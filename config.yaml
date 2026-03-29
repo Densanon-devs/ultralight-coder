@@ -10,12 +10,14 @@ system:
   log_level: "INFO"
 
 # ----------------------------------------------------------
-# Base Model — Llama-3.2-1B Q4_K_M (770MB, 100% benchmark, 28 tok/s)
-# Benchmark winner: beats Qwen2.5-Coder-1.5B on speed, matches quality
-# Fallback: Qwen2.5-Coder-0.5B (469MB, 93.3% w/ experts, 32 tok/s)
+# Base Model — Qwen2.5-Coder-1.5B Q4_K_M (1066MB)
+# EXECUTION benchmark winner: 98.1% (code runs correctly)
+# Structural benchmark had Llama-3.2-1B winning — but execution
+# tests proved Coder-1.5B writes code that actually works.
+# Experts DISABLED — they hurt this model (-2.7% tuned, +0.5% generic)
 # ----------------------------------------------------------
 base_model:
-  path: "models/Llama-3.2-1B-Instruct-Q4_K_M.gguf"
+  path: "models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
   context_length: 4096
   gpu_layers: 99
   threads: 8
@@ -105,7 +107,7 @@ memory:
 # ----------------------------------------------------------
 fusion:
   mode: "structured"
-  chat_format: "llama3"                    # Llama-3.2 native format
+  chat_format: "chatml"                    # Qwen native format
   system_prompt: |
     You are a coding assistant. Write clean, working code.
     Be direct — code first, explain briefly after.

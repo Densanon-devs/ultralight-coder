@@ -111,11 +111,71 @@ Quality
 - **SmolLM2-135M — 101MB, 106 tok/s, 96.7%** (no experts!)
 - The absolute minimum viable coding assistant
 
-## Recommendations
+## Recommendations (Structural Only — see Execution results below)
 
-| Use Case | Model | Size | Quality | Speed |
-|----------|-------|------|---------|-------|
-| **Default / recommended** | Llama-3.2-1B Q4_K_M | 770 MB | 100% | 28 tok/s |
+| Use Case | Model | Size | Structural | Speed |
+|----------|-------|------|------------|-------|
+| Default (structural) | Llama-3.2-1B Q4_K_M | 770 MB | 100% | 28 tok/s |
 | Embedded / ultra-constrained | SmolLM2-135M | 101 MB | 96.7% | 106 tok/s |
-| Speed-optimized floor | SmolLM2-360M + experts | 258 MB | 96.7% | 74 tok/s |
-| Maximum quality headroom | Phi-3.5 3.8B | 2282 MB | 100% | 7 tok/s |
+
+---
+
+# EXECUTION BENCHMARK — Code That Actually Runs
+
+**Date:** 2026-03-29
+**Test Suite:** 35 execution tests (code extracted, run, assertions checked)
+**Key insight: Structural benchmarks are misleading. Execution accuracy is what matters.**
+
+## Execution Rankings
+
+| Model | Size | Direct | +Generic | +Tuned | Perfect |
+|-------|------|--------|----------|--------|---------|
+| **Qwen2.5-Coder-1.5B** | **1066 MB** | **98.1%** | **98.6%** | 95.4% | **33-34/35** |
+| Llama-3.2-1B Q4 | 770 MB | 79.6% | 64.6% | 75.0% | 19-24/35 |
+| Qwen2.5-Coder-0.5B | 469 MB | 77.4% | — | — | 12/20* |
+| SmolLM2-135M | 101 MB | 50.5% | — | — | 6/20* |
+
+*\*Tested on 20-test suite only*
+
+## Structural vs Execution — The Reality Check
+
+| Model | Structural | Execution | Gap |
+|-------|------------|-----------|-----|
+| Llama-3.2-1B | 100% | 79.6% | **-20.4%** |
+| Qwen2.5-Coder-1.5B | 100% | 98.1% | -1.9% |
+| SmolLM2-135M | 96.7% | 50.5% | **-46.2%** |
+
+**Structural benchmarks check "does it look like code". Execution benchmarks check "does it work".**
+
+## Expert System Impact (Execution)
+
+| Model | Direct | Generic | Tuned | Verdict |
+|-------|--------|---------|-------|---------|
+| Coder-1.5B | 98.1% | **98.6%** (+0.5) | 95.4% (-2.7) | Generic barely helps, tuned hurts |
+| Llama-1B | **79.6%** | 64.6% (-15.0) | 75.0% (-4.6) | ALL experts hurt execution |
+
+**Conclusion: Disable experts for execution accuracy.** Few-shot examples confuse models into producing subtly wrong code that passes structural checks but fails test cases.
+
+## Where Models Fail (Execution)
+
+### Qwen2.5-Coder-1.5B failures (2/35):
+- **fibonacci**: Generates `fibonacci(2)=1` but breaks on `fibonacci(5)=5` (off-by-one in loop range)
+- Test harness edge case (try/except block parsing)
+
+### Llama-3.2-1B failures (11/35):
+- **Kadane's algorithm**: Doesn't handle all-negative arrays
+- **Roman numerals**: Misses subtractive notation (IV=4, IX=9)
+- **Matrix multiply**: Syntax errors in generated code
+- **Deep merge**: Incorrect recursive dictionary merging
+- **Run-length encoding**: Wrong output format
+- Several algorithm edge cases
+
+## Final Recommendation
+
+| Use Case | Model | Size | Execution | Config |
+|----------|-------|------|-----------|--------|
+| **Default / recommended** | **Qwen2.5-Coder-1.5B Q4** | **1066 MB** | **98.1%** | **chatml, experts OFF** |
+| Speed-priority fallback | Llama-3.2-1B Q4 | 770 MB | 79.6% | llama3, experts OFF |
+| Ultra-constrained | Qwen2.5-Coder-0.5B | 469 MB | 77.4% | chatml, experts OFF |
+
+**The lesson: never trust structural benchmarks alone. Run the code.**
