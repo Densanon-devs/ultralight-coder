@@ -1,0 +1,194 @@
+{
+  "benchmark_version": "1.0.0",
+  "timestamp": "2026-03-29 08:28:58",
+  "total_models": 1,
+  "total_tests_per_model": 4,
+  "results": [
+    {
+      "model_name": "qwen2.5-coder-0.5b-instruct-q4_k_m",
+      "model_path": "D:\\LLCWork\\ultralight-coder\\models\\qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+      "model_size_mb": 468.6356201171875,
+      "chat_format": "chatml",
+      "experts_enabled": false,
+      "total_tests": 4,
+      "total_passed": 3,
+      "quality_score": 75.0,
+      "category_scores": {
+        "code_gen": {
+          "passed": 1,
+          "total": 1,
+          "score": 100.0
+        },
+        "debug": {
+          "passed": 1,
+          "total": 1,
+          "score": 100.0
+        },
+        "review": {
+          "passed": 1,
+          "total": 1,
+          "score": 100.0
+        },
+        "explain": {
+          "passed": 0,
+          "total": 1,
+          "score": 0.0
+        }
+      },
+      "avg_tokens_per_second": 31.067232557125514,
+      "avg_response_time": 7.160250000000815,
+      "total_time": 28.64100000000326,
+      "tests": [
+        {
+          "test_id": "cg01_fibonacci",
+          "category": "code_gen",
+          "prompt": "Write a Python function to compute the nth Fibonacci number. Handle edge cases like n=0 and n=1.",
+          "response": "Here's a Python function to compute the nth Fibonacci number, handling edge cases like `n=0` and `n=1`:\n\n```python\ndef fibonacci(n):\n    \"\"\"\n    Compute the nth Fibonacci number.\n\n    Args:\n    n (int): The position in the Fibonacci sequence.\n\n    Returns:\n    int: The nth Fibonacci number.\n    \"\"\"\n    # Base cases\n    if n == 0:\n        return 0\n    elif n == 1:\n        return 1\n    \n    # Initialize the first two Fibonacci numbers\n    a, b = 0, 1\n    \n    # Compute the nth Fibonacci number iteratively\n    for _ in range(2, n + 1):\n        a, b = b, a + b\n    \n    return b\n\n# Example usage:\nprint(fibonacci(10))  # Output: 55\nprint(fibonacci(1))   # Output: 1\nprint(fibonacci(0))   # Output: 0\n```\n\n### Explanation:\n- **Base Cases**: The function first checks if `n` is 0 or 1. If so, it returns 0 and 1, as these are the first two Fibonacci numbers.\n- **Iterative Calculation**: For `n > 1`, the function uses a loop to calculate the Fibonacci number iteratively. It starts with `a` and `b` initialized to 0 and 1, respectively. In each iteration, it updates `a` to `b` and `b` to `a + b`.\n- **Efficiency**: This approach is efficient with a time complexity of O(n), where n is the position in the Fibonacci sequence.",
+          "passed": true,
+          "failure_reason": "",
+          "response_time": 10.48399999999674,
+          "tokens_generated": 348,
+          "tokens_per_second": 33.193437619239624,
+          "expert_used": false,
+          "expert_name": "",
+          "expert_attempts": 0
+        },
+        {
+          "test_id": "db01_off_by_one",
+          "category": "debug",
+          "prompt": "Fix this code. It throws IndexError:\n\n```python\ndef get_pairs(lst):\n    pairs = []\n    for i in range(len(lst)):\n        pairs.append((lst[i], lst[i+1]))\n    return pairs\n```\n\nWhat's the bug and how do you fix it?",
+          "response": "The issue with the code is that the function `get_pairs` is trying to access elements at indices `i` and `i+1` in the list `lst`, which are out of range. This results in an `IndexError`.\n\nTo fix this, you need to ensure that you are accessing elements within the bounds of the list. You can do this by checking if the indices are within the range of the list before accessing the elements.\n\nHere's the corrected code:\n\n```python\ndef get_pairs(lst):\n    pairs = []\n    for i in range(len(lst)):\n        if i < len(lst) - 1:\n            pairs.append((lst[i], lst[i+1]))\n    return pairs\n```\n\nIn this corrected code, we first check if `i` is less than `len(lst) - 1`. If it is, we proceed to access the elements at indices `i` and `i+1` and append them to the `pairs` list. This ensures that we do not access elements that are out of range, thus avoiding the `IndexError`.",
+          "passed": true,
+          "failure_reason": "",
+          "response_time": 6.9539999999979045,
+          "tokens_generated": 220,
+          "tokens_per_second": 31.636468219739186,
+          "expert_used": false,
+          "expert_name": "",
+          "expert_attempts": 0
+        },
+        {
+          "test_id": "cr01_sql_injection",
+          "category": "review",
+          "prompt": "Review this code for security issues:\n\n```python\nimport sqlite3\n\ndef get_user(username):\n    conn = sqlite3.connect('users.db')\n    cursor = conn.cursor()\n    query = f\"SELECT * FROM users WHERE name = '{username}'\"\n    cursor.execute(query)\n    return cursor.fetchone()\n```",
+          "response": "To address security issues in the provided code, we need to ensure that the `username` parameter is properly sanitized to prevent SQL injection. Additionally, we should handle exceptions to manage potential errors that might occur during the database operation.\n\nHere's a revised version of the code with these improvements:\n\n```python\nimport sqlite3\n\ndef get_user(username):\n    try:\n        # Connect to the SQLite database\n        conn = sqlite3.connect('users.db')\n        \n        # Create a cursor object\n        cursor = conn.cursor()\n        \n        # Prepare the SQL query\n        query = f\"SELECT * FROM users WHERE name = ?\"\n        \n        # Execute the query with the username as a parameter\n        cursor.execute(query, (username,))\n        \n        # Fetch the result\n        user = cursor.fetchone()\n        \n        # Close the cursor and connection\n        cursor.close()\n        conn.close()\n        \n        return user\n    except sqlite3.Error as e:\n        # Handle the exception\n        print(f\"An error occurred: {e}\")\n        return None\n```\n\n### Key Improvements:\n1. **SQL Injection Prevention**: The `username` parameter is safely passed to the SQL query using a parameterized query. This prevents SQL injection by separating the SQL logic from the data.\n2. **Exception Handling**: The code includes a try-except block to catch and handle any `sqlite3.Error` that might occur during the database operation. This ensures that the application can gracefully handle errors and continue running.\n3. **Resource Management**: The `cursor` and `conn` are closed after use to free up resources, which is important for maintaining database connections.\n\nThis revised code is more secure and robust, especially when dealing with user input.",
+          "passed": true,
+          "failure_reason": "",
+          "response_time": 10.875,
+          "tokens_generated": 348,
+          "tokens_per_second": 32.0,
+          "expert_used": false,
+          "expert_name": "",
+          "expert_attempts": 0
+        },
+        {
+          "test_id": "ex01_decorator",
+          "category": "explain",
+          "prompt": "Explain what a decorator does in Python. Include a simple example.",
+          "response": "Can you explain how decorators work in Python?",
+          "passed": false,
+          "failure_reason": "Explanation too short (< 80 chars); Should mention @ syntax or wrapper pattern; Should include a code example",
+          "response_time": 0.32800000000861473,
+          "tokens_generated": 9,
+          "tokens_per_second": 27.439024389523233,
+          "expert_used": false,
+          "expert_name": "",
+          "expert_attempts": 0
+        }
+      ]
+    },
+    {
+      "model_name": "qwen2.5-coder-0.5b-instruct-q4_k_m",
+      "model_path": "D:\\LLCWork\\ultralight-coder\\models\\qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+      "model_size_mb": 468.6356201171875,
+      "chat_format": "chatml",
+      "experts_enabled": true,
+      "total_tests": 4,
+      "total_passed": 4,
+      "quality_score": 100.0,
+      "category_scores": {
+        "code_gen": {
+          "passed": 1,
+          "total": 1,
+          "score": 100.0
+        },
+        "debug": {
+          "passed": 1,
+          "total": 1,
+          "score": 100.0
+        },
+        "review": {
+          "passed": 1,
+          "total": 1,
+          "score": 100.0
+        },
+        "explain": {
+          "passed": 1,
+          "total": 1,
+          "score": 100.0
+        }
+      },
+      "avg_tokens_per_second": 26.785847683813294,
+      "avg_response_time": 5.9337499999965075,
+      "total_time": 23.73499999998603,
+      "tests": [
+        {
+          "test_id": "cg01_fibonacci",
+          "category": "code_gen",
+          "prompt": "Write a Python function to compute the nth Fibonacci number. Handle edge cases like n=0 and n=1.",
+          "response": "```python\ndef fibonacci(n: int) -> int:\n    if n == 0:\n        return 0\n    elif n == 1:\n        return 1\n    else:\n        a, b = 0, 1\n        for _ in range(2, n + 1):\n            a, b = b, a + b\n        return b\n```",
+          "passed": true,
+          "failure_reason": "",
+          "response_time": 3.2969999999913853,
+          "tokens_generated": 79,
+          "tokens_per_second": 23.961176827481474,
+          "expert_used": true,
+          "expert_name": "code_gen",
+          "expert_attempts": 1
+        },
+        {
+          "test_id": "db01_off_by_one",
+          "category": "debug",
+          "prompt": "Fix this code. It throws IndexError:\n\n```python\ndef get_pairs(lst):\n    pairs = []\n    for i in range(len(lst)):\n        pairs.append((lst[i], lst[i+1]))\n    return pairs\n```\n\nWhat's the bug and how do you fix it?",
+          "response": "The bug in the code is that the loop runs from `i = 0` to `i = len(lst) - 1`, which means it will only append the last two elements of the list. To fix this, you need to loop from `i = 0` to `len(lst) - 2`. This will ensure that all elements are appended to the list.",
+          "passed": true,
+          "failure_reason": "",
+          "response_time": 3.235000000015134,
+          "tokens_generated": 78,
+          "tokens_per_second": 24.111282843782103,
+          "expert_used": true,
+          "expert_name": "debugger",
+          "expert_attempts": 1
+        },
+        {
+          "test_id": "cr01_sql_injection",
+          "category": "review",
+          "prompt": "Review this code for security issues:\n\n```python\nimport sqlite3\n\ndef get_user(username):\n    conn = sqlite3.connect('users.db')\n    cursor = conn.cursor()\n    query = f\"SELECT * FROM users WHERE name = '{username}'\"\n    cursor.execute(query)\n    return cursor.fetchone()\n```",
+          "response": "Security issues:\n\n1. **SQL Injection**: The query is vulnerable to SQL injection attacks. The `name` parameter is directly used in the query without proper sanitization or escaping.\n\n2. **Data Exposure**: The `username` parameter is exposed in the query, which can be used to gain unauthorized access to the database.\n\n3. **Resource Leaks**: The `conn` object is not properly closed, which can lead to resource leaks.\n\n4. **Performance**: The query is executed once per connection, which can be inefficient for large datasets.\n\nTo fix these issues, we can use parameterized queries or use a connection pool to manage database connections.\n\nHere's the corrected version:\n\n```python\nimport sqlite3\n\ndef get_user(username):\n    conn = sqlite3.connect('users.db')\n    cursor = conn.cursor()\n    query = f\"SELECT * FROM users WHERE name = ?\"\n    cursor.execute(query, (username,))\n    return cursor.fetchone()\n```\n\nChanges:\n- Added parameterized query to prevent SQL injection.\n- Used `?` as a placeholder for the `username` parameter.\n- Used `cursor.execute(query, (username,))` to execute the query with the provided `username`.\n- Used `cursor.fetchone()` to retrieve the first row of the result set, which is safer than using `cursor.fetchall()`.\n\nThis approach ensures that the query is executed securely and efficiently, and it also prevents resource leaks.",
+          "passed": true,
+          "failure_reason": "",
+          "response_time": 9.764999999984866,
+          "tokens_generated": 288,
+          "tokens_per_second": 29.493087557649396,
+          "expert_used": true,
+          "expert_name": "code_review",
+          "expert_attempts": 1
+        },
+        {
+          "test_id": "ex01_decorator",
+          "category": "explain",
+          "prompt": "Explain what a decorator does in Python. Include a simple example.",
+          "response": "A decorator is a function that takes another function and extends its behavior without explicitly modifying it. Decorators are used to add functionality to existing functions, such as logging, authentication, or caching.\n\nHere's a simple example of a decorator that logs the execution time of a function:\n\n```python\nimport time\n\ndef log_execution_time(func):\n    def wrapper(*args, **kwargs):\n        start_time = time.time()\n        result = func(*args, **kwargs)\n        end_time = time.time()\n        print(f\"{func.__name__} executed in {end_time - start_time:.4f} seconds\")\n        return result\n    return wrapper\n\n@log_execution_time\ndef example_function():\n    time.sleep(2)\n    return \"Hello, world!\"\n\nprint(example_function())\n```\n\nIn this example, the `log_execution_time` decorator is used to log the execution time of the `example_function`. When `example_function` is called, the decorator will wrap it and add the logging functionality. The `wrapper` function measures the time taken to execute the function and prints the result.",
+          "passed": true,
+          "failure_reason": "",
+          "response_time": 7.437999999994645,
+          "tokens_generated": 220,
+          "tokens_per_second": 29.577843506340198,
+          "expert_used": true,
+          "expert_name": "explainer",
+          "expert_attempts": 1
+        }
+      ]
+    }
+  ]
+}

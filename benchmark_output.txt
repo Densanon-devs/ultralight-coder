@@ -1,0 +1,58 @@
+================================================================================
+ULTRALIGHT CODE ASSISTANT — BENCHMARK RESULTS
+Date: 2026-03-29 08:28:58
+================================================================================
+
+RANKING (by quality score, expert mode):
+------------------------------------------------------------
+
+  With Expert System:
+    1. qwen2.5-coder-0.5b-instruct-q4_k_m — 100.0% (4/4) [26.8 tok/s, 469MB]
+
+  Without Expert System:
+    1. qwen2.5-coder-0.5b-instruct-q4_k_m — 75.0% (3/4) [31.1 tok/s, 469MB]
+
+================================================================================
+DETAILED RESULTS
+================================================================================
+
+--- qwen2.5-coder-0.5b-instruct-q4_k_m (WITHOUT EXPERTS) ---
+  Quality: 75.0% (3/4)
+  Speed:   31.1 tok/s avg
+  Time:    7.2s avg, 29s total
+  Format:  chatml
+  Size:    469 MB
+
+  code_gen    : 1/1 (100.0%)
+  debug       : 1/1 (100.0%)
+  review      : 1/1 (100.0%)
+  explain     : 0/1 (0.0%)
+
+  Failed tests:
+    - ex01_decorator: Explanation too short (< 80 chars); Should mention @ syntax or wrapper pattern; Should include a code example
+
+--- qwen2.5-coder-0.5b-instruct-q4_k_m (WITH EXPERTS) ---
+  Quality: 100.0% (4/4)
+  Speed:   26.8 tok/s avg
+  Time:    5.9s avg, 24s total
+  Format:  chatml
+  Size:    469 MB
+
+  code_gen    : 1/1 (100.0%)
+  debug       : 1/1 (100.0%)
+  review      : 1/1 (100.0%)
+  explain     : 1/1 (100.0%)
+
+  Failed tests:
+    (none)
+
+================================================================================
+EXPERT SYSTEM IMPACT
+================================================================================
+
+  qwen2.5-coder-0.5b-instruct-q4_k_m:
+    Direct: 75.0% -> Expert: 100.0% (delta: +25.0%)
+      code_gen    : 100.0% -> 100.0% (+0.0%)
+      debug       : 100.0% -> 100.0% (+0.0%)
+      review      : 100.0% -> 100.0% (+0.0%)
+      explain     : 0.0% -> 100.0% (+100.0%)
