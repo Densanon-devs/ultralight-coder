@@ -173,4 +173,5 @@ MODEL: qwen2.5-coder-1.5b-instruct-q4_k_m
 
   --- Mode: WITH EXPERTS ---
   [EXPERT] (1/30) cg01_fibonacci... PASS (7.2s, 21.8 tok/s)
-  [EXPERT] (2/30) cg02_merge_sorted... 
+  [EXPERT] (2/30) cg02_merge_sorted... PASS (6.6s, 23.6 tok/s)
+  [EXPERT] (3/30) cg03_is_prime... 
