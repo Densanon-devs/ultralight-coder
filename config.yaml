@@ -10,11 +10,12 @@ system:
   log_level: "INFO"
 
 # ----------------------------------------------------------
-# Base Model — Qwen2.5-Coder-1.5B (1GB, 43.9% HumanEval)
-# Fallback: Qwen2.5-Coder-0.5B (~400MB, 28% HumanEval)
+# Base Model — Llama-3.2-1B Q4_K_M (770MB, 100% benchmark, 28 tok/s)
+# Benchmark winner: beats Qwen2.5-Coder-1.5B on speed, matches quality
+# Fallback: Qwen2.5-Coder-0.5B (469MB, 93.3% w/ experts, 32 tok/s)
 # ----------------------------------------------------------
 base_model:
-  path: "models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
+  path: "models/Llama-3.2-1B-Instruct-Q4_K_M.gguf"
   context_length: 4096
   gpu_layers: 99
   threads: 8
@@ -104,7 +105,7 @@ memory:
 # ----------------------------------------------------------
 fusion:
   mode: "structured"
-  chat_format: "chatml"                    # Qwen uses ChatML
+  chat_format: "llama3"                    # Llama-3.2 native format
   system_prompt: |
     You are a coding assistant. Write clean, working code.
     Be direct — code first, explain briefly after.

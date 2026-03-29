@@ -16,15 +16,20 @@ import sys
 from pathlib import Path
 
 MODELS = {
-    "1.5b": {
+    "llama": {
+        "repo": "bartowski/Llama-3.2-1B-Instruct-GGUF",
+        "filename": "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+        "description": "Llama-3.2-1B Q4_K_M (770MB) — RECOMMENDED: 100% benchmark, 28 tok/s",
+    },
+    "coder-1.5b": {
         "repo": "Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF",
         "filename": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
-        "description": "Qwen2.5-Coder-1.5B Q4_K_M (~1.0GB) — Best bang-for-buck",
+        "description": "Qwen2.5-Coder-1.5B Q4_K_M (~1.0GB) — Code specialist, 100% benchmark",
     },
-    "0.5b": {
+    "coder-0.5b": {
         "repo": "Qwen/Qwen2.5-Coder-0.5B-Instruct-GGUF",
         "filename": "qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
-        "description": "Qwen2.5-Coder-0.5B Q4_K_M (~400MB) — Absolute floor",
+        "description": "Qwen2.5-Coder-0.5B Q4_K_M (~400MB) — Floor model, 93% w/ experts",
     },
 }
 
@@ -63,18 +68,17 @@ def download_model(key: str):
 
 def main():
     parser = argparse.ArgumentParser(description="Download coding models")
-    parser.add_argument("--small", action="store_true", help="Download 0.5B (floor model)")
-    parser.add_argument("--both", action="store_true", help="Download both models")
+    parser.add_argument("--model", choices=list(MODELS.keys()), default="llama",
+                        help="Model to download (default: llama)")
+    parser.add_argument("--all", action="store_true", help="Download all models")
     args = parser.parse_args()
 
-    if args.both:
-        download_model("1.5b")
-        print()
-        download_model("0.5b")
-    elif args.small:
-        download_model("0.5b")
+    if args.all:
+        for key in MODELS:
+            download_model(key)
+            print()
     else:
-        download_model("1.5b")
+        download_model(args.model)
 
     print("\nDone. Update config.yaml 'base_model.path' if needed.")
 
