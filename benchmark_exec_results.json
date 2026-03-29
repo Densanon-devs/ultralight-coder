@@ -1,0 +1,1147 @@
+{
+  "benchmark": "execution",
+  "timestamp": "2026-03-29 13:14:35",
+  "results": [
+    {
+      "model_name": "Llama-3.2-1B-Instruct-Q4_K_M",
+      "model_path": "D:\\LLCWork\\ultralight-coder\\..\\plug-in-intelligence-engine\\models\\Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+      "model_size_mb": 770.2774658203125,
+      "chat_format": "llama3",
+      "total_score": 87.98903508771929,
+      "tests_run": 20,
+      "perfect_count": 15,
+      "avg_response_time": 3.8265500000008617,
+      "avg_tokens_per_second": 0,
+      "results": [
+        {
+          "test_id": "e01_fibonacci",
+          "prompt": "Write a Python function called `fibonacci(n)` that returns the nth Fibonacci number. fibonacci(0)=0, fibonacci(1)=1, fibonacci(2)=1, fibonacci(10)=55.",
+          "response": "```python\ndef fibonacci(n):\n    if n <= 0:\n        return 0\n    elif n == 1:\n        return 1\n    else:\n        return fibonacci(n-1) + fibonacci(n-2)\n```",
+          "extracted_code": "def fibonacci(n):\n    if n <= 0:\n        return 0\n    elif n == 1:\n        return 1\n    else:\n        return fibonacci(n-1) + fibonacci(n-2)\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 2.8280000000086147,
+          "score": 1.0
+        },
+        {
+          "test_id": "e02_is_prime",
+          "prompt": "Write a Python function called `is_prime(n)` that returns True if n is prime, False otherwise. Handle 0, 1, negative numbers, and 2.",
+          "response": "```python\ndef is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n```",
+          "extracted_code": "def is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n",
+          "exec_error": "",
+          "tests_passed": 9,
+          "tests_total": 9,
+          "test_errors": [],
+          "response_time": 3.139999999984866,
+          "score": 1.0
+        },
+        {
+          "test_id": "e03_reverse_string",
+          "prompt": "Write a Python function called `reverse_string(s)` that returns the reversed string.",
+          "response": "```python\ndef reverse_string(s):\n    return s[::-1]\n```",
+          "extracted_code": "def reverse_string(s):\n    return s[::-1]\n",
+          "exec_error": "",
+          "tests_passed": 4,
+          "tests_total": 4,
+          "test_errors": [],
+          "response_time": 0.860000000015134,
+          "score": 1.0
+        },
+        {
+          "test_id": "e04_flatten",
+          "prompt": "Write a Python function called `flatten(lst)` that flattens a nested list of arbitrary depth. Example: flatten([1, [2, [3, 4]], 5]) returns [1, 2, 3, 4, 5].",
+          "response": "```python\ndef flatten(lst):\n    result = []\n    for item in lst:\n        if isinstance(item, list):\n            result.extend(flatten(item))\n        else:\n            result.append(item)\n    return result\n```",
+          "extracted_code": "def flatten(lst):\n    result = []\n    for item in lst:\n        if isinstance(item, list):\n            result.extend(flatten(item))\n        else:\n            result.append(item)\n    return result\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 3.187000000005355,
+          "score": 1.0
+        },
+        {
+          "test_id": "e05_word_count",
+          "prompt": "Write a Python function called `word_count(text)` that returns a dictionary mapping each word (lowercased) to its frequency. Split on whitespace.",
+          "response": "```python\nfrom collections import Counter\n\ndef word_count(text):\n    return dict(Counter(text.lower().split()))\n```",
+          "extracted_code": "from collections import Counter\n\ndef word_count(text):\n    return dict(Counter(text.lower().split()))\n",
+          "exec_error": "",
+          "tests_passed": 4,
+          "tests_total": 4,
+          "test_errors": [],
+          "response_time": 1.2969999999913853,
+          "score": 1.0
+        },
+        {
+          "test_id": "e06_binary_search",
+          "prompt": "Write a Python function called `binary_search(arr, target)` that returns the index of target in sorted array arr, or -1 if not found.",
+          "response": "```python\ndef binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1\n```",
+          "extracted_code": "def binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 4.60899999999674,
+          "score": 1.0
+        },
+        {
+          "test_id": "e07_merge_sorted",
+          "prompt": "Write a Python function called `merge_sorted(a, b)` that merges two sorted lists into one sorted list. Do not use built-in sort.",
+          "response": "```python\ndef merge_sorted(a, b):\n    result = []\n    i, j = 0, 0\n    while i < len(a) and j < len(b):\n        if a[i] < b[j]:\n            result.append(a[i])\n            i += 1\n        else:\n            result.append(b[j])\n            j += 1\n    result.extend(a[i:])\n    result.extend(b[j:])\n    return result\n```",
+          "extracted_code": "def merge_sorted(a, b):\n    result = []\n    i, j = 0, 0\n    while i < len(a) and j < len(b):\n        if a[i] < b[j]:\n            result.append(a[i])\n            i += 1\n        else:\n            result.append(b[j])\n            j += 1\n    result.extend(a[i:])\n    result.extend(b[j:])\n    return result\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 5.407000000006519,
+          "score": 1.0
+        },
+        {
+          "test_id": "e08_two_sum",
+          "prompt": "Write a Python function called `two_sum(nums, target)` that returns the indices of two numbers that add up to target. Return a list of 2 indices. Assume exactly one solution exists.",
+          "response": "```python\ndef two_sum(nums, target):\n    num_dict = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in num_dict:\n            return [num_dict[complement], i]\n        num_dict[num] = i\n    return []\n```",
+          "extracted_code": "def two_sum(nums, target):\n    num_dict = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in num_dict:\n            return [num_dict[complement], i]\n        num_dict[num] = i\n    return []\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 3.2339999999967404,
+          "score": 1.0
+        },
+        {
+          "test_id": "e09_max_subarray",
+          "prompt": "Write a Python function called `max_subarray(nums)` that returns the largest sum of a contiguous subarray (Kadane's algorithm). Example: max_subarray([-2,1,-3,4,-1,2,1,-5,4]) returns 6.",
+          "response": "```python\ndef max_subarray(nums):\n    if not nums:\n        return 0\n\n    max_sum = float('-inf')\n    current_sum = 0\n    left = 0\n\n    for right in range(len(nums)):\n        current_sum += nums[right]\n\n        if current_sum > max_sum:\n            max_sum = current_sum\n            left = right\n\n    return max_sum\n```",
+          "extracted_code": "def max_subarray(nums):\n    if not nums:\n        return 0\n\n    max_sum = float('-inf')\n    current_sum = 0\n    left = 0\n\n    for right in range(len(nums)):\n        current_sum += nums[right]\n\n        if current_sum > max_sum:\n            max_sum = current_sum\n            left = right\n\n    return max_sum\n",
+          "exec_error": "",
+          "tests_passed": 3,
+          "tests_total": 5,
+          "test_errors": [
+            "FAIL: assert max_subarray([-2, 1, -3, 4, -1, 2, 1, -5, 4]) == 6 -> ",
+            "FAIL: assert max_subarray([-2, -1]) == -1 -> "
+          ],
+          "response_time": 4.35899999999674,
+          "score": 0.6
+        },
+        {
+          "test_id": "e10_roman_to_int",
+          "prompt": "Write a Python function called `roman_to_int(s)` that converts a Roman numeral string to an integer. Handle subtractive cases: IV=4, IX=9, XL=40, XC=90, CD=400, CM=900.",
+          "response": "```python\ndef roman_to_int(s):\n    roman_numerals = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}\n    result = 0\n    for i in range(len(s)):\n        if i + 1 < len(s) and roman_numerals[s[i]] < roman_numerals[s[i + 1]]:\n            result += roman_numerals[s[i]] - 2 * roman_numerals[s[i + 1]]\n        else:\n            result += roman_numerals[s[i]]\n    return result\n```",
+          "extracted_code": "def roman_to_int(s):\n    roman_numerals = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}\n    result = 0\n    for i in range(len(s)):\n        if i + 1 < len(s) and roman_numerals[s[i]] < roman_numerals[s[i + 1]]:\n            result += roman_numerals[s[i]] - 2 * roman_numerals[s[i + 1]]\n        else:\n            result += roman_numerals[s[i]]\n    return result\n",
+          "exec_error": "",
+          "tests_passed": 2,
+          "tests_total": 6,
+          "test_errors": [
+            "FAIL: assert roman_to_int(\"IV\") == 4 -> ",
+            "FAIL: assert roman_to_int(\"IX\") == 9 -> ",
+            "FAIL: assert roman_to_int(\"XLII\") == 42 -> ",
+            "FAIL: assert roman_to_int(\"MCMXCIV\") == 1994 -> "
+          ],
+          "response_time": 7.5789999999979045,
+          "score": 0.3333333333333333
+        },
+        {
+          "test_id": "e11_stack",
+          "prompt": "Write a Python class called `Stack` with methods: push(item), pop() that returns the item, peek() that returns top without removing, is_empty() that returns bool, and __len__. Raise IndexError on pop/peek when empty.",
+          "response": "```python\nclass Stack:\n    def __init__(self):\n        self.items = []\n\n    def push(self, item):\n        self.items.append(item)\n\n    def pop(self):\n        if self.is_empty():\n            raise IndexError(\"Cannot pop from an empty stack\")\n        return self.items.pop()\n\n    def peek(self):\n        if self.is_empty():\n            raise IndexError(\"Cannot peek into an empty stack\")\n        return self.items[-1]\n\n    def is_empty(self):\n        return len(self.items) == 0\n\n    def __len__(self):\n        return len(self.items)\n```",
+          "extracted_code": "class Stack:\n    def __init__(self):\n        self.items = []\n\n    def push(self, item):\n        self.items.append(item)\n\n    def pop(self):\n        if self.is_empty():\n            raise IndexError(\"Cannot pop from an empty stack\")\n        return self.items.pop()\n\n    def peek(self):\n        if self.is_empty():\n            raise IndexError(\"Cannot peek into an empty stack\")\n        return self.items[-1]\n\n    def is_empty(self):\n        return len(self.items) == 0\n\n    def __len__(self):\n        return len(self.items)\n",
+          "exec_error": "",
+          "tests_passed": 15,
+          "tests_total": 19,
+          "test_errors": [
+            "ERROR: try: -> IndentationError: expected an indented block after 'try' statement on line 1 (<string>, line 1)",
+            "ERROR: s.pop() -> IndexError: Cannot pop from an empty stack",
+            "FAIL: assert False, \"Should have raised IndexError\" -> Should have raised IndexError",
+            "ERROR: except IndexError: -> SyntaxError: invalid syntax (<string>, line 1)"
+          ],
+          "response_time": 5.8439999999827705,
+          "score": 0.7894736842105263
+        },
+        {
+          "test_id": "e12_matrix_multiply",
+          "prompt": "Write a Python function called `matrix_multiply(a, b)` that multiplies two matrices (2D lists). Raise ValueError if dimensions don't match.",
+          "response": "```python\ndef matrix_multiply(a, b):\n    if len(a) != len(b) or len(a[0]) != len(b[0]):\n        raise ValueError(\"Matrices must be the same size\")\n    return [[sum(a[i][j] * b[j][k] for j in range(len(b[0])) for k in range(len(b[0]))] for i in range(len(a))]\n```",
+          "extracted_code": "def matrix_multiply(a, b):\n    if len(a) != len(b) or len(a[0]) != len(b[0]):\n        raise ValueError(\"Matrices must be the same size\")\n    return [[sum(a[i][j] * b[j][k] for j in range(len(b[0])) for k in range(len(b[0]))] for i in range(len(a))]\n",
+          "exec_error": "SyntaxError: closing parenthesis ']' does not match opening parenthesis '(' (<string>, line 4)",
+          "tests_passed": 0,
+          "tests_total": 4,
+          "test_errors": [
+            "SyntaxError: closing parenthesis ']' does not match opening parenthesis '(' (<string>, line 4)"
+          ],
+          "response_time": 4.219000000011874,
+          "score": 0.0
+        },
+        {
+          "test_id": "e13_palindrome",
+          "prompt": "Write a Python function called `is_palindrome(s)` that returns True if the string is a palindrome, ignoring case and non-alphanumeric characters. Example: is_palindrome('A man, a plan, a canal: Panama') returns True.",
+          "response": "```python\ndef is_palindrome(s):\n    s = ''.join(c for c in s if c.isalnum()).lower()\n    return s == s[::-1]\n```",
+          "extracted_code": "def is_palindrome(s):\n    s = ''.join(c for c in s if c.isalnum()).lower()\n    return s == s[::-1]\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 1.9839999999967404,
+          "score": 1.0
+        },
+        {
+          "test_id": "e14_longest_common_prefix",
+          "prompt": "Write a Python function called `longest_common_prefix(strs)` that returns the longest common prefix among a list of strings. Return '' if no common prefix.",
+          "response": "```python\ndef longest_common_prefix(strs):\n    if not strs:\n        return \"\"\n    prefix = min(strs, key=len)\n    for i, c in enumerate(prefix):\n        for s in strs:\n            if s[i] != c:\n                return prefix[:i]\n    return prefix\n```",
+          "extracted_code": "def longest_common_prefix(strs):\n    if not strs:\n        return \"\"\n    prefix = min(strs, key=len)\n    for i, c in enumerate(prefix):\n        for s in strs:\n            if s[i] != c:\n                return prefix[:i]\n    return prefix\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 4.203000000008615,
+          "score": 1.0
+        },
+        {
+          "test_id": "e15_caesar_cipher",
+          "prompt": "Write a Python function called `caesar_cipher(text, shift)` that applies Caesar cipher. Only shift a-z and A-Z, leave other characters unchanged. Wrap around: z+1=a.",
+          "response": "```python\ndef caesar_cipher(text, shift):\n    result = \"\"\n    for char in text:\n        if char.isalpha():\n            ascii_offset = 97 if char.islower() else 65\n            result += chr((ord(char) - ascii_offset + shift) % 26 + ascii_offset)\n        else:\n            result += char\n    return result\n```",
+          "extracted_code": "def caesar_cipher(text, shift):\n    result = \"\"\n    for char in text:\n        if char.isalpha():\n            ascii_offset = 97 if char.islower() else 65\n            result += chr((ord(char) - ascii_offset + shift) % 26 + ascii_offset)\n        else:\n            result += char\n    return result\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 3.797000000020489,
+          "score": 1.0
+        },
+        {
+          "test_id": "e16_gcd",
+          "prompt": "Write a Python function called `gcd(a, b)` that returns the greatest common divisor using Euclid's algorithm.",
+          "response": "```python\ndef gcd(a, b):\n    while b != 0:\n        a, b = b, a % b\n    return a\n```",
+          "extracted_code": "def gcd(a, b):\n    while b != 0:\n        a, b = b, a % b\n    return a\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 1.6089999999967404,
+          "score": 1.0
+        },
+        {
+          "test_id": "e17_power",
+          "prompt": "Write a Python function called `power(base, exp)` that computes base**exp for non-negative integer exp. Do not use the ** operator or pow(). Use fast exponentiation (repeated squaring).",
+          "response": "```python\ndef power(base, exp):\n    if exp == 0:\n        return 1\n    if exp == 1:\n        return base\n    if exp % 2 == 0:\n        half_power = power(base, exp // 2)\n        return half_power * half_power\n    else:\n        half_power = power(base, exp // 2)\n        return base * half_power * half_power\n```",
+          "extracted_code": "def power(base, exp):\n    if exp == 0:\n        return 1\n    if exp == 1:\n        return base\n    if exp % 2 == 0:\n        half_power = power(base, exp // 2)\n        return half_power * half_power\n    else:\n        half_power = power(base, exp // 2)\n        return base * half_power * half_power\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 4.453000000008615,
+          "score": 1.0
+        },
+        {
+          "test_id": "e18_unique_paths",
+          "prompt": "Write a Python function called `unique_paths(m, n)` that returns the number of unique paths from top-left to bottom-right of an m x n grid, moving only right or down.",
+          "response": "```python\ndef unique_paths(m, n):\n    dp = [[1] * n for _ in range(m)]\n    for i in range(1, m):\n        for j in range(1, n):\n            dp[i][j] = dp[i-1][j] + dp[i][j-1]\n    return dp[m-1][n-1]\n```",
+          "extracted_code": "def unique_paths(m, n):\n    dp = [[1] * n for _ in range(m)]\n    for i in range(1, m):\n        for j in range(1, n):\n            dp[i][j] = dp[i-1][j] + dp[i][j-1]\n    return dp[m-1][n-1]\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 4.812999999994645,
+          "score": 1.0
+        },
+        {
+          "test_id": "e19_valid_parentheses",
+          "prompt": "Write a Python function called `valid_parentheses(s)` that returns True if the string has valid matching parentheses/brackets/braces. Example: '([{}])' is valid, '([)]' is not.",
+          "response": "```python\ndef valid_parentheses(s):\n    stack = []\n    mapping = {')': '(', '}': '{', ']': '['}\n    for c in s:\n        if c in mapping.values():\n            stack.append(c)\n        elif c in mapping.keys():\n            if not stack or stack.pop() != mapping[c]:\n                return False\n    return not stack\n```",
+          "extracted_code": "def valid_parentheses(s):\n    stack = []\n    mapping = {')': '(', '}': '{', ']': '['}\n    for c in s:\n        if c in mapping.values():\n            stack.append(c)\n        elif c in mapping.keys():\n            if not stack or stack.pop() != mapping[c]:\n                return False\n    return not stack\n",
+          "exec_error": "",
+          "tests_passed": 7,
+          "tests_total": 7,
+          "test_errors": [],
+          "response_time": 4.030999999988126,
+          "score": 1.0
+        },
+        {
+          "test_id": "e20_fizzbuzz",
+          "prompt": "Write a Python function called `fizzbuzz(n)` that returns a list of strings from 1 to n. For multiples of 3, use 'Fizz'. For multiples of 5, use 'Buzz'. For multiples of both, use 'FizzBuzz'. Otherwise, use the number as a string.",
+          "response": "```python\ndef fizzbuzz(n):\n    return [f'{i}' if i % 3 == 0 and i % 5 == 0 else \n            f'Fizz' if i % 3 == 0 else \n            f'Buzz' if i % 5 == 0 else \n            str(i) for i in range(1, n+1)]\n```",
+          "extracted_code": "def fizzbuzz(n):\n    return [f'{i}' if i % 3 == 0 and i % 5 == 0 else \n            f'Fizz' if i % 3 == 0 else \n            f'Buzz' if i % 5 == 0 else \n            str(i) for i in range(1, n+1)]\n",
+          "exec_error": "",
+          "tests_passed": 7,
+          "tests_total": 8,
+          "test_errors": [
+            "FAIL: assert result[14] == \"FizzBuzz\" -> "
+          ],
+          "response_time": 5.078000000008615,
+          "score": 0.875
+        }
+      ]
+    },
+    {
+      "model_name": "qwen2.5-coder-1.5b-instruct-q4_k_m",
+      "model_path": "D:\\LLCWork\\ultralight-coder\\models\\qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+      "model_size_mb": 1065.5601196289062,
+      "chat_format": "chatml",
+      "total_score": 93.94736842105263,
+      "tests_run": 20,
+      "perfect_count": 17,
+      "avg_response_time": 5.593799999999464,
+      "avg_tokens_per_second": 0,
+      "results": [
+        {
+          "test_id": "e01_fibonacci",
+          "prompt": "Write a Python function called `fibonacci(n)` that returns the nth Fibonacci number. fibonacci(0)=0, fibonacci(1)=1, fibonacci(2)=1, fibonacci(10)=55.",
+          "response": "```python\ndef fibonacci(n):\n    if n == 0:\n        return 0\n    elif n == 1 or n == 2:\n        return 1\n    else:\n        a, b = 0, 1\n        for _ in range(3, n + 1):\n            a, b = b, a + b\n        return b\n```",
+          "extracted_code": "def fibonacci(n):\n    if n == 0:\n        return 0\n    elif n == 1 or n == 2:\n        return 1\n    else:\n        a, b = 0, 1\n        for _ in range(3, n + 1):\n            a, b = b, a + b\n        return b\n",
+          "exec_error": "",
+          "tests_passed": 3,
+          "tests_total": 6,
+          "test_errors": [
+            "FAIL: assert fibonacci(5) == 5 -> ",
+            "FAIL: assert fibonacci(10) == 55 -> ",
+            "FAIL: assert fibonacci(15) == 610 -> "
+          ],
+          "response_time": 5.23499999998603,
+          "score": 0.5
+        },
+        {
+          "test_id": "e02_is_prime",
+          "prompt": "Write a Python function called `is_prime(n)` that returns True if n is prime, False otherwise. Handle 0, 1, negative numbers, and 2.",
+          "response": "```python\ndef is_prime(n):\n    if n <= 1:\n        return False\n    if n == 2:\n        return True\n    if n % 2 == 0:\n        return False\n    i = 3\n    while i * i <= n:\n        if n % i == 0:\n            return False\n        i += 2\n    return True\n```",
+          "extracted_code": "def is_prime(n):\n    if n <= 1:\n        return False\n    if n == 2:\n        return True\n    if n % 2 == 0:\n        return False\n    i = 3\n    while i * i <= n:\n        if n % i == 0:\n            return False\n        i += 2\n    return True\n",
+          "exec_error": "",
+          "tests_passed": 9,
+          "tests_total": 9,
+          "test_errors": [],
+          "response_time": 5.422000000020489,
+          "score": 1.0
+        },
+        {
+          "test_id": "e03_reverse_string",
+          "prompt": "Write a Python function called `reverse_string(s)` that returns the reversed string.",
+          "response": "```python\ndef reverse_string(s):\n    return s[::-1]\n```",
+          "extracted_code": "def reverse_string(s):\n    return s[::-1]\n",
+          "exec_error": "",
+          "tests_passed": 4,
+          "tests_total": 4,
+          "test_errors": [],
+          "response_time": 1.062000000005355,
+          "score": 1.0
+        },
+        {
+          "test_id": "e04_flatten",
+          "prompt": "Write a Python function called `flatten(lst)` that flattens a nested list of arbitrary depth. Example: flatten([1, [2, [3, 4]], 5]) returns [1, 2, 3, 4, 5].",
+          "response": "```python\ndef flatten(lst):\n    result = []\n    for item in lst:\n        if isinstance(item, list):\n            result.extend(flatten(item))\n        else:\n            result.append(item)\n    return result\n```",
+          "extracted_code": "def flatten(lst):\n    result = []\n    for item in lst:\n        if isinstance(item, list):\n            result.extend(flatten(item))\n        else:\n            result.append(item)\n    return result\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 3.98499999998603,
+          "score": 1.0
+        },
+        {
+          "test_id": "e05_word_count",
+          "prompt": "Write a Python function called `word_count(text)` that returns a dictionary mapping each word (lowercased) to its frequency. Split on whitespace.",
+          "response": "```python\ndef word_count(text):\n    words = text.lower().split()\n    word_freq = {}\n    for word in words:\n        if word in word_freq:\n            word_freq[word] += 1\n        else:\n            word_freq[word] = 1\n    return word_freq\n```",
+          "extracted_code": "def word_count(text):\n    words = text.lower().split()\n    word_freq = {}\n    for word in words:\n        if word in word_freq:\n            word_freq[word] += 1\n        else:\n            word_freq[word] = 1\n    return word_freq\n",
+          "exec_error": "",
+          "tests_passed": 4,
+          "tests_total": 4,
+          "test_errors": [],
+          "response_time": 4.125,
+          "score": 1.0
+        },
+        {
+          "test_id": "e06_binary_search",
+          "prompt": "Write a Python function called `binary_search(arr, target)` that returns the index of target in sorted array arr, or -1 if not found.",
+          "response": "```python\ndef binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n\n    return -1\n```",
+          "extracted_code": "def binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n\n    return -1\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 5.60899999999674,
+          "score": 1.0
+        },
+        {
+          "test_id": "e07_merge_sorted",
+          "prompt": "Write a Python function called `merge_sorted(a, b)` that merges two sorted lists into one sorted list. Do not use built-in sort.",
+          "response": "```python\ndef merge_sorted(a, b):\n    result = []\n    i, j = 0, 0\n\n    while i < len(a) and j < len(b):\n        if a[i] < b[j]:\n            result.append(a[i])\n            i += 1\n        else:\n            result.append(b[j])\n            j += 1\n\n    result.extend(a[i:])\n    result.extend(b[j:])\n\n    return result\n```",
+          "extracted_code": "def merge_sorted(a, b):\n    result = []\n    i, j = 0, 0\n\n    while i < len(a) and j < len(b):\n        if a[i] < b[j]:\n            result.append(a[i])\n            i += 1\n        else:\n            result.append(b[j])\n            j += 1\n\n    result.extend(a[i:])\n    result.extend(b[j:])\n\n    return result\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 7.171999999991385,
+          "score": 1.0
+        },
+        {
+          "test_id": "e08_two_sum",
+          "prompt": "Write a Python function called `two_sum(nums, target)` that returns the indices of two numbers that add up to target. Return a list of 2 indices. Assume exactly one solution exists.",
+          "response": "```python\ndef two_sum(nums, target):\n    num_dict = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in num_dict:\n            return [num_dict[complement], i]\n        num_dict[num] = i\n    return []\n```",
+          "extracted_code": "def two_sum(nums, target):\n    num_dict = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in num_dict:\n            return [num_dict[complement], i]\n        num_dict[num] = i\n    return []\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 4.171999999991385,
+          "score": 1.0
+        },
+        {
+          "test_id": "e09_max_subarray",
+          "prompt": "Write a Python function called `max_subarray(nums)` that returns the largest sum of a contiguous subarray (Kadane's algorithm). Example: max_subarray([-2,1,-3,4,-1,2,1,-5,4]) returns 6.",
+          "response": "```python\ndef max_subarray(nums):\n    if not nums:\n        return 0\n    \n    max_sum = current_sum = nums[0]\n    \n    for num in nums[1:]:\n        current_sum = max(num, current_sum + num)\n        max_sum = max(max_sum, current_sum)\n    \n    return max_sum\n```",
+          "extracted_code": "def max_subarray(nums):\n    if not nums:\n        return 0\n    \n    max_sum = current_sum = nums[0]\n    \n    for num in nums[1:]:\n        current_sum = max(num, current_sum + num)\n        max_sum = max(max_sum, current_sum)\n    \n    return max_sum\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 4.75,
+          "score": 1.0
+        },
+        {
+          "test_id": "e10_roman_to_int",
+          "prompt": "Write a Python function called `roman_to_int(s)` that converts a Roman numeral string to an integer. Handle subtractive cases: IV=4, IX=9, XL=40, XC=90, CD=400, CM=900.",
+          "response": "```python\ndef roman_to_int(s):\n    roman_values = {\n        'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000\n    }\n    total = 0\n    prev_value = 0\n    for char in s:\n        value = roman_values[char]\n        if value > prev_value:\n            total -= 2 * prev_value\n        total += value\n        prev_value = value\n    return total\n```",
+          "extracted_code": "def roman_to_int(s):\n    roman_values = {\n        'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000\n    }\n    total = 0\n    prev_value = 0\n    for char in s:\n        value = roman_values[char]\n        if value > prev_value:\n            total -= 2 * prev_value\n        total += value\n        prev_value = value\n    return total\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 9.312999999994645,
+          "score": 1.0
+        },
+        {
+          "test_id": "e11_stack",
+          "prompt": "Write a Python class called `Stack` with methods: push(item), pop() that returns the item, peek() that returns top without removing, is_empty() that returns bool, and __len__. Raise IndexError on pop/peek when empty.",
+          "response": "```python\nclass Stack:\n    def __init__(self):\n        self.items = []\n\n    def push(self, item):\n        self.items.append(item)\n\n    def pop(self):\n        if not self.is_empty():\n            return self.items.pop()\n        else:\n            raise IndexError(\"pop from empty stack\")\n\n    def peek(self):\n        if not self.is_empty():\n            return self.items[-1]\n        else:\n            raise IndexError(\"peek from empty stack\")\n\n    def is_empty(self):\n        return len(self.items) == 0\n\n    def __len__(self):\n        return len(self.items)\n```",
+          "extracted_code": "class Stack:\n    def __init__(self):\n        self.items = []\n\n    def push(self, item):\n        self.items.append(item)\n\n    def pop(self):\n        if not self.is_empty():\n            return self.items.pop()\n        else:\n            raise IndexError(\"pop from empty stack\")\n\n    def peek(self):\n        if not self.is_empty():\n            return self.items[-1]\n        else:\n            raise IndexError(\"peek from empty stack\")\n\n    def is_empty(self):\n        return len(self.items) == 0\n\n    def __len__(self):\n        return len(self.items)\n",
+          "exec_error": "",
+          "tests_passed": 15,
+          "tests_total": 19,
+          "test_errors": [
+            "ERROR: try: -> IndentationError: expected an indented block after 'try' statement on line 1 (<string>, line 1)",
+            "ERROR: s.pop() -> IndexError: pop from empty stack",
+            "FAIL: assert False, \"Should have raised IndexError\" -> Should have raised IndexError",
+            "ERROR: except IndexError: -> SyntaxError: invalid syntax (<string>, line 1)"
+          ],
+          "response_time": 8.01500000001397,
+          "score": 0.7894736842105263
+        },
+        {
+          "test_id": "e12_matrix_multiply",
+          "prompt": "Write a Python function called `matrix_multiply(a, b)` that multiplies two matrices (2D lists). Raise ValueError if dimensions don't match.",
+          "response": "```python\ndef matrix_multiply(a, b):\n    if len(a[0]) != len(b):\n        raise ValueError(\"Dimensions do not match\")\n    \n    result = [[0 for _ in range(len(b[0]))] for _ in range(len(a))]\n    \n    for i in range(len(a)):\n        for j in range(len(b[0])):\n            for k in range(len(b)):\n                result[i][j] += a[i][k] * b[k][j]\n    \n    return result\n```",
+          "extracted_code": "def matrix_multiply(a, b):\n    if len(a[0]) != len(b):\n        raise ValueError(\"Dimensions do not match\")\n    \n    result = [[0 for _ in range(len(b[0]))] for _ in range(len(a))]\n    \n    for i in range(len(a)):\n        for j in range(len(b[0])):\n            for k in range(len(b)):\n                result[i][j] += a[i][k] * b[k][j]\n    \n    return result\n",
+          "exec_error": "",
+          "tests_passed": 4,
+          "tests_total": 8,
+          "test_errors": [
+            "ERROR: try: -> IndentationError: expected an indented block after 'try' statement on line 1 (<string>, line 1)",
+            "ERROR: matrix_multiply([[1, 2]], [[1, 2]]) -> ValueError: Dimensions do not match",
+            "FAIL: assert False, \"Should have raised ValueError\" -> Should have raised ValueError",
+            "ERROR: except ValueError: -> SyntaxError: invalid syntax (<string>, line 1)"
+          ],
+          "response_time": 7.937999999994645,
+          "score": 0.5
+        },
+        {
+          "test_id": "e13_palindrome",
+          "prompt": "Write a Python function called `is_palindrome(s)` that returns True if the string is a palindrome, ignoring case and non-alphanumeric characters. Example: is_palindrome('A man, a plan, a canal: Panama') returns True.",
+          "response": "```python\nimport re\n\ndef is_palindrome(s):\n    # Remove non-alphanumeric characters and convert to lowercase\n    cleaned_s = re.sub(r'[^A-Za-z0-9]', '', s).lower()\n    \n    # Check if the cleaned string is equal to its reverse\n    return cleaned_s == cleaned_s[::-1]\n```",
+          "extracted_code": "import re\n\ndef is_palindrome(s):\n    # Remove non-alphanumeric characters and convert to lowercase\n    cleaned_s = re.sub(r'[^A-Za-z0-9]', '', s).lower()\n    \n    # Check if the cleaned string is equal to its reverse\n    return cleaned_s == cleaned_s[::-1]\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 4.687000000005355,
+          "score": 1.0
+        },
+        {
+          "test_id": "e14_longest_common_prefix",
+          "prompt": "Write a Python function called `longest_common_prefix(strs)` that returns the longest common prefix among a list of strings. Return '' if no common prefix.",
+          "response": "```python\ndef longest_common_prefix(strs):\n    if not strs:\n        return ''\n    \n    prefix = strs[0]\n    for i in range(1, len(strs)):\n        while strs[i].find(prefix) != 0:\n            prefix = prefix[:-1]\n            if not prefix:\n                return ''\n    return prefix\n```",
+          "extracted_code": "def longest_common_prefix(strs):\n    if not strs:\n        return ''\n    \n    prefix = strs[0]\n    for i in range(1, len(strs)):\n        while strs[i].find(prefix) != 0:\n            prefix = prefix[:-1]\n            if not prefix:\n                return ''\n    return prefix\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 4.85999999998603,
+          "score": 1.0
+        },
+        {
+          "test_id": "e15_caesar_cipher",
+          "prompt": "Write a Python function called `caesar_cipher(text, shift)` that applies Caesar cipher. Only shift a-z and A-Z, leave other characters unchanged. Wrap around: z+1=a.",
+          "response": "```python\ndef caesar_cipher(text, shift):\n    result = \"\"\n    for char in text:\n        if char.isalpha():\n            base = ord('a') if char.islower() else ord('A')\n            shifted = (ord(char) - base + shift) % 26 + base\n            result += chr(shifted)\n        else:\n            result += char\n    return result\n```",
+          "extracted_code": "def caesar_cipher(text, shift):\n    result = \"\"\n    for char in text:\n        if char.isalpha():\n            base = ord('a') if char.islower() else ord('A')\n            shifted = (ord(char) - base + shift) % 26 + base\n            result += chr(shifted)\n        else:\n            result += char\n    return result\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 6.844000000011874,
+          "score": 1.0
+        },
+        {
+          "test_id": "e16_gcd",
+          "prompt": "Write a Python function called `gcd(a, b)` that returns the greatest common divisor using Euclid's algorithm.",
+          "response": "```python\ndef gcd(a, b):\n    while b != 0:\n        a, b = b, a % b\n    return a\n```",
+          "extracted_code": "def gcd(a, b):\n    while b != 0:\n        a, b = b, a % b\n    return a\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 2.2030000000086147,
+          "score": 1.0
+        },
+        {
+          "test_id": "e17_power",
+          "prompt": "Write a Python function called `power(base, exp)` that computes base**exp for non-negative integer exp. Do not use the ** operator or pow(). Use fast exponentiation (repeated squaring).",
+          "response": "```python\ndef power(base, exp):\n    if exp == 0:\n        return 1\n    result = 1\n    while exp > 0:\n        if exp % 2 == 1:\n            result *= base\n        base *= base\n        exp //= 2\n    return result\n```",
+          "extracted_code": "def power(base, exp):\n    if exp == 0:\n        return 1\n    result = 1\n    while exp > 0:\n        if exp % 2 == 1:\n            result *= base\n        base *= base\n        exp //= 2\n    return result\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 4.421999999991385,
+          "score": 1.0
+        },
+        {
+          "test_id": "e18_unique_paths",
+          "prompt": "Write a Python function called `unique_paths(m, n)` that returns the number of unique paths from top-left to bottom-right of an m x n grid, moving only right or down.",
+          "response": "```python\ndef unique_paths(m, n):\n    # Initialize a 2D list with zeros\n    dp = [[0] * n for _ in range(m)]\n    \n    # Base case: there is one way to reach any cell in the first row or first column\n    for i in range(m):\n        dp[i][0] = 1\n    for j in range(n):\n        dp[0][j] = 1\n    \n    # Fill the dp table\n    for i in range(1, m):\n        for j in range(1, n):\n            dp[i][j] = dp[i-1][j] + dp[i][j-1]\n    \n    # The result is in the bottom-right cell of the dp table\n    return dp[m-1][n-1]\n```",
+          "extracted_code": "def unique_paths(m, n):\n    # Initialize a 2D list with zeros\n    dp = [[0] * n for _ in range(m)]\n    \n    # Base case: there is one way to reach any cell in the first row or first column\n    for i in range(m):\n        dp[i][0] = 1\n    for j in range(n):\n        dp[0][j] = 1\n    \n    # Fill the dp table\n    for i in range(1, m):\n        for j in range(1, n):\n            dp[i][j] = dp[i-1][j] + dp[i][j-1]\n    \n    # The result is in the bottom-right cell of the dp table\n    return dp[m-1][n-1]\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 12.062000000005355,
+          "score": 1.0
+        },
+        {
+          "test_id": "e19_valid_parentheses",
+          "prompt": "Write a Python function called `valid_parentheses(s)` that returns True if the string has valid matching parentheses/brackets/braces. Example: '([{}])' is valid, '([)]' is not.",
+          "response": "```python\ndef valid_parentheses(s):\n    stack = []\n    mapping = {\")\": \"(\", \"]\": \"[\", \"}\": \"{\"}\n    \n    for char in s:\n        if char in mapping.values():\n            stack.append(char)\n        elif char in mapping.keys():\n            if not stack or stack.pop() != mapping[char]:\n                return False\n        else:\n            return False\n    \n    return not stack\n```",
+          "extracted_code": "def valid_parentheses(s):\n    stack = []\n    mapping = {\")\": \"(\", \"]\": \"[\", \"}\": \"{\"}\n    \n    for char in s:\n        if char in mapping.values():\n            stack.append(char)\n        elif char in mapping.keys():\n            if not stack or stack.pop() != mapping[char]:\n                return False\n        else:\n            return False\n    \n    return not stack\n",
+          "exec_error": "",
+          "tests_passed": 7,
+          "tests_total": 7,
+          "test_errors": [],
+          "response_time": 5.60899999999674,
+          "score": 1.0
+        },
+        {
+          "test_id": "e20_fizzbuzz",
+          "prompt": "Write a Python function called `fizzbuzz(n)` that returns a list of strings from 1 to n. For multiples of 3, use 'Fizz'. For multiples of 5, use 'Buzz'. For multiples of both, use 'FizzBuzz'. Otherwise, use the number as a string.",
+          "response": "```python\ndef fizzbuzz(n):\n    return ['FizzBuzz' if i % 15 == 0 else 'Fizz' if i % 3 == 0 else 'Buzz' if i % 5 == 0 else str(i) for i in range(1, n+1)]\n```",
+          "extracted_code": "def fizzbuzz(n):\n    return ['FizzBuzz' if i % 15 == 0 else 'Fizz' if i % 3 == 0 else 'Buzz' if i % 5 == 0 else str(i) for i in range(1, n+1)]\n",
+          "exec_error": "",
+          "tests_passed": 8,
+          "tests_total": 8,
+          "test_errors": [],
+          "response_time": 4.39100000000326,
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "model_name": "qwen2.5-coder-0.5b-instruct-q4_k_m",
+      "model_path": "D:\\LLCWork\\ultralight-coder\\models\\qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+      "model_size_mb": 468.6356201171875,
+      "chat_format": "chatml",
+      "total_score": 77.3997493734336,
+      "tests_run": 20,
+      "perfect_count": 12,
+      "avg_response_time": 4.185099999999511,
+      "avg_tokens_per_second": 0,
+      "results": [
+        {
+          "test_id": "e01_fibonacci",
+          "prompt": "Write a Python function called `fibonacci(n)` that returns the nth Fibonacci number. fibonacci(0)=0, fibonacci(1)=1, fibonacci(2)=1, fibonacci(10)=55.",
+          "response": "```python\ndef fibonacci(n):\n    if n == 0:\n        return 0\n    elif n == 1 or n == 2:\n        return 1\n    else:\n        a, b = 0, 1\n        for _ in range(3, n + 1):\n            a, b = b, a + b\n        return b\n```",
+          "extracted_code": "def fibonacci(n):\n    if n == 0:\n        return 0\n    elif n == 1 or n == 2:\n        return 1\n    else:\n        a, b = 0, 1\n        for _ in range(3, n + 1):\n            a, b = b, a + b\n        return b\n",
+          "exec_error": "",
+          "tests_passed": 3,
+          "tests_total": 6,
+          "test_errors": [
+            "FAIL: assert fibonacci(5) == 5 -> ",
+            "FAIL: assert fibonacci(10) == 55 -> ",
+            "FAIL: assert fibonacci(15) == 610 -> "
+          ],
+          "response_time": 2.4839999999967404,
+          "score": 0.5
+        },
+        {
+          "test_id": "e02_is_prime",
+          "prompt": "Write a Python function called `is_prime(n)` that returns True if n is prime, False otherwise. Handle 0, 1, negative numbers, and 2.",
+          "response": "```python\ndef is_prime(n):\n    # Handle 0, 1, negative numbers, and 2 separately\n    if n <= 1:\n        return False\n    if n <= 3:\n        return True\n    if n % 2 == 0 or n % 3 == 0:\n        return False\n    i = 5\n    while i * i <= n:\n        if n % i == 0 or n % (i + 2) == 0:\n            return False\n        i += 6\n    return True\n```",
+          "extracted_code": "def is_prime(n):\n    # Handle 0, 1, negative numbers, and 2 separately\n    if n <= 1:\n        return False\n    if n <= 3:\n        return True\n    if n % 2 == 0 or n % 3 == 0:\n        return False\n    i = 5\n    while i * i <= n:\n        if n % i == 0 or n % (i + 2) == 0:\n            return False\n        i += 6\n    return True\n",
+          "exec_error": "",
+          "tests_passed": 9,
+          "tests_total": 9,
+          "test_errors": [],
+          "response_time": 3.562999999994645,
+          "score": 1.0
+        },
+        {
+          "test_id": "e03_reverse_string",
+          "prompt": "Write a Python function called `reverse_string(s)` that returns the reversed string.",
+          "response": "```python\ndef reverse_string(s):\n    return s[::-1]\n```",
+          "extracted_code": "def reverse_string(s):\n    return s[::-1]\n",
+          "exec_error": "",
+          "tests_passed": 4,
+          "tests_total": 4,
+          "test_errors": [],
+          "response_time": 0.5310000000172295,
+          "score": 1.0
+        },
+        {
+          "test_id": "e04_flatten",
+          "prompt": "Write a Python function called `flatten(lst)` that flattens a nested list of arbitrary depth. Example: flatten([1, [2, [3, 4]], 5]) returns [1, 2, 3, 4, 5].",
+          "response": "```python\ndef flatten(lst):\n    \"\"\"\n    Flattens a nested list of arbitrary depth.\n\n    Args:\n    lst (list): The nested list to be flattened.\n\n    Returns:\n    list: A flattened list.\n    \"\"\"\n    if not lst:\n        return []\n    result = []\n    for item in lst:\n        if isinstance(item, list):\n            result.extend(flatten(item))\n        else:\n            result.append(item)\n    return result\n```",
+          "extracted_code": "def flatten(lst):\n    \"\"\"\n    Flattens a nested list of arbitrary depth.\n\n    Args:\n    lst (list): The nested list to be flattened.\n\n    Returns:\n    list: A flattened list.\n    \"\"\"\n    if not lst:\n        return []\n    result = []\n    for item in lst:\n        if isinstance(item, list):\n            result.extend(flatten(item))\n        else:\n            result.append(item)\n    return result\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 2.75,
+          "score": 1.0
+        },
+        {
+          "test_id": "e05_word_count",
+          "prompt": "Write a Python function called `word_count(text)` that returns a dictionary mapping each word (lowercased) to its frequency. Split on whitespace.",
+          "response": "```python\ndef word_count(text):\n    \"\"\"\n    Return a dictionary mapping each word (lowercased) to its frequency in the text.\n    \n    Parameters:\n    text (str): The input text.\n    \n    Returns:\n    dict: A dictionary with words as keys and their frequencies as values.\n    \"\"\"\n    # Split the text into words and count their frequency\n    word_count = {}\n    for word in text.lower().split():\n        if word in word_count:\n            word_count[word] += 1\n        else:\n            word_count[word] = 1\n    return word_count\n```",
+          "extracted_code": "def word_count(text):\n    \"\"\"\n    Return a dictionary mapping each word (lowercased) to its frequency in the text.\n    \n    Parameters:\n    text (str): The input text.\n    \n    Returns:\n    dict: A dictionary with words as keys and their frequencies as values.\n    \"\"\"\n    # Split the text into words and count their frequency\n    word_count = {}\n    for word in text.lower().split():\n        if word in word_count:\n            word_count[word] += 1\n        else:\n            word_count[word] = 1\n    return word_count\n",
+          "exec_error": "",
+          "tests_passed": 4,
+          "tests_total": 4,
+          "test_errors": [],
+          "response_time": 4.421999999991385,
+          "score": 1.0
+        },
+        {
+          "test_id": "e06_binary_search",
+          "prompt": "Write a Python function called `binary_search(arr, target)` that returns the index of target in sorted array arr, or -1 if not found.",
+          "response": "```python\ndef binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    \n    while left <= right:\n        mid = (left + right) // 2\n        \n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    \n    return -1\n```",
+          "extracted_code": "def binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    \n    while left <= right:\n        mid = (left + right) // 2\n        \n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    \n    return -1\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 2.625,
+          "score": 1.0
+        },
+        {
+          "test_id": "e07_merge_sorted",
+          "prompt": "Write a Python function called `merge_sorted(a, b)` that merges two sorted lists into one sorted list. Do not use built-in sort.",
+          "response": "```python\ndef merge_sorted(a, b):\n    # Initialize pointers for both lists\n    i, j = 0, 0\n    # Initialize an empty list to store the merged result\n    merged = []\n    \n    # Loop through both lists until one is exhausted\n    while i < len(a) and j < len(b):\n        # Compare the elements at the current positions and add the smaller one to the merged list\n        if a[i] < b[j]:\n            merged.append(a[i])\n            i += 1\n        else:\n            merged.append(b[j])\n            j += 1\n    \n    # If there are remaining elements in the first list, add them to the merged list\n    while i < len(a):\n        merged.append(a[i])\n        i += 1\n    \n    # If there are remaining elements in the second list, add them to the merged list\n    while j < len(b):\n        merged.append(b[j])\n        j += 1\n    \n    return merged\n```",
+          "extracted_code": "def merge_sorted(a, b):\n    # Initialize pointers for both lists\n    i, j = 0, 0\n    # Initialize an empty list to store the merged result\n    merged = []\n    \n    # Loop through both lists until one is exhausted\n    while i < len(a) and j < len(b):\n        # Compare the elements at the current positions and add the smaller one to the merged list\n        if a[i] < b[j]:\n            merged.append(a[i])\n            i += 1\n        else:\n            merged.append(b[j])\n            j += 1\n    \n    # If there are remaining elements in the first list, add them to the merged list\n    while i < len(a):\n        merged.append(a[i])\n        i += 1\n    \n    # If there are remaining elements in the second list, add them to the merged list\n    while j < len(b):\n        merged.append(b[j])\n        j += 1\n    \n    return merged\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 5.452999999979511,
+          "score": 1.0
+        },
+        {
+          "test_id": "e08_two_sum",
+          "prompt": "Write a Python function called `two_sum(nums, target)` that returns the indices of two numbers that add up to target. Return a list of 2 indices. Assume exactly one solution exists.",
+          "response": "```python\ndef two_sum(nums, target):\n    \"\"\"\n    Finds the indices of two numbers in the list 'nums' that add up to 'target'.\n    \n    Parameters:\n    nums (list): A list of integers.\n    target (int): The target sum to find.\n    \n    Returns:\n    list: A list of two indices where the two numbers add up to target.\n    \n    Examples:\n    >>> two_sum([1, 3, 5, 0], 0)\n    [0, 3]\n    >>> two_sum([1, 2, 3, 4], 6)\n    [1, 5]\n    >>> two_sum([1, 2, 3, 4], 7)\n    []\n    \"\"\"\n    seen = set()\n    for i, num in enumerate(nums):\n        if target - num in seen:\n            return [seen[target - num], i]\n        seen.add(num)\n    return []\n\n# Check function to verify the correctness of the solution\ndef check_solution():\n    assert two_sum([1, 3, 5, 0], 0) == [0, 3], \"Test case 1 failed\"\n    assert two_sum([1, 2, 3, 4], 6) == [1, 5], \"Test case 2 failed\"\n    assert two_sum([1, 2, 3, 4], 7) == [], \"Test case 3 failed\"\n    assert two_sum([10, 15, 20, 25], 30) == [1, 4], \"Test case 4 failed\"\n    print(\"All test cases passed!\")\n\ncheck_solution()\n```",
+          "extracted_code": "def two_sum(nums, target):\n    \"\"\"\n    Finds the indices of two numbers in the list 'nums' that add up to 'target'.\n    \n    Parameters:\n    nums (list): A list of integers.\n    target (int): The target sum to find.\n    \n    Returns:\n    list: A list of two indices where the two numbers add up to target.\n    \n    Examples:\n    >>> two_sum([1, 3, 5, 0], 0)\n    [0, 3]\n    >>> two_sum([1, 2, 3, 4], 6)\n    [1, 5]\n    >>> two_sum([1, 2, 3, 4], 7)\n    []\n    \"\"\"\n    seen = set()\n    for i, num in enumerate(nums):\n        if target - num in seen:\n            return [seen[target - num], i]\n        seen.add(num)\n    return []\n\n# Check function to verify the correctness of the solution\ndef check_solution():\n    assert two_sum([1, 3, 5, 0], 0) == [0, 3], \"Test case 1 failed\"\n    assert two_sum([1, 2, 3, 4], 6) == [1, 5], \"Test case 2 failed\"\n    assert two_sum([1, 2, 3, 4], 7) == [], \"Test case 3 failed\"\n    assert two_sum([10, 15, 20, 25], 30) == [1, 4], \"Test case 4 failed\"\n    print(\"All test cases passed!\")\n\ncheck_solution()\n",
+          "exec_error": "AssertionError: Test case 1 failed",
+          "tests_passed": 0,
+          "tests_total": 3,
+          "test_errors": [
+            "AssertionError: Test case 1 failed"
+          ],
+          "response_time": 10.219000000011874,
+          "score": 0.0
+        },
+        {
+          "test_id": "e09_max_subarray",
+          "prompt": "Write a Python function called `max_subarray(nums)` that returns the largest sum of a contiguous subarray (Kadane's algorithm). Example: max_subarray([-2,1,-3,4,-1,2,1,-5,4]) returns 6.",
+          "response": "```python\ndef max_subarray(nums):\n    \"\"\"\n    Return the largest sum of a contiguous subarray (Kadane's algorithm).\n    \n    Args:\n    nums (list): A list of integers.\n    \n    Returns:\n    int: The largest sum of a contiguous subarray.\n    \"\"\"\n    if not nums:\n        return 0\n    \n    max_current = max_global = nums[0]\n    \n    for num in nums[1:]:\n        max_current = max(num, max_current + num)\n        max_global = max(max_global, max_current)\n    \n    return max_global\n```",
+          "extracted_code": "def max_subarray(nums):\n    \"\"\"\n    Return the largest sum of a contiguous subarray (Kadane's algorithm).\n    \n    Args:\n    nums (list): A list of integers.\n    \n    Returns:\n    int: The largest sum of a contiguous subarray.\n    \"\"\"\n    if not nums:\n        return 0\n    \n    max_current = max_global = nums[0]\n    \n    for num in nums[1:]:\n        max_current = max(num, max_current + num)\n        max_global = max(max_global, max_current)\n    \n    return max_global\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 3.4530000000086147,
+          "score": 1.0
+        },
+        {
+          "test_id": "e10_roman_to_int",
+          "prompt": "Write a Python function called `roman_to_int(s)` that converts a Roman numeral string to an integer. Handle subtractive cases: IV=4, IX=9, XL=40, XC=90, CD=400, CM=900.",
+          "response": "```python\ndef roman_to_int(s):\n    roman_numerals = {\n        'I': 1,\n        'V': 5,\n        'X': 10,\n        'L': 50,\n        'C': 100,\n        'D': 500,\n        'M': 1000\n    }\n    total = 0\n    for char in s:\n        if char in roman_numerals:\n            total += roman_numerals[char]\n        else:\n            raise ValueError(f\"Invalid Roman numeral: {char}\")\n    return total\n\n# Test cases\nprint(roman_to_int(\"IV\"))  # Output: 4\nprint(roman_to_int(\"IX\"))  # Output: 9\nprint(roman_to_int(\"XL\"))  # Output: 40\nprint(roman_to_int(\"XC\"))  # Output: 90\nprint(roman_to_int(\"CD\"))  # Output: 400\nprint(roman_to_int(\"CM\"))  # Output: 900\n```",
+          "extracted_code": "def roman_to_int(s):\n    roman_numerals = {\n        'I': 1,\n        'V': 5,\n        'X': 10,\n        'L': 50,\n        'C': 100,\n        'D': 500,\n        'M': 1000\n    }\n    total = 0\n    for char in s:\n        if char in roman_numerals:\n            total += roman_numerals[char]\n        else:\n            raise ValueError(f\"Invalid Roman numeral: {char}\")\n    return total\n\n# Test cases\nprint(roman_to_int(\"IV\"))  # Output: 4\nprint(roman_to_int(\"IX\"))  # Output: 9\nprint(roman_to_int(\"XL\"))  # Output: 40\nprint(roman_to_int(\"XC\"))  # Output: 90\nprint(roman_to_int(\"CD\"))  # Output: 400\nprint(roman_to_int(\"CM\"))  # Output: 900\n",
+          "exec_error": "",
+          "tests_passed": 2,
+          "tests_total": 6,
+          "test_errors": [
+            "FAIL: assert roman_to_int(\"IV\") == 4 -> ",
+            "FAIL: assert roman_to_int(\"IX\") == 9 -> ",
+            "FAIL: assert roman_to_int(\"XLII\") == 42 -> ",
+            "FAIL: assert roman_to_int(\"MCMXCIV\") == 1994 -> "
+          ],
+          "response_time": 6.342999999993481,
+          "score": 0.3333333333333333
+        },
+        {
+          "test_id": "e11_stack",
+          "prompt": "Write a Python class called `Stack` with methods: push(item), pop() that returns the item, peek() that returns top without removing, is_empty() that returns bool, and __len__. Raise IndexError on pop/peek when empty.",
+          "response": "```python\nclass Stack:\n    def __init__(self):\n        self.items = []\n\n    def push(self, item):\n        self.items.append(item)\n\n    def pop(self):\n        if not self.is_empty():\n            return self.items.pop()\n        else:\n            raise IndexError(\"pop from empty stack\")\n\n    def peek(self):\n        if not self.is_empty():\n            return self.items[-1]\n        else:\n            raise IndexError(\"peek from empty stack\")\n\n    def is_empty(self):\n        return len(self.items) == 0\n\n    def __len__(self):\n        return len(self.items)\n```",
+          "extracted_code": "class Stack:\n    def __init__(self):\n        self.items = []\n\n    def push(self, item):\n        self.items.append(item)\n\n    def pop(self):\n        if not self.is_empty():\n            return self.items.pop()\n        else:\n            raise IndexError(\"pop from empty stack\")\n\n    def peek(self):\n        if not self.is_empty():\n            return self.items[-1]\n        else:\n            raise IndexError(\"peek from empty stack\")\n\n    def is_empty(self):\n        return len(self.items) == 0\n\n    def __len__(self):\n        return len(self.items)\n",
+          "exec_error": "",
+          "tests_passed": 15,
+          "tests_total": 19,
+          "test_errors": [
+            "ERROR: try: -> IndentationError: expected an indented block after 'try' statement on line 1 (<string>, line 1)",
+            "ERROR: s.pop() -> IndexError: pop from empty stack",
+            "FAIL: assert False, \"Should have raised IndexError\" -> Should have raised IndexError",
+            "ERROR: except IndexError: -> SyntaxError: invalid syntax (<string>, line 1)"
+          ],
+          "response_time": 4.312999999994645,
+          "score": 0.7894736842105263
+        },
+        {
+          "test_id": "e12_matrix_multiply",
+          "prompt": "Write a Python function called `matrix_multiply(a, b)` that multiplies two matrices (2D lists). Raise ValueError if dimensions don't match.",
+          "response": "```python\ndef matrix_multiply(a, b):\n    \"\"\"\n    Multiplies two matrices (2D lists) and returns the result.\n    \n    Parameters:\n    a (list of lists): The first matrix.\n    b (list of lists): The second matrix.\n    \n    Returns:\n    list of lists: The result of the matrix multiplication.\n    \n    Raises:\n    ValueError: If the dimensions of the matrices are not compatible.\n    \"\"\"\n    if len(a) != len(b[0]):\n        raise ValueError(\"The number of columns in the first matrix must be equal to the number of rows in the second matrix.\")\n    \n    result = []\n    for row_a in a:\n        row_b = []\n        for element in row_a:\n            product = 0\n            for element_b in b:\n                product += element * element_b\n            row_b.append(product)\n        result.append(row_b)\n    \n    return result\n```",
+          "extracted_code": "def matrix_multiply(a, b):\n    \"\"\"\n    Multiplies two matrices (2D lists) and returns the result.\n    \n    Parameters:\n    a (list of lists): The first matrix.\n    b (list of lists): The second matrix.\n    \n    Returns:\n    list of lists: The result of the matrix multiplication.\n    \n    Raises:\n    ValueError: If the dimensions of the matrices are not compatible.\n    \"\"\"\n    if len(a) != len(b[0]):\n        raise ValueError(\"The number of columns in the first matrix must be equal to the number of rows in the second matrix.\")\n    \n    result = []\n    for row_a in a:\n        row_b = []\n        for element in row_a:\n            product = 0\n            for element_b in b:\n                product += element * element_b\n            row_b.append(product)\n        result.append(row_b)\n    \n    return result\n",
+          "exec_error": "",
+          "tests_passed": 1,
+          "tests_total": 8,
+          "test_errors": [
+            "ERROR: assert matrix_multiply([[1, 2], [3, 4]], [[5, 6], [7, 8]]) == [[19, 22], [43, 50]] -> TypeError: unsupported operand type(s) for +=: 'int' and 'list'",
+            "ERROR: assert matrix_multiply([[1, 0], [0, 1]], [[5, 6], [7, 8]]) == [[5, 6], [7, 8]] -> TypeError: unsupported operand type(s) for +=: 'int' and 'list'",
+            "ERROR: assert matrix_multiply([[2]], [[3]]) == [[6]] -> TypeError: unsupported operand type(s) for +=: 'int' and 'list'",
+            "ERROR: try: -> IndentationError: expected an indented block after 'try' statement on line 1 (<string>, line 1)",
+            "ERROR: matrix_multiply([[1, 2]], [[1, 2]]) -> ValueError: The number of columns in the first matrix must be equal to the number of rows in the second matrix.",
+            "FAIL: assert False, \"Should have raised ValueError\" -> Should have raised ValueError",
+            "ERROR: except ValueError: -> SyntaxError: invalid syntax (<string>, line 1)"
+          ],
+          "response_time": 5.125,
+          "score": 0.125
+        },
+        {
+          "test_id": "e13_palindrome",
+          "prompt": "Write a Python function called `is_palindrome(s)` that returns True if the string is a palindrome, ignoring case and non-alphanumeric characters. Example: is_palindrome('A man, a plan, a canal: Panama') returns True.",
+          "response": "```python\ndef is_palindrome(s):\n    # Convert the string to lowercase and remove non-alphanumeric characters\n    cleaned_s = ''.join(char.lower() for char in s if char.isalnum())\n    \n    # Check if the cleaned string is equal to its reverse\n    return cleaned_s == cleaned_s[::-1]\n```",
+          "extracted_code": "def is_palindrome(s):\n    # Convert the string to lowercase and remove non-alphanumeric characters\n    cleaned_s = ''.join(char.lower() for char in s if char.isalnum())\n    \n    # Check if the cleaned string is equal to its reverse\n    return cleaned_s == cleaned_s[::-1]\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 1.9059999999881256,
+          "score": 1.0
+        },
+        {
+          "test_id": "e14_longest_common_prefix",
+          "prompt": "Write a Python function called `longest_common_prefix(strs)` that returns the longest common prefix among a list of strings. Return '' if no common prefix.",
+          "response": "```python\ndef longest_common_prefix(strs):\n    if not strs:\n        return \"\"\n    \n    # Start with the first string as the initial prefix\n    prefix = strs[0]\n    \n    # Iterate over the rest of the strings\n    for s in strs[1:]:\n        # Compare the current prefix with the current string\n        while not s.startswith(prefix):\n            # Reduce the prefix by one character\n            prefix = prefix[:-1]\n            # If the prefix becomes empty, no common prefix\n            if not prefix:\n                return \"\"\n    \n    return prefix\n```",
+          "extracted_code": "def longest_common_prefix(strs):\n    if not strs:\n        return \"\"\n    \n    # Start with the first string as the initial prefix\n    prefix = strs[0]\n    \n    # Iterate over the rest of the strings\n    for s in strs[1:]:\n        # Compare the current prefix with the current string\n        while not s.startswith(prefix):\n            # Reduce the prefix by one character\n            prefix = prefix[:-1]\n            # If the prefix becomes empty, no common prefix\n            if not prefix:\n                return \"\"\n    \n    return prefix\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 3.312000000005355,
+          "score": 1.0
+        },
+        {
+          "test_id": "e15_caesar_cipher",
+          "prompt": "Write a Python function called `caesar_cipher(text, shift)` that applies Caesar cipher. Only shift a-z and A-Z, leave other characters unchanged. Wrap around: z+1=a.",
+          "response": "```python\ndef caesar_cipher(text, shift):\n    \"\"\"\n    Apply Caesar cipher to the input text, shifting a-z and A-Z, leaving other characters unchanged.\n    Wrap around: z+1=a.\n    \n    Args:\n    text (str): The input text to be encrypted.\n    shift (int): The number of positions to shift each character.\n    \n    Returns:\n    str: The encrypted text.\n    \"\"\"\n    encrypted_text = []\n    for char in text:\n        if char.isalpha():\n            if char.islower():\n                encrypted_text.append(chr((ord(char) - ord('a') + shift) % 26 + ord('a')))\n            else:\n                encrypted_text.append(chr((ord(char) - ord('A') + shift) % 26 + ord('A')))\n        else:\n            encrypted_text.append(char)\n    return ''.join(encrypted_text)\n\n# Check function to verify the correctness of the solution\ndef check_caesar_cipher():\n    test_cases = [\n        (\"hello\", 3, \"lipps\"),\n        (\"world\", 5, \"lipps\"),\n        (\"python\", 1, \"qrs\"),\n        (\"123\", 1, \"123\"),\n        (\"abc\", 2, \"def\"),\n        (\"xyz\", 3, \"abc\"),\n        (\"\", 1, \"\"),\n        (\"a\", 1, \"a\"),\n        (\"A\", 1, \"A\")\n    ]\n    \n    for text, shift, expected in test_cases:\n        result = caesar_cipher(text, shift)\n        assert result == expected, f\"Expected {expected}, got {result} for text '{text}' with shift {shift}\"\n    print(\"All test cases passed!\")\n\ncheck_caesar_cipher()\n```",
+          "extracted_code": "def caesar_cipher(text, shift):\n    \"\"\"\n    Apply Caesar cipher to the input text, shifting a-z and A-Z, leaving other characters unchanged.\n    Wrap around: z+1=a.\n    \n    Args:\n    text (str): The input text to be encrypted.\n    shift (int): The number of positions to shift each character.\n    \n    Returns:\n    str: The encrypted text.\n    \"\"\"\n    encrypted_text = []\n    for char in text:\n        if char.isalpha():\n            if char.islower():\n                encrypted_text.append(chr((ord(char) - ord('a') + shift) % 26 + ord('a')))\n            else:\n                encrypted_text.append(chr((ord(char) - ord('A') + shift) % 26 + ord('A')))\n        else:\n            encrypted_text.append(char)\n    return ''.join(encrypted_text)\n\n# Check function to verify the correctness of the solution\ndef check_caesar_cipher():\n    test_cases = [\n        (\"hello\", 3, \"lipps\"),\n        (\"world\", 5, \"lipps\"),\n        (\"python\", 1, \"qrs\"),\n        (\"123\", 1, \"123\"),\n        (\"abc\", 2, \"def\"),\n        (\"xyz\", 3, \"abc\"),\n        (\"\", 1, \"\"),\n        (\"a\", 1, \"a\"),\n        (\"A\", 1, \"A\")\n    ]\n    \n    for text, shift, expected in test_cases:\n        result = caesar_cipher(text, shift)\n        assert result == expected, f\"Expected {expected}, got {result} for text '{text}' with shift {shift}\"\n    print(\"All test cases passed!\")\n\ncheck_caesar_cipher()\n",
+          "exec_error": "AssertionError: Expected lipps, got khoor for text 'hello' with shift 3",
+          "tests_passed": 0,
+          "tests_total": 5,
+          "test_errors": [
+            "AssertionError: Expected lipps, got khoor for text 'hello' with shift 3"
+          ],
+          "response_time": 11.860000000015134,
+          "score": 0.0
+        },
+        {
+          "test_id": "e16_gcd",
+          "prompt": "Write a Python function called `gcd(a, b)` that returns the greatest common divisor using Euclid's algorithm.",
+          "response": "```python\ndef gcd(a, b):\n    while b != 0:\n        a, b = b, a % b\n    return a\n```",
+          "extracted_code": "def gcd(a, b):\n    while b != 0:\n        a, b = b, a % b\n    return a\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 0.9839999999967404,
+          "score": 1.0
+        },
+        {
+          "test_id": "e17_power",
+          "prompt": "Write a Python function called `power(base, exp)` that computes base**exp for non-negative integer exp. Do not use the ** operator or pow(). Use fast exponentiation (repeated squaring).",
+          "response": "```python\ndef power(base, exp):\n    result = 1\n    while exp > 0:\n        if exp % 2 == 1:\n            result *= base\n        base *= base\n        exp //= 2\n    return result\n```",
+          "extracted_code": "def power(base, exp):\n    result = 1\n    while exp > 0:\n        if exp % 2 == 1:\n            result *= base\n        base *= base\n        exp //= 2\n    return result\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 1.5929999999934807,
+          "score": 1.0
+        },
+        {
+          "test_id": "e18_unique_paths",
+          "prompt": "Write a Python function called `unique_paths(m, n)` that returns the number of unique paths from top-left to bottom-right of an m x n grid, moving only right or down.",
+          "response": "```python\ndef unique_paths(m, n):\n    # Initialize a 2D list to store the number of unique paths\n    dp = [[0] * n for _ in range(m)]\n    \n    # Base case: there is one path to reach any cell in the first row\n    for i in range(m):\n        dp[i][0] = 1\n    \n    # Base case: there is one path to reach any cell in the first column\n    for j in range(n):\n        dp[0][j] = 1\n    \n    # Fill the dp table\n    for i in range(1, m):\n        for j in range(1, n):\n            dp[i][j] = dp[i-1][j] + dp[i][j-1]\n    \n    # The number of unique paths is the value in the bottom-right corner of the dp table\n    return dp[m-1][n-1]\n```",
+          "extracted_code": "def unique_paths(m, n):\n    # Initialize a 2D list to store the number of unique paths\n    dp = [[0] * n for _ in range(m)]\n    \n    # Base case: there is one path to reach any cell in the first row\n    for i in range(m):\n        dp[i][0] = 1\n    \n    # Base case: there is one path to reach any cell in the first column\n    for j in range(n):\n        dp[0][j] = 1\n    \n    # Fill the dp table\n    for i in range(1, m):\n        for j in range(1, n):\n            dp[i][j] = dp[i-1][j] + dp[i][j-1]\n    \n    # The number of unique paths is the value in the bottom-right corner of the dp table\n    return dp[m-1][n-1]\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 6.48499999998603,
+          "score": 1.0
+        },
+        {
+          "test_id": "e19_valid_parentheses",
+          "prompt": "Write a Python function called `valid_parentheses(s)` that returns True if the string has valid matching parentheses/brackets/braces. Example: '([{}])' is valid, '([)]' is not.",
+          "response": "```python\ndef valid_parentheses(s):\n    \"\"\"\n    Check if the parentheses in the string are valid.\n    \n    Args:\n    s (str): The string containing only parentheses.\n    \n    Returns:\n    bool: True if the string has valid matching parentheses, False otherwise.\n    \"\"\"\n    balance = 0\n    for char in s:\n        if char == '(':\n            balance += 1\n        elif char == ')':\n            balance -= 1\n        # If balance goes negative, it means there's a closing parenthesis without a matching opening one\n        if balance < 0:\n            return False\n    # If balance is zero, all parentheses are matched\n    return balance == 0\n```",
+          "extracted_code": "def valid_parentheses(s):\n    \"\"\"\n    Check if the parentheses in the string are valid.\n    \n    Args:\n    s (str): The string containing only parentheses.\n    \n    Returns:\n    bool: True if the string has valid matching parentheses, False otherwise.\n    \"\"\"\n    balance = 0\n    for char in s:\n        if char == '(':\n            balance += 1\n        elif char == ')':\n            balance -= 1\n        # If balance goes negative, it means there's a closing parenthesis without a matching opening one\n        if balance < 0:\n            return False\n    # If balance is zero, all parentheses are matched\n    return balance == 0\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 7,
+          "test_errors": [
+            "FAIL: assert valid_parentheses(\"([)]\") == False -> "
+          ],
+          "response_time": 4.062000000005355,
+          "score": 0.8571428571428571
+        },
+        {
+          "test_id": "e20_fizzbuzz",
+          "prompt": "Write a Python function called `fizzbuzz(n)` that returns a list of strings from 1 to n. For multiples of 3, use 'Fizz'. For multiples of 5, use 'Buzz'. For multiples of both, use 'FizzBuzz'. Otherwise, use the number as a string.",
+          "response": "```python\ndef fizzbuzz(n):\n    return [str(i) if i % 3 == 0 and i % 5 == 0 else 'Fizz' if i % 3 == 0 else 'Buzz' if i % 5 == 0 else str(i) for i in range(1, n + 1)]\n```",
+          "extracted_code": "def fizzbuzz(n):\n    return [str(i) if i % 3 == 0 and i % 5 == 0 else 'Fizz' if i % 3 == 0 else 'Buzz' if i % 5 == 0 else str(i) for i in range(1, n + 1)]\n",
+          "exec_error": "",
+          "tests_passed": 7,
+          "tests_total": 8,
+          "test_errors": [
+            "FAIL: assert result[14] == \"FizzBuzz\" -> "
+          ],
+          "response_time": 2.2190000000118744,
+          "score": 0.875
+        }
+      ]
+    },
+    {
+      "model_name": "SmolLM2-135M-Instruct-Q4_K_M",
+      "model_path": "D:\\LLCWork\\ultralight-coder\\..\\plug-in-intelligence-engine\\models\\SmolLM2-135M-Instruct-Q4_K_M.gguf",
+      "model_size_mb": 100.56890869140625,
+      "chat_format": "chatml",
+      "total_score": 50.46146616541354,
+      "tests_run": 20,
+      "perfect_count": 6,
+      "avg_response_time": 4.587450000000535,
+      "avg_tokens_per_second": 0,
+      "results": [
+        {
+          "test_id": "e01_fibonacci",
+          "prompt": "Write a Python function called `fibonacci(n)` that returns the nth Fibonacci number. fibonacci(0)=0, fibonacci(1)=1, fibonacci(2)=1, fibonacci(10)=55.",
+          "response": "Here's a Python function that calculates the nth Fibonacci number using recursion:\n\n```python\ndef fibonacci(n):\n    if n == 0:\n        return 0\n    elif n == 1:\n        return 1\n    else:\n        return fibonacci(n-1) + fibonacci(n-2)\n```\n\nHowever, this recursive function has a time complexity of O(n^2), which is inefficient for large values of n. A more efficient approach is to use dynamic programming. Here's an optimized version of the function:\n\n```python\ndef fibonacci(n):\n    if n <= 1:\n        return n\n    a, b = 0, 1\n    for _ in range(2, n):\n        a, b = b, a + b\n    return b\n```\n\nThis version of the function has a time complexity of O(n), which is much faster than the recursive version.\n\nAlternatively, you can use a loop to calculate the Fibonacci numbers:\n\n```python\ndef fibonacci(n):\n    fib_sequence = [0, 1]\n    while len(fib_sequence) < n:\n        fib_sequence.append(fib_sequence[-1] + fib_sequence[-2])\n    return fib_sequence\n```\n\nThis version of the function uses a list to store the Fibonacci numbers, and then iteratively appends the sum of the last two numbers in the list to the end of the list. This approach has a time complexity of O(n), which is much faster than the recursive version.",
+          "extracted_code": "def fibonacci(n):\n    if n == 0:\n        return 0\n    elif n == 1:\n        return 1\n    else:\n        return fibonacci(n-1) + fibonacci(n-2)\n\ndef fibonacci(n):\n    if n <= 1:\n        return n\n    a, b = 0, 1\n    for _ in range(2, n):\n        a, b = b, a + b\n    return b\n\ndef fibonacci(n):\n    fib_sequence = [0, 1]\n    while len(fib_sequence) < n:\n        fib_sequence.append(fib_sequence[-1] + fib_sequence[-2])\n    return fib_sequence\n",
+          "exec_error": "",
+          "tests_passed": 0,
+          "tests_total": 6,
+          "test_errors": [
+            "FAIL: assert fibonacci(0) == 0 -> ",
+            "FAIL: assert fibonacci(1) == 1 -> ",
+            "FAIL: assert fibonacci(2) == 1 -> ",
+            "FAIL: assert fibonacci(5) == 5 -> ",
+            "FAIL: assert fibonacci(10) == 55 -> ",
+            "FAIL: assert fibonacci(15) == 610 -> "
+          ],
+          "response_time": 5.687000000005355,
+          "score": 0.0
+        },
+        {
+          "test_id": "e02_is_prime",
+          "prompt": "Write a Python function called `is_prime(n)` that returns True if n is prime, False otherwise. Handle 0, 1, negative numbers, and 2.",
+          "response": "```python\ndef is_prime(n):\n    \"\"\"\n    Checks if a number is prime.\n\n    Args:\n        n (int): The number to check.\n\n    Returns:\n        bool: True if n is prime, False otherwise.\n    \"\"\"\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n```\n\nExample usage:\n```python\nprint(is_prime(11))  # False\nprint(is_prime(0))  # False\nprint(is_prime(1))  # True\nprint(is_prime(2))  # False\n```\n\nThis function works by checking divisibility of `n` from 2 to the square root of `n`. If `n` is divisible by any of these numbers, it's not prime, and the function returns `False`. Otherwise, it returns `True`, indicating that `n` is prime.",
+          "extracted_code": "def is_prime(n):\n    \"\"\"\n    Checks if a number is prime.\n\n    Args:\n        n (int): The number to check.\n\n    Returns:\n        bool: True if n is prime, False otherwise.\n    \"\"\"\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n\nprint(is_prime(11))  # False\nprint(is_prime(0))  # False\nprint(is_prime(1))  # True\nprint(is_prime(2))  # False\n",
+          "exec_error": "",
+          "tests_passed": 9,
+          "tests_total": 9,
+          "test_errors": [],
+          "response_time": 2.5320000000065193,
+          "score": 1.0
+        },
+        {
+          "test_id": "e03_reverse_string",
+          "prompt": "Write a Python function called `reverse_string(s)` that returns the reversed string.",
+          "response": "Here's a Python function that reverses a string:\n\n```python\ndef reverse_string(s):\n    return s[::-1]\n```\n\nThis function uses Python's slice notation `[::-1]` to create a reversed copy of the input string `s`. The `[::-1]` slice means \"start at the end of the string and end at position 0, move with the step -1\", effectively reversing the string.\n\nHowever, this function is not efficient for large strings because it creates a new string in memory, which can be a problem for large strings.\n\nA more efficient solution would be to use a two-pointer approach:\n\n```python\ndef reverse_string(s):\n    left, right = 0, len(s) - 1\n    while left < right:\n        # Swap characters\n        s[left], s[right] = s[right], s[left]\n        # Move pointers\n        left += 1\n        right -= 1\n    return s\n```\n\nThis solution has a time complexity of O(n), where n is the length of the string, because it makes a single pass through the string.\n\nAlternatively, you can use a two-pointer technique:\n\n```python\ndef reverse_string(s):\n    left, right = 0, len(s) - 1\n    while left < right:\n        # Swap characters\n        s[left], s[right] = s[right], s[left]\n        # Move pointers\n        left += 1\n        right -= 1\n    return s\n```\n\nThis solution has a time complexity of O(n) because it makes a single pass through the string.\n\nBoth of these solutions are efficient and can be used to reverse a string in a Python program.",
+          "extracted_code": "def reverse_string(s):\n    return s[::-1]\n\ndef reverse_string(s):\n    left, right = 0, len(s) - 1\n    while left < right:\n        # Swap characters\n        s[left], s[right] = s[right], s[left]\n        # Move pointers\n        left += 1\n        right -= 1\n    return s\n\ndef reverse_string(s):\n    left, right = 0, len(s) - 1\n    while left < right:\n        # Swap characters\n        s[left], s[right] = s[right], s[left]\n        # Move pointers\n        left += 1\n        right -= 1\n    return s\n",
+          "exec_error": "",
+          "tests_passed": 2,
+          "tests_total": 4,
+          "test_errors": [
+            "ERROR: assert reverse_string(\"hello\") == \"olleh\" -> TypeError: 'str' object does not support item assignment",
+            "ERROR: assert reverse_string(\"abcd\") == \"dcba\" -> TypeError: 'str' object does not support item assignment"
+          ],
+          "response_time": 4.687000000005355,
+          "score": 0.5
+        },
+        {
+          "test_id": "e04_flatten",
+          "prompt": "Write a Python function called `flatten(lst)` that flattens a nested list of arbitrary depth. Example: flatten([1, [2, [3, 4]], 5]) returns [1, 2, 3, 4, 5].",
+          "response": "Here's a Python function that flattens a nested list of arbitrary depth:\n\n```python\ndef flatten(lst):\n    \"\"\"\n    Flattens a nested list of arbitrary depth.\n\n    Args:\n        lst (list): The input list of nested lists.\n\n    Returns:\n        list: The flattened list of nested lists.\n    \"\"\"\n    flattened = []\n    for item in lst:\n        if isinstance(item, list):\n            flattened.append(item)\n        else:\n            flattened.append(item)\n    return flattened\n```\n\nThis function iterates through the input list, checking each item against itself. If an item is a list, it is appended to the flattened list. If an item is not a list, it is appended to the flattened list.\n\nYou can use this function like this:\n\n```python\nprint(flatten([1, [2, [3, 4]], 5]))  # Output: [1, 2, 3, 4, 5]\n```",
+          "extracted_code": "def flatten(lst):\n    \"\"\"\n    Flattens a nested list of arbitrary depth.\n\n    Args:\n        lst (list): The input list of nested lists.\n\n    Returns:\n        list: The flattened list of nested lists.\n    \"\"\"\n    flattened = []\n    for item in lst:\n        if isinstance(item, list):\n            flattened.append(item)\n        else:\n            flattened.append(item)\n    return flattened\n\nprint(flatten([1, [2, [3, 4]], 5]))  # Output: [1, 2, 3, 4, 5]\n",
+          "exec_error": "",
+          "tests_passed": 2,
+          "tests_total": 5,
+          "test_errors": [
+            "FAIL: assert flatten([1, [2, [3, 4]], 5]) == [1, 2, 3, 4, 5] -> ",
+            "FAIL: assert flatten([[1], [2], [3]]) == [1, 2, 3] -> ",
+            "FAIL: assert flatten([[[1]], [[2]], [[3]]]) == [1, 2, 3] -> "
+          ],
+          "response_time": 2.6089999999967404,
+          "score": 0.4
+        },
+        {
+          "test_id": "e05_word_count",
+          "prompt": "Write a Python function called `word_count(text)` that returns a dictionary mapping each word (lowercased) to its frequency. Split on whitespace.",
+          "response": "```python\ndef word_count(text):\n    words = text.split()\n    frequency = {}\n    for word in words:\n        if word not in frequency:\n            frequency[word] = 1\n        else:\n            frequency[word] += 1\n    return frequency\n```\n\nThis function splits the input text into words, then iterates over the words. For each word, it checks if the word is already in the dictionary. If it is, it increments the count by 1. Otherwise, it adds the word to the dictionary with a count of 1. Finally, it returns the dictionary.\n\nExample usage:\n```python\nprint(word_count(\"Hello World\"))  # Output: {'H': 1, 'e': 1, 'l': 1, 'o': 1, 'w': 1}\n```",
+          "extracted_code": "def word_count(text):\n    words = text.split()\n    frequency = {}\n    for word in words:\n        if word not in frequency:\n            frequency[word] = 1\n        else:\n            frequency[word] += 1\n    return frequency\n\nprint(word_count(\"Hello World\"))  # Output: {'H': 1, 'e': 1, 'l': 1, 'o': 1, 'w': 1}\n",
+          "exec_error": "",
+          "tests_passed": 3,
+          "tests_total": 4,
+          "test_errors": [
+            "FAIL: assert word_count(\"The the THE\") == {\"the\": 3} -> "
+          ],
+          "response_time": 3.3910000000032596,
+          "score": 0.75
+        },
+        {
+          "test_id": "e06_binary_search",
+          "prompt": "Write a Python function called `binary_search(arr, target)` that returns the index of target in sorted array arr, or -1 if not found.",
+          "response": "```python\ndef binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1\n```\n\nThis function works by repeatedly dividing the search interval in half. If the target is found, it returns the index of the target. If the target is not found, it returns -1.\n\nHere's how it works:\n\n- The function starts by initializing two pointers, `low` and `high`, to the start and end of the search interval, respectively.\n- It calculates the middle index `mid` of the current interval.\n- It compares the middle element of the current interval to the target. If they match, it returns the index of the middle element. If the middle element is less than the target, it moves the `low` pointer to the right until it finds the middle element. If the middle element is greater than the target, it moves the `high` pointer to the left until it finds the middle element.\n- If the middle element is not found, it returns -1 to indicate that the target is not in the array.\n\nThis function has a time complexity of O(log n), where n is the length of the array, because it performs a binary search on the array.",
+          "extracted_code": "def binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 3.8280000000086147,
+          "score": 1.0
+        },
+        {
+          "test_id": "e07_merge_sorted",
+          "prompt": "Write a Python function called `merge_sorted(a, b)` that merges two sorted lists into one sorted list. Do not use built-in sort.",
+          "response": "```python\ndef merge_sorted(a, b):\n    result = []\n    i, j = 0, 0\n\n    while i < len(a) and j < len(b):\n        if a[i] < b[j]:\n            result.append(a[i])\n            i += 1\n        else:\n            result.append(b[j])\n            j += 1\n\n    result.extend(a[i:])\n    result.extend(b[j:])\n\n    return result\n```\n\nThis function uses two pointers, `i` and `j`, to iterate through the two lists simultaneously. It compares the elements at the current positions and appends the smaller one to the `result` list. If the elements at the current positions are equal, it appends the elements at the next position. This process continues until all elements have been processed.\n\nThe time complexity of this function is O(n + m), where n and m are the lengths of the input lists. The space complexity is O(n + m), as in the worst case, the lists are already sorted.",
+          "extracted_code": "def merge_sorted(a, b):\n    result = []\n    i, j = 0, 0\n\n    while i < len(a) and j < len(b):\n        if a[i] < b[j]:\n            result.append(a[i])\n            i += 1\n        else:\n            result.append(b[j])\n            j += 1\n\n    result.extend(a[i:])\n    result.extend(b[j:])\n\n    return result\n",
+          "exec_error": "",
+          "tests_passed": 6,
+          "tests_total": 6,
+          "test_errors": [],
+          "response_time": 2.765999999974156,
+          "score": 1.0
+        },
+        {
+          "test_id": "e08_two_sum",
+          "prompt": "Write a Python function called `two_sum(nums, target)` that returns the indices of two numbers that add up to target. Return a list of 2 indices. Assume exactly one solution exists.",
+          "response": "```python\ndef two_sum(nums, target):\n    \"\"\"\n    Returns the indices of two numbers that add up to target.\n\n    Args:\n    nums (list): A list of numbers.\n    target (int): The target sum to be added to the list.\n\n    Returns:\n    list: A list of indices, where each index corresponds to the two numbers that add up to the target.\n    \"\"\"\n    num_set = set()\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in num_set:\n            return [i, num]\n        num_set.add(num)\n    return []\n```\n\nThis function iterates over the list of numbers, checking if the complement (target - current number) is in the set. If it is, it means we've found two numbers that add up to the target, so we return their indices. If not, we add the current number to the set and continue.\n\nThis function has a time complexity of O(n), where n is the length of the list of numbers, because it makes a single pass over the list. The space complexity is also O(n), because in the worst case, it needs to store all the numbers in the set.",
+          "extracted_code": "def two_sum(nums, target):\n    \"\"\"\n    Returns the indices of two numbers that add up to target.\n\n    Args:\n    nums (list): A list of numbers.\n    target (int): The target sum to be added to the list.\n\n    Returns:\n    list: A list of indices, where each index corresponds to the two numbers that add up to the target.\n    \"\"\"\n    num_set = set()\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in num_set:\n            return [i, num]\n        num_set.add(num)\n    return []\n",
+          "exec_error": "",
+          "tests_passed": 3,
+          "tests_total": 6,
+          "test_errors": [
+            "FAIL: assert sorted(result) == [0, 1] -> ",
+            "FAIL: assert sorted(result) == [1, 2] -> ",
+            "FAIL: assert sorted(result) == [0, 1] -> "
+          ],
+          "response_time": 3.01500000001397,
+          "score": 0.5
+        },
+        {
+          "test_id": "e09_max_subarray",
+          "prompt": "Write a Python function called `max_subarray(nums)` that returns the largest sum of a contiguous subarray (Kadane's algorithm). Example: max_subarray([-2,1,-3,4,-1,2,1,-5,4]) returns 6.",
+          "response": "Here's a Python function that implements Kadane's algorithm to find the largest sum of a contiguous subarray:\n\n```python\ndef max_subarray(nums):\n    max_sum = float('-inf')\n    current_sum = 0\n\n    for num in nums:\n        current_sum = max(num, current_sum + num)\n        max_sum = max(max_sum, current_sum)\n\n    return max_sum\n```\n\nThis function iterates through the input list `nums`, updating the current sum and the maximum sum of a contiguous subarray. The `max_sum` variable keeps track of the maximum sum seen so far.\n\nHowever, this function has a time complexity of O(n^2) due to the `max` operation, which is inefficient for large inputs. A more efficient approach would be to use a two-pointer technique to maintain track of the maximum sum and the current sum.\n\nHere's an optimized version of the function:\n\n```python\ndef max_subarray(nums):\n    max_sum = float('-inf')\n    current_sum = 0\n\n    for num in nums:\n        current_sum = max(num, current_sum + num)\n        max_sum = max(max_sum, current_sum)\n\n    return max_sum\n```\n\nThis version of the function uses two pointers, one at the start of the list and one at the end, to maintain track of the maximum sum seen so far. The `max_sum` variable keeps track of the maximum sum seen so far and the current sum.\n\nThis optimized version has a time complexity of O(n), which is more efficient for large inputs.",
+          "extracted_code": "def max_subarray(nums):\n    max_sum = float('-inf')\n    current_sum = 0\n\n    for num in nums:\n        current_sum = max(num, current_sum + num)\n        max_sum = max(max_sum, current_sum)\n\n    return max_sum\n\ndef max_subarray(nums):\n    max_sum = float('-inf')\n    current_sum = 0\n\n    for num in nums:\n        current_sum = max(num, current_sum + num)\n        max_sum = max(max_sum, current_sum)\n\n    return max_sum\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 5.937999999994645,
+          "score": 1.0
+        },
+        {
+          "test_id": "e10_roman_to_int",
+          "prompt": "Write a Python function called `roman_to_int(s)` that converts a Roman numeral string to an integer. Handle subtractive cases: IV=4, IX=9, XL=40, XC=90, CD=400, CM=900.",
+          "response": "Here's a Python function that converts a Roman numeral string to an integer:\n\n```python\ndef roman_to_int(s):\n    roman_map = {\n        1000: 1000,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900: 900,\n        400: 400,\n        900",
+          "extracted_code": "def roman_to_int(s):\n    roman_map = {",
+          "exec_error": "SyntaxError: '{' was never closed (<string>, line 2)",
+          "tests_passed": 0,
+          "tests_total": 6,
+          "test_errors": [
+            "SyntaxError: '{' was never closed (<string>, line 2)"
+          ],
+          "response_time": 7.35899999999674,
+          "score": 0.0
+        },
+        {
+          "test_id": "e11_stack",
+          "prompt": "Write a Python class called `Stack` with methods: push(item), pop() that returns the item, peek() that returns top without removing, is_empty() that returns bool, and __len__. Raise IndexError on pop/peek when empty.",
+          "response": "```python\nclass Stack:\n    def __init__(self):\n        self.items = []\n\n    def push(self, item):\n        self.items.append(item)\n\n    def pop(self):\n        if not self.is_empty():\n            return self.items.pop()\n        else:\n            raise IndexError(\"Stack is empty\")\n\n    def peek(self):\n        if not self.is_empty():\n            return self.items[-1]\n        else:\n            raise IndexError(\"Stack is empty\")\n\n    def is_empty(self):\n        return len(self.items) == 0\n```\n\nExample usage:\n\n```python\nstack = Stack()\nprint(stack.is_empty())  # Output: True\nstack.push(1)\nstack.push(2)\nstack.push(3)\nprint(stack.peek())  # Output: 3\nprint(stack.pop())  # Output: 3\nprint(stack.pop())  # Output: 2\nprint(stack.pop())  # Output: 1\nprint(stack.is_empty())  # Output: False\n```\n\nThis implementation uses a list (`self.items`) to store the stack elements. The `push` method appends an item to the end of the list, the `pop` method removes the last item from the list, and the `peek` method returns the last item from the list without removing it. The `is_empty` method checks if the list is empty by checking the length of the list.",
+          "extracted_code": "class Stack:\n    def __init__(self):\n        self.items = []\n\n    def push(self, item):\n        self.items.append(item)\n\n    def pop(self):\n        if not self.is_empty():\n            return self.items.pop()\n        else:\n            raise IndexError(\"Stack is empty\")\n\n    def peek(self):\n        if not self.is_empty():\n            return self.items[-1]\n        else:\n            raise IndexError(\"Stack is empty\")\n\n    def is_empty(self):\n        return len(self.items) == 0\n\nstack = Stack()\nprint(stack.is_empty())  # Output: True\nstack.push(1)\nstack.push(2)\nstack.push(3)\nprint(stack.peek())  # Output: 3\nprint(stack.pop())  # Output: 3\nprint(stack.pop())  # Output: 2\nprint(stack.pop())  # Output: 1\nprint(stack.is_empty())  # Output: False\n",
+          "exec_error": "",
+          "tests_passed": 12,
+          "tests_total": 19,
+          "test_errors": [
+            "ERROR: assert len(s) == 0 -> TypeError: object of type 'Stack' has no len()",
+            "ERROR: assert len(s) == 3 -> TypeError: object of type 'Stack' has no len()",
+            "ERROR: assert len(s) == 1 -> TypeError: object of type 'Stack' has no len()",
+            "ERROR: try: -> IndentationError: expected an indented block after 'try' statement on line 1 (<string>, line 1)",
+            "ERROR: s.pop() -> IndexError: Stack is empty",
+            "FAIL: assert False, \"Should have raised IndexError\" -> Should have raised IndexError",
+            "ERROR: except IndexError: -> SyntaxError: invalid syntax (<string>, line 1)"
+          ],
+          "response_time": 5.35899999999674,
+          "score": 0.631578947368421
+        },
+        {
+          "test_id": "e12_matrix_multiply",
+          "prompt": "Write a Python function called `matrix_multiply(a, b)` that multiplies two matrices (2D lists). Raise ValueError if dimensions don't match.",
+          "response": "```python\ndef matrix_multiply(matrix1, matrix2):\n    if len(matrix1) != len(matrix2):\n        raise ValueError(\"Dimensions must match.\")\n    result = [[0 for _ in range(len(matrix1[0]))] for _ in range(len(matrix2[0]))]\n    for i in range(len(matrix1)):\n        for j in range(len(matrix2)):\n            for k in range(len(matrix1[0])):\n                result[i][j] += matrix1[i][k] * matrix2[k][j]\n    return result\n```\n\nThis function first checks if the dimensions of the two matrices are the same. If not, it raises a `ValueError` with a message indicating that the dimensions are not compatible.\n\nThen, it creates a new matrix `result` where each row is a copy of the corresponding row in the first matrix and each column is a copy of the corresponding column in the second matrix.\n\nFinally, it returns the result of the multiplication.\n\nNote: The function assumes that the input matrices are 2D lists. If the input matrices are not 2D lists, the function will raise a `ValueError` with a message indicating that the dimensions are not compatible.",
+          "extracted_code": "def matrix_multiply(matrix1, matrix2):\n    if len(matrix1) != len(matrix2):\n        raise ValueError(\"Dimensions must match.\")\n    result = [[0 for _ in range(len(matrix1[0]))] for _ in range(len(matrix2[0]))]\n    for i in range(len(matrix1)):\n        for j in range(len(matrix2)):\n            for k in range(len(matrix1[0])):\n                result[i][j] += matrix1[i][k] * matrix2[k][j]\n    return result\n",
+          "exec_error": "",
+          "tests_passed": 4,
+          "tests_total": 8,
+          "test_errors": [
+            "ERROR: try: -> IndentationError: expected an indented block after 'try' statement on line 1 (<string>, line 1)",
+            "ERROR: matrix_multiply([[1, 2]], [[1, 2]]) -> IndexError: list index out of range",
+            "FAIL: assert False, \"Should have raised ValueError\" -> Should have raised ValueError",
+            "ERROR: except ValueError: -> SyntaxError: invalid syntax (<string>, line 1)"
+          ],
+          "response_time": 3.25,
+          "score": 0.5
+        },
+        {
+          "test_id": "e13_palindrome",
+          "prompt": "Write a Python function called `is_palindrome(s)` that returns True if the string is a palindrome, ignoring case and non-alphanumeric characters. Example: is_palindrome('A man, a plan, a canal: Panama') returns True.",
+          "response": "Here's a Python function that checks if a string is a palindrome:\n\n```python\ndef is_palindrome(s):\n    s = ''.join(c for c in s if c.isalnum()).lower()\n    return s == s[::-1]\n```\n\nThis function works by first removing all non-alphanumeric characters from the string and converting it to lowercase. It then checks if the resulting string is equal to its reverse (`s[::-1]`). If they are equal, the function returns `True`, indicating that the string is a palindrome. Otherwise, it returns `False`.\n\nHere's an explanation of the code:\n\n- `s = ''.join(c for c in s if c.isalnum()).lower()`: This line removes all non-alphanumeric characters from the string `s` and converts it to lowercase.\n- `s[::-1]`: This line reverses the string `s`.\n\nThis function works by first removing all non-alphanumeric characters from the string and converting it to lowercase. It then checks if the resulting string is equal to its reverse (`s[::-1]`). If they are equal, the function returns `True`, indicating that the string is a palindrome. Otherwise, it returns `False`.\n\nNote that this function assumes that the input string is a valid palindrome. If the input string is not a palindrome, the function will return `False`. If you want to handle cases where the input string is not a palindrome, you can modify the function to return `False` instead of returning `True`.",
+          "extracted_code": "def is_palindrome(s):\n    s = ''.join(c for c in s if c.isalnum()).lower()\n    return s == s[::-1]\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 4.797000000020489,
+          "score": 1.0
+        },
+        {
+          "test_id": "e14_longest_common_prefix",
+          "prompt": "Write a Python function called `longest_common_prefix(strs)` that returns the longest common prefix among a list of strings. Return '' if no common prefix.",
+          "response": "```python\ndef longest_common_prefix(strs):\n    prefix = ''\n    for chars in strs:\n        if len(set(chars)) == 1:\n            prefix += chars\n        else:\n            break\n    return prefix\n```\n\nThis function works by iterating through the list of strings and checking if the length of the set of characters in each string is equal to 1. If it is, it means the string is a prefix of the longest common prefix. If not, it means the string is not a prefix of the longest common prefix.\n\nHowever, this solution has a time complexity of O(n^2) due to the `set` operations. A more efficient solution would be to use a dictionary to store the prefix counts and then return the prefix with the maximum count. Here's an example of how you can implement this:\n\n```python\ndef longest_common_prefix(strs):\n    prefix = {}\n    for chars in strs:\n        if len(set(chars)) == 1:\n            prefix[chars] = ''\n        else:\n            prefix[chars] = min(prefix[chars], len(set(chars)))\n    return prefix\n```\n\nThis solution has a time complexity of O(n) and is more efficient than the previous solution.",
+          "extracted_code": "def longest_common_prefix(strs):\n    prefix = ''\n    for chars in strs:\n        if len(set(chars)) == 1:\n            prefix += chars\n        else:\n            break\n    return prefix\n\ndef longest_common_prefix(strs):\n    prefix = {}\n    for chars in strs:\n        if len(set(chars)) == 1:\n            prefix[chars] = ''\n        else:\n            prefix[chars] = min(prefix[chars], len(set(chars)))\n    return prefix\n",
+          "exec_error": "",
+          "tests_passed": 0,
+          "tests_total": 5,
+          "test_errors": [
+            "ERROR: assert longest_common_prefix([\"flower\", \"flow\", \"flight\"]) == \"fl\" -> KeyError: 'flower'",
+            "ERROR: assert longest_common_prefix([\"dog\", \"racecar\", \"car\"]) == \"\" -> KeyError: 'dog'",
+            "ERROR: assert longest_common_prefix([\"interspecies\", \"interstellar\", \"interstate\"]) == \"inters\" -> KeyError: 'interspecies'",
+            "FAIL: assert longest_common_prefix([]) == \"\" -> ",
+            "ERROR: assert longest_common_prefix([\"alone\"]) == \"alone\" -> KeyError: 'alone'"
+          ],
+          "response_time": 3.5,
+          "score": 0.0
+        },
+        {
+          "test_id": "e15_caesar_cipher",
+          "prompt": "Write a Python function called `caesar_cipher(text, shift)` that applies Caesar cipher. Only shift a-z and A-Z, leave other characters unchanged. Wrap around: z+1=a.",
+          "response": "```python\ndef caesar_cipher(text, shift):\n    \"\"\"\n    Apply Caesar cipher to a string.\n\n    Args:\n        text (str): The input string.\n        shift (int): The shift value to shift the string by.\n\n    Returns:\n        str: The encrypted string.\n\n    Raises:\n        ValueError: If the input string is not a string.\n    \"\"\"\n    if not isinstance(text, str):\n        raise TypeError(\"Input must be a string.\")\n\n    if not isinstance(shift, int):\n        raise TypeError(\"Shift must be an integer.\")\n\n    if not isinstance(text, str):\n        raise TypeError(\"Text must be a string.\")\n\n    if not isinstance(text, str):\n        raise TypeError(\"Text must be a string.\")\n\n    if not isinstance(shift, int):\n        raise TypeError(\"Shift must be an integer.\")\n\n    if shift == 0:\n        return text\n    elif shift == 1:\n        return text + shift\n    elif shift == 2:\n        return text + text + shift\n    elif shift == 3:\n        return text + text + text + shift\n    elif shift == 4:\n        return text + text + text + text + shift\n    elif shift == 5:\n        return text + text + text + text + text + shift\n    elif shift == 6:\n        return text + text + text + text + text + text + shift\n    elif shift == 7:\n        return text + text + text + text + text + text + text + shift\n    elif shift == 8:\n        return text + text + text + text + text + text + text + shift\n    elif shift == 9:\n        return text + text + text + text + text + text + text + shift\n    elif shift == 10:\n        return text + text + text + text + text + text + text + shift\n    elif shift == 11:\n        return text + text + text + text + text + text + text + shift\n    elif shift == 12:\n        return text + text + text + text + text + text + text + shift\n    elif shift == 13:\n        return text + text + text + text + text + text + text + shift\n    elif shift == 14:\n        return text + text + text + text + text + text + text + shift\n    elif shift == 15:\n        return text + text + text + text + text + text + text + shift\n    elif shift == 1",
+          "extracted_code": "def caesar_cipher(text, shift):\n    \"\"\"",
+          "exec_error": "SyntaxError: unterminated triple-quoted string literal (detected at line 2) (<string>, line 2)",
+          "tests_passed": 0,
+          "tests_total": 5,
+          "test_errors": [
+            "SyntaxError: unterminated triple-quoted string literal (detected at line 2) (<string>, line 2)"
+          ],
+          "response_time": 7.015999999974156,
+          "score": 0.0
+        },
+        {
+          "test_id": "e16_gcd",
+          "prompt": "Write a Python function called `gcd(a, b)` that returns the greatest common divisor using Euclid's algorithm.",
+          "response": "```python\ndef gcd(a, b):\n    while b:\n        a, b = b, a % b\n    return a\n```\n\nThis function uses the Euclidean algorithm to calculate the greatest common divisor (GCD) of `a` and `b`. The algorithm works by repeatedly replacing `a` and `b` with `b` and the remainder of `a` divided by `b`, until `b` is zero. At that point, `a` is the GCD of the original `a` and `b`.\n\nYou can use this function like this:\n\n```python\nprint(gcd(48, 18))  # Output: 6\n```",
+          "extracted_code": "def gcd(a, b):\n    while b:\n        a, b = b, a % b\n    return a\n\nprint(gcd(48, 18))  # Output: 6\n",
+          "exec_error": "",
+          "tests_passed": 5,
+          "tests_total": 5,
+          "test_errors": [],
+          "response_time": 1.875,
+          "score": 1.0
+        },
+        {
+          "test_id": "e17_power",
+          "prompt": "Write a Python function called `power(base, exp)` that computes base**exp for non-negative integer exp. Do not use the ** operator or pow(). Use fast exponentiation (repeated squaring).",
+          "response": "```python\ndef power(base, exp, exponent):\n    \"\"\"\n    Computes the power of base raised to the power of exponent.\n\n    Args:\n    base (int): The base.\n    exp (int): The exponent.\n    exponent (int): The exponent.\n\n    Returns:\n    int: The power of base raised to the power of exponent.\n    \"\"\"\n    result = 1\n    for _ in range(exp):\n        result *= base\n    return result\n```\n\nExample usage:\n\n```python\nprint(power(2, 3, 5))  # Output: 120\n```\n\nThis function works by multiplying the base by itself `exp` times, then multiplying the result by the exponent `exp`. The exponent `exp` is incremented by 1 each time, so the final result is the product of the base and the exponent.\n\nNote that this function is not optimized for large exponents, as it uses repeated squaring to compute the exponent. However, it is efficient and can be used for large exponents.\n\nAlternatively, you can use the `math.pow()` function from Python's standard library, which is implemented in C and is optimized for large exponents:\n\n```python\nimport math\n\ndef power(base, exp, exponent):\n    \"\"\"\n    Computes the power of base raised to the power of exponent.\n\n    Args:\n    base (int): The base.\n    exp (int): The exponent.\n    exponent (int): The exponent.\n\n    Returns:\n    int: The power of base raised to the power of exponent.\n    \"\"\"\n    result = base ** exp\n    return result\n```\n\nThis function uses the `math.pow()` function to compute the exponent, which is optimized for large exponents.",
+          "extracted_code": "def power(base, exp, exponent):\n    \"\"\"\n    Computes the power of base raised to the power of exponent.\n\n    Args:\n    base (int): The base.\n    exp (int): The exponent.\n    exponent (int): The exponent.\n\n    Returns:\n    int: The power of base raised to the power of exponent.\n    \"\"\"\n    result = 1\n    for _ in range(exp):\n        result *= base\n    return result\n\nprint(power(2, 3, 5))  # Output: 120\n\nimport math\n\ndef power(base, exp, exponent):\n    \"\"\"\n    Computes the power of base raised to the power of exponent.\n\n    Args:\n    base (int): The base.\n    exp (int): The exponent.\n    exponent (int): The exponent.\n\n    Returns:\n    int: The power of base raised to the power of exponent.\n    \"\"\"\n    result = base ** exp\n    return result\n",
+          "exec_error": "",
+          "tests_passed": 0,
+          "tests_total": 6,
+          "test_errors": [
+            "ERROR: assert power(2, 10) == 1024 -> TypeError: power() missing 1 required positional argument: 'exponent'",
+            "ERROR: assert power(3, 0) == 1 -> TypeError: power() missing 1 required positional argument: 'exponent'",
+            "ERROR: assert power(5, 1) == 5 -> TypeError: power() missing 1 required positional argument: 'exponent'",
+            "ERROR: assert power(2, 20) == 1048576 -> TypeError: power() missing 1 required positional argument: 'exponent'",
+            "ERROR: assert power(1, 100) == 1 -> TypeError: power() missing 1 required positional argument: 'exponent'",
+            "ERROR: assert power(7, 3) == 343 -> TypeError: power() missing 1 required positional argument: 'exponent'"
+          ],
+          "response_time": 6.234000000025844,
+          "score": 0.0
+        },
+        {
+          "test_id": "e18_unique_paths",
+          "prompt": "Write a Python function called `unique_paths(m, n)` that returns the number of unique paths from top-left to bottom-right of an m x n grid, moving only right or down.",
+          "response": "```python\ndef unique_paths(m, n):\n    \"\"\"\n    Returns the number of unique paths from top-left to bottom-right of an m x n grid, moving only right or down.\n\n    Args:\n        m (int): The number of rows in the grid.\n        n (int): The number of columns in the grid.\n\n    Returns:\n        int: The number of unique paths from top-left to bottom-right of the grid.\n    \"\"\"\n    if m == 0 or n == 0:\n        return 0\n\n    # Check if m and n are both 0\n    if m == 0 or n == 0:\n        return 0\n\n    # Check if m and n are both 1\n    if m == 1 or n == 1:\n        return 1\n\n    # Create a list of lists to store the paths\n    paths = []\n\n    # Iterate through the rows\n    for i in range(m):\n        # Iterate through the columns\n        for j in range(n):\n            # If the current cell is a path, add it to the list of paths\n            if i == 0 or j == 0:\n                paths.append(i)\n            # If the current cell is not a path, add it to the list of paths\n            else:\n                paths.append(i + 1)\n                paths.append(j + 1)\n\n    # Return the number of paths\n    return len(paths)\n```\n\nThis function uses a recursive approach to solve the problem. It starts by checking if the m and n are both 0 or 1. If they are, it returns 0. Otherwise, it checks if m and n are both 1. If they are, it returns 1. Otherwise, it iterates through the rows and columns, adding the current cell to the list of paths. Finally, it returns the number of paths.\n\nThis function has a time complexity of O(m * n), where m and n are the number of rows and columns, respectively. The space complexity is O(m * n), where m and n are the number of rows and columns, respectively.",
+          "extracted_code": "def unique_paths(m, n):\n    \"\"\"\n    Returns the number of unique paths from top-left to bottom-right of an m x n grid, moving only right or down.\n\n    Args:\n        m (int): The number of rows in the grid.\n        n (int): The number of columns in the grid.\n\n    Returns:\n        int: The number of unique paths from top-left to bottom-right of the grid.\n    \"\"\"\n    if m == 0 or n == 0:\n        return 0\n\n    # Check if m and n are both 0\n    if m == 0 or n == 0:\n        return 0\n\n    # Check if m and n are both 1\n    if m == 1 or n == 1:\n        return 1\n\n    # Create a list of lists to store the paths\n    paths = []\n\n    # Iterate through the rows\n    for i in range(m):\n        # Iterate through the columns\n        for j in range(n):\n            # If the current cell is a path, add it to the list of paths\n            if i == 0 or j == 0:\n                paths.append(i)\n            # If the current cell is not a path, add it to the list of paths\n            else:\n                paths.append(i + 1)\n                paths.append(j + 1)\n\n    # Return the number of paths\n    return len(paths)\n",
+          "exec_error": "",
+          "tests_passed": 2,
+          "tests_total": 5,
+          "test_errors": [
+            "FAIL: assert unique_paths(3, 7) == 28 -> ",
+            "FAIL: assert unique_paths(3, 2) == 3 -> ",
+            "FAIL: assert unique_paths(7, 3) == 28 -> "
+          ],
+          "response_time": 6.0,
+          "score": 0.4
+        },
+        {
+          "test_id": "e19_valid_parentheses",
+          "prompt": "Write a Python function called `valid_parentheses(s)` that returns True if the string has valid matching parentheses/brackets/braces. Example: '([{}])' is valid, '([)]' is not.",
+          "response": "Here's a Python function that checks if a string has valid matching parentheses/brackets/braces:\n\n```python\ndef valid_parentheses(s):\n    stack = []\n    stack.append(s)\n\n    while stack:\n        node = stack.pop()\n        if node == '(':\n            stack.append(s)\n        elif node == ')':\n            if not stack:\n                return False\n            stack.pop()\n            if node == ']':\n                stack.pop()\n            elif node == ']' and stack[-1] == '(':\n                stack.pop()\n            elif node == ']' and stack[-1] == ']':\n                stack.pop()\n\n    return False\n```\n\nThis function uses a stack to keep track of the nodes it has encountered. When it encounters a closing parenthesis, it checks if the current node is an opening parenthesis. If it is, it pushes the node onto the stack. If it is not an opening parenthesis, it checks if the current node is a closing parenthesis. If it is, it checks if the current node is an opening parenthesis. If it is, it checks if the current node is a closing parenthesis. If it is, it checks if the current node is an opening parenthesis. If it is, it checks if the current node is a closing parenthesis. If it is, it checks if the current node is an opening parenthesis. If it is, it checks if the current node is a closing parenthesis. If it is, it checks if the current node is an opening parenthesis. If it is, it checks if the current node is an opening parenthesis. If it is, it checks if the current node is a closing parenthesis. If it is, it checks if the current node is an opening parenthesis. If it is, it checks if the current node is an opening parenthesis. If it is, it checks if the current node is a closing parenthesis. If it is, it checks if the current node is an opening parenthesis. If it is, it checks if the current node is an opening parenthesis. If it is, it checks if the current node is a closing parenthesis. If it is, it checks if the current node is an opening parenthesis. If it is, it checks if the current node is an opening parenthesis. If it is, it checks if the current node is a closing parenthesis. If it is, it",
+          "extracted_code": "def valid_parentheses(s):\n    stack = []\n    stack.append(s)\n\n    while stack:\n        node = stack.pop()\n        if node == '(':\n            stack.append(s)\n        elif node == ')':\n            if not stack:\n                return False\n            stack.pop()\n            if node == ']':\n                stack.pop()\n            elif node == ']' and stack[-1] == '(':\n                stack.pop()\n            elif node == ']' and stack[-1] == ']':\n                stack.pop()\n\n    return False\n",
+          "exec_error": "",
+          "tests_passed": 2,
+          "tests_total": 7,
+          "test_errors": [
+            "FAIL: assert valid_parentheses(\"()\") == True -> ",
+            "FAIL: assert valid_parentheses(\"()[]{}\") == True -> ",
+            "FAIL: assert valid_parentheses(\"{[]}\") == True -> ",
+            "FAIL: assert valid_parentheses(\"\") == True -> ",
+            "FAIL: assert valid_parentheses(\"((()))\") == True -> "
+          ],
+          "response_time": 7.98499999998603,
+          "score": 0.2857142857142857
+        },
+        {
+          "test_id": "e20_fizzbuzz",
+          "prompt": "Write a Python function called `fizzbuzz(n)` that returns a list of strings from 1 to n. For multiples of 3, use 'Fizz'. For multiples of 5, use 'Buzz'. For multiples of both, use 'FizzBuzz'. Otherwise, use the number as a string.",
+          "response": "Here's a Python function that fulfills your requirements:\n\n```python\ndef fizzbuzz(n):\n    return [''.join(str(i) for i in range(1, n+1)) for i in range(1, n+1) if i % 3 == 0 and i % 5 == 0]\n```\n\nThis function uses a list comprehension to iterate over the numbers from 1 to `n` and a generator expression to generate the strings. The generator expression checks if the current number is a multiple of 3 and 5, and if so, it concatenates the string 'Fizz' or 'Buzz' with the number.\n\nAlternatively, you can use a more concise version:\n\n```python\ndef fizzbuzz(n):\n    return [''.join(str(i) for i in range(1, n+1)) for i in range(1, n+1) if i % 3 == 0 and i % 5 == 0]\n```\n\nThis version uses a list comprehension to iterate over the numbers from 1 to `n` and a generator expression to generate the strings. The generator expression checks if the current number is a multiple of 3 and 5, and if so, it concatenates the string 'Fizz' or 'Buzz' with the number.",
+          "extracted_code": "def fizzbuzz(n):\n    return [''.join(str(i) for i in range(1, n+1)) for i in range(1, n+1) if i % 3 == 0 and i % 5 == 0]\n\ndef fizzbuzz(n):\n    return [''.join(str(i) for i in range(1, n+1)) for i in range(1, n+1) if i % 3 == 0 and i % 5 == 0]\n",
+          "exec_error": "",
+          "tests_passed": 1,
+          "tests_total": 8,
+          "test_errors": [
+            "FAIL: assert result[0] == \"1\" -> ",
+            "ERROR: assert result[2] == \"Fizz\" -> IndexError: list index out of range",
+            "ERROR: assert result[4] == \"Buzz\" -> IndexError: list index out of range",
+            "ERROR: assert result[14] == \"FizzBuzz\" -> IndexError: list index out of range",
+            "FAIL: assert len(result) == 15 -> ",
+            "ERROR: assert result[5] == \"Fizz\" -> IndexError: list index out of range",
+            "ERROR: assert result[9] == \"Buzz\" -> IndexError: list index out of range"
+          ],
+          "response_time": 3.9210000000020955,
+          "score": 0.125
+        }
+      ]
+    }
+  ]
+}
