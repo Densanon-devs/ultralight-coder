@@ -930,6 +930,65 @@ class ExecBenchmarkRunner:
             score=passed / total if total > 0 else 0.0,
         )
 
+    def run_test_pipeline(self, model, test: ExecTest, chat_format: str) -> ExecTestResult:
+        """Run a test through the generate→execute→repair pipeline."""
+        from engine.code_pipeline import CodePipeline
+        pipeline = CodePipeline(max_retries=2)
+
+        start = time.monotonic()
+        result = pipeline.run_single(
+            task=test.prompt, model=model, chat_format=chat_format,
+            test_code=test.test_code,
+            gen_kwargs={"max_tokens": self.max_tokens, "temperature": self.temperature},
+        )
+        elapsed = time.monotonic() - start
+
+        # Convert to ExecTestResult
+        tr = result.test_results or {}
+        passed_count = tr.get("passed", 1 if result.passed else 0)
+        total_count = tr.get("total", 1)
+        test_errors = tr.get("errors", [result.error] if result.error else [])
+
+        return ExecTestResult(
+            test_id=test.test_id, prompt=test.prompt,
+            response=result.response, extracted_code=result.code,
+            exec_error="" if result.passed or tr.get("stage") == "tests" else result.error,
+            tests_passed=passed_count, tests_total=total_count,
+            test_errors=test_errors, response_time=elapsed,
+            score=passed_count / total_count if total_count > 0 else 0.0,
+        )
+
+    def run_test_multi(self, generator, debugger, test: ExecTest,
+                       gen_format: str, dbg_format: str) -> ExecTestResult:
+        """Run a test with multi-model: generate with A, debug with B."""
+        from engine.code_pipeline import CodePipeline
+        pipeline = CodePipeline(max_retries=2)
+
+        start = time.monotonic()
+        result = pipeline.run_multi(
+            task=test.prompt,
+            generator_model=generator, generator_format=gen_format,
+            debugger_model=debugger, debugger_format=dbg_format,
+            test_code=test.test_code,
+            gen_kwargs={"max_tokens": self.max_tokens, "temperature": self.temperature},
+            debug_kwargs={"max_tokens": self.max_tokens, "temperature": self.temperature},
+        )
+        elapsed = time.monotonic() - start
+
+        tr = result.test_results or {}
+        passed_count = tr.get("passed", 1 if result.passed else 0)
+        total_count = tr.get("total", 1)
+        test_errors = tr.get("errors", [result.error] if result.error else [])
+
+        return ExecTestResult(
+            test_id=test.test_id, prompt=test.prompt,
+            response=result.response, extracted_code=result.code,
+            exec_error="" if result.passed or tr.get("stage") == "tests" else result.error,
+            tests_passed=passed_count, tests_total=total_count,
+            test_errors=test_errors, response_time=elapsed,
+            score=passed_count / total_count if total_count > 0 else 0.0,
+        )
+
     def _run_suite(self, model, model_name, model_path, model_size_mb,
                    chat_format, mode, expert_router=None):
         """Run all tests under one mode."""
@@ -947,7 +1006,10 @@ class ExecBenchmarkRunner:
             tag = mode.upper()
             print(f"  [{tag}] ({i}/{len(self.tests)}) {test.test_id}...", end=" ", flush=True)
 
-            tr = self.run_test(model, test, chat_format, expert_router=expert_router)
+            if mode == "pipeline":
+                tr = self.run_test_pipeline(model, test, chat_format)
+            else:
+                tr = self.run_test(model, test, chat_format, expert_router=expert_router)
             mr.results.append(tr)
             all_scores.append(tr.score)
             all_times.append(tr.response_time)
@@ -1013,6 +1075,73 @@ class ExecBenchmarkRunner:
 
         return results
 
+    def run_multi_model(self, gen_path: Path, dbg_path: Path) -> ExecModelResult:
+        """Run multi-model benchmark: generate with gen_path, debug with dbg_path."""
+        gen_format = detect_chat_format(str(gen_path))
+        dbg_format = detect_chat_format(str(dbg_path))
+        gen_name = gen_path.stem
+        dbg_name = dbg_path.stem
+        combo_name = f"{gen_name}+{dbg_name}"
+        total_mb = gen_path.stat().st_size / (1024*1024) + dbg_path.stat().st_size / (1024*1024)
+
+        print(f"\n{'='*70}")
+        print(f"MULTI-MODEL: {gen_name} (gen) + {dbg_name} (debug)")
+        print(f"  Total size: {total_mb:.0f} MB | Tests: {len(self.tests)}")
+        print(f"{'='*70}")
+
+        try:
+            generator = self.load_model(gen_path)
+            debugger = self.load_model(dbg_path)
+        except Exception as e:
+            print(f"  FAILED TO LOAD: {e}")
+            return None
+
+        mr = ExecModelResult(
+            model_name=combo_name, model_path=f"{gen_path}+{dbg_path}",
+            model_size_mb=total_mb, chat_format=f"{gen_format}+{dbg_format}",
+            mode="multi",
+            total_score=0, tests_run=0, perfect_count=0,
+            avg_response_time=0, avg_tokens_per_second=0,
+        )
+
+        all_scores = []
+        all_times = []
+
+        for i, test in enumerate(self.tests, 1):
+            print(f"  [MULTI] ({i}/{len(self.tests)}) {test.test_id}...", end=" ", flush=True)
+
+            tr = self.run_test_multi(generator, debugger, test, gen_format, dbg_format)
+            mr.results.append(tr)
+            all_scores.append(tr.score)
+            all_times.append(tr.response_time)
+            mr.tests_run += 1
+
+            if tr.exec_error:
+                print(f"EXEC_ERR ({tr.response_time:.1f}s)")
+                print(f"         {tr.exec_error[:100]}")
+            elif tr.score == 1.0:
+                print(f"PERFECT {tr.tests_passed}/{tr.tests_total} ({tr.response_time:.1f}s)")
+                mr.perfect_count += 1
+            else:
+                print(f"PARTIAL {tr.tests_passed}/{tr.tests_total} ({tr.score:.0%}) ({tr.response_time:.1f}s)")
+                for err in tr.test_errors[:2]:
+                    print(f"         {err[:100]}")
+
+        mr.total_score = sum(all_scores) / len(all_scores) * 100 if all_scores else 0
+        mr.avg_response_time = sum(all_times) / len(all_times) if all_times else 0
+
+        print(f"\n  [MULTI] RESULTS: {combo_name}")
+        print(f"    Execution Score: {mr.total_score:.1f}%")
+        print(f"    Perfect tests:   {mr.perfect_count}/{mr.tests_run}")
+        print(f"    Avg time:        {mr.avg_response_time:.1f}s")
+
+        del generator, debugger
+        gc.collect()
+        print(f"\n  Models unloaded.")
+
+        self.all_results.append(mr)
+        return mr
+
 
 # ---------------------------------------------------------------------------
 # Output
@@ -1070,10 +1199,14 @@ def main():
     parser.add_argument("--model", type=str, help="Specific model to test")
     parser.add_argument("--all", action="store_true", help="Test all available models")
     parser.add_argument("--quick", action="store_true", help="Quick: first 5 tests only")
-    parser.add_argument("--tuned", action="store_true", help="Run with tuned experts (adds tuned mode)")
-    parser.add_argument("--expert", action="store_true", help="Run with generic experts (adds generic mode)")
-    parser.add_argument("--compare", action="store_true", help="Run all 3 modes: direct, generic, tuned")
-    parser.add_argument("--direct-only", action="store_true", help="Only run direct mode (no experts)")
+    parser.add_argument("--tuned", action="store_true", help="Run with tuned experts")
+    parser.add_argument("--expert", action="store_true", help="Run with generic experts")
+    parser.add_argument("--pipeline", action="store_true", help="Run with test-execute-retry pipeline")
+    parser.add_argument("--compare", action="store_true", help="Run all modes: direct, pipeline")
+    parser.add_argument("--compare-all", action="store_true", help="Run ALL modes: direct, generic, tuned, pipeline")
+    parser.add_argument("--direct-only", action="store_true", help="Only run direct mode")
+    parser.add_argument("--multi", nargs=2, metavar=("GEN_MODEL", "DBG_MODEL"),
+                        help="Multi-model: generate with GEN, debug with DBG")
     parser.add_argument("--max-tokens", type=int, default=512)
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--gpu-layers", type=int, default=99)
@@ -1089,8 +1222,10 @@ def main():
         print(f"Quick mode: {len(tests)} tests")
 
     # Determine modes
-    if args.compare:
-        modes = ["direct", "generic", "tuned"]
+    if args.compare_all:
+        modes = ["direct", "generic", "tuned", "pipeline"]
+    elif args.compare:
+        modes = ["direct", "pipeline"]
     elif args.direct_only:
         modes = ["direct"]
     else:
@@ -1099,6 +1234,8 @@ def main():
             modes.append("generic")
         if args.tuned:
             modes.append("tuned")
+        if args.pipeline:
+            modes.append("pipeline")
 
     if args.model:
         models = [Path(args.model)]
@@ -1120,12 +1257,28 @@ def main():
         gpu_layers=args.gpu_layers, threads=args.threads,
     )
 
-    for model_path in models:
+    # Run multi-model if specified
+    if args.multi:
+        gen_path = Path(args.multi[0])
+        dbg_path = Path(args.multi[1])
+        if not gen_path.exists():
+            print(f"Generator model not found: {gen_path}")
+            sys.exit(1)
+        if not dbg_path.exists():
+            print(f"Debugger model not found: {dbg_path}")
+            sys.exit(1)
         try:
-            runner.run_model(model_path, modes=modes)
+            runner.run_multi_model(gen_path, dbg_path)
         except Exception as e:
-            print(f"\n  FATAL: {model_path.name}: {e}")
+            print(f"\n  FATAL: {e}")
             traceback.print_exc()
+    else:
+        for model_path in models:
+            try:
+                runner.run_model(model_path, modes=modes)
+            except Exception as e:
+                print(f"\n  FATAL: {model_path.name}: {e}")
+                traceback.print_exc()
 
     print_summary(runner.all_results)
     save_results(runner.all_results, PROJECT_ROOT / "benchmark_exec_results.json")
