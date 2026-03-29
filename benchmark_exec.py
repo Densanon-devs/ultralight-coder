@@ -789,6 +789,7 @@ class ExecModelResult:
     model_path: str
     model_size_mb: float
     chat_format: str
+    mode: str  # "direct", "generic_expert", "tuned_expert"
     total_score: float  # average of test scores
     tests_run: int
     perfect_count: int  # tests with 100% assertions passing
@@ -800,6 +801,37 @@ class ExecModelResult:
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
+
+class _ModelShim:
+    """Wraps raw llama model to provide .generate() and .count_tokens() for ExpertRouter."""
+    def __init__(self, model, max_tokens, temperature):
+        self.model = model
+        self.max_tokens = max_tokens
+        self.temperature = temperature
+        self.total_time = 0
+        self.total_tokens = 0
+
+    def generate(self, prompt, max_tokens=None, temperature=None, **kwargs):
+        mt = max_tokens or self.max_tokens
+        temp = temperature or self.temperature
+        stop = ["</s>", "<|im_end|>", "<|end|>", "<|eot_id|>", "\nUser:", "\nHuman:"]
+        start = time.monotonic()
+        # Remove grammar from kwargs if present (not needed for code gen)
+        kwargs.pop("grammar", None)
+        output = self.model(prompt, max_tokens=mt, temperature=temp, stop=stop, echo=False, **kwargs)
+        elapsed = time.monotonic() - start
+        self.total_time += elapsed
+        text = output["choices"][0]["text"].strip()
+        tokens = output.get("usage", {}).get("completion_tokens", max(1, len(text) // 4))
+        self.total_tokens += tokens
+        return text
+
+    def count_tokens(self, text):
+        try:
+            return len(self.model.tokenize(text.encode("utf-8")))
+        except Exception:
+            return len(text) // 4
+
 
 class ExecBenchmarkRunner:
     def __init__(self, tests: list[ExecTest], max_tokens: int = 512,
@@ -835,15 +867,37 @@ class ExecBenchmarkRunner:
         tokens = output.get("usage", {}).get("completion_tokens", max(1, len(text) // 4))
         return text, elapsed, tokens
 
-    def run_test(self, model, test: ExecTest, chat_format: str) -> ExecTestResult:
-        system = (
-            "Write a Python function as requested. Return ONLY the code in a ```python block. "
-            "No explanation needed. The function must be complete and runnable."
-        )
-        prompt = wrap_chat(system, test.prompt, chat_format)
-
-        # Generate
-        response, elapsed, tokens = self.generate(model, prompt)
+    def run_test(self, model, test: ExecTest, chat_format: str,
+                 expert_router=None) -> ExecTestResult:
+        """Run a test. If expert_router is provided, use it to build the prompt."""
+        if expert_router:
+            # Use expert system to build prompt + generate
+            from engine.experts import ExpertResult
+            shim = _ModelShim(model, self.max_tokens, self.temperature)
+            expert_result = expert_router.process(
+                query=test.prompt, model=shim, chat_format=chat_format,
+                module_hint="code_gen",
+                gen_kwargs={"max_tokens": self.max_tokens, "temperature": self.temperature},
+            )
+            if expert_result:
+                response = expert_result.response
+                elapsed = shim.total_time
+                tokens = shim.total_tokens
+            else:
+                # Fallback to direct
+                system = (
+                    "Write a Python function as requested. Return ONLY the code in a ```python block. "
+                    "No explanation needed. The function must be complete and runnable."
+                )
+                prompt = wrap_chat(system, test.prompt, chat_format)
+                response, elapsed, tokens = self.generate(model, prompt)
+        else:
+            system = (
+                "Write a Python function as requested. Return ONLY the code in a ```python block. "
+                "No explanation needed. The function must be complete and runnable."
+            )
+            prompt = wrap_chat(system, test.prompt, chat_format)
+            response, elapsed, tokens = self.generate(model, prompt)
         tps = tokens / elapsed if elapsed > 0 else 0
 
         # Extract code
@@ -876,37 +930,24 @@ class ExecBenchmarkRunner:
             score=passed / total if total > 0 else 0.0,
         )
 
-    def run_model(self, model_path: Path) -> ExecModelResult:
-        chat_format = detect_chat_format(str(model_path))
-        model_name = model_path.stem
-        model_size_mb = model_path.stat().st_size / (1024 * 1024)
-
-        print(f"\n{'='*70}")
-        print(f"MODEL: {model_name}")
-        print(f"  Size: {model_size_mb:.0f} MB | Format: {chat_format} | Tests: {len(self.tests)}")
-        print(f"{'='*70}")
-
-        try:
-            model = self.load_model(model_path)
-        except Exception as e:
-            print(f"  FAILED TO LOAD: {e}")
-            return None
-
+    def _run_suite(self, model, model_name, model_path, model_size_mb,
+                   chat_format, mode, expert_router=None):
+        """Run all tests under one mode."""
         mr = ExecModelResult(
-            model_name=model_name, model_path=str(model_path),
-            model_size_mb=model_size_mb, chat_format=chat_format,
+            model_name=model_name, model_path=model_path,
+            model_size_mb=model_size_mb, chat_format=chat_format, mode=mode,
             total_score=0, tests_run=0, perfect_count=0,
             avg_response_time=0, avg_tokens_per_second=0,
         )
 
         all_scores = []
         all_times = []
-        all_tps = []
 
         for i, test in enumerate(self.tests, 1):
-            print(f"  ({i}/{len(self.tests)}) {test.test_id}...", end=" ", flush=True)
+            tag = mode.upper()
+            print(f"  [{tag}] ({i}/{len(self.tests)}) {test.test_id}...", end=" ", flush=True)
 
-            tr = self.run_test(model, test, chat_format)
+            tr = self.run_test(model, test, chat_format, expert_router=expert_router)
             mr.results.append(tr)
             all_scores.append(tr.score)
             all_times.append(tr.response_time)
@@ -916,7 +957,6 @@ class ExecBenchmarkRunner:
                 print(f"EXEC_ERR ({tr.response_time:.1f}s)")
                 print(f"         {tr.exec_error[:100]}")
             elif tr.score == 1.0:
-                tps = len(tr.response.split()) / tr.response_time if tr.response_time > 0 else 0
                 print(f"PERFECT {tr.tests_passed}/{tr.tests_total} ({tr.response_time:.1f}s)")
                 mr.perfect_count += 1
             else:
@@ -924,21 +964,54 @@ class ExecBenchmarkRunner:
                 for err in tr.test_errors[:2]:
                     print(f"         {err[:100]}")
 
-        # Aggregate
         mr.total_score = sum(all_scores) / len(all_scores) * 100 if all_scores else 0
         mr.avg_response_time = sum(all_times) / len(all_times) if all_times else 0
 
-        print(f"\n  RESULTS: {model_name}")
+        print(f"\n  [{mode.upper()}] RESULTS: {model_name}")
         print(f"    Execution Score: {mr.total_score:.1f}%")
         print(f"    Perfect tests:   {mr.perfect_count}/{mr.tests_run}")
         print(f"    Avg time:        {mr.avg_response_time:.1f}s")
 
-        # Unload
-        del model
-        gc.collect()
-
         self.all_results.append(mr)
         return mr
+
+    def run_model(self, model_path: Path, modes: list[str] = None) -> list[ExecModelResult]:
+        """Run tests in specified modes. modes: 'direct', 'generic', 'tuned'."""
+        if modes is None:
+            modes = ["direct"]
+
+        chat_format = detect_chat_format(str(model_path))
+        model_name = model_path.stem
+        model_size_mb = model_path.stat().st_size / (1024 * 1024)
+
+        print(f"\n{'='*70}")
+        print(f"MODEL: {model_name}")
+        print(f"  Size: {model_size_mb:.0f} MB | Format: {chat_format} | Tests: {len(self.tests)}")
+        print(f"  Modes: {', '.join(modes)}")
+        print(f"{'='*70}")
+
+        try:
+            model = self.load_model(model_path)
+        except Exception as e:
+            print(f"  FAILED TO LOAD: {e}")
+            return []
+
+        results = []
+        for mode in modes:
+            expert_router = None
+            if mode in ("generic", "tuned"):
+                from engine.experts import ExpertRouter
+                expert_router = ExpertRouter(tuned=(mode == "tuned"))
+
+            mr = self._run_suite(model, model_name, str(model_path),
+                                 model_size_mb, chat_format, mode, expert_router)
+            results.append(mr)
+
+        del model
+        gc.collect()
+        print(f"\n  Model unloaded.")
+
+        return results
 
 
 # ---------------------------------------------------------------------------
@@ -952,13 +1025,27 @@ def print_summary(results: list[ExecModelResult]):
 
     sorted_r = sorted(results, key=lambda r: (-r.total_score, -r.perfect_count))
 
-    print(f"  {'Model':<45s} {'Score':>6s} {'Perfect':>8s} {'Size':>7s} {'Time':>6s}")
-    print(f"  {'-'*45} {'-'*6} {'-'*8} {'-'*7} {'-'*6}")
+    print(f"  {'Model':<38s} {'Mode':<8s} {'Score':>6s} {'Perfect':>8s} {'Size':>7s} {'Time':>6s}")
+    print(f"  {'-'*38} {'-'*8} {'-'*6} {'-'*8} {'-'*7} {'-'*6}")
 
     for r in sorted_r:
-        print(f"  {r.model_name:<45s} {r.total_score:>5.1f}% "
+        name = r.model_name if len(r.model_name) <= 38 else r.model_name[:35] + "..."
+        print(f"  {name:<38s} {r.mode:<8s} {r.total_score:>5.1f}% "
               f"{r.perfect_count:>3d}/{r.tests_run:<3d}  "
               f"{r.model_size_mb:>5.0f}MB {r.avg_response_time:>5.1f}s")
+
+    # Expert impact comparison
+    model_names = sorted(set(r.model_name for r in results))
+    modes_present = sorted(set(r.mode for r in results))
+    if len(modes_present) > 1:
+        print(f"\n  EXPERT IMPACT:")
+        print(f"  {'-'*60}")
+        for name in model_names:
+            scores = {r.mode: r.total_score for r in results if r.model_name == name}
+            if len(scores) > 1:
+                parts = [f"{mode}: {score:.1f}%" for mode, score in sorted(scores.items())]
+                short = name if len(name) <= 35 else name[:32] + "..."
+                print(f"  {short:<38s} {' | '.join(parts)}")
 
     print()
 
@@ -983,6 +1070,10 @@ def main():
     parser.add_argument("--model", type=str, help="Specific model to test")
     parser.add_argument("--all", action="store_true", help="Test all available models")
     parser.add_argument("--quick", action="store_true", help="Quick: first 5 tests only")
+    parser.add_argument("--tuned", action="store_true", help="Run with tuned experts (adds tuned mode)")
+    parser.add_argument("--expert", action="store_true", help="Run with generic experts (adds generic mode)")
+    parser.add_argument("--compare", action="store_true", help="Run all 3 modes: direct, generic, tuned")
+    parser.add_argument("--direct-only", action="store_true", help="Only run direct mode (no experts)")
     parser.add_argument("--max-tokens", type=int, default=512)
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--gpu-layers", type=int, default=99)
@@ -997,6 +1088,18 @@ def main():
         tests = tests[:5]
         print(f"Quick mode: {len(tests)} tests")
 
+    # Determine modes
+    if args.compare:
+        modes = ["direct", "generic", "tuned"]
+    elif args.direct_only:
+        modes = ["direct"]
+    else:
+        modes = ["direct"]
+        if args.expert:
+            modes.append("generic")
+        if args.tuned:
+            modes.append("tuned")
+
     if args.model:
         models = [Path(args.model)]
     elif args.all:
@@ -1008,7 +1111,7 @@ def main():
         print("No models found.")
         sys.exit(1)
 
-    print(f"\nExecution Benchmark — {len(tests)} tests, {len(models)} models")
+    print(f"\nExecution Benchmark — {len(tests)} tests, {len(models)} models, modes: {modes}")
     for m in models:
         print(f"  - {m.name} ({m.stat().st_size / (1024*1024):.0f} MB)")
 
@@ -1019,7 +1122,7 @@ def main():
 
     for model_path in models:
         try:
-            runner.run_model(model_path)
+            runner.run_model(model_path, modes=modes)
         except Exception as e:
             print(f"\n  FATAL: {model_path.name}: {e}")
             traceback.print_exc()
