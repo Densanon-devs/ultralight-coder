@@ -1,0 +1,15 @@
+llama_context: n_ctx_per_seq (4096) < n_ctx_train (32768) -- the full capacity of the model will not be utilized
+llama_context: n_ctx_per_seq (4096) < n_ctx_train (131072) -- the full capacity of the model will not be utilized
+
+Execution Benchmark — 35 tests, 4 models, modes: ['direct']
+  - Llama-3.2-1B-Instruct-Q4_K_M.gguf (770 MB)
+  - qwen2.5-coder-1.5b-instruct-q4_k_m.gguf (1066 MB)
+  - qwen2.5-coder-0.5b-instruct-q4_k_m.gguf (469 MB)
+  - SmolLM2-135M-Instruct-Q4_K_M.gguf (101 MB)
+
+======================================================================
+MULTI-MODEL: qwen2.5-coder-1.5b-instruct-q4_k_m (gen) + Llama-3.2-1B-Instruct-Q4_K_M (debug)
+  Total size: 1836 MB | Tests: 35
+======================================================================
+  [MULTI] (1/35) e01_fibonacci... C:\Users\Jordan\AppData\Roaming\Python\Python310\site-packages\llama_cpp\llama.py:1240: RuntimeWarning: Detected duplicate leading "<|begin_of_text|>" in prompt, this will likely reduce response quality, consider removing it...
+  warnings.warn(

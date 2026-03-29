@@ -1,0 +1,17 @@
+llama_context: n_ctx_per_seq (4096) < n_ctx_train (32768) -- the full capacity of the model will not be utilized
+
+Execution Benchmark — 35 tests, 1 models, modes: ['direct', 'pipeline']
+  - qwen2.5-coder-1.5b-instruct-q4_k_m.gguf (1066 MB)
+
+======================================================================
+MODEL: qwen2.5-coder-1.5b-instruct-q4_k_m
+  Size: 1066 MB | Format: chatml | Tests: 35
+  Modes: direct, pipeline
+======================================================================
+  [DIRECT] (1/35) e01_fibonacci... PARTIAL 3/6 (50%) (4.2s)
+         FAIL: assert fibonacci(5) == 5 -> 
+         FAIL: assert fibonacci(10) == 55 -> 
+  [DIRECT] (2/35) e02_is_prime... PERFECT 9/9 (5.9s)
+  [DIRECT] (3/35) e03_reverse_string... PERFECT 4/4 (1.6s)
+  [DIRECT] (4/35) e04_flatten... PERFECT 5/5 (4.5s)
+  [DIRECT] (5/35) e05_word_count... 
