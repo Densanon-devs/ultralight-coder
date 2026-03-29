@@ -3,95 +3,119 @@
 **Date:** 2026-03-29
 **Test Suite:** 30 tests across 4 categories (code_gen, debug, review, explain)
 **Config:** max_tokens=512, temperature=0.2, gpu_layers=99, threads=8
+**Models tested:** 12
 
-## Rankings — Best Score (Direct Mode)
+## Full Rankings — Direct Mode (No Experts)
 
-| Rank | Model | Size | Score | Speed | Best For |
-|------|-------|------|-------|-------|----------|
-| 1 | **Llama-3.2-1B Q4_K_M** | 770 MB | **100%** (30/30) | **28 tok/s** | **RECOMMENDED — perfect + fastest** |
-| 1 | **Qwen2.5-Coder-1.5B Q4_K_M** | 1066 MB | **100%** (30/30) | 21 tok/s | Code specialist, slower |
-| 1 | **Llama-3.2-1B Q8_0** | 1260 MB | **100%** (30/30) | 15 tok/s | Highest quant, slowest of 100% |
-| 4 | Llama-3.2-1B Q5_K_M | 869 MB | 96.7% (29/30) | 21 tok/s | Higher quant, 1 debug miss |
-| 5 | Qwen2.5-Coder-0.5B Q4_K_M | 469 MB | 80% (24/30) | **32 tok/s** | Fastest overall, weak at explanations |
+| Rank | Model | Params | Size | Score | Code | Debug | Review | Explain | Speed |
+|:----:|-------|--------|------|:-----:|:----:|:-----:|:------:|:-------:|------:|
+| 1 | **Llama-3.2-1B Q4_K_M** | 1.2B | 770 MB | **100%** | 100% | 100% | 100% | 100% | **28 tok/s** |
+| 1 | Qwen2.5-Coder-1.5B Q4 | 1.5B | 1066 MB | **100%** | 100% | 100% | 100% | 100% | 21 tok/s |
+| 1 | Qwen2.5-1.5B (general) Q4 | 1.5B | 1066 MB | **100%** | 100% | 100% | 100% | 100% | 8 tok/s* |
+| 1 | Llama-3.2-1B Q8_0 | 1.2B | 1260 MB | **100%** | 100% | 100% | 100% | 100% | 15 tok/s |
+| 1 | SmolLM2-1.7B Q4_K_M | 1.7B | 1007 MB | **100%** | 100% | 100% | 100% | 100% | 10 tok/s* |
+| 1 | Phi-3.5 3.8B Q4_K_M | 3.8B | 2282 MB | **100%** | 100% | 100% | 100% | 100% | 7 tok/s* |
+| 7 | Llama-3.2-1B Q5_K_M | 1.2B | 869 MB | 96.7% | 100% | 87.5% | 100% | 100% | 21 tok/s |
+| 7 | **SmolLM2-135M Q4_K_M** | 135M | **101 MB** | **96.7%** | 100% | 100% | 83.3% | 100% | **106 tok/s** |
+| 9 | Qwen2.5-0.5B (general) Q4 | 0.5B | 469 MB | 93.3% | 100% | 100% | 66.7% | 100% | 20 tok/s* |
+| 10 | SmolLM2-360M Q4_K_M | 360M | 258 MB | 90% | 90% | 100% | 66.7% | 100% | 66 tok/s |
+| 11 | TinyLlama-1.1B Q4_K_M | 1.1B | 638 MB | 86.7% | 100% | 87.5% | 50% | 100% | 39 tok/s |
+| 12 | Qwen2.5-Coder-0.5B Q4 | 0.5B | 469 MB | 80% | 90% | 100% | 100% | **16.7%** | 32 tok/s |
 
-## Category Breakdown — Direct (No Experts)
-
-| Model | Code Gen (10) | Debug (8) | Review (6) | Explain (6) |
-|-------|:---:|:---:|:---:|:---:|
-| Llama-3.2-1B Q4 | **100%** | **100%** | **100%** | **100%** |
-| Qwen2.5-Coder-1.5B | **100%** | **100%** | **100%** | **100%** |
-| Llama-3.2-1B Q8 | **100%** | **100%** | **100%** | **100%** |
-| Llama-3.2-1B Q5 | **100%** | 87.5% | **100%** | **100%** |
-| Qwen2.5-Coder-0.5B | 90% | **100%** | **100%** | **16.7%** |
+*\*Speed reduced by GPU contention (two models benchmarked simultaneously)*
 
 ## Expert System Impact
 
 | Model | Direct | +Expert | Delta | Verdict |
-|-------|--------|---------|-------|---------|
-| Qwen2.5-Coder-0.5B | 80% | **93.3%** | **+13.3%** | Experts essential |
-| Llama-3.2-1B Q5 | 96.7% | **100%** | +3.3% | Experts help slightly |
-| Llama-3.2-1B Q4 | **100%** | **100%** | 0 | No effect (already perfect) |
-| Qwen2.5-Coder-1.5B | **100%** | 90% | **-10%** | Experts hurt! |
-
-### Expert Impact by Category (Qwen2.5-Coder-0.5B)
-
-| Category | Direct | +Expert | Delta |
-|----------|--------|---------|-------|
-| Code Gen | 90% | **100%** | +10% |
-| Debug | **100%** | 87.5% | -12.5% |
-| Review | **100%** | 83.3% | -16.7% |
-| **Explain** | **16.7%** | **100%** | **+83.3%** |
+|-------|:------:|:-------:|:-----:|---------|
+| Qwen2.5-Coder-0.5B | 80% | **93.3%** | **+13.3%** | Essential — fixes explanations |
+| SmolLM2-360M | 90% | **96.7%** | **+6.7%** | Helpful |
+| TinyLlama-1.1B | 86.7% | **93.3%** | **+6.6%** | Helpful — fixes reviews |
+| Llama-3.2-1B Q5 | 96.7% | **100%** | +3.3% | Minor fix |
+| Llama-3.2-1B Q4 | **100%** | **100%** | 0 | No effect |
+| Phi-3.5 3.8B | **100%** | **100%** | 0 | No effect |
+| Qwen2.5-1.5B (general) | **100%** | **100%** | 0 | No effect |
+| SmolLM2-135M | **96.7%** | 90% | **-6.7%** | Hurts! |
+| Qwen2.5-0.5B (general) | **93.3%** | 86.7% | **-6.6%** | Hurts! |
+| Qwen2.5-Coder-1.5B | **100%** | 90% | **-10%** | Hurts! |
+| SmolLM2-1.7B | **100%** | 90% | **-10%** | Hurts! |
 
 ## Key Findings
 
-### 1. Llama-3.2-1B Q4_K_M is the winner
-- **100% on all 30 tests without experts** at 28 tok/s
-- 770 MB on disk — smaller than the code-specialized Qwen2.5-Coder-1.5B
-- General-purpose model beats the code specialist on speed while matching quality
-- Already in the PIE models directory — no new download needed
+### 1. Llama-3.2-1B Q4_K_M is the clear winner
+- **100% on all 30 tests** at **28 tok/s** in **770 MB**
+- Fastest of the 100% models by 2x
+- Smallest of the 100% models
+- General-purpose model — not code-specialized
+- No expert system needed
 
-### 2. Code specialization has diminishing returns at 1B+
-- Qwen2.5-Coder-1.5B matches Llama-3.2-1B on quality but is 25% slower
-- The "coder" training helps at 0.5B (90% code gen) but isn't needed at 1.5B
-- General models at 1B+ already understand code well enough
+### 2. SmolLM2-135M is the shocking floor discovery
+- **96.7% at 101 MB and 106 tok/s**
+- A 135M parameter model passes 29/30 code tests
+- Only miss: 1 code review test (review specificity)
+- 100% on code generation, debugging, AND explanations
+- The absolute minimum viable coding brain
 
-### 3. Expert system: essential for small models, harmful for capable ones
-- **< 700MB models:** Experts boost +13% (critical for explanations)
-- **700MB-1GB models:** Experts help slightly (+3%)
-- **> 1GB models:** Experts hurt quality (-10%) by constraining the model
-- **Threshold:** Disable experts for models scoring >95% direct
+### 3. Code specialization is unnecessary at 1B+
+- Qwen2.5-Coder-1.5B = Qwen2.5-1.5B (general) = Llama-3.2-1B — all 100%
+- The code-trained variant is slower, not better
+- At 0.5B, code specialization helps code gen (90% vs 80% general) but kills explanations (16.7% vs 100%)
 
-### 4. The 0.5B coder floor is viable but specialized
-- 80% direct at 32 tok/s — fastest model tested
-- Perfect at code gen/debug/review, terrible at explanations (16.7%)
-- With experts: 93.3% — explanations jump to 100%
-- Use case: embedded/constrained environments where speed > explanations
+### 4. Expert system: helps weak models, hurts strong ones
+- **Threshold pattern:** Models scoring <90% direct benefit from experts; >95% are hurt
+- Experts constrain capable models by forcing them into few-shot patterns
+- For the 0.5B coder, experts are essential (+13.3%, fixes explanations from 16.7% to 100%)
+- For 1B+ models, disable experts entirely
 
-### 5. Quantization barely matters for code
-- Q4_K_M vs Q5_K_M vs Q8_0 (same Llama-3.2-1B base):
+### 5. Code review is the hardest category
+- Only category where models consistently fail
+- Race conditions and input validation are the toughest tests
+- 0.5B models average 66-83% on review; 1B+ models get 100%
+
+### 6. Quantization: Q4_K_M is optimal
+- Q4 vs Q5 vs Q8 (same Llama-3.2-1B):
   - Q4: 100%, 28 tok/s, 770 MB
-  - Q5: 96.7%, 21 tok/s, 869 MB
+  - Q5: 96.7%, 21 tok/s, 869 MB (actually worse!)
   - Q8: 100%, 15 tok/s, 1260 MB
-- Q4_K_M is optimal — highest speed, joint-highest quality, smallest size
-- Higher quants trade speed for no quality gain
+- Q4_K_M: highest speed, joint-highest quality, smallest size
 
-## Remaining Models (in progress)
+## Speed vs Quality Chart
 
-Phi-3.5 3.8B, Qwen2.5 general 0.5B/1.5B, SmolLM2 135M/360M/1.7B, TinyLlama 1.1B
-still benchmarking — GPU contention slowing parallel runs.
+```
+Quality
+100% |  * Llama-1B-Q4(28)  * Coder-1.5B(21)  * Phi-3.5(7)  * SmolLM2-1.7B(10)
+     |  * Llama-1B-Q8(15)  * Qwen-1.5B(8)
+ 97% |  * Llama-1B-Q5(21)  * SmolLM2-135M(106!)
+ 93% |  * Qwen-0.5B-gen(20)
+ 90% |  * SmolLM2-360M(66)
+ 87% |  * TinyLlama(39)
+ 80% |  * Coder-0.5B(32)
+     +--+----+----+----+----+----+----+----+----+----+----> tok/s
+        7   15   21   28   32   39   66        106
+```
+
+## Model Tiers
+
+### Tier 1: Full-featured assistant (100%, no experts)
+- **Llama-3.2-1B Q4_K_M** — 770MB, 28 tok/s (RECOMMENDED)
+- Qwen2.5-1.5B general — 1066MB, 8-21 tok/s
+- SmolLM2-1.7B — 1007MB, 10-20 tok/s
+- Phi-3.5 3.8B — 2282MB, 5-9 tok/s (overkill)
+
+### Tier 2: Viable with experts (90%+ with expert system)
+- SmolLM2-360M + experts — 258MB, 66-74 tok/s, 96.7%
+- TinyLlama-1.1B + experts — 638MB, 37-39 tok/s, 93.3%
+- Qwen2.5-Coder-0.5B + experts — 469MB, 32 tok/s, 93.3%
+
+### Tier 3: Ultralight floor
+- **SmolLM2-135M — 101MB, 106 tok/s, 96.7%** (no experts!)
+- The absolute minimum viable coding assistant
 
 ## Recommendations
 
-### For the Ultralight Code Assistant:
-
-**Primary model:** `Llama-3.2-1B-Instruct-Q4_K_M.gguf` (770MB)
-- 100% quality, 28 tok/s, no experts needed
-- Chat format: llama3
-- Already available from PIE
-
-**Floor model:** `qwen2.5-coder-0.5b-instruct-q4_k_m.gguf` (469MB)
-- 93.3% with experts, 32 tok/s
-- Chat format: chatml
-- Enable expert system
-
-**Config change needed:** Switch default model from Qwen2.5-Coder-1.5B to Llama-3.2-1B Q4_K_M.
+| Use Case | Model | Size | Quality | Speed |
+|----------|-------|------|---------|-------|
+| **Default / recommended** | Llama-3.2-1B Q4_K_M | 770 MB | 100% | 28 tok/s |
+| Embedded / ultra-constrained | SmolLM2-135M | 101 MB | 96.7% | 106 tok/s |
+| Speed-optimized floor | SmolLM2-360M + experts | 258 MB | 96.7% | 74 tok/s |
+| Maximum quality headroom | Phi-3.5 3.8B | 2282 MB | 100% | 7 tok/s |

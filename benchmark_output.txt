@@ -1,60 +1,62 @@
 ================================================================================
 ULTRALIGHT CODE ASSISTANT — BENCHMARK RESULTS
-Date: 2026-03-29 11:24:39
+Date: 2026-03-29 11:36:09
 ================================================================================
 
 RANKING (by quality score, expert mode):
 ------------------------------------------------------------
 
   With Expert System:
-    1. SmolLM2-135M-Instruct-Q4_K_M — 90.0% (27/30) [84.8 tok/s, 101MB]
+    1. tinyllama-1.1b-chat-v1.0.Q4_K_M — 93.3% (28/30) [37.0 tok/s, 638MB]
 
   Without Expert System:
-    1. SmolLM2-135M-Instruct-Q4_K_M — 96.7% (29/30) [105.7 tok/s, 101MB]
+    1. tinyllama-1.1b-chat-v1.0.Q4_K_M — 86.7% (26/30) [38.5 tok/s, 638MB]
 
 ================================================================================
 DETAILED RESULTS
 ================================================================================
 
---- SmolLM2-135M-Instruct-Q4_K_M (WITHOUT EXPERTS) ---
-  Quality: 96.7% (29/30)
-  Speed:   105.7 tok/s avg
-  Time:    3.2s avg, 95s total
-  Format:  chatml
-  Size:    101 MB
+--- tinyllama-1.1b-chat-v1.0.Q4_K_M (WITHOUT EXPERTS) ---
+  Quality: 86.7% (26/30)
+  Speed:   38.5 tok/s avg
+  Time:    8.3s avg, 250s total
+  Format:  alpaca
+  Size:    638 MB
 
   code_gen    : 10/10 (100.0%)
-  debug       : 8/8 (100.0%)
+  debug       : 7/8 (87.5%)
+  review      : 3/6 (50.0%)
+  explain     : 6/6 (100.0%)
+
+  Failed tests:
+    - db05_keyerror: Should mention: KeyError / missing key
+    - cr01_sql_injection: Should identify SQL injection vulnerability; Should suggest parameterized queries
+    - cr03_performance: Should suggest a more efficient approach
+    - cr06_input_validation: Should identify missing input validation
+
+--- tinyllama-1.1b-chat-v1.0.Q4_K_M (WITH EXPERTS) ---
+  Quality: 93.3% (28/30)
+  Speed:   37.0 tok/s avg
+  Time:    6.2s avg, 185s total
+  Format:  alpaca
+  Size:    638 MB
+
+  code_gen    : 10/10 (100.0%)
+  debug       : 7/8 (87.5%)
   review      : 5/6 (83.3%)
   explain     : 6/6 (100.0%)
 
   Failed tests:
-    - cr06_input_validation: Should identify missing input validation
-
---- SmolLM2-135M-Instruct-Q4_K_M (WITH EXPERTS) ---
-  Quality: 90.0% (27/30)
-  Speed:   84.8 tok/s avg
-  Time:    4.6s avg, 138s total
-  Format:  chatml
-  Size:    101 MB
-
-  code_gen    : 10/10 (100.0%)
-  debug       : 7/8 (87.5%)
-  review      : 4/6 (66.7%)
-  explain     : 6/6 (100.0%)
-
-  Failed tests:
-    - db02_mutable_default: Should mention: mutable default argument
-    - cr03_performance: Should identify performance / complexity issue
+    - db05_keyerror: Should identify root cause
     - cr06_input_validation: Should identify missing input validation
 
 ================================================================================
 EXPERT SYSTEM IMPACT
 ================================================================================
 
-  SmolLM2-135M-Instruct-Q4_K_M:
-    Direct: 96.7% -> Expert: 90.0% (delta: -6.7%)
+  tinyllama-1.1b-chat-v1.0.Q4_K_M:
+    Direct: 86.7% -> Expert: 93.3% (delta: +6.7%)
       code_gen    : 100.0% -> 100.0% (+0.0%)
-      debug       : 100.0% -> 87.5% (-12.5%)
-      review      : 83.3% -> 66.7% (-16.6%)
+      debug       : 87.5% -> 87.5% (+0.0%)
+      review      : 50.0% -> 83.3% (+33.3%)
       explain     : 100.0% -> 100.0% (+0.0%)
