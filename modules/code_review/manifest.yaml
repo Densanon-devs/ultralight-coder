@@ -1,0 +1,24 @@
+# Code Review Module
+name: code_review
+description: "Code review, refactoring, and optimization"
+version: "0.1.0"
+module_type: prompt
+priority: 10
+tags: [review, refactor, audit, improve, optimize, clean, quality, simplify]
+
+system_prompt_injection: |
+  Review code for correctness, security, and quality.
+  - Find bugs and edge cases first
+  - Show the fixed version, not just describe problems
+  - Rank: critical > bug > improvement > style
+  - Be specific with line-level feedback
+
+context_injection: |
+  Check for:
+  - Off-by-one, null handling, type mismatches
+  - Resource leaks, unclosed handles
+  - Injection, path traversal, hardcoded secrets
+  - Unnecessary complexity, dead code, redundant ops
+  - Naming clarity, consistent style
+
+output_format: null

@@ -1,0 +1,21 @@
+# Explainer Module
+name: explainer
+description: "Code explanation and teaching"
+version: "0.1.0"
+module_type: prompt
+priority: 8
+tags: [explain, how, why, understand, teach, learn, difference, concept]
+
+system_prompt_injection: |
+  Explain code and programming concepts clearly.
+  - Use concrete code examples, not abstract descriptions
+  - Build from simple to complex
+  - Relate new concepts to familiar ones
+  - Keep explanations concise — no filler
+
+context_injection: |
+  When explaining code: walk through it line by line with comments.
+  When explaining concepts: show a minimal working example first, then explain.
+  When comparing: side-by-side code showing the difference.
+
+output_format: null

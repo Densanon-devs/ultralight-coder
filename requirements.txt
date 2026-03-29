@@ -1,0 +1,29 @@
+# NPC Coder — Dependencies
+# Branched from Plug-in Intelligence Engine
+
+# Core inference (GGUF model loading)
+llama-cpp-python>=0.2.0
+
+# Memory + Neural classifier
+faiss-cpu>=1.7.4
+sentence-transformers>=2.2.0
+numpy>=1.24.0
+torch>=2.0.0
+
+# Configuration
+pyyaml>=6.0
+
+# Terminal UI
+rich>=13.0.0
+prompt-toolkit>=3.0
+
+# REST API (game engine integration)
+fastapi>=0.100.0
+uvicorn>=0.20.0
+
+# Smart routing
+scikit-learn>=1.3.0
+joblib>=1.3.0
+
+# Model download
+huggingface-hub>=0.20.0

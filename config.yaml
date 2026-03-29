@@ -1,0 +1,152 @@
+# ============================================================
+# Ultralight Code Assistant — Configuration
+# Lowest-viable local coding assistant
+# Branched from Plug-in Intelligence Engine
+# ============================================================
+
+system:
+  name: "Ultralight Code Assistant"
+  version: "0.1.0"
+  log_level: "INFO"
+
+# ----------------------------------------------------------
+# Base Model — Qwen2.5-Coder-1.5B (1GB, 43.9% HumanEval)
+# Fallback: Qwen2.5-Coder-0.5B (~400MB, 28% HumanEval)
+# ----------------------------------------------------------
+base_model:
+  path: "models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
+  context_length: 4096
+  gpu_layers: 99
+  threads: 8
+  temperature: 0.2                         # Low for code accuracy
+  max_tokens: 512                          # Code needs room
+  batch_size: 512
+
+# ----------------------------------------------------------
+# Router — Code task routing
+# ----------------------------------------------------------
+router:
+  mode: "hybrid"
+  max_active_modules: 2
+  default_modules: ["code_gen"]
+
+  rules:
+    - keywords: ["write", "create", "implement", "build", "generate", "make", "add", "function", "class", "script"]
+      module: "code_gen"
+      priority: 12
+
+    - keywords: ["review", "check", "audit", "improve", "refactor", "optimize", "clean", "simplify"]
+      module: "code_review"
+      priority: 10
+
+    - keywords: ["bug", "fix", "error", "broken", "crash", "debug", "wrong", "fails", "issue", "traceback", "exception"]
+      module: "debugger"
+      priority: 11
+
+    - keywords: ["explain", "how", "why", "what does", "understand", "teach", "learn", "difference"]
+      module: "explainer"
+      priority: 8
+
+  classifier:
+    type: "neural"
+    model_path: "data/router_model"
+    min_training_samples: 10
+    confidence_threshold: 0.4
+    retrain_interval: 50
+    max_features: 5000
+    embedding_model: "all-MiniLM-L6-v2"
+
+  blending:
+    enabled: true
+    strategy: "weighted"
+    max_blend_modules: 2
+    conflict_resolution: "priority"
+    weight_decay: 0.7
+
+# ----------------------------------------------------------
+# Modules
+# ----------------------------------------------------------
+modules:
+  directory: "modules"
+  cache_ttl: 300
+  max_cached: 5
+  predictive_preload: true
+  preload_top_k: 2
+
+# ----------------------------------------------------------
+# Memory — Project context persistence
+# ----------------------------------------------------------
+memory:
+  enabled: true
+
+  short_term:
+    max_turns: 30
+    max_tokens: 2048
+
+  long_term:
+    enabled: true
+    backend: "faiss"
+    storage_dir: "data/memory"
+    top_k: 5
+    similarity_threshold: 0.3
+    embedding_model: "all-MiniLM-L6-v2"
+
+  system:
+    enabled: true
+    knowledge_dir: "data/knowledge"
+
+  compressor:
+    max_summary_sentences: 10
+    max_topics: 8
+
+# ----------------------------------------------------------
+# Fusion — Code-optimized prompt assembly
+# ----------------------------------------------------------
+fusion:
+  mode: "structured"
+  chat_format: "chatml"                    # Qwen uses ChatML
+  system_prompt: |
+    You are a coding assistant. Write clean, working code.
+    Be direct — code first, explain briefly after.
+    Always use proper syntax and handle edge cases.
+
+  max_prompt_tokens: 2048
+
+  budget_system: 0.08
+  budget_modules: 0.35
+  budget_memory: 0.15
+  budget_conversation: 0.32
+  budget_reserve: 0.10
+
+# ----------------------------------------------------------
+# Pipeline
+# ----------------------------------------------------------
+pipeline:
+  enabled: true
+  parallel_workers: 3
+  enable_generation_queue: true
+  generation_timeout: 180
+
+# ----------------------------------------------------------
+# KV Cache
+# ----------------------------------------------------------
+kv_cache:
+  enabled: true
+  compression_threshold: 0.80
+
+# ----------------------------------------------------------
+# Micro-Adapters
+# ----------------------------------------------------------
+micro_adapters:
+  enabled: true
+  storage_dir: "data/adapters"
+  embedding_model: "all-MiniLM-L6-v2"
+  min_cluster_size: 5
+  max_adapters: 8
+  regenerate_interval: 20
+
+# ----------------------------------------------------------
+# NPC Mode — Disabled (this is a utility, not a character)
+# ----------------------------------------------------------
+npc:
+  enabled: false

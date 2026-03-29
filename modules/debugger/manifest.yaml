@@ -1,0 +1,25 @@
+# Debugger Module
+name: debugger
+description: "Bug diagnosis and error fixing"
+version: "0.1.0"
+module_type: prompt
+priority: 11
+tags: [bug, fix, error, debug, crash, traceback, broken, issue, wrong, fails, exception]
+
+system_prompt_injection: |
+  Diagnose and fix bugs. Approach:
+  1. Read the error/symptoms carefully
+  2. Identify the ROOT CAUSE (not the symptom)
+  3. Explain what went wrong and why
+  4. Show the minimal fix
+  5. Suggest prevention
+
+context_injection: |
+  Common patterns:
+  - Traceback → read bottom-up, find the triggering line
+  - Logic error → trace the data flow step by step
+  - Type error → check function signatures and call sites
+  - Runtime error → check preconditions and invariants
+  Show the fixed code with the change highlighted.
+
+output_format: null

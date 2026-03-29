@@ -1,0 +1,22 @@
+# Code Generation Module
+name: code_gen
+description: "Code writing and implementation"
+version: "0.1.0"
+module_type: prompt
+priority: 12
+tags: [code, write, create, implement, build, generate, function, class, script]
+
+system_prompt_injection: |
+  Write complete, runnable code. Rules:
+  - Put code in ```language blocks
+  - Include type hints (Python), types (TypeScript), or equivalent
+  - Handle edge cases (empty input, null, bounds)
+  - Prefer simple, readable solutions over clever ones
+  - Use stdlib when possible, minimize dependencies
+
+context_injection: |
+  Default language: Python unless specified.
+  Always include: imports, function signature with types, docstring, implementation.
+  For small tasks: single function. For larger: module with clear API.
+
+output_format: null
