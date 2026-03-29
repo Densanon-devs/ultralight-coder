@@ -296,4 +296,76 @@ PASS (13.9s, 27.8 tok/s)
   [EXPERT] (23/30) cr05_hardcoded_creds... PASS (16.0s, 27.7 tok/s)
   [EXPERT] (24/30) cr06_input_validation... PASS (18.3s, 27.9 tok/s)
   [EXPERT] (25/30) ex01_decorator... PASS (17.8s, 26.4 tok/s)
-  [EXPERT] (26/30) ex02_deepcopy... 
+  [EXPERT] (26/30) ex02_deepcopy... PASS (19.1s, 26.8 tok/s)
+  [EXPERT] (27/30) ex03_yield... PASS (20.9s, 24.5 tok/s)
+  [EXPERT] (28/30) ex04_async... PASS (22.2s, 23.1 tok/s)
+  [EXPERT] (29/30) ex05_closure... PASS (21.0s, 23.3 tok/s)
+  [EXPERT] (30/30) ex06_gil... 09:02:38 [benchmark] INFO: Loading model: Llama-3.2-1B-Instruct-Q5_K_M.gguf
+llama_context: n_ctx_per_seq (4096) < n_ctx_train (131072) -- the full capacity of the model will not be utilized
+PASS (22.0s, 23.3 tok/s)
+
+  [EXPERT] Results for Llama-3.2-1B-Instruct-Q4_K_M:
+    Overall: 30/30 (100.0%)
+    code_gen    : 10/10 (100.0%)
+    debug       : 8/8 (100.0%)
+    review      : 6/6 (100.0%)
+    explain     : 6/6 (100.0%)
+    Avg speed: 27.7 tok/s
+    Avg time:  14.0s
+    Total time: 419.0s
+
+  Model unloaded.
+
+======================================================================
+MODEL: Llama-3.2-1B-Instruct-Q5_K_M
+  Size: 869.3 MB | Format: llama3
+  Tests: 30 | Max tokens: 512
+======================================================================
+
+  --- Mode: NO EXPERTS ---
+  [DIRECT] (1/30) cg01_fibonacci... PASS (21.5s, 21.6 tok/s)
+  [DIRECT] (2/30) cg02_merge_sorted... PASS (23.4s, 21.9 tok/s)
+  [DIRECT] (3/30) cg03_is_prime... PASS (20.1s, 21.5 tok/s)
+  [DIRECT] (4/30) cg04_flatten... PASS (13.9s, 21.1 tok/s)
+  [DIRECT] (5/30) cg05_longest_prefix... PASS (14.4s, 22.1 tok/s)
+  [DIRECT] (6/30) cg06_lru_cache... PASS (23.7s, 21.6 tok/s)
+  [DIRECT] (7/30) cg07_roman_to_int... PASS (20.3s, 21.8 tok/s)
+  [DIRECT] (8/30) cg08_permutations... PASS (15.9s, 22.3 tok/s)
+  [DIRECT] (9/30) cg09_email_regex... PASS (18.0s, 21.1 tok/s)
+  [DIRECT] (10/30) cg10_matrix_multiply... PASS (23.3s, 21.5 tok/s)
+  [DIRECT] (11/30) db01_off_by_one... PASS (10.3s, 22.4 tok/s)
+  [DIRECT] (12/30) db02_mutable_default... PASS (10.4s, 21.3 tok/s)
+  [DIRECT] (13/30) db03_scope... PASS (10.5s, 21.6 tok/s)
+  [DIRECT] (14/30) db04_infinite_loop... FAIL (12.3s, 22.6 tok/s)
+         Reason: Should identify root cause
+  [DIRECT] (15/30) db05_keyerror... PASS (17.8s, 22.1 tok/s)
+  [DIRECT] (16/30) db06_typeerror... PASS (11.7s, 22.4 tok/s)
+  [DIRECT] (17/30) db07_list_modification... PASS (14.0s, 22.0 tok/s)
+  [DIRECT] (18/30) db08_recursion_base... PASS (17.1s, 22.3 tok/s)
+  [DIRECT] (19/30) cr01_sql_injection... PASS (19.6s, 21.6 tok/s)
+  [DIRECT] (20/30) cr02_resource_leak... PASS (22.5s, 19.9 tok/s)
+  [DIRECT] (21/30) cr03_performance... PASS (19.7s, 19.9 tok/s)
+  [DIRECT] (22/30) cr04_race_condition... PASS (26.1s, 19.6 tok/s)
+  [DIRECT] (23/30) cr05_hardcoded_creds... PASS (25.5s, 20.1 tok/s)
+  [DIRECT] (24/30) cr06_input_validation... PASS (25.1s, 20.4 tok/s)
+  [DIRECT] (25/30) ex01_decorator... PASS (26.3s, 19.4 tok/s)
+  [DIRECT] (26/30) ex02_deepcopy... PASS (26.1s, 19.6 tok/s)
+  [DIRECT] (27/30) ex03_yield... PASS (26.3s, 19.5 tok/s)
+  [DIRECT] (28/30) ex04_async... PASS (27.2s, 18.9 tok/s)
+  [DIRECT] (29/30) ex05_closure... PASS (26.1s, 19.6 tok/s)
+  [DIRECT] (30/30) ex06_gil... PASS (26.2s, 19.5 tok/s)
+
+  [DIRECT] Results for Llama-3.2-1B-Instruct-Q5_K_M:
+    Overall: 29/30 (96.7%)
+    code_gen    : 10/10 (100.0%)
+    debug       : 7/8 (87.5%)
+    review      : 6/6 (100.0%)
+    explain     : 6/6 (100.0%)
+    Avg speed: 21.0 tok/s
+    Avg time:  19.8s
+    Total time: 595.5s
+
+  --- Mode: WITH EXPERTS ---
+  [EXPERT] (1/30) cg01_fibonacci... PASS (20.2s, 18.8 tok/s)
+  [EXPERT] (2/30) cg02_merge_sorted... PASS (25.1s, 19.4 tok/s)
+  [EXPERT] (3/30) cg03_is_prime... 
