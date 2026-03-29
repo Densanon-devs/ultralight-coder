@@ -104,22 +104,21 @@ memory:
 
 # ----------------------------------------------------------
 # Fusion — Code-optimized prompt assembly
+# Lean mode: minimal system prompt, no XML tags, max room for user code
 # ----------------------------------------------------------
 fusion:
-  mode: "structured"
+  mode: "lean"                             # "lean" (code-optimized) or "structured" (PIE default)
   chat_format: "chatml"                    # Qwen native format
-  system_prompt: |
-    You are a coding assistant. Write clean, working code.
-    Be direct — code first, explain briefly after.
-    Always use proper syntax and handle edge cases.
+  system_prompt: "You are a coding assistant. Write clean, correct Python in ```python blocks."
 
   max_prompt_tokens: 2048
 
-  budget_system: 0.08
-  budget_modules: 0.35
-  budget_memory: 0.15
-  budget_conversation: 0.32
-  budget_reserve: 0.10
+  # Lean budget: maximize user input + conversation, minimize overhead
+  budget_system: 0.05
+  budget_modules: 0.10                     # Minimal — module context is mostly noise for code models
+  budget_memory: 0.10
+  budget_conversation: 0.55               # Most room for multi-turn context
+  budget_reserve: 0.20                     # Reserve for user's code pastes
 
 # ----------------------------------------------------------
 # Pipeline

@@ -76,7 +76,11 @@ class FusionLayer:
         Returns:
             Fully assembled prompt string
         """
-        if self.config.mode == "structured":
+        if self.config.mode == "lean":
+            return self._assemble_lean(
+                user_input, active_modules, memory_context,
+            )
+        elif self.config.mode == "structured":
             return self._assemble_structured(
                 user_input, active_modules, memory_context,
                 npc_profile, system_knowledge, blend_weights,
@@ -86,6 +90,86 @@ class FusionLayer:
                 user_input, active_modules, memory_context,
                 npc_profile, system_knowledge,
             )
+
+    # ── Lean Assembly (code-optimized) ─────────────────────────
+
+    def _assemble_lean(
+        self,
+        user_input: str,
+        active_modules: Optional[list[LoadedModule]] = None,
+        memory_context: Optional[dict[str, str]] = None,
+    ) -> str:
+        """
+        Lean code-optimized assembly. Minimal overhead, maximum room for user code.
+
+        No XML tags. No module bloat. Just:
+        1. One-line system prompt
+        2. Conversation history (if any)
+        3. User input
+
+        The model's first attempt is the quality ceiling. Every extra token
+        in the prompt is attention budget stolen from the code generation.
+        """
+        system = self.config.system_prompt.strip()
+
+        # Only include conversation history — skip modules, memory, adapters
+        # for first-turn. Include for multi-turn.
+        context_parts = []
+
+        if memory_context and memory_context.get("conversation"):
+            conv = memory_context["conversation"]
+            budget = int(self.config.max_prompt_tokens * self.config.budget_conversation)
+            conv_text = self._fit_conversation(conv, budget)
+            if conv_text:
+                context_parts.append(conv_text)
+
+        # For multi-turn: include compressed state if conversation is long
+        if memory_context and memory_context.get("compressed"):
+            compressed = memory_context["compressed"]
+            c_budget = int(self.config.max_prompt_tokens * self.config.budget_memory)
+            c_text = self._fit_to_budget(compressed, c_budget)
+            if c_text:
+                context_parts.append(c_text)
+
+        # Assemble into chat format
+        if context_parts:
+            # Multi-turn: system + context + user
+            context_block = "\n\n".join(context_parts)
+            full_user = f"{context_block}\n\n{user_input}"
+        else:
+            # First turn: just system + user (cleanest possible)
+            full_user = user_input
+
+        prompt = self._apply_chat_format_lean(system, full_user)
+
+        total_tokens = self._count_tokens(prompt)
+        logger.debug(f"Lean prompt: ~{total_tokens} tokens")
+        return prompt
+
+    def _apply_chat_format_lean(self, system: str, user: str) -> str:
+        """Apply chat format with minimal overhead."""
+        fmt = self.config.chat_format
+
+        if fmt == "chatml":
+            return (f"<|im_start|>system\n{system}<|im_end|>\n"
+                    f"<|im_start|>user\n{user}<|im_end|>\n"
+                    f"<|im_start|>assistant\n")
+        elif fmt == "llama3":
+            return (f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
+                    f"{system}<|eot_id|>"
+                    f"<|start_header_id|>user<|end_header_id|>\n\n"
+                    f"{user}<|eot_id|>"
+                    f"<|start_header_id|>assistant<|end_header_id|>\n\n")
+        elif fmt == "phi3":
+            return (f"<|system|>\n{system}<|end|>\n"
+                    f"<|user|>\n{user}<|end|>\n"
+                    f"<|assistant|>\n")
+        elif fmt == "alpaca":
+            return (f"### System:\n{system}\n\n"
+                    f"### Instruction:\n{user}\n\n"
+                    f"### Response:\n")
+        else:
+            return f"System: {system}\n\nUser: {user}\n\nAssistant:"
 
     # ── Phase 2: Structured Assembly ──────────────────────────
 
