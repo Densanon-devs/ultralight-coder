@@ -38,4 +38,49 @@ MODEL: stable-code-instruct-3b.Q4_K_M
   [DIRECT] (17/35) e17_power... PERFECT 6/6 (43.8s)
   [DIRECT] (18/35) e18_unique_paths... EXEC_ERR (61.2s)
          SyntaxError: unmatched ']' (<string>, line 17)
-  [DIRECT] (19/35) e19_valid_parentheses... 
+  [DIRECT] (19/35) e19_valid_parentheses... PERFECT 7/7 (30.2s)
+  [DIRECT] (20/35) e20_fizzbuzz... EXEC_ERR (20.5s)
+         SyntaxError: unmatched ')' (<string>, line 11)
+  [DIRECT] (21/35) e21_fibonacci_memo... PERFECT 6/6 (30.5s)
+  [DIRECT] (22/35) e22_kadane_negative... EXEC_ERR (27.3s)
+         SyntaxError: unmatched ')' (<string>, line 6)
+  [DIRECT] (23/35) e23_roman_to_int_hard... EXEC_ERR (42.0s)
+         SyntaxError: invalid syntax (<string>, line 11)
+  [DIRECT] (24/35) e24_matrix_transpose... EXEC_ERR (25.1s)
+         SyntaxError: unmatched ')' (<string>, line 4)
+  [DIRECT] (25/35) e25_bubble_sort... EXEC_ERR (17.3s)
+         SyntaxError: unmatched ')' (<string>, line 4)
+  [DIRECT] (26/35) e26_anagram_check... EXEC_ERR (19.5s)
+         SyntaxError: unmatched ')' (<string>, line 9)
+  [DIRECT] (27/35) e27_run_length_encode... EXEC_ERR (27.0s)
+         SyntaxError: unmatched ')' (<string>, line 5)
+  [DIRECT] (28/35) e28_title_case... EXEC_ERR (15.5s)
+         SyntaxError: unmatched ')' (<string>, line 2)
+  [DIRECT] (29/35) e29_remove_duplicates... EXEC_ERR (47.0s)
+         SyntaxError: unmatched ')' (<string>, line 10)
+  [DIRECT] (30/35) e30_chunk_list... EXEC_ERR (30.7s)
+         SyntaxError: invalid syntax (<string>, line 4)
+  [DIRECT] (31/35) e31_deep_merge... EXEC_ERR (39.2s)
+         SyntaxError: unmatched ')' (<string>, line 5)
+  [DIRECT] (32/35) e32_lcm... PERFECT 6/6 (29.8s)
+  [DIRECT] (33/35) e33_nth_prime... EXEC_ERR (25.7s)
+         SyntaxError: unmatched ')' (<string>, line 8)
+  [DIRECT] (34/35) e34_count_digits... PERFECT 6/6 (15.3s)
+  [DIRECT] (35/35) e35_clamp... PERFECT 7/7 (18.6s)
+
+  [DIRECT] RESULTS: stable-code-instruct-3b.Q4_K_M
+    Execution Score: 34.3%
+    Perfect tests:   12/35
+    Avg time:        38.2s
+
+  Model unloaded.
+
+======================================================================
+EXECUTION BENCHMARK — FINAL RANKINGS
+======================================================================
+
+  Model                                  Mode      Score  Perfect    Size   Time
+  -------------------------------------- -------- ------ -------- ------- ------
+  stable-code-instruct-3b.Q4_K_M         direct    34.3%  12/35    1629MB  38.2s
+
+Results saved to: D:\LLCWork\ultralight-coder\benchmark_exec_results.json
