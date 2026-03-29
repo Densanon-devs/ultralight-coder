@@ -14,4 +14,105 @@ MODEL: qwen2.5-coder-1.5b-instruct-q4_k_m
   [DIRECT] (2/35) e02_is_prime... PERFECT 9/9 (5.9s)
   [DIRECT] (3/35) e03_reverse_string... PERFECT 4/4 (1.6s)
   [DIRECT] (4/35) e04_flatten... PERFECT 5/5 (4.5s)
-  [DIRECT] (5/35) e05_word_count... 
+  [DIRECT] (5/35) e05_word_count... PERFECT 4/4 (6.0s)
+  [DIRECT] (6/35) e06_binary_search... PERFECT 6/6 (7.9s)
+  [DIRECT] (7/35) e07_merge_sorted... PERFECT 6/6 (8.6s)
+  [DIRECT] (8/35) e08_two_sum... PERFECT 3/3 (5.3s)
+  [DIRECT] (9/35) e09_max_subarray... PERFECT 5/5 (5.9s)
+  [DIRECT] (10/35) e10_roman_to_int... PERFECT 6/6 (10.2s)
+  [DIRECT] (11/35) e11_stack... PERFECT 11/11 (9.9s)
+  [DIRECT] (12/35) e12_matrix_multiply... PERFECT 4/4 (8.4s)
+  [DIRECT] (13/35) e13_palindrome... PERFECT 5/5 (6.0s)
+  [DIRECT] (14/35) e14_longest_common_prefix... PERFECT 5/5 (5.5s)
+  [DIRECT] (15/35) e15_caesar_cipher... PERFECT 5/5 (6.9s)
+  [DIRECT] (16/35) e16_gcd... PERFECT 5/5 (2.6s)
+  [DIRECT] (17/35) e17_power... PERFECT 6/6 (5.8s)
+  [DIRECT] (18/35) e18_unique_paths... PERFECT 5/5 (14.0s)
+  [DIRECT] (19/35) e19_valid_parentheses... PERFECT 7/7 (6.9s)
+  [DIRECT] (20/35) e20_fizzbuzz... PERFECT 7/7 (5.9s)
+  [DIRECT] (21/35) e21_fibonacci_memo... PERFECT 6/6 (6.7s)
+  [DIRECT] (22/35) e22_kadane_negative... PERFECT 6/6 (6.5s)
+  [DIRECT] (23/35) e23_roman_to_int_hard... PERFECT 7/7 (16.1s)
+  [DIRECT] (24/35) e24_matrix_transpose... PERFECT 5/5 (2.9s)
+  [DIRECT] (25/35) e25_bubble_sort... PERFECT 6/6 (5.4s)
+  [DIRECT] (26/35) e26_anagram_check... PERFECT 7/7 (4.0s)
+  [DIRECT] (27/35) e27_run_length_encode... PARTIAL 5/6 (83%) (6.9s)
+         ERROR: assert run_length_encode("") == "" -> IndexError: string index out of range
+  [DIRECT] (28/35) e28_title_case... PERFECT 6/6 (2.0s)
+  [DIRECT] (29/35) e29_remove_duplicates... PERFECT 5/5 (3.6s)
+  [DIRECT] (30/35) e30_chunk_list... PERFECT 6/6 (2.8s)
+  [DIRECT] (31/35) e31_deep_merge... PERFECT 6/6 (5.7s)
+  [DIRECT] (32/35) e32_lcm... PERFECT 6/6 (5.2s)
+  [DIRECT] (33/35) e33_nth_prime... PERFECT 7/7 (8.6s)
+  [DIRECT] (34/35) e34_count_digits... PERFECT 6/6 (1.5s)
+  [DIRECT] (35/35) e35_clamp... PERFECT 7/7 (3.8s)
+
+  [DIRECT] RESULTS: qwen2.5-coder-1.5b-instruct-q4_k_m
+    Execution Score: 98.1%
+    Perfect tests:   33/35
+    Avg time:        6.1s
+  [PIPELINE] (1/35) e01_fibonacci... PARTIAL 3/6 (50%) (19.4s)
+         FAIL: assert fibonacci(5) == 5
+         FAIL: assert fibonacci(10) == 55
+  [PIPELINE] (2/35) e02_is_prime... PERFECT 9/9 (6.7s)
+  [PIPELINE] (3/35) e03_reverse_string... PERFECT 4/4 (1.6s)
+  [PIPELINE] (4/35) e04_flatten... PERFECT 5/5 (3.9s)
+  [PIPELINE] (5/35) e05_word_count... PERFECT 4/4 (11.2s)
+  [PIPELINE] (6/35) e06_binary_search... PERFECT 6/6 (7.1s)
+  [PIPELINE] (7/35) e07_merge_sorted... PERFECT 6/6 (8.0s)
+  [PIPELINE] (8/35) e08_two_sum... PERFECT 6/6 (5.0s)
+  [PIPELINE] (9/35) e09_max_subarray... PERFECT 5/5 (4.3s)
+  [PIPELINE] (10/35) e10_roman_to_int... PERFECT 6/6 (5.4s)
+  [PIPELINE] (11/35) e11_stack... PARTIAL 15/19 (79%) (15.2s)
+         ERROR: try: -> IndentationError: expected an indented block after 'try' statement on line 1 (<string
+         ERROR: s.pop() -> IndexError: pop from empty stack
+  [PIPELINE] (12/35) e12_matrix_multiply... PARTIAL 4/8 (50%) (13.9s)
+         ERROR: try: -> IndentationError: expected an indented block after 'try' statement on line 1 (<string
+         ERROR: matrix_multiply([[1, 2]], [[1, 2]]) -> ValueError: Dimensions don't match
+  [PIPELINE] (13/35) e13_palindrome... PERFECT 5/5 (2.8s)
+  [PIPELINE] (14/35) e14_longest_common_prefix... PARTIAL 2/5 (40%) (8.9s)
+         FAIL: assert longest_common_prefix(["flower", "flow", "flight"]) == "fl"
+         FAIL: assert longest_common_prefix(["dog", "racecar", "car"]) == ""
+  [PIPELINE] (15/35) e15_caesar_cipher... PERFECT 5/5 (3.7s)
+  [PIPELINE] (16/35) e16_gcd... PERFECT 5/5 (1.3s)
+  [PIPELINE] (17/35) e17_power... PERFECT 6/6 (2.8s)
+  [PIPELINE] (18/35) e18_unique_paths... PERFECT 5/5 (6.4s)
+  [PIPELINE] (19/35) e19_valid_parentheses... PERFECT 7/7 (3.7s)
+  [PIPELINE] (20/35) e20_fizzbuzz... PERFECT 8/8 (2.8s)
+  [PIPELINE] (21/35) e21_fibonacci_memo... PERFECT 6/6 (3.4s)
+  [PIPELINE] (22/35) e22_kadane_negative... PERFECT 6/6 (3.2s)
+  [PIPELINE] (23/35) e23_roman_to_int_hard... PERFECT 7/7 (8.3s)
+  [PIPELINE] (24/35) e24_matrix_transpose... PERFECT 5/5 (1.5s)
+  [PIPELINE] (25/35) e25_bubble_sort... PERFECT 6/6 (4.5s)
+  [PIPELINE] (26/35) e26_anagram_check... PERFECT 7/7 (2.1s)
+  [PIPELINE] (27/35) e27_run_length_encode... PERFECT 6/6 (3.9s)
+  [PIPELINE] (28/35) e28_title_case... PERFECT 6/6 (1.1s)
+  [PIPELINE] (29/35) e29_remove_duplicates... PERFECT 5/5 (2.1s)
+  [PIPELINE] (30/35) e30_chunk_list... PERFECT 6/6 (1.4s)
+  [PIPELINE] (31/35) e31_deep_merge... PERFECT 6/6 (3.0s)
+  [PIPELINE] (32/35) e32_lcm... PERFECT 6/6 (2.0s)
+  [PIPELINE] (33/35) e33_nth_prime... PERFECT 7/7 (4.5s)
+  [PIPELINE] (34/35) e34_count_digits... PERFECT 6/6 (0.9s)
+  [PIPELINE] (35/35) e35_clamp... PERFECT 7/7 (2.1s)
+
+  [PIPELINE] RESULTS: qwen2.5-coder-1.5b-instruct-q4_k_m
+    Execution Score: 94.8%
+    Perfect tests:   31/35
+    Avg time:        5.1s
+
+  Model unloaded.
+
+======================================================================
+EXECUTION BENCHMARK — FINAL RANKINGS
+======================================================================
+
+  Model                                  Mode      Score  Perfect    Size   Time
+  -------------------------------------- -------- ------ -------- ------- ------
+  qwen2.5-coder-1.5b-instruct-q4_k_m     direct    98.1%  33/35    1066MB   6.1s
+  qwen2.5-coder-1.5b-instruct-q4_k_m     pipeline  94.8%  31/35    1066MB   5.1s
+
+  EXPERT IMPACT:
+  ------------------------------------------------------------
+  qwen2.5-coder-1.5b-instruct-q4_k_m     direct: 98.1% | pipeline: 94.8%
+
+Results saved to: D:\LLCWork\ultralight-coder\benchmark_exec_results.json
