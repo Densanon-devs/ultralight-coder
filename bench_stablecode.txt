@@ -1,0 +1,41 @@
+llama_context: n_ctx_per_seq (4096) < n_ctx_train (16384) -- the full capacity of the model will not be utilized
+
+Execution Benchmark — 35 tests, 1 models, modes: ['direct']
+  - stable-code-instruct-3b.Q4_K_M.gguf (1629 MB)
+
+======================================================================
+MODEL: stable-code-instruct-3b.Q4_K_M
+  Size: 1629 MB | Format: chatml | Tests: 35
+  Modes: direct
+======================================================================
+  [DIRECT] (1/35) e01_fibonacci... EXEC_ERR (57.4s)
+         SyntaxError: unmatched ')' (<string>, line 11)
+  [DIRECT] (2/35) e02_is_prime... EXEC_ERR (72.7s)
+         SyntaxError: expected ':' (<string>, line 9)
+  [DIRECT] (3/35) e03_reverse_string... PERFECT 4/4 (16.4s)
+  [DIRECT] (4/35) e04_flatten... EXEC_ERR (35.3s)
+         SyntaxError: unmatched ')' (<string>, line 5)
+  [DIRECT] (5/35) e05_word_count... PERFECT 4/4 (58.4s)
+  [DIRECT] (6/35) e06_binary_search... PERFECT 6/6 (83.0s)
+  [DIRECT] (7/35) e07_merge_sorted... EXEC_ERR (41.8s)
+         SyntaxError: unmatched ')' (<string>, line 14)
+  [DIRECT] (8/35) e08_two_sum... PARTIAL 0/3 (0%) (26.1s)
+         FAIL: assert sorted(result) == [0, 1] -> 
+         FAIL: assert sorted(result) == [1, 2] -> 
+  [DIRECT] (9/35) e09_max_subarray... EXEC_ERR (39.0s)
+         SyntaxError: unmatched ')' (<string>, line 5)
+  [DIRECT] (10/35) e10_roman_to_int... PERFECT 6/6 (51.7s)
+  [DIRECT] (11/35) e11_stack... PERFECT 11/11 (70.0s)
+  [DIRECT] (12/35) e12_matrix_multiply... EXEC_ERR (52.1s)
+         SyntaxError: unmatched ')' (<string>, line 1)
+  [DIRECT] (13/35) e13_palindrome... EXEC_ERR (40.0s)
+         SyntaxError: unmatched ']' (<string>, line 8)
+  [DIRECT] (14/35) e14_longest_common_prefix... EXEC_ERR (37.3s)
+         SyntaxError: unmatched ')' (<string>, line 6)
+  [DIRECT] (15/35) e15_caesar_cipher... PERFECT 5/5 (48.8s)
+  [DIRECT] (16/35) e16_gcd... EXEC_ERR (39.3s)
+         SyntaxError: invalid syntax (<string>, line 6)
+  [DIRECT] (17/35) e17_power... PERFECT 6/6 (43.8s)
+  [DIRECT] (18/35) e18_unique_paths... EXEC_ERR (61.2s)
+         SyntaxError: unmatched ']' (<string>, line 17)
+  [DIRECT] (19/35) e19_valid_parentheses... 
