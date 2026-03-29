@@ -1,0 +1,159 @@
+llama_context: n_ctx_per_seq (4096) < n_ctx_train (32768) -- the full capacity of the model will not be utilized
+
+Execution Benchmark — 35 tests, 1 models, modes: ['direct', 'generic', 'tuned']
+  - qwen2.5-coder-1.5b-instruct-q4_k_m.gguf (1066 MB)
+
+======================================================================
+MODEL: qwen2.5-coder-1.5b-instruct-q4_k_m
+  Size: 1066 MB | Format: chatml | Tests: 35
+  Modes: direct, generic, tuned
+======================================================================
+  [DIRECT] (1/35) e01_fibonacci... PARTIAL 3/6 (50%) (4.2s)
+         FAIL: assert fibonacci(5) == 5 -> 
+         FAIL: assert fibonacci(10) == 55 -> 
+  [DIRECT] (2/35) e02_is_prime... PERFECT 9/9 (8.2s)
+  [DIRECT] (3/35) e03_reverse_string... PERFECT 4/4 (1.6s)
+  [DIRECT] (4/35) e04_flatten... PERFECT 5/5 (4.6s)
+  [DIRECT] (5/35) e05_word_count... PERFECT 4/4 (6.1s)
+  [DIRECT] (6/35) e06_binary_search... PERFECT 6/6 (8.6s)
+  [DIRECT] (7/35) e07_merge_sorted... PERFECT 6/6 (9.2s)
+  [DIRECT] (8/35) e08_two_sum... PERFECT 3/3 (6.0s)
+  [DIRECT] (9/35) e09_max_subarray... PERFECT 5/5 (6.6s)
+  [DIRECT] (10/35) e10_roman_to_int... PERFECT 6/6 (12.0s)
+  [DIRECT] (11/35) e11_stack... PERFECT 11/11 (11.5s)
+  [DIRECT] (12/35) e12_matrix_multiply... PERFECT 4/4 (9.8s)
+  [DIRECT] (13/35) e13_palindrome... PERFECT 5/5 (6.6s)
+  [DIRECT] (14/35) e14_longest_common_prefix... PERFECT 5/5 (6.9s)
+  [DIRECT] (15/35) e15_caesar_cipher... PERFECT 5/5 (8.6s)
+  [DIRECT] (16/35) e16_gcd... PERFECT 5/5 (3.5s)
+  [DIRECT] (17/35) e17_power... PERFECT 6/6 (7.0s)
+  [DIRECT] (18/35) e18_unique_paths... PERFECT 5/5 (18.0s)
+  [DIRECT] (19/35) e19_valid_parentheses... PERFECT 7/7 (9.2s)
+  [DIRECT] (20/35) e20_fizzbuzz... PERFECT 7/7 (7.0s)
+  [DIRECT] (21/35) e21_fibonacci_memo... PERFECT 6/6 (8.5s)
+  [DIRECT] (22/35) e22_kadane_negative... PERFECT 6/6 (7.6s)
+  [DIRECT] (23/35) e23_roman_to_int_hard... PERFECT 7/7 (19.7s)
+  [DIRECT] (24/35) e24_matrix_transpose... PERFECT 5/5 (3.5s)
+  [DIRECT] (25/35) e25_bubble_sort... PERFECT 6/6 (7.9s)
+  [DIRECT] (26/35) e26_anagram_check... PERFECT 7/7 (5.5s)
+  [DIRECT] (27/35) e27_run_length_encode... PARTIAL 5/6 (83%) (9.7s)
+         ERROR: assert run_length_encode("") == "" -> IndexError: string index out of range
+  [DIRECT] (28/35) e28_title_case... PERFECT 6/6 (2.7s)
+  [DIRECT] (29/35) e29_remove_duplicates... PERFECT 5/5 (5.3s)
+  [DIRECT] (30/35) e30_chunk_list... PERFECT 6/6 (3.5s)
+  [DIRECT] (31/35) e31_deep_merge... PERFECT 6/6 (8.6s)
+  [DIRECT] (32/35) e32_lcm... PERFECT 6/6 (7.5s)
+  [DIRECT] (33/35) e33_nth_prime... PERFECT 7/7 (11.9s)
+  [DIRECT] (34/35) e34_count_digits... PERFECT 6/6 (2.2s)
+  [DIRECT] (35/35) e35_clamp... PERFECT 7/7 (5.5s)
+
+  [DIRECT] RESULTS: qwen2.5-coder-1.5b-instruct-q4_k_m
+    Execution Score: 98.1%
+    Perfect tests:   33/35
+    Avg time:        7.6s
+  [GENERIC] (1/35) e01_fibonacci... PARTIAL 3/6 (50%) (10.6s)
+         FAIL: assert fibonacci(5) == 5 -> 
+         FAIL: assert fibonacci(10) == 55 -> 
+  [GENERIC] (2/35) e02_is_prime... PERFECT 9/9 (10.0s)
+  [GENERIC] (3/35) e03_reverse_string... PERFECT 4/4 (2.4s)
+  [GENERIC] (4/35) e04_flatten... PERFECT 5/5 (5.5s)
+  [GENERIC] (5/35) e05_word_count... PERFECT 4/4 (9.7s)
+  [GENERIC] (6/35) e06_binary_search... PERFECT 6/6 (10.5s)
+  [GENERIC] (7/35) e07_merge_sorted... PERFECT 6/6 (17.0s)
+  [GENERIC] (8/35) e08_two_sum... PERFECT 3/3 (17.7s)
+  [GENERIC] (9/35) e09_max_subarray... PERFECT 5/5 (8.4s)
+  [GENERIC] (10/35) e10_roman_to_int... PERFECT 6/6 (25.4s)
+  [GENERIC] (11/35) e11_stack... PERFECT 11/11 (22.2s)
+  [GENERIC] (12/35) e12_matrix_multiply... PERFECT 4/4 (25.1s)
+  [GENERIC] (13/35) e13_palindrome... PERFECT 5/5 (5.4s)
+  [GENERIC] (14/35) e14_longest_common_prefix... PERFECT 5/5 (24.0s)
+  [GENERIC] (15/35) e15_caesar_cipher... PERFECT 5/5 (22.7s)
+  [GENERIC] (16/35) e16_gcd... PERFECT 5/5 (4.1s)
+  [GENERIC] (17/35) e17_power... PERFECT 6/6 (12.7s)
+  [GENERIC] (18/35) e18_unique_paths... PERFECT 5/5 (35.0s)
+  [GENERIC] (19/35) e19_valid_parentheses... PERFECT 7/7 (9.1s)
+  [GENERIC] (20/35) e20_fizzbuzz... PERFECT 7/7 (11.1s)
+  [GENERIC] (21/35) e21_fibonacci_memo... PERFECT 6/6 (16.4s)
+  [GENERIC] (22/35) e22_kadane_negative... PERFECT 6/6 (8.5s)
+  [GENERIC] (23/35) e23_roman_to_int_hard... PERFECT 7/7 (28.7s)
+  [GENERIC] (24/35) e24_matrix_transpose... PERFECT 5/5 (9.0s)
+  [GENERIC] (25/35) e25_bubble_sort... PERFECT 6/6 (11.5s)
+  [GENERIC] (26/35) e26_anagram_check... PERFECT 7/7 (6.2s)
+  [GENERIC] (27/35) e27_run_length_encode... PERFECT 6/6 (18.5s)
+  [GENERIC] (28/35) e28_title_case... PERFECT 6/6 (3.3s)
+  [GENERIC] (29/35) e29_remove_duplicates... PERFECT 5/5 (5.3s)
+  [GENERIC] (30/35) e30_chunk_list... PERFECT 6/6 (4.1s)
+  [GENERIC] (31/35) e31_deep_merge... PERFECT 6/6 (14.6s)
+  [GENERIC] (32/35) e32_lcm... PERFECT 6/6 (5.6s)
+  [GENERIC] (33/35) e33_nth_prime... PERFECT 7/7 (17.7s)
+  [GENERIC] (34/35) e34_count_digits... PERFECT 6/6 (3.6s)
+  [GENERIC] (35/35) e35_clamp... PERFECT 7/7 (5.5s)
+
+  [GENERIC] RESULTS: qwen2.5-coder-1.5b-instruct-q4_k_m
+    Execution Score: 98.6%
+    Perfect tests:   34/35
+    Avg time:        12.8s
+  [TUNED] (1/35) e01_fibonacci... PARTIAL 3/6 (50%) (10.4s)
+         FAIL: assert fibonacci(5) == 5 -> 
+         FAIL: assert fibonacci(10) == 55 -> 
+  [TUNED] (2/35) e02_is_prime... PERFECT 9/9 (8.6s)
+  [TUNED] (3/35) e03_reverse_string... PERFECT 4/4 (2.1s)
+  [TUNED] (4/35) e04_flatten... PERFECT 5/5 (11.3s)
+  [TUNED] (5/35) e05_word_count... PERFECT 4/4 (6.7s)
+  [TUNED] (6/35) e06_binary_search... PERFECT 6/6 (9.5s)
+  [TUNED] (7/35) e07_merge_sorted... PERFECT 6/6 (9.9s)
+  [TUNED] (8/35) e08_two_sum... PERFECT 3/3 (6.7s)
+  [TUNED] (9/35) e09_max_subarray... PERFECT 5/5 (6.5s)
+  [TUNED] (10/35) e10_roman_to_int... PERFECT 6/6 (12.6s)
+  [TUNED] (11/35) e11_stack... PERFECT 11/11 (20.5s)
+  [TUNED] (12/35) e12_matrix_multiply... PERFECT 4/4 (11.3s)
+  [TUNED] (13/35) e13_palindrome... PERFECT 5/5 (4.4s)
+  [TUNED] (14/35) e14_longest_common_prefix... PERFECT 5/5 (7.0s)
+  [TUNED] (15/35) e15_caesar_cipher... PARTIAL 2/5 (40%) (8.0s)
+         FAIL: assert caesar_cipher("xyz", 3) == "abc" -> 
+         FAIL: assert caesar_cipher("Hello, World!", 13) == "Uryyb, Jbeyq!" -> 
+  [TUNED] (16/35) e16_gcd... PERFECT 5/5 (4.0s)
+  [TUNED] (17/35) e17_power... PARTIAL 3/6 (50%) (11.0s)
+         FAIL: assert power(2, 10) == 1024 -> 
+         FAIL: assert power(2, 20) == 1048576 -> 
+  [TUNED] (18/35) e18_unique_paths... PERFECT 5/5 (18.3s)
+  [TUNED] (19/35) e19_valid_parentheses... PERFECT 7/7 (8.3s)
+  [TUNED] (20/35) e20_fizzbuzz... PERFECT 7/7 (10.7s)
+  [TUNED] (21/35) e21_fibonacci_memo... PERFECT 6/6 (15.2s)
+  [TUNED] (22/35) e22_kadane_negative... PERFECT 6/6 (8.8s)
+  [TUNED] (23/35) e23_roman_to_int_hard... PERFECT 7/7 (17.0s)
+  [TUNED] (24/35) e24_matrix_transpose... PERFECT 5/5 (8.9s)
+  [TUNED] (25/35) e25_bubble_sort... PERFECT 6/6 (7.8s)
+  [TUNED] (26/35) e26_anagram_check... PERFECT 7/7 (5.5s)
+  [TUNED] (27/35) e27_run_length_encode... PERFECT 6/6 (10.3s)
+  [TUNED] (28/35) e28_title_case... PERFECT 6/6 (3.0s)
+  [TUNED] (29/35) e29_remove_duplicates... PERFECT 5/5 (5.7s)
+  [TUNED] (30/35) e30_chunk_list... PERFECT 6/6 (4.2s)
+  [TUNED] (31/35) e31_deep_merge... PERFECT 6/6 (8.4s)
+  [TUNED] (32/35) e32_lcm... PERFECT 6/6 (5.5s)
+  [TUNED] (33/35) e33_nth_prime... PERFECT 7/7 (17.4s)
+  [TUNED] (34/35) e34_count_digits... PERFECT 6/6 (4.0s)
+  [TUNED] (35/35) e35_clamp... PERFECT 7/7 (5.3s)
+
+  [TUNED] RESULTS: qwen2.5-coder-1.5b-instruct-q4_k_m
+    Execution Score: 95.4%
+    Perfect tests:   32/35
+    Avg time:        9.0s
+
+  Model unloaded.
+
+======================================================================
+EXECUTION BENCHMARK — FINAL RANKINGS
+======================================================================
+
+  Model                                  Mode      Score  Perfect    Size   Time
+  -------------------------------------- -------- ------ -------- ------- ------
+  qwen2.5-coder-1.5b-instruct-q4_k_m     generic   98.6%  34/35    1066MB  12.8s
+  qwen2.5-coder-1.5b-instruct-q4_k_m     direct    98.1%  33/35    1066MB   7.6s
+  qwen2.5-coder-1.5b-instruct-q4_k_m     tuned     95.4%  32/35    1066MB   9.0s
+
+  EXPERT IMPACT:
+  ------------------------------------------------------------
+  qwen2.5-coder-1.5b-instruct-q4_k_m     direct: 98.1% | generic: 98.6% | tuned: 95.4%
+
+Results saved to: D:\LLCWork\ultralight-coder\benchmark_exec_results.json

@@ -1,0 +1,344 @@
+llama_context: n_ctx_per_seq (4096) < n_ctx_train (131072) -- the full capacity of the model will not be utilized
+
+Execution Benchmark — 35 tests, 1 models, modes: ['direct', 'generic', 'tuned']
+  - Llama-3.2-1B-Instruct-Q4_K_M.gguf (770 MB)
+
+======================================================================
+MODEL: Llama-3.2-1B-Instruct-Q4_K_M
+  Size: 770 MB | Format: llama3 | Tests: 35
+  Modes: direct, generic, tuned
+======================================================================
+  [DIRECT] (1/35) e01_fibonacci... C:\Users\Jordan\AppData\Roaming\Python\Python310\site-packages\llama_cpp\llama.py:1240: RuntimeWarning: Detected duplicate leading "<|begin_of_text|>" in prompt, this will likely reduce response quality, consider removing it...
+  warnings.warn(
+PERFECT 6/6 (3.7s)
+  [DIRECT] (2/35) e02_is_prime... PERFECT 9/9 (3.8s)
+  [DIRECT] (3/35) e03_reverse_string... PERFECT 4/4 (1.1s)
+  [DIRECT] (4/35) e04_flatten... PERFECT 5/5 (3.1s)
+  [DIRECT] (5/35) e05_word_count... PERFECT 4/4 (1.7s)
+  [DIRECT] (6/35) e06_binary_search... PERFECT 6/6 (6.0s)
+  [DIRECT] (7/35) e07_merge_sorted... PERFECT 6/6 (6.2s)
+  [DIRECT] (8/35) e08_two_sum... PERFECT 3/3 (4.3s)
+  [DIRECT] (9/35) e09_max_subarray... PARTIAL 3/5 (60%) (5.6s)
+         FAIL: assert max_subarray([-2, 1, -3, 4, -1, 2, 1, -5, 4]) == 6 -> 
+         FAIL: assert max_subarray([-2, -1]) == -1 -> 
+  [DIRECT] (10/35) e10_roman_to_int... PARTIAL 2/6 (33%) (9.2s)
+         FAIL: assert roman_to_int("IV") == 4 -> 
+         FAIL: assert roman_to_int("IX") == 9 -> 
+  [DIRECT] (11/35) e11_stack... PERFECT 11/11 (7.7s)
+  [DIRECT] (12/35) e12_matrix_multiply... EXEC_ERR (5.6s)
+         SyntaxError: closing parenthesis ']' does not match opening parenthesis '(' (<string>, line 4)
+  [DIRECT] (13/35) e13_palindrome... PERFECT 5/5 (2.5s)
+  [DIRECT] (14/35) e14_longest_common_prefix... PERFECT 5/5 (4.1s)
+  [DIRECT] (15/35) e15_caesar_cipher... PERFECT 5/5 (5.0s)
+  [DIRECT] (16/35) e16_gcd... PERFECT 5/5 (2.1s)
+  [DIRECT] (17/35) e17_power... PERFECT 6/6 (5.7s)
+  [DIRECT] (18/35) e18_unique_paths... PERFECT 5/5 (5.0s)
+  [DIRECT] (19/35) e19_valid_parentheses... PERFECT 7/7 (5.2s)
+  [DIRECT] (20/35) e20_fizzbuzz... PARTIAL 6/7 (86%) (5.4s)
+         FAIL: assert result[14] == "FizzBuzz" -> 
+  [DIRECT] (21/35) e21_fibonacci_memo... PERFECT 6/6 (5.8s)
+  [DIRECT] (22/35) e22_kadane_negative... PERFECT 6/6 (4.9s)
+  [DIRECT] (23/35) e23_roman_to_int_hard... PARTIAL 0/7 (0%) (9.5s)
+         FAIL: assert roman_to_int_hard("MCMXCIX") == 1999 -> 
+         FAIL: assert roman_to_int_hard("IV") == 4 -> 
+  [DIRECT] (24/35) e24_matrix_transpose... EXEC_ERR (2.2s)
+         SyntaxError: closing parenthesis ']' does not match opening parenthesis '(' (<string>, line 2)
+  [DIRECT] (25/35) e25_bubble_sort... PERFECT 6/6 (4.9s)
+  [DIRECT] (26/35) e26_anagram_check... PARTIAL 6/7 (86%) (2.1s)
+         FAIL: assert is_anagram("Astronomer", "Moon starer") == True -> 
+  [DIRECT] (27/35) e27_run_length_encode... PARTIAL 1/6 (17%) (4.5s)
+         FAIL: assert run_length_encode("aaabbc") == "3a2b1c" -> 
+         FAIL: assert run_length_encode("a") == "1a" -> 
+  [DIRECT] (28/35) e28_title_case... PERFECT 6/6 (1.8s)
+  [DIRECT] (29/35) e29_remove_duplicates... PERFECT 5/5 (3.4s)
+  [DIRECT] (30/35) e30_chunk_list... [[1, 2], [3, 4], [5]]
+PERFECT 6/6 (3.6s)
+  [DIRECT] (31/35) e31_deep_merge... PARTIAL 2/6 (33%) (6.7s)
+         FAIL: assert deep_merge({"a": 1}, {"b": 2}) == {"a": 1, "b": 2} -> 
+         FAIL: assert deep_merge({}, {"a": 1}) == {"a": 1} -> 
+  [DIRECT] (32/35) e32_lcm... PERFECT 6/6 (2.8s)
+  [DIRECT] (33/35) e33_nth_prime... PERFECT 7/7 (7.6s)
+  [DIRECT] (34/35) e34_count_digits... EXEC_ERR (1.4s)
+         SyntaxError: '(' was never closed (<string>, line 2)
+  [DIRECT] (35/35) e35_clamp... PARTIAL 5/7 (71%) (2.0s)
+         FAIL: assert clamp(5, 1, 10) == 5 -> 
+         FAIL: assert clamp(50, 50, 100) == 50 -> 
+
+  [DIRECT] RESULTS: Llama-3.2-1B-Instruct-Q4_K_M
+    Execution Score: 79.6%
+    Perfect tests:   24/35
+    Avg time:        4.5s
+  [GENERIC] (1/35) e01_fibonacci... 34
+PARTIAL 2/6 (33%) (24.7s)
+         ERROR: assert fibonacci(0) == 0 -> ValueError: n must be a positive integer
+         FAIL: assert fibonacci(5) == 5 -> 
+  [GENERIC] (2/35) e02_is_prime... True
+False
+False
+False
+False
+True
+PERFECT 9/9 (27.4s)
+  [GENERIC] (3/35) e03_reverse_string... olleh
+cba
+PARTIAL 0/4 (0%) (20.9s)
+         ERROR: assert reverse_string("hello") == "olleh" -> AttributeError: 'str' object has no attribute 'r
+         ERROR: assert reverse_string("") == "" -> AttributeError: 'str' object has no attribute 'reverse'
+  [GENERIC] (4/35) e04_flatten... [1, 2, 3, 4, 5]
+PERFECT 5/5 (21.9s)
+  [GENERIC] (5/35) e05_word_count... {'Hello': 2, 'world,': 1, 'hello': 1, 'again.': 1, 'again!': 1}
+PARTIAL 3/4 (75%) (19.8s)
+         FAIL: assert word_count("The the THE") == {"the": 3} -> 
+  [GENERIC] (6/35) e06_binary_search... 4
+PERFECT 6/6 (30.6s)
+  [GENERIC] (7/35) e07_merge_sorted... [1, 2, 3, 4, 5, 6]
+PERFECT 6/6 (33.4s)
+  [GENERIC] (8/35) e08_two_sum... [0, 1]
+[]
+[0, 1]
+[]
+PARTIAL 2/3 (67%) (35.7s)
+         FAIL: assert sorted(result) == [1, 2] -> 
+  [GENERIC] (9/35) e09_max_subarray... 6
+PERFECT 5/5 (31.4s)
+  [GENERIC] (10/35) e10_roman_to_int... 3
+-4
+-9
+58
+6
+PARTIAL 2/6 (33%) (37.6s)
+         FAIL: assert roman_to_int("IV") == 4 -> 
+         FAIL: assert roman_to_int("IX") == 9 -> 
+  [GENERIC] (11/35) e11_stack... 3
+2
+False
+2
+PERFECT 11/11 (31.9s)
+  [GENERIC] (12/35) e12_matrix_multiply... EXEC_ERR (27.7s)
+         ValueError: Matrices must have the same number of rows and columns
+  [GENERIC] (13/35) e13_palindrome... True
+False
+PERFECT 5/5 (16.5s)
+  [GENERIC] (14/35) e14_longest_common_prefix... EXEC_ERR (21.9s)
+         SyntaxError: invalid syntax. Perhaps you forgot a comma? (<string>, line 17)
+  [GENERIC] (15/35) e15_caesar_cipher... Khoor, Zruog!
+Hello, World!
+PERFECT 5/5 (28.1s)
+  [GENERIC] (16/35) e16_gcd... 6
+1
+PERFECT 5/5 (20.2s)
+  [GENERIC] (17/35) e17_power... PERFECT 6/6 (27.8s)
+  [GENERIC] (18/35) e18_unique_paths... 14
+PARTIAL 1/5 (20%) (36.4s)
+         FAIL: assert unique_paths(3, 7) == 28 -> 
+         FAIL: assert unique_paths(3, 2) == 3 -> 
+  [GENERIC] (19/35) e19_valid_parentheses... True
+False
+False
+True
+False
+PERFECT 7/7 (24.4s)
+  [GENERIC] (20/35) e20_fizzbuzz... EXEC_ERR (28.2s)
+         SyntaxError: invalid syntax (<string>, line 21)
+  [GENERIC] (21/35) e21_fibonacci_memo... 0
+1
+832040
+PERFECT 6/6 (28.2s)
+  [GENERIC] (22/35) e22_kadane_negative... -2
+1
+-1
+PERFECT 6/6 (33.3s)
+  [GENERIC] (23/35) e23_roman_to_int_hard... PARTIAL 0/7 (0%) (33.4s)
+         FAIL: assert roman_to_int_hard("MCMXCIX") == 1999 -> 
+         FAIL: assert roman_to_int_hard("IV") == 4 -> 
+  [GENERIC] (24/35) e24_matrix_transpose... EXEC_ERR (21.5s)
+         SyntaxError: closing parenthesis ']' does not match opening parenthesis '(' (<string>, line 11)
+  [GENERIC] (25/35) e25_bubble_sort... [11, 12, 22, 25, 34, 64, 90]
+PERFECT 6/6 (31.7s)
+  [GENERIC] (26/35) e26_anagram_check... True
+False
+PERFECT 7/7 (18.8s)
+  [GENERIC] (27/35) e27_run_length_encode... 3a2b1c
+PERFECT 6/6 (23.2s)
+  [GENERIC] (28/35) e28_title_case... Hello World
+This Is A Test
+PERFECT 6/6 (12.1s)
+  [GENERIC] (29/35) e29_remove_duplicates... EXEC_ERR (19.9s)
+         SyntaxError: invalid syntax (<string>, line 19)
+  [GENERIC] (30/35) e30_chunk_list... EXEC_ERR (19.3s)
+         SyntaxError: invalid syntax (<string>, line 14)
+  [GENERIC] (31/35) e31_deep_merge... {'a': 1, 'b': {'c': 2, 'd': 3}, 'e': 4}
+PARTIAL 4/6 (67%) (27.9s)
+         ERROR: assert deep_merge({"a": 1}, {"a": 2}) == {"a": 2} -> AttributeError: 'int' object has no attr
+         ERROR: assert deep_merge({"a": {"b": 1}}, {"a": {"b": 2}}) == {"a": {"b": 2}} -> AttributeError: 'in
+  [GENERIC] (32/35) e32_lcm... 60
+0
+12
+PERFECT 6/6 (24.5s)
+  [GENERIC] (33/35) e33_nth_prime... 2
+3
+29
+PERFECT 7/7 (28.5s)
+  [GENERIC] (34/35) e34_count_digits... 5
+6
+1
+PARTIAL 4/6 (67%) (13.3s)
+         FAIL: assert count_digits(-42) == 2 -> 
+         FAIL: assert count_digits(-1000) == 4 -> 
+  [GENERIC] (35/35) e35_clamp... 10
+15
+15
+EXEC_ERR (18.6s)
+         TypeError: min_val and max_val must be integers or floats
+
+  [GENERIC] RESULTS: Llama-3.2-1B-Instruct-Q4_K_M
+    Execution Score: 64.6%
+    Perfect tests:   19/35
+    Avg time:        25.7s
+  [TUNED] (1/35) e01_fibonacci... PARTIAL 5/6 (83%) (11.8s)
+         ERROR: assert fibonacci(0) == 0 -> ValueError: n must be a positive integer
+  [TUNED] (2/35) e02_is_prime... True
+False
+False
+False
+True
+PERFECT 9/9 (14.2s)
+  [TUNED] (3/35) e03_reverse_string... olleh
+PERFECT 4/4 (8.9s)
+  [TUNED] (4/35) e04_flatten... EXEC_ERR (16.0s)
+         SyntaxError: closing parenthesis ')' does not match opening parenthesis '[' (<string>, line 20)
+  [TUNED] (5/35) e05_word_count... {'hello': 1, 'world,': 1, 'this': 1, 'is': 1, 'a': 1, 'test.': 1, 'the': 2, 'quick': 1, 'brown': 1, 'fox': 1, 'jumps': 1, 'over': 1, 'lazy': 1, 'dog.': 1}
+PERFECT 4/4 (17.1s)
+  [TUNED] (6/35) e06_binary_search... EXEC_ERR (20.0s)
+         SyntaxError: invalid syntax (<string>, line 23)
+  [TUNED] (7/35) e07_merge_sorted... [1, 2, 3, 4, 5, 6]
+[1, 2, 3, 4, 5, 6]
+[1, 2, 3]
+[1, 2, 3]
+PERFECT 6/6 (22.2s)
+  [TUNED] (8/35) e08_two_sum... [0, 1]
+[1, 2]
+[0, 1]
+PERFECT 3/3 (20.2s)
+  [TUNED] (9/35) e09_max_subarray... 6
+PERFECT 5/5 (21.2s)
+  [TUNED] (10/35) e10_roman_to_int... PERFECT 6/6 (24.1s)
+  [TUNED] (11/35) e11_stack... 3
+3
+2
+False
+1
+PERFECT 11/11 (21.0s)
+  [TUNED] (12/35) e12_matrix_multiply... EXEC_ERR (19.4s)
+         SyntaxError: closing parenthesis ']' does not match opening parenthesis '(' (<string>, line 18)
+  [TUNED] (13/35) e13_palindrome... True
+False
+True
+PERFECT 5/5 (11.0s)
+  [TUNED] (14/35) e14_longest_common_prefix... EXEC_ERR (15.2s)
+         SyntaxError: invalid syntax. Perhaps you forgot a comma? (<string>, line 23)
+  [TUNED] (15/35) e15_caesar_cipher... Khoor, Zruog!
+Hello, World!
+PERFECT 5/5 (20.1s)
+  [TUNED] (16/35) e16_gcd... 3
+6
+6
+PERFECT 5/5 (15.5s)
+  [TUNED] (17/35) e17_power... 16
+3
+1
+1
+PARTIAL 3/6 (50%) (20.1s)
+         FAIL: assert power(2, 10) == 1024 -> 
+         FAIL: assert power(2, 20) == 1048576 -> 
+  [TUNED] (18/35) e18_unique_paths... PARTIAL 3/5 (60%) (24.8s)
+         FAIL: assert unique_paths(3, 7) == 28 -> 
+         FAIL: assert unique_paths(7, 3) == 28 -> 
+  [TUNED] (19/35) e19_valid_parentheses... True
+False
+True
+True
+False
+PERFECT 7/7 (18.7s)
+  [TUNED] (20/35) e20_fizzbuzz... ['1', '2', 'Fizz', '4', 'Buzz']
+['1', '2', 'Fizz', '4', 'Buzz', 'Fizz', '7', '8', 'Fizz', 'Buzz']
+['1', '2', 'Fizz', '4', 'Buzz', 'Fizz', '7', '8', 'Fizz', 'Buzz', '11', 'Fizz', '13', '14', 'FizzBuzz']
+PERFECT 7/7 (19.7s)
+  [TUNED] (21/35) e21_fibonacci_memo... 0
+1
+832040
+PERFECT 6/6 (19.7s)
+  [TUNED] (22/35) e22_kadane_negative... 5
+4
+4
+PARTIAL 0/6 (0%) (21.5s)
+         FAIL: assert max_subarray_neg([-3, -2, -5]) == -2 -> 
+         FAIL: assert max_subarray_neg([-1]) == -1 -> 
+  [TUNED] (23/35) e23_roman_to_int_hard... PERFECT 7/7 (25.1s)
+  [TUNED] (24/35) e24_matrix_transpose... EXEC_ERR (20.6s)
+         SyntaxError: invalid syntax (<string>, line 1)
+  [TUNED] (25/35) e25_bubble_sort... [11, 12, 22, 25, 34, 64, 90]
+PERFECT 6/6 (21.1s)
+  [TUNED] (26/35) e26_anagram_check... True
+False
+True
+PERFECT 7/7 (16.2s)
+  [TUNED] (27/35) e27_run_length_encode... 3a2b1c
+1a1b1c1d1e1f
+
+PERFECT 6/6 (16.8s)
+  [TUNED] (28/35) e28_title_case... Hello World
+This Is A Test
+PERFECT 6/6 (13.9s)
+  [TUNED] (29/35) e29_remove_duplicates... [1, 2, 3]
+[4, 5]
+[1, 2, 3]
+PERFECT 5/5 (16.3s)
+  [TUNED] (30/35) e30_chunk_list... EXEC_ERR (16.2s)
+         SyntaxError: invalid syntax (<string>, line 14)
+  [TUNED] (31/35) e31_deep_merge... {'a': 1, 'e': 4, 'b': {'c': 2, 'd': 3}}
+PARTIAL 4/6 (67%) (20.3s)
+         FAIL: assert deep_merge({"a": 1}, {"a": 2}) == {"a": 2} -> 
+         FAIL: assert deep_merge({"a": {"b": 1}}, {"a": {"b": 2}}) == {"a": {"b": 2}} -> 
+  [TUNED] (32/35) e32_lcm... 60
+0
+20
+PERFECT 6/6 (14.7s)
+  [TUNED] (33/35) e33_nth_prime... 2
+3
+29
+PERFECT 7/7 (20.6s)
+  [TUNED] (34/35) e34_count_digits... 5
+6
+1
+PARTIAL 4/6 (67%) (15.1s)
+         FAIL: assert count_digits(-42) == 2 -> 
+         FAIL: assert count_digits(-1000) == 4 -> 
+  [TUNED] (35/35) e35_clamp... 5
+10
+10
+1
+PERFECT 7/7 (15.0s)
+
+  [TUNED] RESULTS: Llama-3.2-1B-Instruct-Q4_K_M
+    Execution Score: 75.0%
+    Perfect tests:   23/35
+    Avg time:        18.1s
+
+  Model unloaded.
+
+======================================================================
+EXECUTION BENCHMARK — FINAL RANKINGS
+======================================================================
+
+  Model                                  Mode      Score  Perfect    Size   Time
+  -------------------------------------- -------- ------ -------- ------- ------
+  Llama-3.2-1B-Instruct-Q4_K_M           direct    79.6%  24/35     770MB   4.5s
+  Llama-3.2-1B-Instruct-Q4_K_M           tuned     75.0%  23/35     770MB  18.1s
+  Llama-3.2-1B-Instruct-Q4_K_M           generic   64.6%  19/35     770MB  25.7s
+
+  EXPERT IMPACT:
+  ------------------------------------------------------------
+  Llama-3.2-1B-Instruct-Q4_K_M           direct: 79.6% | generic: 64.6% | tuned: 75.0%
+
+Results saved to: D:\LLCWork\ultralight-coder\benchmark_exec_results.json
