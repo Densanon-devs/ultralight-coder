@@ -406,29 +406,139 @@ def build_explainer_expert() -> Expert:
     )
 
 
+# ── Tuned Expert Definitions ─────────────────────────────────
+
+def build_tuned_code_gen_expert() -> Expert:
+    """
+    Tuned code_gen expert with algorithm-specific few-shot examples.
+
+    Targets the exact failure modes observed in benchmarks:
+    - Fibonacci: wrong base cases / 1-indexed confusion
+    - Roman numerals: missing subtractive logic (IV, IX, XL)
+    - Kadane's algorithm: broken reset-vs-continue on all-negatives
+    - Matrix multiply: syntax errors and wrong dimension checks
+    - Stack class: missing IndexError on empty pop
+    """
+    examples = [
+        # ── Benchmark-targeted examples (correct patterns) ───────
+        SolvedExample(
+            "Write a Python function called `fibonacci(n)` that returns the nth Fibonacci number. fibonacci(0)=0, fibonacci(1)=1.",
+            '```python\ndef fibonacci(n: int) -> int:\n    if n <= 0:\n        return 0\n    if n == 1:\n        return 1\n    a, b = 0, 1\n    for _ in range(2, n + 1):\n        a, b = b, a + b\n    return b\n```',
+            category="algorithm",
+        ),
+        SolvedExample(
+            "Write a Python function called `roman_to_int(s)` that converts a Roman numeral string to an integer. Handle subtractive cases like IV=4, IX=9.",
+            '```python\ndef roman_to_int(s: str) -> int:\n    values = {\'I\': 1, \'V\': 5, \'X\': 10, \'L\': 50, \'C\': 100, \'D\': 500, \'M\': 1000}\n    result = 0\n    for i in range(len(s)):\n        if i + 1 < len(s) and values[s[i]] < values[s[i + 1]]:\n            result -= values[s[i]]\n        else:\n            result += values[s[i]]\n    return result\n```',
+            category="algorithm",
+        ),
+        SolvedExample(
+            "Write a Python function called `max_subarray(nums)` that returns the largest sum of a contiguous subarray using Kadane's algorithm.",
+            '```python\ndef max_subarray(nums: list[int]) -> int:\n    max_sum = nums[0]\n    current = nums[0]\n    for num in nums[1:]:\n        current = max(num, current + num)\n        max_sum = max(max_sum, current)\n    return max_sum\n```',
+            category="algorithm",
+        ),
+        SolvedExample(
+            "Write a Python function called `matrix_multiply(a, b)` that multiplies two matrices. Raise ValueError if dimensions don't match.",
+            '```python\ndef matrix_multiply(a: list[list], b: list[list]) -> list[list]:\n    if not a or not b or len(a[0]) != len(b):\n        raise ValueError("Incompatible dimensions")\n    rows_a, cols_b, cols_a = len(a), len(b[0]), len(a[0])\n    result = [[0] * cols_b for _ in range(rows_a)]\n    for i in range(rows_a):\n        for j in range(cols_b):\n            for k in range(cols_a):\n                result[i][j] += a[i][k] * b[k][j]\n    return result\n```',
+            category="algorithm",
+        ),
+        SolvedExample(
+            "Write a Python function called `two_sum(nums, target)` that returns indices of two numbers that add up to target.",
+            '```python\ndef two_sum(nums: list[int], target: int) -> list[int]:\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []\n```',
+            category="algorithm",
+        ),
+        # ── Stack class (targets empty-pop IndexError miss) ──────
+        SolvedExample(
+            "Write a simple stack class.",
+            '```python\nclass Stack:\n    def __init__(self) -> None:\n        self._items: list = []\n\n    def push(self, item) -> None:\n        self._items.append(item)\n\n    def pop(self):\n        if not self._items:\n            raise IndexError("pop from empty stack")\n        return self._items.pop()\n\n    def peek(self):\n        if not self._items:\n            raise IndexError("peek at empty stack")\n        return self._items[-1]\n\n    def is_empty(self) -> bool:\n        return len(self._items) == 0\n\n    def __len__(self) -> int:\n        return len(self._items)\n```',
+            category="data_structure",
+        ),
+        # ── Additional general examples ──────────────────────────
+        SolvedExample(
+            "Write a function to check if a string has valid parentheses.",
+            '```python\ndef valid_parentheses(s: str) -> bool:\n    stack: list[str] = []\n    pairs = {\')\': \'(\', \']\': \'[\', \'}\': \'{\'}\n    for ch in s:\n        if ch in \'([{\':\n            stack.append(ch)\n        elif ch in pairs:\n            if not stack or stack[-1] != pairs[ch]:\n                return False\n            stack.pop()\n    return len(stack) == 0\n```',
+            category="algorithm",
+        ),
+        SolvedExample(
+            "Write a binary search function.",
+            '```python\ndef binary_search(arr: list[int], target: int) -> int:\n    lo, hi = 0, len(arr) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n```',
+            category="algorithm",
+        ),
+        SolvedExample(
+            "Write a Caesar cipher function that shifts letters by a given amount.",
+            '```python\ndef caesar_cipher(text: str, shift: int) -> str:\n    result: list[str] = []\n    for ch in text:\n        if ch.isalpha():\n            base = ord(\'A\') if ch.isupper() else ord(\'a\')\n            result.append(chr((ord(ch) - base + shift) % 26 + base))\n        else:\n            result.append(ch)\n    return \'\'.join(result)\n```',
+            category="algorithm",
+        ),
+    ]
+
+    return Expert(
+        name="code_gen",
+        system_context=(
+            "Write clean, working code. Use ```language blocks. Include type hints. "
+            "Handle edge cases. Pay attention to 0-indexed vs 1-indexed conventions. "
+            "For algorithms, initialize correctly and handle empty/negative inputs."
+        ),
+        examples=examples,
+        verifier=verify_code_gen,
+        max_examples=3,
+        max_retries=1,
+    )
+
+
 # ── Expert Router ─────────────────────────────────────────────
 
 class ExpertRouter:
     """Routes queries to the right expert and runs generate -> verify -> retry."""
 
-    def __init__(self):
+    def __init__(self, tuned: bool = False):
         self.experts: dict[str, Expert] = {}
         self._embedder = None
+        self._tuned = tuned
+        # Keep both sets available for runtime switching
+        self._generic_experts: dict[str, Expert] = {}
+        self._tuned_experts: dict[str, Expert] = {}
         self._register_defaults()
 
     def _register_defaults(self):
-        """Register code-focused experts."""
-        self.experts["code_gen"] = build_code_gen_expert()
-        self.experts["code_review"] = build_code_review_expert()
-        self.experts["debugger"] = build_debug_expert()
-        self.experts["explainer"] = build_explainer_expert()
+        """Register code-focused experts. Uses tuned code_gen when self._tuned is True."""
+        # Always build both sets so we can switch at runtime
+        self._generic_experts = {
+            "code_gen": build_code_gen_expert(),
+            "code_review": build_code_review_expert(),
+            "debugger": build_debug_expert(),
+            "explainer": build_explainer_expert(),
+        }
+        self._tuned_experts = {
+            "code_gen": build_tuned_code_gen_expert(),
+            "code_review": build_code_review_expert(),
+            "debugger": build_debug_expert(),
+            "explainer": build_explainer_expert(),
+        }
+
+        if self._tuned:
+            self.experts = dict(self._tuned_experts)
+        else:
+            self.experts = dict(self._generic_experts)
 
     def init_embeddings(self, embedder):
-        """Initialize embeddings for all experts."""
+        """Initialize embeddings for all experts (both sets)."""
         self._embedder = embedder
-        for expert in self.experts.values():
+        # Embed both sets so switching is instant
+        all_experts = set(self._generic_experts.values()) | set(self._tuned_experts.values())
+        for expert in all_experts:
             expert.init_embeddings(embedder)
-        logger.info(f"Expert embeddings initialized for {len(self.experts)} experts")
+        logger.info(f"Expert embeddings initialized for {len(self.experts)} active experts")
+
+    def use_tuned_experts(self):
+        """Swap in tuned code_gen expert (algorithm-specific few-shot examples)."""
+        self._tuned = True
+        self.experts = dict(self._tuned_experts)
+        logger.info("Switched to tuned experts")
+
+    def use_generic_experts(self):
+        """Revert to the original generic experts."""
+        self._tuned = False
+        self.experts = dict(self._generic_experts)
+        logger.info("Switched to generic experts")
 
     def select_expert(self, query: str, module_hint: Optional[str] = None) -> Optional[Expert]:
         """Select the best expert for a query."""

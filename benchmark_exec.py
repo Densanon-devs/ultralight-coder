@@ -117,20 +117,81 @@ def safe_exec(code: str, timeout: float = 5.0) -> tuple[dict, str]:
 
 def run_tests(namespace: dict, test_code: str) -> tuple[int, int, list[str]]:
     """Run test assertions against the namespace. Returns (passed, total, errors)."""
-    # Split test code into individual assertions
-    tests = [t.strip() for t in test_code.strip().split("\n") if t.strip() and not t.strip().startswith("#")]
+    # Parse test code into executable blocks.
+    # Multi-line blocks (try/except, if/else, for, while, with) are grouped
+    # together and executed as a single unit.
+    raw_lines = test_code.strip().split("\n")
+
+    blocks: list[str] = []
+    current_block: list[str] = []
+    in_multiline = False
+
+    for line in raw_lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if in_multiline:
+            current_block.append(line)
+            # A multiline block ends when we hit a non-indented line that is
+            # NOT a continuation keyword (except, elif, else, finally).
+            if stripped and not line[0].isspace() and not stripped.startswith(
+                ("except", "elif", "else:", "else ", "finally")
+            ):
+                # This line is a new top-level statement — flush the block
+                # without this line, then start fresh.
+                blocks.append("\n".join(current_block[:-1]))
+                current_block = [line]
+                in_multiline = stripped.endswith(":") and stripped.startswith(
+                    ("try:", "if ", "for ", "while ", "with ")
+                )
+            elif not line[0].isspace() and stripped.startswith(
+                ("except", "elif", "else:", "else ", "finally")
+            ):
+                # Continuation of a compound statement — stay in multiline.
+                pass
+            else:
+                # Indented line — still inside the block.
+                pass
+        else:
+            # Check if this line starts a compound statement
+            if stripped.endswith(":") and stripped.startswith(
+                ("try:", "if ", "for ", "while ", "with ")
+            ):
+                if current_block:
+                    blocks.append("\n".join(current_block))
+                current_block = [line]
+                in_multiline = True
+            else:
+                current_block.append(line)
+
+    # Flush remaining
+    if current_block:
+        if in_multiline:
+            blocks.append("\n".join(current_block))
+        else:
+            # Each remaining single line is its own block
+            for line in current_block:
+                blocks.append(line.strip())
+
+    # Count total test assertions across all blocks
+    total = sum(b.count("assert ") for b in blocks)
     passed = 0
-    total = len(tests)
     errors = []
 
-    for test in tests:
+    for block in blocks:
+        block_asserts = block.count("assert ")
         try:
-            exec(test, namespace)
-            passed += 1
+            exec(block, namespace)
+            passed += block_asserts
         except AssertionError as e:
-            errors.append(f"FAIL: {test} -> {e}")
+            # For single-assert blocks, report the exact line. For multi-line
+            # blocks, report a summary.
+            first_line = block.split("\n")[0].strip()
+            errors.append(f"FAIL: {first_line} -> {e}")
         except Exception as e:
-            errors.append(f"ERROR: {test} -> {type(e).__name__}: {e}")
+            first_line = block.split("\n")[0].strip()
+            errors.append(f"ERROR: {first_line} -> {type(e).__name__}: {e}")
 
     return passed, total, errors
 
@@ -449,6 +510,226 @@ assert result[14] == "FizzBuzz"
 assert len(result) == 15
 assert result[5] == "Fizz"
 assert result[9] == "Buzz"
+""",
+    ))
+
+    # ── Algorithm Weaknesses (models fail these) ─────────────
+
+    tests.append(ExecTest(
+        test_id="e21_fibonacci_memo",
+        prompt="Write a Python function called `fibonacci_memo(n)` that returns the nth Fibonacci number using memoization. It must handle large n efficiently. fibonacci_memo(0)=0, fibonacci_memo(1)=1, fibonacci_memo(30)=832040.",
+        func_name="fibonacci_memo",
+        test_code="""
+assert fibonacci_memo(0) == 0
+assert fibonacci_memo(1) == 1
+assert fibonacci_memo(2) == 1
+assert fibonacci_memo(10) == 55
+assert fibonacci_memo(30) == 832040
+assert fibonacci_memo(40) == 102334155
+""",
+    ))
+
+    tests.append(ExecTest(
+        test_id="e22_kadane_negative",
+        prompt="Write a Python function called `max_subarray_neg(nums)` that returns the largest sum of a contiguous subarray using Kadane's algorithm. It MUST handle all-negative arrays correctly by returning the largest (least negative) element. Example: max_subarray_neg([-3, -2, -5]) returns -2.",
+        func_name="max_subarray_neg",
+        test_code="""
+assert max_subarray_neg([-3, -2, -5]) == -2
+assert max_subarray_neg([-1]) == -1
+assert max_subarray_neg([-10, -7, -3, -8]) == -3
+assert max_subarray_neg([1, 2, 3]) == 6
+assert max_subarray_neg([-2, 1, -3, 4, -1, 2, 1, -5, 4]) == 6
+assert max_subarray_neg([5]) == 5
+""",
+    ))
+
+    tests.append(ExecTest(
+        test_id="e23_roman_to_int_hard",
+        prompt="Write a Python function called `roman_to_int_hard(s)` that converts a Roman numeral string to an integer. Handle ALL subtractive cases: IV=4, IX=9, XL=40, XC=90, CD=400, CM=900. Example: roman_to_int_hard('MCMXCIX') returns 1999.",
+        func_name="roman_to_int_hard",
+        test_code="""
+assert roman_to_int_hard("MCMXCIX") == 1999
+assert roman_to_int_hard("IV") == 4
+assert roman_to_int_hard("IX") == 9
+assert roman_to_int_hard("XL") == 40
+assert roman_to_int_hard("XC") == 90
+assert roman_to_int_hard("CD") == 400
+assert roman_to_int_hard("CM") == 900
+""",
+    ))
+
+    tests.append(ExecTest(
+        test_id="e24_matrix_transpose",
+        prompt="Write a Python function called `transpose(matrix)` that returns the transpose of a 2D list (matrix). The matrix may be non-square. Example: transpose([[1,2,3],[4,5,6]]) returns [[1,4],[2,5],[3,6]].",
+        func_name="transpose",
+        test_code="""
+assert transpose([[1, 2, 3], [4, 5, 6]]) == [[1, 4], [2, 5], [3, 6]]
+assert transpose([[1]]) == [[1]]
+assert transpose([[1, 2], [3, 4]]) == [[1, 3], [2, 4]]
+assert transpose([[1, 2, 3]]) == [[1], [2], [3]]
+assert transpose([[1], [2], [3]]) == [[1, 2, 3]]
+""",
+    ))
+
+    tests.append(ExecTest(
+        test_id="e25_bubble_sort",
+        prompt="Write a Python function called `bubble_sort(arr)` that sorts a list of numbers in ascending order using the bubble sort algorithm. Return the sorted list. Do not use built-in sort.",
+        func_name="bubble_sort",
+        test_code="""
+assert bubble_sort([5, 3, 1, 4, 2]) == [1, 2, 3, 4, 5]
+assert bubble_sort([]) == []
+assert bubble_sort([1]) == [1]
+assert bubble_sort([3, 2, 1]) == [1, 2, 3]
+assert bubble_sort([1, 2, 3]) == [1, 2, 3]
+assert bubble_sort([5, 5, 3, 3, 1]) == [1, 3, 3, 5, 5]
+""",
+    ))
+
+    # ── String/Data Processing (edge case heavy) ────────────
+
+    tests.append(ExecTest(
+        test_id="e26_anagram_check",
+        prompt="Write a Python function called `is_anagram(s1, s2)` that returns True if s1 and s2 are anagrams of each other. Ignore case and spaces. Example: is_anagram('listen', 'silent') returns True.",
+        func_name="is_anagram",
+        test_code="""
+assert is_anagram("listen", "silent") == True
+assert is_anagram("hello", "world") == False
+assert is_anagram("Astronomer", "Moon starer") == True
+assert is_anagram("", "") == True
+assert is_anagram("a", "a") == True
+assert is_anagram("ab", "ba") == True
+assert is_anagram("abc", "abd") == False
+""",
+    ))
+
+    tests.append(ExecTest(
+        test_id="e27_run_length_encode",
+        prompt="Write a Python function called `run_length_encode(s)` that performs run-length encoding on a string. Example: run_length_encode('aaabbc') returns '3a2b1c'. Each group is count followed by the character.",
+        func_name="run_length_encode",
+        test_code="""
+assert run_length_encode("aaabbc") == "3a2b1c"
+assert run_length_encode("") == ""
+assert run_length_encode("a") == "1a"
+assert run_length_encode("aaa") == "3a"
+assert run_length_encode("abcd") == "1a1b1c1d"
+assert run_length_encode("aabbcc") == "2a2b2c"
+""",
+    ))
+
+    tests.append(ExecTest(
+        test_id="e28_title_case",
+        prompt="Write a Python function called `title_case(s)` that converts a string to title case: the first letter of each word is capitalized, the rest are lowercase. Split on whitespace. Example: title_case('hello world') returns 'Hello World'.",
+        func_name="title_case",
+        test_code="""
+assert title_case("hello world") == "Hello World"
+assert title_case("HELLO WORLD") == "Hello World"
+assert title_case("") == ""
+assert title_case("a") == "A"
+assert title_case("hello") == "Hello"
+assert title_case("foo bar baz") == "Foo Bar Baz"
+""",
+    ))
+
+    # ── Practical Coding Tasks ──────────────────────────────
+
+    tests.append(ExecTest(
+        test_id="e29_remove_duplicates",
+        prompt="Write a Python function called `remove_duplicates(lst)` that removes duplicates from a list while preserving the original order. Example: remove_duplicates([1, 2, 2, 3, 1]) returns [1, 2, 3].",
+        func_name="remove_duplicates",
+        test_code="""
+assert remove_duplicates([1, 2, 2, 3, 1]) == [1, 2, 3]
+assert remove_duplicates([]) == []
+assert remove_duplicates([1, 1, 1]) == [1]
+assert remove_duplicates([1, 2, 3]) == [1, 2, 3]
+assert remove_duplicates([3, 2, 1, 2, 3]) == [3, 2, 1]
+""",
+    ))
+
+    tests.append(ExecTest(
+        test_id="e30_chunk_list",
+        prompt="Write a Python function called `chunk_list(lst, n)` that splits a list into chunks of size n. The last chunk may be smaller. Example: chunk_list([1,2,3,4,5], 2) returns [[1,2],[3,4],[5]].",
+        func_name="chunk_list",
+        test_code="""
+assert chunk_list([1, 2, 3, 4, 5], 2) == [[1, 2], [3, 4], [5]]
+assert chunk_list([1, 2, 3, 4], 2) == [[1, 2], [3, 4]]
+assert chunk_list([], 3) == []
+assert chunk_list([1], 5) == [[1]]
+assert chunk_list([1, 2, 3], 1) == [[1], [2], [3]]
+assert chunk_list([1, 2, 3], 3) == [[1, 2, 3]]
+""",
+    ))
+
+    tests.append(ExecTest(
+        test_id="e31_deep_merge",
+        prompt="Write a Python function called `deep_merge(d1, d2)` that deep merges two dictionaries. Values from d2 override d1. If both values are dicts, merge recursively. Example: deep_merge({'a': 1, 'b': {'c': 2}}, {'b': {'d': 3}}) returns {'a': 1, 'b': {'c': 2, 'd': 3}}.",
+        func_name="deep_merge",
+        test_code="""
+assert deep_merge({"a": 1}, {"b": 2}) == {"a": 1, "b": 2}
+assert deep_merge({"a": 1}, {"a": 2}) == {"a": 2}
+assert deep_merge({}, {"a": 1}) == {"a": 1}
+assert deep_merge({"a": {"b": 1}}, {"a": {"c": 2}}) == {"a": {"b": 1, "c": 2}}
+assert deep_merge({"a": {"b": 1}}, {"a": {"b": 2}}) == {"a": {"b": 2}}
+assert deep_merge({"a": 1, "b": {"c": 2}}, {"b": {"d": 3}}) == {"a": 1, "b": {"c": 2, "d": 3}}
+""",
+    ))
+
+    # ── Math ────────────────────────────────────────────────
+
+    tests.append(ExecTest(
+        test_id="e32_lcm",
+        prompt="Write a Python function called `lcm(a, b)` that returns the least common multiple of two non-negative integers. Use the relationship lcm(a,b) = a*b // gcd(a,b). Handle zero: lcm(0, n) = 0.",
+        func_name="lcm",
+        test_code="""
+assert lcm(4, 6) == 12
+assert lcm(3, 5) == 15
+assert lcm(7, 7) == 7
+assert lcm(0, 5) == 0
+assert lcm(12, 18) == 36
+assert lcm(1, 10) == 10
+""",
+    ))
+
+    tests.append(ExecTest(
+        test_id="e33_nth_prime",
+        prompt="Write a Python function called `nth_prime(n)` that returns the nth prime number (1-indexed). nth_prime(1) returns 2, nth_prime(2) returns 3, nth_prime(10) returns 29.",
+        func_name="nth_prime",
+        test_code="""
+assert nth_prime(1) == 2
+assert nth_prime(2) == 3
+assert nth_prime(3) == 5
+assert nth_prime(4) == 7
+assert nth_prime(5) == 11
+assert nth_prime(10) == 29
+assert nth_prime(20) == 71
+""",
+    ))
+
+    tests.append(ExecTest(
+        test_id="e34_count_digits",
+        prompt="Write a Python function called `count_digits(n)` that returns the number of digits in an integer. Handle negative numbers (ignore the sign) and zero (which has 1 digit). Example: count_digits(12345) returns 5, count_digits(-42) returns 2.",
+        func_name="count_digits",
+        test_code="""
+assert count_digits(12345) == 5
+assert count_digits(0) == 1
+assert count_digits(-42) == 2
+assert count_digits(9) == 1
+assert count_digits(100) == 3
+assert count_digits(-1000) == 4
+""",
+    ))
+
+    tests.append(ExecTest(
+        test_id="e35_clamp",
+        prompt="Write a Python function called `clamp(value, min_val, max_val)` that clamps a number between min_val and max_val. If value < min_val, return min_val. If value > max_val, return max_val. Otherwise return value.",
+        func_name="clamp",
+        test_code="""
+assert clamp(5, 1, 10) == 5
+assert clamp(-5, 0, 100) == 0
+assert clamp(150, 0, 100) == 100
+assert clamp(0, 0, 0) == 0
+assert clamp(1, 1, 1) == 1
+assert clamp(50, 50, 100) == 50
+assert clamp(100, 50, 100) == 100
 """,
     ))
 
