@@ -1,47 +1,47 @@
 ================================================================================
 ULTRALIGHT CODE ASSISTANT — BENCHMARK RESULTS
-Date: 2026-03-29 08:28:58
+Date: 2026-03-29 11:11:20
 ================================================================================
 
 RANKING (by quality score, expert mode):
 ------------------------------------------------------------
 
   With Expert System:
-    1. qwen2.5-coder-0.5b-instruct-q4_k_m — 100.0% (4/4) [26.8 tok/s, 469MB]
+    1. Phi-3.5-mini-instruct-Q4_K_M — 100.0% (30/30) [5.1 tok/s, 2282MB]
 
   Without Expert System:
-    1. qwen2.5-coder-0.5b-instruct-q4_k_m — 75.0% (3/4) [31.1 tok/s, 469MB]
+    1. Phi-3.5-mini-instruct-Q4_K_M — 100.0% (30/30) [7.1 tok/s, 2282MB]
 
 ================================================================================
 DETAILED RESULTS
 ================================================================================
 
---- qwen2.5-coder-0.5b-instruct-q4_k_m (WITHOUT EXPERTS) ---
-  Quality: 75.0% (3/4)
-  Speed:   31.1 tok/s avg
-  Time:    7.2s avg, 29s total
-  Format:  chatml
-  Size:    469 MB
+--- Phi-3.5-mini-instruct-Q4_K_M (WITHOUT EXPERTS) ---
+  Quality: 100.0% (30/30)
+  Speed:   7.1 tok/s avg
+  Time:    60.7s avg, 1820s total
+  Format:  phi3
+  Size:    2282 MB
 
-  code_gen    : 1/1 (100.0%)
-  debug       : 1/1 (100.0%)
-  review      : 1/1 (100.0%)
-  explain     : 0/1 (0.0%)
+  code_gen    : 10/10 (100.0%)
+  debug       : 8/8 (100.0%)
+  review      : 6/6 (100.0%)
+  explain     : 6/6 (100.0%)
 
   Failed tests:
-    - ex01_decorator: Explanation too short (< 80 chars); Should mention @ syntax or wrapper pattern; Should include a code example
+    (none)
 
---- qwen2.5-coder-0.5b-instruct-q4_k_m (WITH EXPERTS) ---
-  Quality: 100.0% (4/4)
-  Speed:   26.8 tok/s avg
-  Time:    5.9s avg, 24s total
-  Format:  chatml
-  Size:    469 MB
+--- Phi-3.5-mini-instruct-Q4_K_M (WITH EXPERTS) ---
+  Quality: 100.0% (30/30)
+  Speed:   5.1 tok/s avg
+  Time:    73.9s avg, 2218s total
+  Format:  phi3
+  Size:    2282 MB
 
-  code_gen    : 1/1 (100.0%)
-  debug       : 1/1 (100.0%)
-  review      : 1/1 (100.0%)
-  explain     : 1/1 (100.0%)
+  code_gen    : 10/10 (100.0%)
+  debug       : 8/8 (100.0%)
+  review      : 6/6 (100.0%)
+  explain     : 6/6 (100.0%)
 
   Failed tests:
     (none)
@@ -50,9 +50,9 @@ DETAILED RESULTS
 EXPERT SYSTEM IMPACT
 ================================================================================
 
-  qwen2.5-coder-0.5b-instruct-q4_k_m:
-    Direct: 75.0% -> Expert: 100.0% (delta: +25.0%)
+  Phi-3.5-mini-instruct-Q4_K_M:
+    Direct: 100.0% -> Expert: 100.0% (delta: +0.0%)
       code_gen    : 100.0% -> 100.0% (+0.0%)
       debug       : 100.0% -> 100.0% (+0.0%)
       review      : 100.0% -> 100.0% (+0.0%)
-      explain     : 0.0% -> 100.0% (+100.0%)
+      explain     : 100.0% -> 100.0% (+0.0%)

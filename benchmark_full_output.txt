@@ -501,4 +501,110 @@ MODEL: Phi-3.5-mini-instruct-Q4_K_M
 ======================================================================
 
   --- Mode: NO EXPERTS ---
-  [DIRECT] (1/30) cg01_fibonacci... 
+  [DIRECT] (1/30) cg01_fibonacci... PASS (34.2s, 10.1 tok/s)
+  [DIRECT] (2/30) cg02_merge_sorted... PASS (40.1s, 10.6 tok/s)
+  [DIRECT] (3/30) cg03_is_prime... PASS (41.8s, 10.6 tok/s)
+  [DIRECT] (4/30) cg04_flatten... PASS (28.3s, 10.5 tok/s)
+  [DIRECT] (5/30) cg05_longest_prefix... PASS (36.8s, 10.5 tok/s)
+  [DIRECT] (6/30) cg06_lru_cache... PASS (48.8s, 10.5 tok/s)
+  [DIRECT] (7/30) cg07_roman_to_int... PASS (41.1s, 10.6 tok/s)
+  [DIRECT] (8/30) cg08_permutations... PASS (33.4s, 10.7 tok/s)
+  [DIRECT] (9/30) cg09_email_regex... PASS (44.4s, 6.9 tok/s)
+  [DIRECT] (10/30) cg10_matrix_multiply... PASS (80.1s, 6.4 tok/s)
+  [DIRECT] (11/30) db01_off_by_one... PASS (62.4s, 6.3 tok/s)
+  [DIRECT] (12/30) db02_mutable_default... PASS (68.6s, 5.9 tok/s)
+  [DIRECT] (13/30) db03_scope... PASS (41.5s, 6.0 tok/s)
+  [DIRECT] (14/30) db04_infinite_loop... PASS (60.2s, 6.0 tok/s)
+  [DIRECT] (15/30) db05_keyerror... PASS (42.8s, 6.0 tok/s)
+  [DIRECT] (16/30) db06_typeerror... PASS (30.8s, 5.8 tok/s)
+  [DIRECT] (17/30) db07_list_modification... PASS (49.4s, 5.9 tok/s)
+  [DIRECT] (18/30) db08_recursion_base... PASS (78.1s, 5.9 tok/s)
+  [DIRECT] (19/30) cr01_sql_injection... PASS (66.6s, 5.9 tok/s)
+  [DIRECT] (20/30) cr02_resource_leak... PASS (54.2s, 6.0 tok/s)
+  [DIRECT] (21/30) cr03_performance... PASS (90.4s, 5.7 tok/s)
+  [DIRECT] (22/30) cr04_race_condition... PASS (83.5s, 5.6 tok/s)
+  [DIRECT] (23/30) cr05_hardcoded_creds... PASS (95.4s, 5.4 tok/s)
+  [DIRECT] (24/30) cr06_input_validation... PASS (69.4s, 5.6 tok/s)
+  [DIRECT] (25/30) ex01_decorator... PASS (60.1s, 5.8 tok/s)
+  [DIRECT] (26/30) ex02_deepcopy... PASS (88.2s, 5.8 tok/s)
+  [DIRECT] (27/30) ex03_yield... PASS (82.4s, 5.8 tok/s)
+  [DIRECT] (28/30) ex04_async... PASS (88.8s, 5.8 tok/s)
+  [DIRECT] (29/30) ex05_closure... PASS (88.9s, 5.8 tok/s)
+  [DIRECT] (30/30) ex06_gil... PASS (89.5s, 5.7 tok/s)
+
+  [DIRECT] Results for Phi-3.5-mini-instruct-Q4_K_M:
+    Overall: 30/30 (100.0%)
+    code_gen    : 10/10 (100.0%)
+    debug       : 8/8 (100.0%)
+    review      : 6/6 (100.0%)
+    explain     : 6/6 (100.0%)
+    Avg speed: 7.1 tok/s
+    Avg time:  60.7s
+    Total time: 1820.4s
+
+  --- Mode: WITH EXPERTS ---
+  [EXPERT] (1/30) cg01_fibonacci... PASS (66.5s, 5.4 tok/s)
+  [EXPERT] (2/30) cg02_merge_sorted... PASS (81.5s, 5.6 tok/s)
+  [EXPERT] (3/30) cg03_is_prime... PASS (61.7s, 5.7 tok/s)
+  [EXPERT] (4/30) cg04_flatten... PASS (63.8s, 5.4 tok/s)
+  [EXPERT] (5/30) cg05_longest_prefix... PASS (82.4s, 5.2 tok/s)
+  [EXPERT] (6/30) cg06_lru_cache... PASS (98.1s, 5.2 tok/s)
+  [EXPERT] (7/30) cg07_roman_to_int... PASS (95.0s, 5.2 tok/s)
+  [EXPERT] (8/30) cg08_permutations... PASS (65.8s, 5.3 tok/s)
+  [EXPERT] (9/30) cg09_email_regex... PASS (87.2s, 5.1 tok/s)
+  [EXPERT] (10/30) cg10_matrix_multiply... PASS (93.0s, 5.1 tok/s)
+  [EXPERT] (11/30) db01_off_by_one... PASS (81.4s, 4.7 tok/s)
+  [EXPERT] (12/30) db02_mutable_default... PASS (47.3s, 5.0 tok/s)
+  [EXPERT] (13/30) db03_scope... PASS (46.6s, 5.3 tok/s)
+  [EXPERT] (14/30) db04_infinite_loop... PASS (36.0s, 5.2 tok/s)
+  [EXPERT] (15/30) db05_keyerror... PASS (40.9s, 5.0 tok/s)
+  [EXPERT] (16/30) db06_typeerror... PASS (40.7s, 5.0 tok/s)
+  [EXPERT] (17/30) db07_list_modification... PASS (45.7s, 4.5 tok/s)
+  [EXPERT] (18/30) db08_recursion_base... PASS (55.0s, 4.7 tok/s)
+  [EXPERT] (19/30) cr01_sql_injection... PASS (63.1s, 4.7 tok/s)
+  [EXPERT] (20/30) cr02_resource_leak... PASS (74.0s, 5.1 tok/s)
+  [EXPERT] (21/30) cr03_performance... PASS (42.0s, 5.0 tok/s)
+  [EXPERT] (22/30) cr04_race_condition... PASS (100.5s, 5.1 tok/s)
+  [EXPERT] (23/30) cr05_hardcoded_creds... PASS (101.9s, 5.0 tok/s)
+  [EXPERT] (24/30) cr06_input_validation... PASS (73.5s, 5.1 tok/s)
+  [EXPERT] (25/30) ex01_decorator... PASS (105.8s, 4.8 tok/s)
+  [EXPERT] (26/30) ex02_deepcopy... PASS (102.5s, 5.0 tok/s)
+  [EXPERT] (27/30) ex03_yield... PASS (100.9s, 5.1 tok/s)
+  [EXPERT] (28/30) ex04_async... PASS (92.1s, 5.6 tok/s)
+  [EXPERT] (29/30) ex05_closure... PASS (83.1s, 5.7 tok/s)
+  [EXPERT] (30/30) ex06_gil... PASS (89.8s, 5.7 tok/s)
+
+  [EXPERT] Results for Phi-3.5-mini-instruct-Q4_K_M:
+    Overall: 30/30 (100.0%)
+    code_gen    : 10/10 (100.0%)
+    debug       : 8/8 (100.0%)
+    review      : 6/6 (100.0%)
+    explain     : 6/6 (100.0%)
+    Avg speed: 5.1 tok/s
+    Avg time:  73.9s
+    Total time: 2217.8s
+
+  Model unloaded.
+
+======================================================================
+BENCHMARK COMPLETE — 4041s total
+======================================================================
+
+
+==============================================================================================================
+BENCHMARK SUMMARY
+==============================================================================================================
+Model                               Mode      Score  CodeGen    Debug   Review  Explain   tok/s  Avg(s)   Total
+--------------------------------------------------------------------------------------------------------------
+Phi-3.5-mini-instruct-Q4_K_M        DIRECT   100.0%   100.0%   100.0%   100.0%   100.0%     7.1    60.7   1820s
+Phi-3.5-mini-instruct-Q4_K_M        EXPERT   100.0%   100.0%   100.0%   100.0%   100.0%     5.1    73.9   2218s
+--------------------------------------------------------------------------------------------------------------
+
+EXPERT SYSTEM IMPACT:
+------------------------------------------------------------
+  Phi-3.5-mini-instruct-Q4_K_M               100.0% -> 100.0% (+ +0.0%)
+
+Detailed results saved to: D:\LLCWork\ultralight-coder\benchmark_results.json
+Summary saved to: D:\LLCWork\ultralight-coder\benchmark_output.txt
+
+Total wall time: 4041s
