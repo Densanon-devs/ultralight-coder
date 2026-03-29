@@ -174,4 +174,84 @@ MODEL: qwen2.5-coder-1.5b-instruct-q4_k_m
   --- Mode: WITH EXPERTS ---
   [EXPERT] (1/30) cg01_fibonacci... PASS (7.2s, 21.8 tok/s)
   [EXPERT] (2/30) cg02_merge_sorted... PASS (6.6s, 23.6 tok/s)
-  [EXPERT] (3/30) cg03_is_prime... 
+  [EXPERT] (3/30) cg03_is_prime... PASS (3.8s, 23.6 tok/s)
+  [EXPERT] (4/30) cg04_flatten... PASS (2.3s, 22.8 tok/s)
+  [EXPERT] (5/30) cg05_longest_prefix... PASS (6.4s, 24.5 tok/s)
+  [EXPERT] (6/30) cg06_lru_cache... PASS (9.5s, 24.4 tok/s)
+  [EXPERT] (7/30) cg07_roman_to_int... PASS (5.6s, 24.2 tok/s)
+  [EXPERT] (8/30) cg08_permutations... PASS (3.2s, 24.2 tok/s)
+  [EXPERT] (9/30) cg09_email_regex... PASS (2.5s, 23.8 tok/s)
+  [EXPERT] (10/30) cg10_matrix_multiply... PASS (9.0s, 24.6 tok/s)
+  [EXPERT] (11/30) db01_off_by_one... PASS (7.2s, 20.9 tok/s)
+  [EXPERT] (12/30) db02_mutable_default... PASS (8.5s, 21.1 tok/s)
+  [EXPERT] (13/30) db03_scope... PASS (6.2s, 22.3 tok/s)
+  [EXPERT] (14/30) db04_infinite_loop... PASS (9.7s, 21.9 tok/s)
+  [EXPERT] (15/30) db05_keyerror... FAIL (4.8s, 21.7 tok/s)
+         Reason: Should identify root cause
+  [EXPERT] (16/30) db06_typeerror... PASS (7.5s, 21.7 tok/s)
+  [EXPERT] (17/30) db07_list_modification... PASS (9.5s, 22.1 tok/s)
+  [EXPERT] (18/30) db08_recursion_base... PASS (4.2s, 22.2 tok/s)
+  [EXPERT] (19/30) cr01_sql_injection... PASS (12.0s, 21.5 tok/s)
+  [EXPERT] (20/30) cr02_resource_leak... PASS (5.8s, 22.5 tok/s)
+  [EXPERT] (21/30) cr03_performance... PASS (8.3s, 22.5 tok/s)
+  [EXPERT] (22/30) cr04_race_condition... PASS (2.5s, 21.5 tok/s)
+  [EXPERT] (23/30) cr05_hardcoded_creds... FAIL (4.7s, 21.5 tok/s)
+         Reason: Should suggest externalized configuration
+  [EXPERT] (24/30) cr06_input_validation... FAIL (8.6s, 22.4 tok/s)
+         Reason: Should identify missing input validation
+  [EXPERT] (25/30) ex01_decorator... PASS (12.0s, 20.3 tok/s)
+  [EXPERT] (26/30) ex02_deepcopy... PASS (13.5s, 22.4 tok/s)
+  [EXPERT] (27/30) ex03_yield... PASS (10.1s, 23.7 tok/s)
+  [EXPERT] (28/30) ex04_async... PASS (14.9s, 22.9 tok/s)
+  [EXPERT] (29/30) ex05_closure... PASS (11.8s, 22.2 tok/s)
+  [EXPERT] (30/30) ex06_gil... 08:48:33 [benchmark] INFO: Loading model: Llama-3.2-1B-Instruct-Q4_K_M.gguf
+llama_context: n_ctx_per_seq (4096) < n_ctx_train (131072) -- the full capacity of the model will not be utilized
+PASS (14.0s, 22.5 tok/s)
+
+  [EXPERT] Results for qwen2.5-coder-1.5b-instruct-q4_k_m:
+    Overall: 27/30 (90.0%)
+    code_gen    : 10/10 (100.0%)
+    debug       : 7/8 (87.5%)
+    review      : 4/6 (66.7%)
+    explain     : 6/6 (100.0%)
+    Avg speed: 22.6 tok/s
+    Avg time:  7.7s
+    Total time: 232.0s
+
+  Model unloaded.
+
+======================================================================
+MODEL: Llama-3.2-1B-Instruct-Q4_K_M
+  Size: 770.3 MB | Format: llama3
+  Tests: 30 | Max tokens: 512
+======================================================================
+
+  --- Mode: NO EXPERTS ---
+  [DIRECT] (1/30) cg01_fibonacci... C:\Users\Jordan\AppData\Roaming\Python\Python310\site-packages\llama_cpp\llama.py:1240: RuntimeWarning: Detected duplicate leading "<|begin_of_text|>" in prompt, this will likely reduce response quality, consider removing it...
+  warnings.warn(
+PASS (13.9s, 27.8 tok/s)
+  [DIRECT] (2/30) cg02_merge_sorted... PASS (18.5s, 27.6 tok/s)
+  [DIRECT] (3/30) cg03_is_prime... PASS (12.6s, 27.8 tok/s)
+  [DIRECT] (4/30) cg04_flatten... PASS (13.0s, 27.0 tok/s)
+  [DIRECT] (5/30) cg05_longest_prefix... PASS (12.3s, 28.5 tok/s)
+  [DIRECT] (6/30) cg06_lru_cache... PASS (18.4s, 27.9 tok/s)
+  [DIRECT] (7/30) cg07_roman_to_int... PASS (15.7s, 27.8 tok/s)
+  [DIRECT] (8/30) cg08_permutations... PASS (13.3s, 28.2 tok/s)
+  [DIRECT] (9/30) cg09_email_regex... PASS (13.5s, 28.1 tok/s)
+  [DIRECT] (10/30) cg10_matrix_multiply... PASS (17.9s, 27.6 tok/s)
+  [DIRECT] (11/30) db01_off_by_one... PASS (12.4s, 26.8 tok/s)
+  [DIRECT] (12/30) db02_mutable_default... PASS (11.3s, 27.1 tok/s)
+  [DIRECT] (13/30) db03_scope... PASS (11.2s, 27.1 tok/s)
+  [DIRECT] (14/30) db04_infinite_loop... PASS (4.9s, 27.0 tok/s)
+  [DIRECT] (15/30) db05_keyerror... PASS (10.6s, 27.1 tok/s)
+  [DIRECT] (16/30) db06_typeerror... PASS (9.9s, 28.1 tok/s)
+  [DIRECT] (17/30) db07_list_modification... PASS (6.5s, 27.7 tok/s)
+  [DIRECT] (18/30) db08_recursion_base... PASS (9.3s, 29.2 tok/s)
+  [DIRECT] (19/30) cr01_sql_injection... PASS (16.0s, 29.5 tok/s)
+  [DIRECT] (20/30) cr02_resource_leak... PASS (13.9s, 29.9 tok/s)
+  [DIRECT] (21/30) cr03_performance... PASS (10.4s, 30.1 tok/s)
+  [DIRECT] (22/30) cr04_race_condition... PASS (14.8s, 29.5 tok/s)
+  [DIRECT] (23/30) cr05_hardcoded_creds... PASS (15.6s, 27.2 tok/s)
+  [DIRECT] (24/30) cr06_input_validation... PASS (18.3s, 28.0 tok/s)
+  [DIRECT] (25/30) ex01_decorator... PASS (19.0s, 26.9 tok/s)
+  [DIRECT] (26/30) ex02_deepcopy... 
