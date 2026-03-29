@@ -1,0 +1,62 @@
+llama_context: n_ctx_per_seq (4096) < n_ctx_train (32768) -- the full capacity of the model will not be utilized
+
+Execution Benchmark — 35 tests, 1 models, modes: ['direct']
+  - qwen2.5-coder-3b-instruct-q4_k_m.gguf (2007 MB)
+
+======================================================================
+MODEL: qwen2.5-coder-3b-instruct-q4_k_m
+  Size: 2007 MB | Format: chatml | Tests: 35
+  Modes: direct
+======================================================================
+  [DIRECT] (1/35) e01_fibonacci... PERFECT 6/6 (15.4s)
+  [DIRECT] (2/35) e02_is_prime... PERFECT 9/9 (16.6s)
+  [DIRECT] (3/35) e03_reverse_string... PERFECT 4/4 (3.2s)
+  [DIRECT] (4/35) e04_flatten... PERFECT 5/5 (8.9s)
+  [DIRECT] (5/35) e05_word_count... PERFECT 4/4 (28.8s)
+  [DIRECT] (6/35) e06_binary_search... PERFECT 6/6 (16.8s)
+  [DIRECT] (7/35) e07_merge_sorted... PERFECT 6/6 (21.9s)
+  [DIRECT] (8/35) e08_two_sum... PERFECT 3/3 (12.2s)
+  [DIRECT] (9/35) e09_max_subarray... PERFECT 5/5 (14.1s)
+  [DIRECT] (10/35) e10_roman_to_int... PERFECT 6/6 (24.6s)
+  [DIRECT] (11/35) e11_stack... PERFECT 11/11 (21.2s)
+  [DIRECT] (12/35) e12_matrix_multiply... PERFECT 4/4 (20.4s)
+  [DIRECT] (13/35) e13_palindrome... PERFECT 5/5 (14.0s)
+  [DIRECT] (14/35) e14_longest_common_prefix... PERFECT 5/5 (12.6s)
+  [DIRECT] (15/35) e15_caesar_cipher... PERFECT 5/5 (20.4s)
+  [DIRECT] (16/35) e16_gcd... PERFECT 5/5 (5.9s)
+  [DIRECT] (17/35) e17_power... PERFECT 6/6 (11.3s)
+  [DIRECT] (18/35) e18_unique_paths... PERFECT 5/5 (35.0s)
+  [DIRECT] (19/35) e19_valid_parentheses... PERFECT 7/7 (17.8s)
+  [DIRECT] (20/35) e20_fizzbuzz... PERFECT 7/7 (20.5s)
+  [DIRECT] (21/35) e21_fibonacci_memo... PERFECT 6/6 (21.0s)
+  [DIRECT] (22/35) e22_kadane_negative... PERFECT 6/6 (17.3s)
+  [DIRECT] (23/35) e23_roman_to_int_hard... PERFECT 7/7 (41.3s)
+  [DIRECT] (24/35) e24_matrix_transpose... PERFECT 5/5 (30.4s)
+  [DIRECT] (25/35) e25_bubble_sort... PERFECT 6/6 (11.4s)
+  [DIRECT] (26/35) e26_anagram_check... PERFECT 7/7 (12.1s)
+  [DIRECT] (27/35) e27_run_length_encode... PERFECT 6/6 (15.2s)
+  [DIRECT] (28/35) e28_title_case... PERFECT 6/6 (4.4s)
+  [DIRECT] (29/35) e29_remove_duplicates... PERFECT 5/5 (7.5s)
+  [DIRECT] (30/35) e30_chunk_list... PERFECT 6/6 (5.9s)
+  [DIRECT] (31/35) e31_deep_merge... PERFECT 6/6 (11.6s)
+  [DIRECT] (32/35) e32_lcm... PERFECT 6/6 (10.3s)
+  [DIRECT] (33/35) e33_nth_prime... PERFECT 7/7 (16.5s)
+  [DIRECT] (34/35) e34_count_digits... PERFECT 6/6 (9.0s)
+  [DIRECT] (35/35) e35_clamp... PERFECT 7/7 (4.5s)
+
+  [DIRECT] RESULTS: qwen2.5-coder-3b-instruct-q4_k_m
+    Execution Score: 100.0%
+    Perfect tests:   35/35
+    Avg time:        16.0s
+
+  Model unloaded.
+
+======================================================================
+EXECUTION BENCHMARK — FINAL RANKINGS
+======================================================================
+
+  Model                                  Mode      Score  Perfect    Size   Time
+  -------------------------------------- -------- ------ -------- ------- ------
+  qwen2.5-coder-3b-instruct-q4_k_m       direct   100.0%  35/35    2007MB  16.0s
+
+Results saved to: D:\LLCWork\ultralight-coder\benchmark_exec_results.json

@@ -1,0 +1,98 @@
+llama_context: n_ctx_per_seq (4096) < n_ctx_train (131072) -- the full capacity of the model will not be utilized
+
+Execution Benchmark — 35 tests, 1 models, modes: ['direct']
+  - Yi-Coder-1.5B-Chat-Q4_K_M.gguf (919 MB)
+
+======================================================================
+MODEL: Yi-Coder-1.5B-Chat-Q4_K_M
+  Size: 919 MB | Format: chatml | Tests: 35
+  Modes: direct
+======================================================================
+  [DIRECT] (1/35) e01_fibonacci... PARTIAL 1/6 (17%) (16.0s)
+         FAIL: assert fibonacci(0) == 0 -> 
+         FAIL: assert fibonacci(1) == 1 -> 
+  [DIRECT] (2/35) e02_is_prime... PERFECT 9/9 (31.9s)
+  [DIRECT] (3/35) e03_reverse_string... PERFECT 4/4 (10.0s)
+  [DIRECT] (4/35) e04_flatten... [1, 2, 3, 4, 5]
+PERFECT 5/5 (16.7s)
+  [DIRECT] (5/35) e05_word_count... {'this': 2, 'is': 2, 'a': 2, 'test.': 2, 'only': 1}
+PERFECT 4/4 (29.8s)
+  [DIRECT] (6/35) e06_binary_search... PERFECT 6/6 (28.5s)
+  [DIRECT] (7/35) e07_merge_sorted... [1, 2, 3, 4, 5, 6]
+[1, 2, 3, 4, 5, 6]
+[1, 1, 2, 2, 3, 3]
+PERFECT 6/6 (48.7s)
+  [DIRECT] (8/35) e08_two_sum... PERFECT 3/3 (23.2s)
+  [DIRECT] (9/35) e09_max_subarray... PERFECT 5/5 (29.3s)
+  [DIRECT] (10/35) e10_roman_to_int... 3
+4
+9
+58
+1994
+PERFECT 6/6 (52.6s)
+  [DIRECT] (11/35) e11_stack... World
+Hello
+1
+PERFECT 11/11 (33.5s)
+  [DIRECT] (12/35) e12_matrix_multiply... PERFECT 4/4 (40.6s)
+  [DIRECT] (13/35) e13_palindrome... True
+False
+PERFECT 5/5 (35.1s)
+  [DIRECT] (14/35) e14_longest_common_prefix... PERFECT 5/5 (34.7s)
+  [DIRECT] (15/35) e15_caesar_cipher... Khoor, Zruog!
+PERFECT 5/5 (35.4s)
+  [DIRECT] (16/35) e16_gcd... PERFECT 5/5 (10.8s)
+  [DIRECT] (17/35) e17_power... PERFECT 6/6 (20.3s)
+  [DIRECT] (18/35) e18_unique_paths... 28
+PERFECT 5/5 (41.1s)
+  [DIRECT] (19/35) e19_valid_parentheses... PERFECT 7/7 (29.2s)
+  [DIRECT] (20/35) e20_fizzbuzz... PERFECT 7/7 (14.5s)
+  [DIRECT] (21/35) e21_fibonacci_memo... 1
+1
+832040
+PARTIAL 5/6 (83%) (13.5s)
+         FAIL: assert fibonacci_memo(0) == 0 -> 
+  [DIRECT] (22/35) e22_kadane_negative... PARTIAL 3/6 (50%) (15.6s)
+         FAIL: assert max_subarray_neg([-3, -2, -5]) == -2 -> 
+         FAIL: assert max_subarray_neg([-1]) == -1 -> 
+  [DIRECT] (23/35) e23_roman_to_int_hard... PERFECT 7/7 (20.9s)
+  [DIRECT] (24/35) e24_matrix_transpose... [[1, 4], [2, 5], [3, 6]]
+PERFECT 5/5 (10.8s)
+  [DIRECT] (25/35) e25_bubble_sort... PERFECT 6/6 (11.8s)
+  [DIRECT] (26/35) e26_anagram_check... PERFECT 7/7 (12.1s)
+  [DIRECT] (27/35) e27_run_length_encode... PERFECT 6/6 (12.3s)
+  [DIRECT] (28/35) e28_title_case... Hello World
+PERFECT 6/6 (3.5s)
+  [DIRECT] (29/35) e29_remove_duplicates... [1, 2, 3]
+PERFECT 5/5 (13.3s)
+  [DIRECT] (30/35) e30_chunk_list... [[1, 2], [3, 4], [5]]
+PERFECT 6/6 (14.4s)
+  [DIRECT] (31/35) e31_deep_merge... {'a': 1, 'b': {'c': 2, 'd': 3}}
+PERFECT 6/6 (17.7s)
+  [DIRECT] (32/35) e32_lcm... 12
+0
+0
+0
+PERFECT 6/6 (12.6s)
+  [DIRECT] (33/35) e33_nth_prime... PERFECT 7/7 (14.1s)
+  [DIRECT] (34/35) e34_count_digits... 5
+2
+PERFECT 6/6 (8.8s)
+  [DIRECT] (35/35) e35_clamp... PERFECT 7/7 (8.6s)
+
+  [DIRECT] RESULTS: Yi-Coder-1.5B-Chat-Q4_K_M
+    Execution Score: 95.7%
+    Perfect tests:   32/35
+    Avg time:        22.1s
+
+  Model unloaded.
+
+======================================================================
+EXECUTION BENCHMARK — FINAL RANKINGS
+======================================================================
+
+  Model                                  Mode      Score  Perfect    Size   Time
+  -------------------------------------- -------- ------ -------- ------- ------
+  Yi-Coder-1.5B-Chat-Q4_K_M              direct    95.7%  32/35     919MB  22.1s
+
+Results saved to: D:\LLCWork\ultralight-coder\benchmark_exec_results.json
