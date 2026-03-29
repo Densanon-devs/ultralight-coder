@@ -1,58 +1,60 @@
 ================================================================================
 ULTRALIGHT CODE ASSISTANT — BENCHMARK RESULTS
-Date: 2026-03-29 11:11:20
+Date: 2026-03-29 11:24:39
 ================================================================================
 
 RANKING (by quality score, expert mode):
 ------------------------------------------------------------
 
   With Expert System:
-    1. Phi-3.5-mini-instruct-Q4_K_M — 100.0% (30/30) [5.1 tok/s, 2282MB]
+    1. SmolLM2-135M-Instruct-Q4_K_M — 90.0% (27/30) [84.8 tok/s, 101MB]
 
   Without Expert System:
-    1. Phi-3.5-mini-instruct-Q4_K_M — 100.0% (30/30) [7.1 tok/s, 2282MB]
+    1. SmolLM2-135M-Instruct-Q4_K_M — 96.7% (29/30) [105.7 tok/s, 101MB]
 
 ================================================================================
 DETAILED RESULTS
 ================================================================================
 
---- Phi-3.5-mini-instruct-Q4_K_M (WITHOUT EXPERTS) ---
-  Quality: 100.0% (30/30)
-  Speed:   7.1 tok/s avg
-  Time:    60.7s avg, 1820s total
-  Format:  phi3
-  Size:    2282 MB
+--- SmolLM2-135M-Instruct-Q4_K_M (WITHOUT EXPERTS) ---
+  Quality: 96.7% (29/30)
+  Speed:   105.7 tok/s avg
+  Time:    3.2s avg, 95s total
+  Format:  chatml
+  Size:    101 MB
 
   code_gen    : 10/10 (100.0%)
   debug       : 8/8 (100.0%)
-  review      : 6/6 (100.0%)
+  review      : 5/6 (83.3%)
   explain     : 6/6 (100.0%)
 
   Failed tests:
-    (none)
+    - cr06_input_validation: Should identify missing input validation
 
---- Phi-3.5-mini-instruct-Q4_K_M (WITH EXPERTS) ---
-  Quality: 100.0% (30/30)
-  Speed:   5.1 tok/s avg
-  Time:    73.9s avg, 2218s total
-  Format:  phi3
-  Size:    2282 MB
+--- SmolLM2-135M-Instruct-Q4_K_M (WITH EXPERTS) ---
+  Quality: 90.0% (27/30)
+  Speed:   84.8 tok/s avg
+  Time:    4.6s avg, 138s total
+  Format:  chatml
+  Size:    101 MB
 
   code_gen    : 10/10 (100.0%)
-  debug       : 8/8 (100.0%)
-  review      : 6/6 (100.0%)
+  debug       : 7/8 (87.5%)
+  review      : 4/6 (66.7%)
   explain     : 6/6 (100.0%)
 
   Failed tests:
-    (none)
+    - db02_mutable_default: Should mention: mutable default argument
+    - cr03_performance: Should identify performance / complexity issue
+    - cr06_input_validation: Should identify missing input validation
 
 ================================================================================
 EXPERT SYSTEM IMPACT
 ================================================================================
 
-  Phi-3.5-mini-instruct-Q4_K_M:
-    Direct: 100.0% -> Expert: 100.0% (delta: +0.0%)
+  SmolLM2-135M-Instruct-Q4_K_M:
+    Direct: 96.7% -> Expert: 90.0% (delta: -6.7%)
       code_gen    : 100.0% -> 100.0% (+0.0%)
-      debug       : 100.0% -> 100.0% (+0.0%)
-      review      : 100.0% -> 100.0% (+0.0%)
+      debug       : 100.0% -> 87.5% (-12.5%)
+      review      : 83.3% -> 66.7% (-16.6%)
       explain     : 100.0% -> 100.0% (+0.0%)
