@@ -482,4 +482,23 @@ MODEL: Llama-3.2-1B-Instruct-Q8_0
   [EXPERT] (20/30) cr02_resource_leak... PASS (33.3s, 15.4 tok/s)
   [EXPERT] (21/30) cr03_performance... PASS (21.3s, 14.9 tok/s)
   [EXPERT] (22/30) cr04_race_condition... PASS (30.1s, 15.0 tok/s)
-  [EXPERT] (23/30) cr05_hardcoded_creds... 
+  [EXPERT] (23/30) cr05_hardcoded_creds... 10:03:59 [benchmark] INFO: Loading model: Phi-3.5-mini-instruct-Q4_K_M.gguf
+llama_context: n_ctx_per_seq (4096) < n_ctx_train (131072) -- the full capacity of the model will not be utilized
+
+Ultralight Code Assistant — Benchmark
+Models: 1
+Tests:  30 per model
+Modes:  direct+ expert
+Config: max_tokens=512, temp=0.2, gpu_layers=99, threads=8
+
+Models to benchmark:
+  - Phi-3.5-mini-instruct-Q4_K_M.gguf (2282 MB, phi3)
+
+======================================================================
+MODEL: Phi-3.5-mini-instruct-Q4_K_M
+  Size: 2282.4 MB | Format: phi3
+  Tests: 30 | Max tokens: 512
+======================================================================
+
+  --- Mode: NO EXPERTS ---
+  [DIRECT] (1/30) cg01_fibonacci... 
