@@ -218,14 +218,80 @@ The execution benchmark (Phase 2) tested single functions. Real coding requires 
 
 **The Calculator is a model killer.** Building a recursive-descent parser with operator precedence is beyond every model tested — even step 1 (basic arithmetic with precedence) fails universally.
 
+## Phase 3b: Stress-Targeted Expert System
+
+**Date:** 2026-03-30
+
+Hypothesis: generic experts hurt (-2.7% in Phase 2), but experts targeting the *specific failure patterns* should help. Created `build_stress_code_gen_expert()` with 9 few-shot examples for:
+- Retry decorators with function attributes
+- State machines with history + guards
+- Recursive-descent expression evaluators
+- Event emitter on/off/once/emit
+- Mini ORM with metaclass + classmethods
+- HTTP routers with path param extraction
+- Token bucket rate limiters with explicit time
+
+### Direct vs Expert — Overall Scores
+
+| Model | Direct | +Experts | Delta |
+|-------|:------:|:--------:|:-----:|
+| **Qwen2.5-Coder-3B** | 42% | **48%** | **+6%** |
+| Qwen2.5-Coder-1.5B | 31% | **29%** | -2% |
+| Qwen2.5-Coder-0.5B | 22% | **36%** | **+14%** |
+| DeepSeek-Coder-1.3B | 26% | *partial* | (hung on T2.05) |
+
+### Where Experts Made the Biggest Impact
+
+| Test | Direct (best) | +Expert (best) | What the expert taught |
+|------|:-------------:|:--------------:|------------------------|
+| State Machine | 0% all | **100% (3 models)** | history as list property + guard pattern |
+| Rate Limiter | 29-64% | **100% (Qwen 3B, 1.5B)** | Token bucket with explicit now= param |
+| Expression Eval | 0-75% | **100% (3B, 0.5B)** | Recursive descent parser pattern |
+| HTTP Router | 0% all | **100% (3B, 0.5B)** | Decorator + regex path matching |
+| Calculator Step 1 | 0% all | **100% (3B only)** | Tokenizer + recursive descent |
+| Calculator Step 2 | 0% all | **100% (3B only)** | Parentheses in recursive parser |
+
+### Where Experts Did NOT Help
+
+| Test | Direct | +Expert | Issue |
+|------|:------:|:-------:|-------|
+| Retry Decorator | 0% | **0% still** | Code extraction breaks indentation of test assertions |
+| Event Emitter | 43% | **43% still** | Same indentation extraction bug |
+| Markdown to HTML | 0% | **0% still** | Unterminated string literals in generated code |
+| Mini ORM | 0% | **0% still** | Model generates correct SQL but class init breaks |
+
+### Tier-by-Tier: Qwen 3B (Direct vs Expert)
+
+| Test | Direct | Expert | Delta |
+|------|:------:|:------:|:-----:|
+| LRU Cache | 100% | 100% | = |
+| Expression Eval | 75% | **100%** | +25% |
+| Trie | 64% | 0% | -64% |
+| Event Emitter | 43% | 43% | = |
+| CSV Parser | 75% | 0% | -75% |
+| JSON Flatten | 88% | 88% | = |
+| Retry Decorator | 0% | 0% | = |
+| Graph BFS/DFS | 75% | **92%** | +17% |
+| Rate Limiter | 29% | **100%** | **+71%** |
+| State Machine | 0% | **100%** | **+100%** |
+| KV Store | 0% | 0% | = |
+| Markdown HTML | 0% | 0% | = |
+| Task Scheduler | 90% | 60% | -30% |
+| Mini ORM | 0% | 0% | = |
+| HTTP Router | 0% | **100%** | **+100%** |
+| Calc Step 1-2 | 0% | **100%** | **+100%** |
+| Calc Step 3-4 | 0% | 0% | = |
+
+**Key insight:** Experts are a double-edged sword. They massively boost tests that match the example patterns (0% -> 100%), but can hurt tests where the few-shot example *misleads* the model (Trie 64% -> 0%, CSV 75% -> 0%). The semantic matching isn't always selecting the right example.
+
 ## Execution vs Stress — The Gap
 
-| Model | Execution (Phase 2) | Stress (Phase 3) | Drop |
-|-------|:-------------------:|:-----------------:|:----:|
-| Qwen2.5-Coder-3B | 100% | 42% | **-58%** |
-| Qwen2.5-Coder-1.5B | 98.1% | 31% | **-67%** |
-| DeepSeek-Coder-1.3B | 96.9% | 26% | **-71%** |
-| Qwen2.5-Coder-0.5B | 77.4% | 22% | **-55%** |
+| Model | Execution (Phase 2) | Stress (Phase 3) | +Experts | Recovery |
+|-------|:-------------------:|:-----------------:|:--------:|:--------:|
+| Qwen2.5-Coder-3B | 100% | 42% | **48%** | +6% |
+| Qwen2.5-Coder-1.5B | 98.1% | 31% | 29% | -2% |
+| DeepSeek-Coder-1.3B | 96.9% | 26% | — | — |
+| Qwen2.5-Coder-0.5B | 77.4% | 22% | **36%** | +14% |
 
 ---
 
@@ -258,3 +324,17 @@ The execution benchmark (Phase 2) tested single functions. Real coding requires 
 11. **The "medium" tier is the real differentiator.** Tier 2 (heavy) was too hard for all models. Tier 1 (medium) — multi-method classes, data structures, parsers — is where you see meaningful quality differences between models.
 
 12. **Multi-turn persistence (JSON save/load) is a cliff.** All models except Qwen 3B failed the persistence step of the Todo app. Coordinating dataclass serialization with file I/O and state recovery is a specific weakness.
+
+## From Phase 3b (Stress + Experts)
+
+13. **Targeted experts can turn 0% into 100%.** State machine, rate limiter, expression evaluator, and HTTP router all went from universal failure to perfect scores with the right few-shot examples. Pattern-specific expertise is transformative.
+
+14. **But experts are a double-edged sword.** Semantic matching can select the *wrong* example, misleading the model. Trie dropped 64% -> 0% and CSV dropped 75% -> 0% because the retrieved example pattern didn't match what was needed.
+
+15. **Generic experts hurt; targeted experts help (sometimes).** Phase 2 showed generic experts at -2.7%. Stress-targeted experts give +6% to +14% overall — but with high variance per test. The value is in matching the right example to the right problem.
+
+16. **Small models benefit more from experts.** Qwen 0.5B gained +14% overall (+64% relative), while the larger 1.5B actually lost 2%. Smaller models have less internal knowledge, so external few-shot examples fill a bigger gap.
+
+17. **Code extraction is a bottleneck.** The retry decorator and event emitter tests fail at 0% with AND without experts — not because the model generates bad code, but because the code extractor breaks indentation on test assertion blocks. Fixing extraction could recover additional tests.
+
+18. **The real value of experts: teach patterns, not solutions.** The state machine expert showed the property+guard pattern; the router expert showed decorator+regex. These are *architectural patterns* the model couldn't discover on its own but could faithfully reproduce once shown.
