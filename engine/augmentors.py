@@ -73,6 +73,18 @@ FAILURE_PATTERNS: dict[str, list[str]] = {
     "pattern_glob": [
         "glob_match", "wildcard matching", "glob pattern",
     ],
+    "pattern_iterator": [
+        "lazy data processing", "pipeline", ".map(", ".filter(",
+        ".take(", ".collect(", "reusable range", "reusablerange",
+    ],
+    "pattern_template": [
+        "template", "{{var}}", "{% for", "{% endfor", "render(",
+        "variable substitution", "template engine",
+    ],
+    "pattern_tree": [
+        "binary search tree", "bst", "inorder", "in-order successor",
+        "tree height", "preorder", "postorder", "level_order", "trie",
+    ],
 }
 
 logger = logging.getLogger(__name__)
