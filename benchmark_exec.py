@@ -116,66 +116,32 @@ def safe_exec(code: str, timeout: float = 5.0) -> tuple[dict, str]:
 
 
 def run_tests(namespace: dict, test_code: str) -> tuple[int, int, list[str]]:
-    """Run test assertions against the namespace. Returns (passed, total, errors)."""
-    # Parse test code into executable blocks.
-    # Multi-line blocks (try/except, if/else, for, while, with) are grouped
-    # together and executed as a single unit.
-    raw_lines = test_code.strip().split("\n")
+    """Run test assertions against the namespace. Returns (passed, total, errors).
 
-    blocks: list[str] = []
-    current_block: list[str] = []
-    in_multiline = False
+    Strategy: parse test_code into top-level blocks using Python's own AST,
+    then execute each block individually. This correctly handles inline def,
+    class, decorators, try/except, and arbitrarily nested structures.
+    Falls back to the old line-based parser if AST parsing fails.
+    """
+    import ast
 
-    for line in raw_lines:
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
+    code = test_code.strip()
+    total = code.count("assert ")
 
-        if in_multiline:
-            current_block.append(line)
-            # A multiline block ends when we hit a non-indented line that is
-            # NOT a continuation keyword (except, elif, else, finally).
-            if stripped and not line[0].isspace() and not stripped.startswith(
-                ("except", "elif", "else:", "else ", "finally")
-            ):
-                # This line is a new top-level statement — flush the block
-                # without this line, then start fresh.
-                blocks.append("\n".join(current_block[:-1]))
-                current_block = [line]
-                in_multiline = stripped.endswith(":") and stripped.startswith(
-                    ("try:", "if ", "for ", "while ", "with ")
-                )
-            elif not line[0].isspace() and stripped.startswith(
-                ("except", "elif", "else:", "else ", "finally")
-            ):
-                # Continuation of a compound statement — stay in multiline.
-                pass
-            else:
-                # Indented line — still inside the block.
-                pass
-        else:
-            # Check if this line starts a compound statement
-            if stripped.endswith(":") and stripped.startswith(
-                ("try:", "if ", "for ", "while ", "with ")
-            ):
-                if current_block:
-                    blocks.append("\n".join(current_block))
-                current_block = [line]
-                in_multiline = True
-            else:
-                current_block.append(line)
+    # Try AST-based block splitting first (handles all Python constructs)
+    try:
+        tree = ast.parse(code)
+        blocks = []
+        lines = code.split("\n")
+        for node in tree.body:
+            start = node.lineno - 1
+            end = node.end_lineno
+            block = "\n".join(lines[start:end])
+            blocks.append(block)
+    except SyntaxError:
+        # Fallback: split on blank lines at top level, preserving indentation
+        blocks = _split_test_blocks_fallback(code)
 
-    # Flush remaining
-    if current_block:
-        if in_multiline:
-            blocks.append("\n".join(current_block))
-        else:
-            # Each remaining single line is its own block
-            for line in current_block:
-                blocks.append(line.strip())
-
-    # Count total test assertions across all blocks
-    total = sum(b.count("assert ") for b in blocks)
     passed = 0
     errors = []
 
@@ -185,8 +151,6 @@ def run_tests(namespace: dict, test_code: str) -> tuple[int, int, list[str]]:
             exec(block, namespace)
             passed += block_asserts
         except AssertionError as e:
-            # For single-assert blocks, report the exact line. For multi-line
-            # blocks, report a summary.
             first_line = block.split("\n")[0].strip()
             errors.append(f"FAIL: {first_line} -> {e}")
         except Exception as e:
@@ -194,6 +158,35 @@ def run_tests(namespace: dict, test_code: str) -> tuple[int, int, list[str]]:
             errors.append(f"ERROR: {first_line} -> {type(e).__name__}: {e}")
 
     return passed, total, errors
+
+
+def _split_test_blocks_fallback(code: str) -> list[str]:
+    """Fallback block splitter when AST parsing fails.
+    Groups lines into blocks by top-level statements (non-indented lines
+    start new blocks, indented lines continue the current block).
+    """
+    raw_lines = code.split("\n")
+    blocks = []
+    current = []
+
+    for line in raw_lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            if current:
+                current.append(line)
+            continue
+
+        # Non-indented, non-empty line = potential new block
+        if not line[0].isspace() and current:
+            blocks.append("\n".join(current))
+            current = [line]
+        else:
+            current.append(line)
+
+    if current:
+        blocks.append("\n".join(current))
+
+    return blocks
 
 
 # ---------------------------------------------------------------------------
