@@ -1,7 +1,7 @@
 """
 Code Quality Pipeline — Generate → Execute → Self-Repair
 
-Instead of few-shot experts (which hurt execution accuracy),
+Instead of few-shot augmentors (which hurt execution accuracy),
 this pipeline uses actual code execution as the quality gate:
 
 1. Generate code from prompt
@@ -15,7 +15,7 @@ Also supports multi-model mode:
 - If it fails, Model B (a debugger) gets the error + code and fixes it
 - Allows pairing a fast generator with a cheap debugger
 
-This replaces the expert system for code tasks.
+This replaces the augmentor system for code tasks.
 """
 
 import logging

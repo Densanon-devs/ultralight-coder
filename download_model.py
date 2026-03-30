@@ -29,7 +29,7 @@ MODELS = {
     "coder-0.5b": {
         "repo": "Qwen/Qwen2.5-Coder-0.5B-Instruct-GGUF",
         "filename": "qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
-        "description": "Qwen2.5-Coder-0.5B Q4_K_M (~400MB) — Floor model, 93% w/ experts",
+        "description": "Qwen2.5-Coder-0.5B Q4_K_M (~400MB) — Floor model, 93% w/ augmentors",
     },
 }
 

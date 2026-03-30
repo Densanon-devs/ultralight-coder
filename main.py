@@ -33,7 +33,7 @@ from engine.pipeline import Pipeline
 from engine.kv_cache import KVCacheManager
 from engine.micro_adapters import MicroAdapterEngine
 from engine.tools import ToolRegistry
-from engine.experts import ExpertRouter
+from engine.augmentors import AugmentorRouter
 from engine.speculative import SpeculativeEngine
 
 logger = logging.getLogger("UCA")
@@ -91,9 +91,9 @@ class UltralightCodeAssistant:
         # Tools
         self.tools = ToolRegistry()
 
-        # Expert system (code-focused)
-        self.expert_router = ExpertRouter()
-        self._experts_enabled = self._should_enable_experts()
+        # Augmentor system (code-focused)
+        self.augmentor_router = AugmentorRouter()
+        self._augmentors_enabled = self._should_enable_augmentors()
 
         # Response cache
         self.speculative = SpeculativeEngine(storage_dir="data/cache")
@@ -101,14 +101,14 @@ class UltralightCodeAssistant:
         # Performance tracking
         self._perf_history: list[dict] = []
 
-    def _should_enable_experts(self) -> bool:
-        """Auto-enable experts for small models."""
+    def _should_enable_augmentors(self) -> bool:
+        """Auto-enable augmentors for small models."""
         model_path = Path(self.config.base_model.path)
         if not model_path.exists():
             return True
         size_mb = model_path.stat().st_size / (1024 * 1024)
         enabled = size_mb < 2000  # Enable for sub-3B models (our target range)
-        logger.info(f"Expert system: {'ON' if enabled else 'OFF'} (model={size_mb:.0f}MB)")
+        logger.info(f"Augmentor system: {'ON' if enabled else 'OFF'} (model={size_mb:.0f}MB)")
         return enabled
 
     def _apply_tuned_config(self):
@@ -187,20 +187,20 @@ class UltralightCodeAssistant:
         else:
             logger.info("DRY RUN mode — no model loaded")
 
-        # Initialize expert embeddings
+        # Initialize augmentor embeddings
         try:
             from engine.embedder import get_embedder
             embedder = get_embedder()
             if embedder:
-                self.expert_router.init_embeddings(embedder)
+                self.augmentor_router.init_embeddings(embedder)
         except Exception as e:
-            logger.debug(f"Expert embeddings not initialized: {e}")
+            logger.debug(f"Augmentor embeddings not initialized: {e}")
 
         self.pipeline.start()
         logger.info("Ready")
 
     def process(self, user_input: str) -> str:
-        """Full pipeline: route -> expert/fusion -> generate -> post-process."""
+        """Full pipeline: route -> augmentor/fusion -> generate -> post-process."""
         result = self._handle_commands(user_input)
         if result is not None:
             return result
@@ -225,10 +225,10 @@ class UltralightCodeAssistant:
         )
         perf["route"] = time.monotonic() - perf["start"]
 
-        # Expert system
-        if not self.dry_run and self._experts_enabled and routing.selected_modules:
+        # Augmentor system
+        if not self.dry_run and self._augmentors_enabled and routing.selected_modules:
             module_hint = routing.selected_modules[0]
-            expert_result = self.expert_router.process(
+            augmentor_result = self.augmentor_router.process(
                 query=user_input,
                 model=self.base_model,
                 chat_format=self.config.fusion.chat_format,
@@ -236,10 +236,10 @@ class UltralightCodeAssistant:
                 gen_kwargs={"max_tokens": self.config.base_model.max_tokens,
                             "temperature": self.config.base_model.temperature},
             )
-            if expert_result is not None:
-                perf["expert"] = expert_result.expert_name
-                perf["expert_attempts"] = expert_result.attempts
-                response = expert_result.response
+            if augmentor_result is not None:
+                perf["augmentor"] = augmentor_result.augmentor_name
+                perf["augmentor_attempts"] = augmentor_result.attempts
+                response = augmentor_result.response
                 perf["generation"] = time.monotonic() - perf["start"] - perf["route"]
                 self._post_process(user_input, response, routing, perf)
                 return response
@@ -436,7 +436,7 @@ class UltralightCodeAssistant:
         if cmd == "/status":
             return (
                 f"Model: {'loaded' if self.base_model.is_loaded else 'not loaded'}\n"
-                f"Experts: {'ON' if self._experts_enabled else 'OFF'}\n"
+                f"Augmentors: {'ON' if self._augmentors_enabled else 'OFF'}\n"
                 f"Modules: {len(self.modules.available_modules)} available\n"
                 f"Memory: {self.memory.status()['short_term_turns']} turns"
             )

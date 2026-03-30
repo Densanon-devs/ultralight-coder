@@ -14,7 +14,7 @@ system:
 # EXECUTION benchmark winner: 98.1% (code runs correctly)
 # Structural benchmark had Llama-3.2-1B winning — but execution
 # tests proved Coder-1.5B writes code that actually works.
-# Experts DISABLED — they hurt this model (-2.7% tuned, +0.5% generic)
+# Augmentors DISABLED — they hurt this model (-2.7% tuned, +0.5% generic)
 # ----------------------------------------------------------
 base_model:
   path: "models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"

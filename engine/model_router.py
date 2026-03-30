@@ -7,7 +7,7 @@ perfect at each task category:
   code      → SmolLM2 135M  (159 tok/s, 3/3 raw)
   math      → Qwen2.5 0.5B  (45 tok/s, 3/3 raw)
   json      → SmolLM2 360M  (65 tok/s, 2/2 raw)
-  reasoning → Llama 3.2 1B   (28 tok/s, needs experts)
+  reasoning → Llama 3.2 1B   (28 tok/s, needs augmentors)
   general   → SmolLM2 135M  (159 tok/s, 2/2 raw)
   instruct  → SmolLM2 135M  (159 tok/s, 1/1 raw)
 

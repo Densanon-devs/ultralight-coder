@@ -150,7 +150,7 @@ def create_app():
             "model": {
                 "loaded": engine.base_model.is_loaded,
             },
-            "experts": engine._experts_enabled,
+            "augmentors": engine._augmentors_enabled,
             "modules": engine.modules.available_modules,
             "memory": engine.memory.status(),
         }

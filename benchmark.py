@@ -8,15 +8,15 @@ Tests GGUF models on code-specific tasks across 4 categories:
   3. Code Review (6 tests)
   4. Explanation (6 tests)
 
-Each model is tested WITH and WITHOUT the expert system to measure
-expert impact. Results are saved as JSON and a summary text file.
+Each model is tested WITH and WITHOUT the augmentor system to measure
+augmentor impact. Results are saved as JSON and a summary text file.
 
 Usage:
     python benchmark.py                      # Run all models
     python benchmark.py --model <path>       # Run a specific model
     python benchmark.py --category code_gen  # Run one category only
     python benchmark.py --quick              # 1 test per category (smoke test)
-    python benchmark.py --no-experts         # Skip expert-enabled runs
+    python benchmark.py --no-augmentors       # Skip augmentor-enabled runs
     python benchmark.py --max-tokens 256     # Override generation length
 """
 
@@ -66,7 +66,7 @@ def detect_chat_format(model_path: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Prompt builder (mirrors expert system's _wrap_expert_chat)
+# Prompt builder (mirrors augmentor system's _wrap_augmentor_chat)
 # ---------------------------------------------------------------------------
 
 def wrap_chat(system: str, user: str, chat_format: str) -> str:
@@ -117,19 +117,19 @@ class TestResult:
     response_time: float = 0.0
     tokens_generated: int = 0
     tokens_per_second: float = 0.0
-    expert_used: bool = False
-    expert_name: str = ""
-    expert_attempts: int = 0
+    augmentor_used: bool = False
+    augmentor_name: str = ""
+    augmentor_attempts: int = 0
 
 
 @dataclass
 class ModelResult:
-    """Aggregated results for one model under one mode (expert/no-expert)."""
+    """Aggregated results for one model under one mode (augmentor/no-augmentor)."""
     model_name: str
     model_path: str
     model_size_mb: float
     chat_format: str
-    experts_enabled: bool
+    augmentors_enabled: bool
     total_tests: int = 0
     total_passed: int = 0
     quality_score: float = 0.0
@@ -149,7 +149,7 @@ class BenchmarkTest:
     """A single benchmark test case."""
     test_id: str
     category: str           # code_gen, debug, review, explain
-    expert_hint: str        # module_hint for ExpertRouter
+    augmentor_hint: str     # module_hint for AugmentorRouter
     prompt: str
     verify: "callable"      # fn(response, prompt) -> (bool, str)
 
@@ -577,7 +577,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cg01_fibonacci",
         category="code_gen",
-        expert_hint="code_gen",
+        augmentor_hint="code_gen",
         prompt="Write a Python function to compute the nth Fibonacci number. Handle edge cases like n=0 and n=1.",
         verify=verify_fibonacci,
     ))
@@ -585,7 +585,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cg02_merge_sorted",
         category="code_gen",
-        expert_hint="code_gen",
+        augmentor_hint="code_gen",
         prompt="Write a Python function that merges two sorted lists into a single sorted list without using built-in sort.",
         verify=verify_merge_sorted,
     ))
@@ -593,7 +593,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cg03_is_prime",
         category="code_gen",
-        expert_hint="code_gen",
+        augmentor_hint="code_gen",
         prompt="Write a Python function to check if a number is prime. Return True if prime, False otherwise. Handle edge cases (0, 1, negative numbers).",
         verify=verify_is_prime,
     ))
@@ -601,7 +601,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cg04_flatten",
         category="code_gen",
-        expert_hint="code_gen",
+        augmentor_hint="code_gen",
         prompt="Write a Python function to flatten a nested list of arbitrary depth. Example: [1, [2, [3, 4]], 5] -> [1, 2, 3, 4, 5]",
         verify=verify_flatten,
     ))
@@ -609,7 +609,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cg05_longest_prefix",
         category="code_gen",
-        expert_hint="code_gen",
+        augmentor_hint="code_gen",
         prompt="Write a Python function to find the longest common prefix string among a list of strings. Return empty string if no common prefix.",
         verify=verify_longest_common_prefix,
     ))
@@ -617,7 +617,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cg06_lru_cache",
         category="code_gen",
-        expert_hint="code_gen",
+        augmentor_hint="code_gen",
         prompt="Write a simple LRU cache class in Python with get(key) and put(key, value) methods. It should have a fixed capacity and evict the least recently used item when full.",
         verify=verify_lru_cache,
     ))
@@ -625,7 +625,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cg07_roman_to_int",
         category="code_gen",
-        expert_hint="code_gen",
+        augmentor_hint="code_gen",
         prompt="Write a Python function to convert a Roman numeral string (like 'XIV') to an integer. Handle subtractive cases like IV=4, IX=9.",
         verify=verify_roman_to_int,
     ))
@@ -633,7 +633,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cg08_permutations",
         category="code_gen",
-        expert_hint="code_gen",
+        augmentor_hint="code_gen",
         prompt="Write a Python function to find all permutations of a string. Return a list of strings.",
         verify=verify_permutations,
     ))
@@ -641,7 +641,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cg09_email_regex",
         category="code_gen",
-        expert_hint="code_gen",
+        augmentor_hint="code_gen",
         prompt="Write a Python function to validate an email address using regex. Return True if the email is valid.",
         verify=verify_email_regex,
     ))
@@ -649,7 +649,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cg10_matrix_multiply",
         category="code_gen",
-        expert_hint="code_gen",
+        augmentor_hint="code_gen",
         prompt="Write a Python function to multiply two matrices (2D lists). Handle dimension mismatch with a ValueError.",
         verify=verify_matrix_multiply,
     ))
@@ -659,7 +659,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="db01_off_by_one",
         category="debug",
-        expert_hint="debugger",
+        augmentor_hint="debugger",
         prompt=(
             "Fix this code. It throws IndexError:\n\n"
             "```python\n"
@@ -677,7 +677,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="db02_mutable_default",
         category="debug",
-        expert_hint="debugger",
+        augmentor_hint="debugger",
         prompt=(
             "This function behaves strangely — calling it multiple times accumulates results:\n\n"
             "```python\n"
@@ -696,7 +696,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="db03_scope",
         category="debug",
-        expert_hint="debugger",
+        augmentor_hint="debugger",
         prompt=(
             "This code raises UnboundLocalError:\n\n"
             "```python\n"
@@ -714,7 +714,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="db04_infinite_loop",
         category="debug",
-        expert_hint="debugger",
+        augmentor_hint="debugger",
         prompt=(
             "This code hangs and never terminates:\n\n"
             "```python\n"
@@ -731,7 +731,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="db05_keyerror",
         category="debug",
-        expert_hint="debugger",
+        augmentor_hint="debugger",
         prompt=(
             "This code crashes with KeyError:\n\n"
             "```python\n"
@@ -749,7 +749,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="db06_typeerror",
         category="debug",
-        expert_hint="debugger",
+        augmentor_hint="debugger",
         prompt=(
             "This code throws TypeError:\n\n"
             "```python\n"
@@ -766,7 +766,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="db07_list_modification",
         category="debug",
-        expert_hint="debugger",
+        augmentor_hint="debugger",
         prompt=(
             "This code skips some elements and gives wrong results:\n\n"
             "```python\n"
@@ -786,7 +786,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="db08_recursion_base",
         category="debug",
-        expert_hint="debugger",
+        augmentor_hint="debugger",
         prompt=(
             "This recursive function causes maximum recursion depth exceeded:\n\n"
             "```python\n"
@@ -803,7 +803,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cr01_sql_injection",
         category="review",
-        expert_hint="code_review",
+        augmentor_hint="code_review",
         prompt=(
             "Review this code for security issues:\n\n"
             "```python\n"
@@ -823,7 +823,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cr02_resource_leak",
         category="review",
-        expert_hint="code_review",
+        augmentor_hint="code_review",
         prompt=(
             "Review this code:\n\n"
             "```python\n"
@@ -842,7 +842,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cr03_performance",
         category="review",
-        expert_hint="code_review",
+        augmentor_hint="code_review",
         prompt=(
             "Review this code for performance:\n\n"
             "```python\n"
@@ -860,7 +860,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cr04_race_condition",
         category="review",
-        expert_hint="code_review",
+        augmentor_hint="code_review",
         prompt=(
             "Review this code used in a multi-threaded web server:\n\n"
             "```python\n"
@@ -880,7 +880,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cr05_hardcoded_creds",
         category="review",
-        expert_hint="code_review",
+        augmentor_hint="code_review",
         prompt=(
             "Review this code:\n\n"
             "```python\n"
@@ -900,7 +900,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="cr06_input_validation",
         category="review",
-        expert_hint="code_review",
+        augmentor_hint="code_review",
         prompt=(
             "Review this code:\n\n"
             "```python\n"
@@ -920,7 +920,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="ex01_decorator",
         category="explain",
-        expert_hint="explainer",
+        augmentor_hint="explainer",
         prompt="Explain what a decorator does in Python. Include a simple example.",
         verify=verify_explain_decorator,
     ))
@@ -928,7 +928,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="ex02_deepcopy",
         category="explain",
-        expert_hint="explainer",
+        augmentor_hint="explainer",
         prompt="Explain the difference between a shallow copy and a deep copy in Python. When would you use each?",
         verify=verify_explain_deepcopy,
     ))
@@ -936,7 +936,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="ex03_yield",
         category="explain",
-        expert_hint="explainer",
+        augmentor_hint="explainer",
         prompt="Explain what `yield` does in Python and how generators work. Show a simple example.",
         verify=verify_explain_yield,
     ))
@@ -944,7 +944,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="ex04_async",
         category="explain",
-        expert_hint="explainer",
+        augmentor_hint="explainer",
         prompt="Explain async/await in Python. When should you use it and what problem does it solve?",
         verify=verify_explain_async,
     ))
@@ -952,7 +952,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="ex05_closure",
         category="explain",
-        expert_hint="explainer",
+        augmentor_hint="explainer",
         prompt="Explain what a closure is in Python. Give a concrete example.",
         verify=verify_explain_closure,
     ))
@@ -960,7 +960,7 @@ def build_test_suite() -> list[BenchmarkTest]:
     tests.append(BenchmarkTest(
         test_id="ex06_gil",
         category="explain",
-        expert_hint="explainer",
+        augmentor_hint="explainer",
         prompt="Explain the GIL (Global Interpreter Lock) in Python. Why does it exist and how does it affect multithreading?",
         verify=verify_explain_gil,
     ))
@@ -1063,48 +1063,48 @@ class BenchmarkRunner:
         model,
         test: BenchmarkTest,
         chat_format: str,
-        expert_router: Optional["ExpertRouter"] = None,
+        augmentor_router: Optional["AugmentorRouter"] = None,
     ) -> TestResult:
-        """Run a single test, optionally through the expert system."""
+        """Run a single test, optionally through the augmentor system."""
         result = TestResult(
             test_id=test.test_id,
             category=test.category,
             prompt=test.prompt,
             response="",
             passed=False,
-            expert_used=expert_router is not None,
+            augmentor_used=augmentor_router is not None,
         )
 
         try:
-            if expert_router is not None:
-                # Run through expert system
-                from engine.experts import ExpertRouter as _ER
+            if augmentor_router is not None:
+                # Run through augmentor system
+                from engine.augmentors import AugmentorRouter as _AR
                 from engine.base_model import BaseModel as _BM
 
                 # Create a minimal shim that wraps the raw llama model
-                # so ExpertRouter.process() can call model.generate() and
+                # so AugmentorRouter.process() can call model.generate() and
                 # model.count_tokens()
                 shim = _ModelShim(model, self.max_tokens, self.temperature)
 
-                expert_result = expert_router.process(
+                augmentor_result = augmentor_router.process(
                     query=test.prompt,
                     model=shim,
                     chat_format=chat_format,
-                    module_hint=test.expert_hint,
+                    module_hint=test.augmentor_hint,
                     gen_kwargs={
                         "max_tokens": self.max_tokens,
                         "temperature": self.temperature,
                     },
                 )
 
-                if expert_result is not None:
-                    result.response = expert_result.response
-                    result.expert_name = expert_result.expert_name
-                    result.expert_attempts = expert_result.attempts
+                if augmentor_result is not None:
+                    result.response = augmentor_result.response
+                    result.augmentor_name = augmentor_result.augmentor_name
+                    result.augmentor_attempts = augmentor_result.attempts
                     result.response_time = shim.total_time
                     result.tokens_generated = shim.total_tokens
                 else:
-                    # Expert router returned None, fall back to direct
+                    # Augmentor router returned None, fall back to direct
                     prompt = wrap_chat(
                         "You are a coding assistant. Write clean, working code.",
                         test.prompt,
@@ -1115,7 +1115,7 @@ class BenchmarkRunner:
                     result.response_time = elapsed
                     result.tokens_generated = tokens
             else:
-                # Direct generation (no expert system)
+                # Direct generation (no augmentor system)
                 prompt = wrap_chat(
                     "You are a coding assistant. Write clean, working code.",
                     test.prompt,
@@ -1150,8 +1150,8 @@ class BenchmarkRunner:
     def run_model(
         self,
         model_path: Path,
-        run_experts: bool = True,
-        run_no_experts: bool = True,
+        run_augmentors: bool = True,
+        run_no_augmentors: bool = True,
     ) -> list[ModelResult]:
         """Run the full test suite on a single model. Returns results for each mode."""
         chat_format = detect_chat_format(str(model_path))
@@ -1174,24 +1174,24 @@ class BenchmarkRunner:
 
         model_results = []
 
-        # --- Run WITHOUT experts ---
-        if run_no_experts:
-            print(f"\n  --- Mode: NO EXPERTS ---")
+        # --- Run WITHOUT augmentors ---
+        if run_no_augmentors:
+            print(f"\n  --- Mode: NO AUGMENTORS ---")
             mr = self._run_suite(
                 model, model_name, str(model_path), model_size_mb,
-                chat_format, experts_enabled=False, expert_router=None,
+                chat_format, augmentors_enabled=False, augmentor_router=None,
             )
             model_results.append(mr)
             self.results.append(mr)
 
-        # --- Run WITH experts ---
-        if run_experts:
-            print(f"\n  --- Mode: WITH EXPERTS ---")
-            from engine.experts import ExpertRouter
-            expert_router = ExpertRouter()
+        # --- Run WITH augmentors ---
+        if run_augmentors:
+            print(f"\n  --- Mode: WITH AUGMENTORS ---")
+            from engine.augmentors import AugmentorRouter
+            augmentor_router = AugmentorRouter()
             mr = self._run_suite(
                 model, model_name, str(model_path), model_size_mb,
-                chat_format, experts_enabled=True, expert_router=expert_router,
+                chat_format, augmentors_enabled=True, augmentor_router=augmentor_router,
             )
             model_results.append(mr)
             self.results.append(mr)
@@ -1210,8 +1210,8 @@ class BenchmarkRunner:
         model_path: str,
         model_size_mb: float,
         chat_format: str,
-        experts_enabled: bool,
-        expert_router,
+        augmentors_enabled: bool,
+        augmentor_router,
     ) -> ModelResult:
         """Run all tests under one mode and aggregate results."""
         mr = ModelResult(
@@ -1219,7 +1219,7 @@ class BenchmarkRunner:
             model_path=model_path,
             model_size_mb=model_size_mb,
             chat_format=chat_format,
-            experts_enabled=experts_enabled,
+            augmentors_enabled=augmentors_enabled,
         )
 
         suite_start = time.monotonic()
@@ -1228,12 +1228,12 @@ class BenchmarkRunner:
         category_counts: dict[str, dict] = {}
 
         for i, test in enumerate(self.tests, 1):
-            tag = "EXPERT" if experts_enabled else "DIRECT"
+            tag = "AUGMENTOR" if augmentors_enabled else "DIRECT"
             print(f"  [{tag}] ({i}/{len(self.tests)}) {test.test_id}...", end=" ", flush=True)
 
             tr = self.run_test(
                 model, test, chat_format,
-                expert_router=expert_router if experts_enabled else None,
+                augmentor_router=augmentor_router if augmentors_enabled else None,
             )
 
             status = "PASS" if tr.passed else "FAIL"
@@ -1276,7 +1276,7 @@ class BenchmarkRunner:
             }
 
         # Print category summary
-        tag = "EXPERT" if experts_enabled else "DIRECT"
+        tag = "AUGMENTOR" if augmentors_enabled else "DIRECT"
         print(f"\n  [{tag}] Results for {model_name}:")
         print(f"    Overall: {mr.total_passed}/{mr.total_tests} ({mr.quality_score:.1f}%)")
         for cat, scores in mr.category_scores.items():
@@ -1291,7 +1291,7 @@ class BenchmarkRunner:
 class _ModelShim:
     """
     Minimal wrapper around a raw llama-cpp model object to satisfy
-    the ExpertRouter.process() interface, which expects:
+    the AugmentorRouter.process() interface, which expects:
       - model.generate(prompt, **kwargs) -> str
       - model.count_tokens(text) -> int
     """
@@ -1364,11 +1364,11 @@ def print_summary_table(results: list[ModelResult]):
     print(header)
     print("-" * 110)
 
-    # Sort by model name, then experts_enabled
-    sorted_results = sorted(results, key=lambda r: (r.model_name, r.experts_enabled))
+    # Sort by model name, then augmentors_enabled
+    sorted_results = sorted(results, key=lambda r: (r.model_name, r.augmentors_enabled))
 
     for mr in sorted_results:
-        mode = "EXPERT" if mr.experts_enabled else "DIRECT"
+        mode = "AUGMENTOR" if mr.augmentors_enabled else "DIRECT"
         cg = mr.category_scores.get("code_gen", {}).get("score", 0)
         db = mr.category_scores.get("debug", {}).get("score", 0)
         cr = mr.category_scores.get("review", {}).get("score", 0)
@@ -1388,17 +1388,17 @@ def print_summary_table(results: list[ModelResult]):
 
     print("-" * 110)
 
-    # Expert impact analysis
-    print("\nEXPERT SYSTEM IMPACT:")
+    # Augmentor impact analysis
+    print("\nAUGMENTOR SYSTEM IMPACT:")
     print("-" * 60)
 
     model_names = set(r.model_name for r in results)
     for name in sorted(model_names):
-        direct = [r for r in results if r.model_name == name and not r.experts_enabled]
-        expert = [r for r in results if r.model_name == name and r.experts_enabled]
-        if direct and expert:
+        direct = [r for r in results if r.model_name == name and not r.augmentors_enabled]
+        augmented = [r for r in results if r.model_name == name and r.augmentors_enabled]
+        if direct and augmented:
             d = direct[0]
-            e = expert[0]
+            e = augmented[0]
             delta = e.quality_score - d.quality_score
             sign = "+" if delta >= 0 else ""
             short_name = name if len(name) <= 40 else name[:37] + "..."
@@ -1433,24 +1433,24 @@ def save_text_summary(results: list[ModelResult], output_path: Path):
     lines.append("")
 
     # Ranking
-    lines.append("RANKING (by quality score, expert mode):")
+    lines.append("RANKING (by quality score, augmentor mode):")
     lines.append("-" * 60)
 
-    expert_results = sorted(
-        [r for r in results if r.experts_enabled],
+    augmentor_results = sorted(
+        [r for r in results if r.augmentors_enabled],
         key=lambda r: r.quality_score,
         reverse=True,
     )
     direct_results = sorted(
-        [r for r in results if not r.experts_enabled],
+        [r for r in results if not r.augmentors_enabled],
         key=lambda r: r.quality_score,
         reverse=True,
     )
 
-    if expert_results:
+    if augmentor_results:
         lines.append("")
-        lines.append("  With Expert System:")
-        for i, r in enumerate(expert_results, 1):
+        lines.append("  With Augmentor System:")
+        for i, r in enumerate(augmentor_results, 1):
             lines.append(
                 f"    {i}. {r.model_name} — {r.quality_score:.1f}% "
                 f"({r.total_passed}/{r.total_tests}) "
@@ -1459,7 +1459,7 @@ def save_text_summary(results: list[ModelResult], output_path: Path):
 
     if direct_results:
         lines.append("")
-        lines.append("  Without Expert System:")
+        lines.append("  Without Augmentor System:")
         for i, r in enumerate(direct_results, 1):
             lines.append(
                 f"    {i}. {r.model_name} — {r.quality_score:.1f}% "
@@ -1473,9 +1473,9 @@ def save_text_summary(results: list[ModelResult], output_path: Path):
     lines.append("DETAILED RESULTS")
     lines.append("=" * 80)
 
-    sorted_all = sorted(results, key=lambda r: (r.model_name, r.experts_enabled))
+    sorted_all = sorted(results, key=lambda r: (r.model_name, r.augmentors_enabled))
     for mr in sorted_all:
-        mode = "WITH EXPERTS" if mr.experts_enabled else "WITHOUT EXPERTS"
+        mode = "WITH AUGMENTORS" if mr.augmentors_enabled else "WITHOUT AUGMENTORS"
         lines.append("")
         lines.append(f"--- {mr.model_name} ({mode}) ---")
         lines.append(f"  Quality: {mr.quality_score:.1f}% ({mr.total_passed}/{mr.total_tests})")
@@ -1497,23 +1497,23 @@ def save_text_summary(results: list[ModelResult], output_path: Path):
             for t in failed:
                 lines.append(f"    - {t['test_id']}: {t['failure_reason']}")
 
-    # Expert impact
+    # Augmentor impact
     lines.append("")
     lines.append("=" * 80)
-    lines.append("EXPERT SYSTEM IMPACT")
+    lines.append("AUGMENTOR SYSTEM IMPACT")
     lines.append("=" * 80)
     lines.append("")
 
     model_names = sorted(set(r.model_name for r in results))
     for name in model_names:
-        direct = [r for r in results if r.model_name == name and not r.experts_enabled]
-        expert = [r for r in results if r.model_name == name and r.experts_enabled]
-        if direct and expert:
+        direct = [r for r in results if r.model_name == name and not r.augmentors_enabled]
+        augmented = [r for r in results if r.model_name == name and r.augmentors_enabled]
+        if direct and augmented:
             d = direct[0]
-            e = expert[0]
+            e = augmented[0]
             delta = e.quality_score - d.quality_score
             lines.append(f"  {name}:")
-            lines.append(f"    Direct: {d.quality_score:.1f}% -> Expert: {e.quality_score:.1f}% (delta: {delta:+.1f}%)")
+            lines.append(f"    Direct: {d.quality_score:.1f}% -> Augmentor: {e.quality_score:.1f}% (delta: {delta:+.1f}%)")
 
             # Per-category delta
             for cat in d.category_scores:
@@ -1544,15 +1544,15 @@ def main():
             "  python benchmark.py --model models/foo.gguf  # Single model\n"
             "  python benchmark.py --category code_gen      # One category\n"
             "  python benchmark.py --quick                  # Smoke test\n"
-            "  python benchmark.py --no-experts             # Skip expert runs\n"
+            "  python benchmark.py --no-augmentors           # Skip augmentor runs\n"
         ),
     )
     parser.add_argument("--model", type=str, help="Path to a specific GGUF model to test")
     parser.add_argument("--category", type=str, choices=["code_gen", "debug", "review", "explain"],
                         help="Run only one test category")
     parser.add_argument("--quick", action="store_true", help="Quick mode: 1 test per category")
-    parser.add_argument("--no-experts", action="store_true", help="Skip expert-enabled runs")
-    parser.add_argument("--no-direct", action="store_true", help="Skip direct (no-expert) runs")
+    parser.add_argument("--no-augmentors", action="store_true", help="Skip augmentor-enabled runs")
+    parser.add_argument("--no-direct", action="store_true", help="Skip direct (no-augmentor) runs")
     parser.add_argument("--max-tokens", type=int, default=512, help="Max generation tokens (default: 512)")
     parser.add_argument("--temperature", type=float, default=0.2, help="Sampling temperature (default: 0.2)")
     parser.add_argument("--gpu-layers", type=int, default=99, help="GPU layers to offload (default: 99)")
@@ -1612,7 +1612,7 @@ def main():
     print(f"Models: {len(models)}")
     print(f"Tests:  {len(all_tests)} per model")
     print(f"Modes:  {'direct' if not args.no_direct else ''}"
-          f"{'+ expert' if not args.no_experts else ''}")
+          f"{'+ augmentor' if not args.no_augmentors else ''}")
     print(f"Config: max_tokens={args.max_tokens}, temp={args.temperature}, "
           f"gpu_layers={args.gpu_layers}, threads={args.threads}")
     print(f"\nModels to benchmark:")
@@ -1638,8 +1638,8 @@ def main():
         try:
             runner.run_model(
                 model_path,
-                run_experts=not args.no_experts,
-                run_no_experts=not args.no_direct,
+                run_augmentors=not args.no_augmentors,
+                run_no_augmentors=not args.no_direct,
             )
         except Exception as e:
             print(f"\n  FATAL ERROR with {model_path.name}: {e}")

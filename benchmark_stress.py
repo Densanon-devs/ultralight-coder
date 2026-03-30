@@ -1128,7 +1128,7 @@ class StressModelResult:
 # ═══════════════════════════════════════════════════════════════════════
 
 class _ModelShim:
-    """Wraps raw llama model for ExpertRouter compatibility."""
+    """Wraps raw llama model for AugmentorRouter compatibility."""
     def __init__(self, model, max_tokens, temperature):
         self.model = model
         self.max_tokens = max_tokens
@@ -1154,19 +1154,19 @@ class _ModelShim:
 
 class StressBenchmarkRunner:
     def __init__(self, gpu_layers: int = 99, threads: int = 8, context_length: int = 4096,
-                 use_experts: bool = False):
+                 use_augmentors: bool = False):
         self.gpu_layers = gpu_layers
         self.threads = threads
         self.context_length = context_length
-        self.use_experts = use_experts
+        self.use_augmentors = use_augmentors
         self.all_results: list[StressModelResult] = []
 
-    def _get_expert_router(self):
-        """Create a stress-targeted expert router."""
-        if not self.use_experts:
+    def _get_augmentor_router(self):
+        """Create a stress-targeted augmentor router."""
+        if not self.use_augmentors:
             return None
-        from engine.experts import ExpertRouter
-        router = ExpertRouter(stress=True)
+        from engine.augmentors import AugmentorRouter
+        router = AugmentorRouter(stress=True)
         try:
             from engine.embedder import get_embedder
             embedder = get_embedder()
@@ -1199,17 +1199,17 @@ class StressBenchmarkRunner:
         return text, elapsed
 
     def run_single_test(self, model, test: StressTest, chat_format: str,
-                        expert_router=None) -> StressTestResult:
-        """Run a single-shot test (tier 1 or 2). Uses expert router if provided."""
-        if expert_router:
+                        augmentor_router=None) -> StressTestResult:
+        """Run a single-shot test (tier 1 or 2). Uses augmentor router if provided."""
+        if augmentor_router:
             shim = _ModelShim(model, test.max_tokens, 0.2)
-            expert_result = expert_router.process(
+            augmentor_result = augmentor_router.process(
                 query=test.prompt, model=shim, chat_format=chat_format,
                 module_hint="code_gen",
                 gen_kwargs={"max_tokens": test.max_tokens, "temperature": 0.2},
             )
-            if expert_result:
-                response = expert_result.response
+            if augmentor_result:
+                response = augmentor_result.response
                 elapsed = shim.total_time
             else:
                 # Fallback to direct
@@ -1254,7 +1254,7 @@ class StressBenchmarkRunner:
 
     def run_multi_turn_test(self, model, test: MultiTurnTest,
                             chat_format: str,
-                            expert_router=None) -> MultiTurnTestResult:
+                            augmentor_router=None) -> MultiTurnTestResult:
         """Run a multi-turn test — each step builds on accumulated code."""
         step_results = []
         accumulated_code = ""
@@ -1271,16 +1271,16 @@ class StressBenchmarkRunner:
             else:
                 user_msg = step.prompt
 
-            # Use expert router if available (especially valuable for first step)
-            if expert_router:
+            # Use augmentor router if available (especially valuable for first step)
+            if augmentor_router:
                 shim = _ModelShim(model, step.max_tokens, 0.2)
-                expert_result = expert_router.process(
+                augmentor_result = augmentor_router.process(
                     query=user_msg, model=shim, chat_format=chat_format,
                     module_hint="code_gen",
                     gen_kwargs={"max_tokens": step.max_tokens, "temperature": 0.2},
                 )
-                if expert_result:
-                    response = expert_result.response
+                if augmentor_result:
+                    response = augmentor_result.response
                     elapsed = shim.total_time
                 else:
                     system = (
@@ -1354,7 +1354,7 @@ class StressBenchmarkRunner:
         model_size_mb = model_path.stat().st_size / (1024 * 1024)
         chat_format = detect_chat_format(str(model_path))
 
-        mode_str = "EXPERTS" if self.use_experts else "DIRECT"
+        mode_str = "AUGMENTORS" if self.use_augmentors else "DIRECT"
         print(f"\n{'='*70}")
         print(f"  Model: {model_name} [{mode_str}]")
         print(f"  Size: {model_size_mb:.0f} MB | Format: {chat_format}")
@@ -1363,8 +1363,8 @@ class StressBenchmarkRunner:
 
         model = self.load_model(model_path)
 
-        # Create expert router if requested
-        expert_router = self._get_expert_router() if self.use_experts else None
+        # Create augmentor router if requested
+        augmentor_router = self._get_augmentor_router() if self.use_augmentors else None
 
         result = StressModelResult(
             model_name=model_name, model_path=str(model_path),
@@ -1379,7 +1379,7 @@ class StressBenchmarkRunner:
             print(f"\n  -- Tier 1: Medium ({len(tier1_tests)} tests) --")
             for test in tier1_tests:
                 print(f"    {test.test_id}...", end=" ", flush=True)
-                tr = self.run_single_test(model, test, chat_format, expert_router=expert_router)
+                tr = self.run_single_test(model, test, chat_format, augmentor_router=augmentor_router)
                 result.tier1_results.append(tr)
                 status = f"{tr.tests_passed}/{tr.tests_total}"
                 icon = "PASS" if tr.score == 1.0 else ("PARTIAL" if tr.score > 0 else "FAIL")
@@ -1399,7 +1399,7 @@ class StressBenchmarkRunner:
             print(f"\n  -- Tier 2: Heavy ({len(tier2_tests)} tests) --")
             for test in tier2_tests:
                 print(f"    {test.test_id}...", end=" ", flush=True)
-                tr = self.run_single_test(model, test, chat_format, expert_router=expert_router)
+                tr = self.run_single_test(model, test, chat_format, augmentor_router=augmentor_router)
                 result.tier2_results.append(tr)
                 status = f"{tr.tests_passed}/{tr.tests_total}"
                 icon = "PASS" if tr.score == 1.0 else ("PARTIAL" if tr.score > 0 else "FAIL")
@@ -1420,7 +1420,7 @@ class StressBenchmarkRunner:
             for test in tier3_tests:
                 print(f"    {test.test_id} ({len(test.steps)} steps):")
                 tr = self.run_multi_turn_test(model, test, chat_format,
-                                              expert_router=expert_router)
+                                              augmentor_router=augmentor_router)
                 result.tier3_results.append(tr)
                 for sr in tr.step_results:
                     status = f"{sr.tests_passed}/{sr.tests_total}"
@@ -1584,8 +1584,8 @@ def main():
     parser.add_argument("--context-length", type=int, default=4096)
     parser.add_argument("--output", type=str, default="benchmark_stress_results.json",
                         help="Output JSON file")
-    parser.add_argument("--experts", action="store_true",
-                        help="Use stress-targeted expert system (few-shot examples)")
+    parser.add_argument("--augmentors", action="store_true",
+                        help="Use stress-targeted augmentor system (few-shot examples)")
     parser.add_argument("--list-tests", action="store_true", help="List all tests and exit")
     args = parser.parse_args()
 
@@ -1626,7 +1626,7 @@ def main():
     if args.quick:
         total_tests = len(tiers)
 
-    mode_str = "EXPERTS" if args.experts else "DIRECT"
+    mode_str = "AUGMENTORS" if args.augmentors else "DIRECT"
     print(f"\n  Stress Benchmark [{mode_str}]")
     print(f"  Models: {len(models)} | Tiers: {tiers} | Tests: {total_tests}/model")
     print(f"  {'Quick mode' if args.quick else 'Full run'}")
@@ -1635,7 +1635,7 @@ def main():
         gpu_layers=args.gpu_layers,
         threads=args.threads,
         context_length=args.context_length,
-        use_experts=args.experts,
+        use_augmentors=args.augmentors,
     )
 
     for model_path in models:

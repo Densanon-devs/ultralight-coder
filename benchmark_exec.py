@@ -787,7 +787,7 @@ class ExecModelResult:
     model_path: str
     model_size_mb: float
     chat_format: str
-    mode: str  # "direct", "generic_expert", "tuned_expert"
+    mode: str  # "direct", "generic_augmentor", "tuned_augmentor"
     total_score: float  # average of test scores
     tests_run: int
     perfect_count: int  # tests with 100% assertions passing
@@ -801,7 +801,7 @@ class ExecModelResult:
 # ---------------------------------------------------------------------------
 
 class _ModelShim:
-    """Wraps raw llama model to provide .generate() and .count_tokens() for ExpertRouter."""
+    """Wraps raw llama model to provide .generate() and .count_tokens() for AugmentorRouter."""
     def __init__(self, model, max_tokens, temperature):
         self.model = model
         self.max_tokens = max_tokens
@@ -866,19 +866,19 @@ class ExecBenchmarkRunner:
         return text, elapsed, tokens
 
     def run_test(self, model, test: ExecTest, chat_format: str,
-                 expert_router=None) -> ExecTestResult:
-        """Run a test. If expert_router is provided, use it to build the prompt."""
-        if expert_router:
-            # Use expert system to build prompt + generate
-            from engine.experts import ExpertResult
+                 augmentor_router=None) -> ExecTestResult:
+        """Run a test. If augmentor_router is provided, use it to build the prompt."""
+        if augmentor_router:
+            # Use augmentor system to build prompt + generate
+            from engine.augmentors import AugmentorResult
             shim = _ModelShim(model, self.max_tokens, self.temperature)
-            expert_result = expert_router.process(
+            augmentor_result = augmentor_router.process(
                 query=test.prompt, model=shim, chat_format=chat_format,
                 module_hint="code_gen",
                 gen_kwargs={"max_tokens": self.max_tokens, "temperature": self.temperature},
             )
-            if expert_result:
-                response = expert_result.response
+            if augmentor_result:
+                response = augmentor_result.response
                 elapsed = shim.total_time
                 tokens = shim.total_tokens
             else:
@@ -988,7 +988,7 @@ class ExecBenchmarkRunner:
         )
 
     def _run_suite(self, model, model_name, model_path, model_size_mb,
-                   chat_format, mode, expert_router=None):
+                   chat_format, mode, augmentor_router=None):
         """Run all tests under one mode."""
         mr = ExecModelResult(
             model_name=model_name, model_path=model_path,
@@ -1007,7 +1007,7 @@ class ExecBenchmarkRunner:
             if mode == "pipeline":
                 tr = self.run_test_pipeline(model, test, chat_format)
             else:
-                tr = self.run_test(model, test, chat_format, expert_router=expert_router)
+                tr = self.run_test(model, test, chat_format, augmentor_router=augmentor_router)
             mr.results.append(tr)
             all_scores.append(tr.score)
             all_times.append(tr.response_time)
@@ -1058,13 +1058,13 @@ class ExecBenchmarkRunner:
 
         results = []
         for mode in modes:
-            expert_router = None
+            augmentor_router = None
             if mode in ("generic", "tuned"):
-                from engine.experts import ExpertRouter
-                expert_router = ExpertRouter(tuned=(mode == "tuned"))
+                from engine.augmentors import AugmentorRouter
+                augmentor_router = AugmentorRouter(tuned=(mode == "tuned"))
 
             mr = self._run_suite(model, model_name, str(model_path),
-                                 model_size_mb, chat_format, mode, expert_router)
+                                 model_size_mb, chat_format, mode, augmentor_router)
             results.append(mr)
 
         del model
@@ -1161,11 +1161,11 @@ def print_summary(results: list[ExecModelResult]):
               f"{r.perfect_count:>3d}/{r.tests_run:<3d}  "
               f"{r.model_size_mb:>5.0f}MB {r.avg_response_time:>5.1f}s")
 
-    # Expert impact comparison
+    # Augmentor impact comparison
     model_names = sorted(set(r.model_name for r in results))
     modes_present = sorted(set(r.mode for r in results))
     if len(modes_present) > 1:
-        print(f"\n  EXPERT IMPACT:")
+        print(f"\n  AUGMENTOR IMPACT:")
         print(f"  {'-'*60}")
         for name in model_names:
             scores = {r.mode: r.total_score for r in results if r.model_name == name}
@@ -1197,8 +1197,8 @@ def main():
     parser.add_argument("--model", type=str, help="Specific model to test")
     parser.add_argument("--all", action="store_true", help="Test all available models")
     parser.add_argument("--quick", action="store_true", help="Quick: first 5 tests only")
-    parser.add_argument("--tuned", action="store_true", help="Run with tuned experts")
-    parser.add_argument("--expert", action="store_true", help="Run with generic experts")
+    parser.add_argument("--tuned", action="store_true", help="Run with tuned augmentors")
+    parser.add_argument("--augmentor", action="store_true", help="Run with generic augmentors")
     parser.add_argument("--pipeline", action="store_true", help="Run with test-execute-retry pipeline")
     parser.add_argument("--compare", action="store_true", help="Run all modes: direct, pipeline")
     parser.add_argument("--compare-all", action="store_true", help="Run ALL modes: direct, generic, tuned, pipeline")
@@ -1228,7 +1228,7 @@ def main():
         modes = ["direct"]
     else:
         modes = ["direct"]
-        if args.expert:
+        if args.augmentor:
             modes.append("generic")
         if args.tuned:
             modes.append("tuned")

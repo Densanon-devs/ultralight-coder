@@ -1,7 +1,7 @@
 """
-Expert System — Code-Focused Experts
+Augmentor System — Code-Focused Augmentors
 
-Branched from PIE's expert system. Stripped NPC experts, expanded code expertise.
+Branched from PIE's expert system. Stripped NPC augmentors, expanded code augmentation.
 
 1. DYNAMIC FEW-SHOT RETRIEVAL — finds similar solved examples
 2. OUTPUT SCAFFOLDING — forces structured reasoning
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class SolvedExample:
-    """A solved example in the expert's knowledge bank."""
+    """A solved example in the augmentor's knowledge bank."""
     query: str
     solution: str
     category: str = ""
@@ -35,10 +35,10 @@ class SolvedExample:
 
 
 @dataclass
-class ExpertResult:
-    """Result from an expert's processing."""
+class AugmentorResult:
+    """Result from an augmentor's processing."""
     response: str
-    expert_name: str
+    augmentor_name: str
     attempts: int = 1
     verified: bool = False
     scaffolding_used: bool = False
@@ -46,9 +46,9 @@ class ExpertResult:
     prompt_tokens: int = 0
 
 
-class Expert:
+class Augmentor:
     """
-    A single domain expert with:
+    A single domain augmentor with:
     - Embedded example bank for few-shot retrieval
     - Output scaffolding template
     - Verification function
@@ -86,7 +86,7 @@ class Expert:
         for i, ex in enumerate(self.examples):
             ex.embedding = embeddings[i].tolist()
 
-        logger.debug(f"Expert '{self.name}': embedded {len(self.examples)} examples")
+        logger.debug(f"Augmentor '{self.name}': embedded {len(self.examples)} examples")
 
     def retrieve_examples(self, query: str, top_k: Optional[int] = None) -> list[SolvedExample]:
         """Find the most relevant solved examples for a query.
@@ -151,7 +151,7 @@ class Expert:
         else:
             user_block = user_input
 
-        return _wrap_expert_chat(system_block, user_block, chat_format)
+        return _wrap_augmentor_chat(system_block, user_block, chat_format)
 
     def build_retry_prompt(self, user_input: str, previous_response: str,
                            error_hint: str, chat_format: str) -> str:
@@ -175,10 +175,10 @@ class Expert:
         if self.scaffolding:
             user_block += f"\n\n{self.scaffolding}"
 
-        return _wrap_expert_chat(system_block, user_block, chat_format)
+        return _wrap_augmentor_chat(system_block, user_block, chat_format)
 
     def verify(self, response: str, query: str) -> tuple[bool, str]:
-        """Verify the response using the expert's verifier."""
+        """Verify the response using the augmentor's verifier."""
         if self.verifier is None:
             return True, ""
         try:
@@ -188,7 +188,7 @@ class Expert:
             return True, ""
 
 
-def _wrap_expert_chat(system: str, user: str, chat_format: str) -> str:
+def _wrap_augmentor_chat(system: str, user: str, chat_format: str) -> str:
     """Minimal chat wrapping."""
     if chat_format == "chatml":
         return (f"<|im_start|>system\n{system}<|im_end|>\n"
@@ -267,10 +267,10 @@ def verify_explanation(response: str, query: str) -> tuple[bool, str]:
     return True, ""
 
 
-# ── Expert Definitions ────────────────────────────────────────
+# ── Augmentor Definitions ────────────────────────────────────
 
-def build_code_gen_expert() -> Expert:
-    """Expert for code generation — expanded with diverse examples."""
+def build_code_gen_augmentor() -> Augmentor:
+    """Augmentor for code generation — expanded with diverse examples."""
     examples = [
         SolvedExample(
             "Write a function that reverses a string.",
@@ -324,7 +324,7 @@ def build_code_gen_expert() -> Expert:
         ),
     ]
 
-    return Expert(
+    return Augmentor(
         name="code_gen",
         system_context="Write clean, working code. Use ```language blocks. Include type hints. Handle edge cases.",
         examples=examples,
@@ -334,8 +334,8 @@ def build_code_gen_expert() -> Expert:
     )
 
 
-def build_code_review_expert() -> Expert:
-    """Expert for code review."""
+def build_code_review_augmentor() -> Augmentor:
+    """Augmentor for code review."""
     examples = [
         SolvedExample(
             "Review this:\ndef add(a, b):\n    return a + b",
@@ -359,7 +359,7 @@ def build_code_review_expert() -> Expert:
         ),
     ]
 
-    return Expert(
+    return Augmentor(
         name="code_review",
         system_context="Review code for bugs, security issues, performance, and quality. Show the fixed version.",
         examples=examples,
@@ -369,8 +369,8 @@ def build_code_review_expert() -> Expert:
     )
 
 
-def build_debug_expert() -> Expert:
-    """Expert for debugging."""
+def build_debug_augmentor() -> Augmentor:
+    """Augmentor for debugging."""
     examples = [
         SolvedExample(
             "My function returns None instead of the result:\ndef process(data):\n    for item in data:\n        result = item * 2\n    return result",
@@ -399,7 +399,7 @@ def build_debug_expert() -> Expert:
         ),
     ]
 
-    return Expert(
+    return Augmentor(
         name="debugger",
         system_context="Diagnose the bug. Explain the root cause first, then show the fix.",
         examples=examples,
@@ -409,8 +409,8 @@ def build_debug_expert() -> Expert:
     )
 
 
-def build_explainer_expert() -> Expert:
-    """Expert for explaining code and concepts."""
+def build_explainer_augmentor() -> Augmentor:
+    """Augmentor for explaining code and concepts."""
     examples = [
         SolvedExample(
             "Explain list comprehensions in Python.",
@@ -429,7 +429,7 @@ def build_explainer_expert() -> Expert:
         ),
     ]
 
-    return Expert(
+    return Augmentor(
         name="explainer",
         system_context="Explain code and concepts clearly with concrete examples. Code first, then explain.",
         examples=examples,
@@ -439,11 +439,11 @@ def build_explainer_expert() -> Expert:
     )
 
 
-# ── Tuned Expert Definitions ─────────────────────────────────
+# ── Tuned Augmentor Definitions ─────────────────────────────
 
-def build_tuned_code_gen_expert() -> Expert:
+def build_tuned_code_gen_augmentor() -> Augmentor:
     """
-    Tuned code_gen expert with algorithm-specific few-shot examples.
+    Tuned code_gen augmentor with algorithm-specific few-shot examples.
 
     Targets the exact failure modes observed in benchmarks:
     - Fibonacci: wrong base cases / 1-indexed confusion
@@ -503,7 +503,7 @@ def build_tuned_code_gen_expert() -> Expert:
         ),
     ]
 
-    return Expert(
+    return Augmentor(
         name="code_gen",
         system_context=(
             "Write clean, working code. Use ```language blocks. Include type hints. "
@@ -517,9 +517,9 @@ def build_tuned_code_gen_expert() -> Expert:
     )
 
 
-def build_stress_code_gen_expert() -> Expert:
+def build_stress_code_gen_augmentor() -> Augmentor:
     """
-    Stress-targeted code_gen expert with few-shot examples for patterns
+    Stress-targeted code_gen augmentor with few-shot examples for patterns
     that sub-3B models universally fail on:
 
     - Decorator with function attributes (.attempts tracking)
@@ -651,7 +651,7 @@ def build_stress_code_gen_expert() -> Expert:
         ),
     ]
 
-    return Expert(
+    return Augmentor(
         name="code_gen",
         system_context=(
             "You are a Python expert. Write complete, correct, runnable code. "
@@ -667,125 +667,125 @@ def build_stress_code_gen_expert() -> Expert:
     )
 
 
-# ── Expert Router ─────────────────────────────────────────────
+# ── Augmentor Router ─────────────────────────────────────────
 
-class ExpertRouter:
-    """Routes queries to the right expert and runs generate -> verify -> retry."""
+class AugmentorRouter:
+    """Routes queries to the right augmentor and runs generate -> verify -> retry."""
 
     def __init__(self, tuned: bool = False, stress: bool = False):
-        self.experts: dict[str, Expert] = {}
+        self.augmentors: dict[str, Augmentor] = {}
         self._embedder = None
         self._tuned = tuned
         self._stress = stress
         # Keep all sets available for runtime switching
-        self._generic_experts: dict[str, Expert] = {}
-        self._tuned_experts: dict[str, Expert] = {}
-        self._stress_experts: dict[str, Expert] = {}
+        self._generic_augmentors: dict[str, Augmentor] = {}
+        self._tuned_augmentors: dict[str, Augmentor] = {}
+        self._stress_augmentors: dict[str, Augmentor] = {}
         self._register_defaults()
 
     def _register_defaults(self):
-        """Register code-focused experts. Uses tuned code_gen when self._tuned is True."""
+        """Register code-focused augmentors. Uses tuned code_gen when self._tuned is True."""
         # Always build both sets so we can switch at runtime
-        self._generic_experts = {
-            "code_gen": build_code_gen_expert(),
-            "code_review": build_code_review_expert(),
-            "debugger": build_debug_expert(),
-            "explainer": build_explainer_expert(),
+        self._generic_augmentors = {
+            "code_gen": build_code_gen_augmentor(),
+            "code_review": build_code_review_augmentor(),
+            "debugger": build_debug_augmentor(),
+            "explainer": build_explainer_augmentor(),
         }
-        self._tuned_experts = {
-            "code_gen": build_tuned_code_gen_expert(),
-            "code_review": build_code_review_expert(),
-            "debugger": build_debug_expert(),
-            "explainer": build_explainer_expert(),
+        self._tuned_augmentors = {
+            "code_gen": build_tuned_code_gen_augmentor(),
+            "code_review": build_code_review_augmentor(),
+            "debugger": build_debug_augmentor(),
+            "explainer": build_explainer_augmentor(),
         }
-        self._stress_experts = {
-            "code_gen": build_stress_code_gen_expert(),
-            "code_review": build_code_review_expert(),
-            "debugger": build_debug_expert(),
-            "explainer": build_explainer_expert(),
+        self._stress_augmentors = {
+            "code_gen": build_stress_code_gen_augmentor(),
+            "code_review": build_code_review_augmentor(),
+            "debugger": build_debug_augmentor(),
+            "explainer": build_explainer_augmentor(),
         }
 
         if self._stress:
-            self.experts = dict(self._stress_experts)
+            self.augmentors = dict(self._stress_augmentors)
         elif self._tuned:
-            self.experts = dict(self._tuned_experts)
+            self.augmentors = dict(self._tuned_augmentors)
         else:
-            self.experts = dict(self._generic_experts)
+            self.augmentors = dict(self._generic_augmentors)
 
     def init_embeddings(self, embedder):
-        """Initialize embeddings for all experts (all sets)."""
+        """Initialize embeddings for all augmentors (all sets)."""
         self._embedder = embedder
-        all_experts = (set(self._generic_experts.values())
-                       | set(self._tuned_experts.values())
-                       | set(self._stress_experts.values()))
-        for expert in all_experts:
-            expert.init_embeddings(embedder)
-        logger.info(f"Expert embeddings initialized for {len(self.experts)} active experts")
+        all_augmentors = (set(self._generic_augmentors.values())
+                          | set(self._tuned_augmentors.values())
+                          | set(self._stress_augmentors.values()))
+        for augmentor in all_augmentors:
+            augmentor.init_embeddings(embedder)
+        logger.info(f"Augmentor embeddings initialized for {len(self.augmentors)} active augmentors")
 
-    def use_tuned_experts(self):
-        """Swap in tuned code_gen expert (algorithm-specific few-shot examples)."""
+    def use_tuned_augmentors(self):
+        """Swap in tuned code_gen augmentor (algorithm-specific few-shot examples)."""
         self._tuned = True
         self._stress = False
-        self.experts = dict(self._tuned_experts)
-        logger.info("Switched to tuned experts")
+        self.augmentors = dict(self._tuned_augmentors)
+        logger.info("Switched to tuned augmentors")
 
-    def use_generic_experts(self):
-        """Revert to the original generic experts."""
+    def use_generic_augmentors(self):
+        """Revert to the original generic augmentors."""
         self._tuned = False
         self._stress = False
-        self.experts = dict(self._generic_experts)
-        logger.info("Switched to generic experts")
+        self.augmentors = dict(self._generic_augmentors)
+        logger.info("Switched to generic augmentors")
 
-    def use_stress_experts(self):
-        """Swap in stress-targeted experts (pattern-specific few-shot examples)."""
+    def use_stress_augmentors(self):
+        """Swap in stress-targeted augmentors (pattern-specific few-shot examples)."""
         self._tuned = False
         self._stress = True
-        self.experts = dict(self._stress_experts)
-        logger.info("Switched to stress experts")
+        self.augmentors = dict(self._stress_augmentors)
+        logger.info("Switched to stress augmentors")
 
-    def select_expert(self, query: str, module_hint: Optional[str] = None) -> Optional[Expert]:
-        """Select the best expert for a query."""
+    def select_augmentor(self, query: str, module_hint: Optional[str] = None) -> Optional[Augmentor]:
+        """Select the best augmentor for a query."""
         if module_hint == "code_gen":
-            return self.experts.get("code_gen")
+            return self.augmentors.get("code_gen")
         if module_hint == "code_review":
-            return self.experts.get("code_review")
+            return self.augmentors.get("code_review")
         if module_hint == "debugger":
-            return self.experts.get("debugger")
+            return self.augmentors.get("debugger")
         if module_hint == "explainer":
-            return self.experts.get("explainer")
+            return self.augmentors.get("explainer")
 
         q = query.lower()
         if any(w in q for w in ["write", "create", "implement", "build", "generate", "function", "class"]):
-            return self.experts.get("code_gen")
+            return self.augmentors.get("code_gen")
         if any(w in q for w in ["review", "check", "audit", "refactor", "optimize", "improve"]):
-            return self.experts.get("code_review")
+            return self.augmentors.get("code_review")
         if any(w in q for w in ["bug", "fix", "error", "debug", "crash", "traceback", "broken"]):
-            return self.experts.get("debugger")
+            return self.augmentors.get("debugger")
         if any(w in q for w in ["explain", "how does", "what is", "what's the difference", "teach"]):
-            return self.experts.get("explainer")
+            return self.augmentors.get("explainer")
 
         if any(w in q for w in ["code", "python", "script", "def ", "import "]):
-            return self.experts.get("code_gen")
+            return self.augmentors.get("code_gen")
 
         return None
 
     def process(self, query: str, model, chat_format: str,
                 module_hint: Optional[str] = None,
-                gen_kwargs: Optional[dict] = None) -> Optional[ExpertResult]:
-        """Full expert pipeline: select -> build prompt -> generate -> verify -> retry."""
+                gen_kwargs: Optional[dict] = None) -> Optional[AugmentorResult]:
+        """Full augmentor pipeline: select -> build prompt -> generate -> verify -> retry."""
         kwargs = gen_kwargs or {}
-        expert = self.select_expert(query, module_hint)
+        augmentor = self.select_augmentor(query, module_hint)
 
-        if expert is None:
+        if augmentor is None:
             return None
 
-        prompt = expert.build_prompt(query, chat_format)
+        prompt = augmentor.build_prompt(query, chat_format)
         prompt_tokens = model.count_tokens(prompt)
 
-        if expert.grammar_str:
+        if augmentor.grammar_str:
             try:
                 from llama_cpp import LlamaGrammar
-                grammar = LlamaGrammar.from_string(expert.grammar_str)
+                grammar = LlamaGrammar.from_string(augmentor.grammar_str)
                 kwargs["grammar"] = grammar
             except Exception:
                 pass
@@ -793,30 +793,30 @@ class ExpertRouter:
         response = model.generate(prompt, **kwargs)
         attempts = 1
 
-        for retry in range(expert.max_retries):
-            passed, error_hint = expert.verify(response, query)
+        for retry in range(augmentor.max_retries):
+            passed, error_hint = augmentor.verify(response, query)
             if passed:
                 break
 
             logger.debug(
-                f"Expert '{expert.name}' verification failed (attempt {attempts}): {error_hint}"
+                f"Augmentor '{augmentor.name}' verification failed (attempt {attempts}): {error_hint}"
             )
 
-            retry_prompt = expert.build_retry_prompt(
+            retry_prompt = augmentor.build_retry_prompt(
                 query, response, error_hint, chat_format,
             )
             response = model.generate(retry_prompt, **kwargs)
             attempts += 1
 
-        verified, _ = expert.verify(response, query)
-        examples_used = len(expert.retrieve_examples(query))
+        verified, _ = augmentor.verify(response, query)
+        examples_used = len(augmentor.retrieve_examples(query))
 
-        return ExpertResult(
+        return AugmentorResult(
             response=response,
-            expert_name=expert.name,
+            augmentor_name=augmentor.name,
             attempts=attempts,
             verified=verified,
-            scaffolding_used=expert.scaffolding is not None,
+            scaffolding_used=augmentor.scaffolding is not None,
             examples_injected=examples_used,
             prompt_tokens=prompt_tokens,
         )

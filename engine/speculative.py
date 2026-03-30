@@ -5,11 +5,11 @@ Since native speculative decoding requires matching vocabularies
 (Llama 3.2 vocab=128256 doesn't match any small model), we implement
 speculative execution at the application level:
 
-1. PARALLEL GENERATION: Run fast model + expert system simultaneously
+1. PARALLEL GENERATION: Run fast model + augmentor system simultaneously
    on different prompts from a batch, overlapping I/O with generation.
 
 2. PREDICTIVE GENERATION: Start generating the likely response while
-   still doing routing/expert retrieval. If the prediction is wrong,
+   still doing routing/augmentor retrieval. If the prediction is wrong,
    discard and regenerate.
 
 3. N-GRAM CACHE: Cache common prompt→response patterns. If we've seen
