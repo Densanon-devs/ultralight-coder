@@ -1,0 +1,231 @@
+[
+  {
+    "model_name": "Llama-3.2-1B-Instruct-Q4_K_M",
+    "model_path": "D:\\LLCWork\\ultralight-coder\\..\\plug-in-intelligence-engine\\models\\Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+    "model_size_mb": 770.2774658203125,
+    "chat_format": "llama3",
+    "tier1_score": 0.25,
+    "tier2_score": 0.0,
+    "overall_score": 0.25,
+    "total_time": 105.98399999999674,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 7,
+        "response_time": 46.43699999997625,
+        "test_errors": [
+          "IndentationError: expected an indented block after function definition on line 100 (<string>, line 100)"
+        ],
+        "exec_error": "IndentationError: expected an indented block after function definition on line 100 (<string>, line 100)"
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 4,
+        "response_time": 10.73499999998603,
+        "test_errors": [
+          "AttributeError: 'Timer' object has no attribute 'elapsed'"
+        ],
+        "exec_error": "AttributeError: 'Timer' object has no attribute 'elapsed'"
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 27.25,
+        "test_errors": [
+          "RecursionError: maximum recursion depth exceeded"
+        ],
+        "exec_error": "RecursionError: maximum recursion depth exceeded"
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 21.56200000003446,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": []
+  },
+  {
+    "model_name": "qwen2.5-coder-1.5b-instruct-q4_k_m",
+    "model_path": "D:\\LLCWork\\ultralight-coder\\models\\qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+    "model_size_mb": 1065.5601196289062,
+    "chat_format": "chatml",
+    "tier1_score": 0.75,
+    "tier2_score": 0.0,
+    "overall_score": 0.75,
+    "total_time": 71.06099999992875,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 1.0,
+        "tests_passed": 7,
+        "tests_total": 7,
+        "response_time": 41.51499999995576,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 4,
+        "response_time": 7.35899999999674,
+        "test_errors": [
+          "ERROR: assert t.elapsed >= 0.04 -> AttributeError: 'Timer' object has no attribute 'elapsed'",
+          "ERROR: assert t.elapsed < 1.0 -> AttributeError: 'Timer' object has no attribute 'elapsed'",
+          "ERROR: assert t2.elapsed >= 0 -> AttributeError: 'Timer' object has no attribute 'elapsed'",
+          "ERROR: assert t2.elapsed < 0.1 -> AttributeError: 'Timer' object has no attribute 'elapsed'"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 12.811999999976251,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 9.375,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": []
+  },
+  {
+    "model_name": "qwen2.5-coder-0.5b-instruct-q4_k_m",
+    "model_path": "D:\\LLCWork\\ultralight-coder\\models\\qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+    "model_size_mb": 468.6356201171875,
+    "chat_format": "chatml",
+    "tier1_score": 1.0,
+    "tier2_score": 0.0,
+    "overall_score": 1.0,
+    "total_time": 25.124999999941792,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 1.0,
+        "tests_passed": 7,
+        "tests_total": 7,
+        "response_time": 7.157000000006519,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 2.405999999959022,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 10.375,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 5.186999999976251,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": []
+  },
+  {
+    "model_name": "SmolLM2-135M-Instruct-Q4_K_M",
+    "model_path": "D:\\LLCWork\\ultralight-coder\\..\\plug-in-intelligence-engine\\models\\SmolLM2-135M-Instruct-Q4_K_M.gguf",
+    "model_size_mb": 100.56890869140625,
+    "chat_format": "chatml",
+    "tier1_score": 0.0,
+    "tier2_score": 0.0,
+    "overall_score": 0.0,
+    "total_time": 28.93699999997625,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 7,
+        "response_time": 10.139999999955762,
+        "test_errors": [
+          "ERROR: assert list(ReusableRange(5)) == [0, 1, 2, 3, 4] -> TypeError: ReusableRange.__init__() missing 2 required positional arguments: 'stop' and 'step'",
+          "ERROR: assert list(ReusableRange(2, 5)) == [2, 3, 4] -> TypeError: ReusableRange.__init__() missing 1 required positional argument: 'step'",
+          "ERROR: r = ReusableRange(3) -> TypeError: ReusableRange.__init__() missing 2 required positional arguments: 'stop' and 'step'",
+          "ERROR: assert list(r) == [0, 1, 2] -> NameError: name 'r' is not defined",
+          "ERROR: assert list(r) == [0, 1, 2] -> NameError: name 'r' is not defined",
+          "ERROR: assert list(ReusableRange(0, 10, 3)) == [0, 3, 6, 9] -> TypeError: iter() returned non-iterator of type 'ReusableRange'",
+          "ERROR: assert list(ReusableRange(0)) == [] -> TypeError: ReusableRange.__init__() missing 2 required positional arguments: 'stop' and 'step'",
+          "ERROR: assert list(ReusableRange(1, 1)) == [] -> TypeError: ReusableRange.__init__() missing 1 required positional argument: 'step'"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 4,
+        "response_time": 5.48399999999674,
+        "test_errors": [
+          "ERROR: t = Timer() -> TypeError: Timer.__init__() missing 1 required positional argument: 'data'",
+          "ERROR: with t: -> NameError: name 't' is not defined",
+          "ERROR: assert t.elapsed >= 0.04 -> NameError: name 't' is not defined",
+          "ERROR: assert t.elapsed < 1.0 -> NameError: name 't' is not defined",
+          "ERROR: t2 = Timer() -> TypeError: Timer.__init__() missing 1 required positional argument: 'data'",
+          "ERROR: with t2: -> NameError: name 't2' is not defined",
+          "ERROR: assert t2.elapsed >= 0 -> NameError: name 't2' is not defined",
+          "ERROR: assert t2.elapsed < 0.1 -> NameError: name 't2' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 4.5,
+        "test_errors": [
+          "SyntaxError: cannot assign to function call here. Maybe you meant '==' instead of '='? (<string>, line 12)"
+        ],
+        "exec_error": "SyntaxError: cannot assign to function call here. Maybe you meant '==' instead of '='? (<string>, line 12)"
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 6,
+        "response_time": 8.813000000023749,
+        "test_errors": [
+          "SyntaxError: invalid syntax (<string>, line 165)"
+        ],
+        "exec_error": "SyntaxError: invalid syntax (<string>, line 165)"
+      }
+    ],
+    "tier2_results": []
+  }
+]

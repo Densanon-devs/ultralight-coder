@@ -812,10 +812,13 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
 
     def _get_augmentor_router(self):
         """Create a programmer-targeted augmentor router."""
-        if not self.use_augmentors:
+        if not self.use_augmentors and not self.use_yaml:
             return None
         from engine.augmentors import AugmentorRouter
-        router = AugmentorRouter(pack=True)
+        if self.use_yaml:
+            router = AugmentorRouter(yaml_dir="data/augmentor_examples")
+        else:
+            router = AugmentorRouter(pack=True)
         try:
             from engine.embedder import get_embedder
             embedder = get_embedder()
@@ -832,7 +835,7 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
         model_size_mb = model_path.stat().st_size / (1024 * 1024)
         chat_format = detect_chat_format(str(model_path))
 
-        mode_str = "AUGMENTORS" if self.use_augmentors else "DIRECT"
+        mode_str = "YAML" if self.use_yaml else ("AUGMENTORS" if self.use_augmentors else "DIRECT")
         print(f"\n{'='*70}")
         print(f"  Model: {model_name} [{mode_str}]")
         print(f"  Size: {model_size_mb:.0f} MB | Format: {chat_format}")
@@ -840,7 +843,7 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
         print(f"{'='*70}")
 
         model = self.load_model(model_path)
-        augmentor_router = self._get_augmentor_router() if self.use_augmentors else None
+        augmentor_router = self._get_augmentor_router() if (self.use_augmentors or self.use_yaml) else None
 
         result = StressModelResult(
             model_name=model_name, model_path=str(model_path),
@@ -1031,6 +1034,8 @@ def main():
                         help="Output JSON file")
     parser.add_argument("--augmentors", action="store_true",
                         help="Use programmer-pack augmentor system (few-shot examples)")
+    parser.add_argument("--yaml", action="store_true",
+                        help="Use YAML-based augmentors from data/augmentor_examples/")
     parser.add_argument("--list-tests", action="store_true", help="List all tests and exit")
     args = parser.parse_args()
 
@@ -1081,7 +1086,7 @@ def main():
     all_tests = build_programmer_tests()
     test_count = 4 if args.quick else len(all_tests)
 
-    mode_str = "AUGMENTORS" if args.augmentors else "DIRECT"
+    mode_str = "YAML" if args.yaml else ("AUGMENTORS" if args.augmentors else "DIRECT")
     print(f"\n  Programmer Pack Benchmark [{mode_str}]")
     print(f"  Models: {len(models)} | Tests: {test_count}/model")
     print(f"  Domains: 8 (Iterator, Context, Descriptor, Thread, Serial, Tree, Text, Middleware)")
@@ -1092,6 +1097,7 @@ def main():
         threads=args.threads,
         context_length=args.context_length,
         use_augmentors=args.augmentors,
+        use_yaml=args.yaml,
     )
 
     for model_path in models:

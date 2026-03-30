@@ -1154,19 +1154,23 @@ class _ModelShim:
 
 class StressBenchmarkRunner:
     def __init__(self, gpu_layers: int = 99, threads: int = 8, context_length: int = 4096,
-                 use_augmentors: bool = False):
+                 use_augmentors: bool = False, use_yaml: bool = False):
         self.gpu_layers = gpu_layers
         self.threads = threads
         self.context_length = context_length
         self.use_augmentors = use_augmentors
+        self.use_yaml = use_yaml
         self.all_results: list[StressModelResult] = []
 
     def _get_augmentor_router(self):
         """Create a stress-targeted augmentor router."""
-        if not self.use_augmentors:
+        if not self.use_augmentors and not self.use_yaml:
             return None
         from engine.augmentors import AugmentorRouter
-        router = AugmentorRouter(stress=True)
+        if self.use_yaml:
+            router = AugmentorRouter(yaml_dir="data/augmentor_examples")
+        else:
+            router = AugmentorRouter(stress=True)
         try:
             from engine.embedder import get_embedder
             embedder = get_embedder()
@@ -1586,6 +1590,8 @@ def main():
                         help="Output JSON file")
     parser.add_argument("--augmentors", action="store_true",
                         help="Use stress-targeted augmentor system (few-shot examples)")
+    parser.add_argument("--yaml", action="store_true",
+                        help="Use YAML-based augmentors from data/augmentor_examples/")
     parser.add_argument("--list-tests", action="store_true", help="List all tests and exit")
     args = parser.parse_args()
 
@@ -1636,6 +1642,7 @@ def main():
         threads=args.threads,
         context_length=args.context_length,
         use_augmentors=args.augmentors,
+        use_yaml=args.yaml,
     )
 
     for model_path in models:

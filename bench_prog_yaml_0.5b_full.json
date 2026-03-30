@@ -1,0 +1,210 @@
+[
+  {
+    "model_name": "qwen2.5-coder-0.5b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+    "model_size_mb": 468.6356201171875,
+    "chat_format": "chatml",
+    "tier1_score": 0.6666666666666666,
+    "tier2_score": 0.4126984126984127,
+    "overall_score": 0.5396825396825397,
+    "total_time": 153.93799999990733,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 1.0,
+        "tests_passed": 7,
+        "tests_total": 7,
+        "response_time": 6.64100000000326,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_iter_02_pipeline",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 6,
+        "response_time": 11.64100000000326,
+        "test_errors": [
+          "FAIL: assert Pipeline([1, 2, 3, 4, 5]).map(lambda x: x * 2).collect() == [2, 4, 6, 8, 10] -> ",
+          "FAIL: assert Pipeline(range(100)).filter(lambda x: x % 2 == 0).map(lambda x: x * x).take(5).collect() == [0, 4, 16, 36, 64] -> ",
+          "FAIL: assert Pipeline([]).collect() == [] -> ",
+          "FAIL: assert Pipeline(range(10)).take(3).collect() == [0, 1, 2] -> ",
+          "FAIL: assert Pipeline([1, 2, 3]).filter(lambda x: x > 5).collect() == [] -> ",
+          "FAIL: assert Pipeline([10, 20, 30]).map(str).collect() == [\"10\", \"20\", \"30\"] -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 2.5320000000065193,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 13.453000000037719,
+        "test_errors": [
+          "TypeError: 'TypedFieldDescriptor' object is not callable"
+        ],
+        "exec_error": "TypeError: 'TypedFieldDescriptor' object is not callable"
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 3.98499999998603,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_01_schema_validate",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 15.03100000001723,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_01_bst",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 14.155999999959022,
+        "test_errors": [
+          "TypeError: BST.height() takes 1 positional argument but 2 were given"
+        ],
+        "exec_error": "TypeError: BST.height() takes 1 positional argument but 2 were given"
+      },
+      {
+        "test_id": "t_tree_02_traversals",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 8.937999999965541,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_02_glob_match",
+        "score": 1.0,
+        "tests_passed": 15,
+        "tests_total": 15,
+        "response_time": 7.592999999993481,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t_ctx_02_transaction",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 9.688000000023749,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_02_cached_property",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 4.077999999979511,
+        "test_errors": [
+          "ERROR: assert obj.value == 42 -> NameError: name 'name' is not defined",
+          "FAIL: assert call_count == 1 -> ",
+          "ERROR: assert obj.value == 42 -> NameError: name 'name' is not defined",
+          "FAIL: assert call_count == 1 -> ",
+          "ERROR: del obj.value -> AttributeError: value",
+          "ERROR: assert obj.value == 42 -> NameError: name 'name' is not defined",
+          "FAIL: assert call_count == 2 -> ",
+          "ERROR: assert obj2.value == 42 -> NameError: name 'name' is not defined",
+          "FAIL: assert call_count == 1 -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_02_future",
+        "score": 0.6666666666666666,
+        "tests_passed": 6,
+        "tests_total": 9,
+        "response_time": 6.85899999999674,
+        "test_errors": [
+          "ERROR: try: -> RuntimeError: result not set",
+          "FAIL: try: -> Should re-raise ValueError"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_02_roundtrip",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 15,
+        "response_time": 17.48399999999674,
+        "test_errors": [
+          "'serialize' not found in generated code"
+        ],
+        "exec_error": "'serialize' not found in generated code"
+      },
+      {
+        "test_id": "t_text_01_template",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 11,
+        "response_time": 11.327999999979511,
+        "test_errors": [
+          "ERROR: assert render(\"Hello {{name}}\", {\"name\": \"World\"}) == \"Hello World\" -> NameError: name 'for_pat' is not defined",
+          "ERROR: assert render(\"{{a}} + {{b}}\", {\"a\": \"1\", \"b\": \"2\"}) == \"1 + 2\" -> NameError: name 'for_pat' is not defined",
+          "ERROR: assert render(\"{{missing}}\", {}) == \"\" -> NameError: name 'for_pat' is not defined",
+          "ERROR: result = render(\"{% for x in items %}{{x}} {% endfor %}\", {\"items\": [\"a\", \"b\", \"c\"]}) -> NameError: name 'for_pat' is not defined",
+          "ERROR: assert \"a\" in result -> NameError: name 'result' is not defined",
+          "ERROR: assert \"b\" in result -> NameError: name 'result' is not defined",
+          "ERROR: assert \"c\" in result -> NameError: name 'result' is not defined",
+          "ERROR: result2 = render(\"Users: {% for u in users %}{{u}}, {% endfor %}done\", {\"users\": [\"Alice\", \"Bob\"]}) -> NameError: name 'for_pat' is not defined",
+          "ERROR: assert \"Alice\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert \"Bob\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert \"done\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert render(\"No vars here\", {}) == \"No vars here\" -> NameError: name 'for_pat' is not defined",
+          "ERROR: assert render(\"{% for x in items %}{{x}}{% endfor %}\", {\"items\": []}) == \"\" -> NameError: name 'for_pat' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_01_pipeline",
+        "score": 1.0,
+        "tests_passed": 5,
+        "tests_total": 5,
+        "response_time": 7.75,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_02_pubsub",
+        "score": 0.2222222222222222,
+        "tests_passed": 2,
+        "tests_total": 9,
+        "response_time": 12.780999999959022,
+        "test_errors": [
+          "FAIL: assert len(results) == 2 -> ",
+          "FAIL: assert (\"user\", {\"id\": 1}) in results -> ",
+          "FAIL: assert (\"all\", {\"id\": 1}) in results -> ",
+          "FAIL: assert len(results) == 1 -> ",
+          "ERROR: assert results[0][0] == \"all\" -> IndexError: list index out of range",
+          "ERROR: ps.unsubscribe(\"*\", on_all) -> NameError: name 'topic' is not defined",
+          "FAIL: assert len(results) == 1 -> ",
+          "ERROR: assert results[0][0] == \"user\" -> IndexError: list index out of range",
+          "ERROR: ps.unsubscribe(\"user.*\", on_user) -> NameError: name 'topic' is not defined"
+        ],
+        "exec_error": ""
+      }
+    ]
+  }
+]

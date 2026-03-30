@@ -68,12 +68,14 @@ def load_examples_from_file(filepath: Path) -> list[dict]:
             return []
 
         category = data.get("category", "")
+        augmentor = data.get("augmentor", "")
         examples = []
         for ex in data["examples"]:
             examples.append({
                 "query": ex.get("query", "").strip(),
                 "solution": ex.get("solution", "").strip(),
                 "category": ex.get("category", category),
+                "augmentor": ex.get("augmentor", augmentor),
                 "tags": ex.get("tags", []),
                 "difficulty": ex.get("difficulty", "medium"),
             })
