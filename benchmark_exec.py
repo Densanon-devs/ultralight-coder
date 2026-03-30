@@ -134,10 +134,15 @@ def run_tests(namespace: dict, test_code: str) -> tuple[int, int, list[str]]:
         blocks = []
         lines = code.split("\n")
         for node in tree.body:
-            start = node.lineno - 1
+            # For decorated functions/classes, start from the first decorator
+            if hasattr(node, "decorator_list") and node.decorator_list:
+                start = node.decorator_list[0].lineno - 1
+            else:
+                start = node.lineno - 1
             end = node.end_lineno
             block = "\n".join(lines[start:end])
-            blocks.append(block)
+            if block.strip():
+                blocks.append(block)
     except SyntaxError:
         # Fallback: split on blank lines at top level, preserving indentation
         blocks = _split_test_blocks_fallback(code)

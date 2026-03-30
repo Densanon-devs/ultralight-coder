@@ -89,7 +89,12 @@ class Expert:
         logger.debug(f"Expert '{self.name}': embedded {len(self.examples)} examples")
 
     def retrieve_examples(self, query: str, top_k: Optional[int] = None) -> list[SolvedExample]:
-        """Find the most relevant solved examples for a query."""
+        """Find the most relevant solved examples for a query.
+
+        Uses category-aware retrieval: picks the best match, then fills
+        remaining slots preferring examples from the same category. Applies
+        a minimum similarity threshold to avoid injecting misleading examples.
+        """
         if not self._embedder or self._example_embeddings is None or len(self.examples) == 0:
             return self.examples[:self.max_examples]
 
@@ -97,9 +102,37 @@ class Expert:
         query_vec = self._embedder.encode([query], normalize_embeddings=True)
 
         sims = np.dot(self._example_embeddings, query_vec.T).flatten()
-        top_indices = sims.argsort()[-k:][::-1]
 
-        return [self.examples[i] for i in top_indices]
+        # Minimum similarity threshold — don't inject irrelevant examples
+        min_sim = 0.35
+        ranked = sims.argsort()[::-1]
+
+        # Best match sets the target category
+        best_idx = ranked[0]
+        if sims[best_idx] < min_sim:
+            return []
+
+        best_category = self.examples[best_idx].category
+        selected = [best_idx]
+
+        # Fill remaining slots: prefer same category, then highest similarity
+        same_cat = [i for i in ranked[1:] if sims[i] >= min_sim
+                    and self.examples[i].category == best_category
+                    and i not in selected]
+        other = [i for i in ranked[1:] if sims[i] >= min_sim
+                 and self.examples[i].category != best_category
+                 and i not in selected]
+
+        for i in same_cat:
+            if len(selected) >= k:
+                break
+            selected.append(i)
+        for i in other:
+            if len(selected) >= k:
+                break
+            selected.append(i)
+
+        return [self.examples[i] for i in selected]
 
     def build_prompt(self, user_input: str, chat_format: str) -> str:
         """Build a minimal, high-signal prompt."""
