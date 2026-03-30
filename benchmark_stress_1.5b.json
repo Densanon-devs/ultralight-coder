@@ -1,0 +1,385 @@
+[
+  {
+    "model_name": "qwen2.5-coder-1.5b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+    "model_size_mb": 1065.5601196289062,
+    "chat_format": "chatml",
+    "tier1_score": 0.42256493506493503,
+    "tier2_score": 0.26,
+    "tier3_score": 0.24375,
+    "overall_score": 0.308771645021645,
+    "total_time": 698.0149999999849,
+    "tier1_results": [
+      {
+        "test_id": "t1_01_lru_cache",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 6.875,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_02_expression_eval",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 8.85899999999674,
+        "test_errors": [
+          "ERROR: assert abs(evaluate(\"2 + 3\") - 5.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'",
+          "ERROR: assert abs(evaluate(\"2 + 3 * 4\") - 14.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'",
+          "ERROR: assert abs(evaluate(\"(2 + 3) * 4\") - 20.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'",
+          "ERROR: assert abs(evaluate(\"10 / 2 - 1\") - 4.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'",
+          "ERROR: assert abs(evaluate(\"3 + 4 * 2 / (1 - 5)\") - 1.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'",
+          "ERROR: assert abs(evaluate(\"100\") - 100.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'",
+          "ERROR: assert abs(evaluate(\"(((5)))\") - 5.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'",
+          "ERROR: assert abs(evaluate(\"2.5 * 4\") - 10.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_03_trie",
+        "score": 0.6363636363636364,
+        "tests_passed": 7,
+        "tests_total": 11,
+        "response_time": 14.125,
+        "test_errors": [
+          "FAIL: assert t.count_prefix(\"ap\") == 3 -> ",
+          "FAIL: assert t.count_prefix(\"app\") == 2 -> ",
+          "FAIL: assert t.count_prefix(\"banana\") == 1 -> ",
+          "FAIL: assert t.all_words() == [\"app\", \"apple\", \"apricot\", \"banana\"] -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_04_event_emitter",
+        "score": 0.42857142857142855,
+        "tests_passed": 3,
+        "tests_total": 7,
+        "response_time": 10.28200000000652,
+        "test_errors": [
+          "ERROR: def on_data(x): -> IndentationError: expected an indented block after function definition on line 1 (<string>, line 1)",
+          "ERROR: results.append(x) -> NameError: name 'x' is not defined",
+          "ERROR: ee.on(\"data\", on_data) -> NameError: name 'on_data' is not defined",
+          "FAIL: assert results == [1, 2] -> ",
+          "FAIL: assert ee.listener_count(\"data\") == 1 -> ",
+          "ERROR: ee.off(\"data\", on_data) -> NameError: name 'on_data' is not defined",
+          "FAIL: assert results == [1, 2] -> ",
+          "ERROR: def on_once(x): -> IndentationError: expected an indented block after function definition on line 1 (<string>, line 1)",
+          "ERROR: once_results.append(x) -> NameError: name 'x' is not defined",
+          "ERROR: ee.once(\"ping\", on_once) -> NameError: name 'on_once' is not defined",
+          "FAIL: assert once_results == [\"a\"] -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_05_csv_parser",
+        "score": 0.75,
+        "tests_passed": 6,
+        "tests_total": 8,
+        "response_time": 19.73399999999674,
+        "test_errors": [
+          "FAIL: assert quoted[0][\"bio\"] == \"likes, commas\" -> ",
+          "FAIL: assert quoted[1][\"bio\"] == 'says \"hi\"' -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_06_json_flatten",
+        "score": 0.375,
+        "tests_passed": 3,
+        "tests_total": 8,
+        "response_time": 28.155999999988126,
+        "test_errors": [
+          "ERROR: assert flatten_json({\"a\": {\"b\": 1}}) == {\"a.b\": 1} -> ValueError: dictionary update sequence element #0 has length 3; 2 is required",
+          "ERROR: f = flatten_json({\"a\": {\"b\": 1, \"c\": [2, 3]}}) -> ValueError: dictionary update sequence element #1 has length 9; 2 is required",
+          "ERROR: assert f == {\"a.b\": 1, \"a.c.0\": 2, \"a.c.1\": 3} -> NameError: name 'f' is not defined",
+          "ERROR: assert flatten_json({\"x\": {\"y\": {\"z\": 42}}}) == {\"x.y.z\": 42} -> ValueError: dictionary update sequence element #0 has length 5; 2 is required",
+          "FAIL: assert unflatten_json({\"a.b\": 1}) == {\"a\": {\"b\": 1}} -> ",
+          "FAIL: assert u == {\"a\": {\"b\": 1, \"c\": [2, 3]}} -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_07_retry_decorator",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 6,
+        "response_time": 11.875,
+        "test_errors": [
+          "ERROR: import time as _time -> NameError: name 'attempts' is not defined",
+          "ERROR: if call_count < 3: -> IndentationError: unexpected indent (<string>, line 1)",
+          "ERROR: call_count = 0 -> NameError: name 'fail_twice' is not defined",
+          "ERROR: try: -> NameError: name 'always_fail' is not defined",
+          "ERROR: assert always_fail.attempts == 2 -> NameError: name 'always_fail' is not defined",
+          "ERROR: @retry(max_attempts=1, backoff=0) -> SyntaxError: invalid syntax (<string>, line 1)",
+          "ERROR: def instant_success(): -> IndentationError: expected an indented block after function definition on line 1 (<string>, line 1)",
+          "ERROR: return 42 -> SyntaxError: 'return' outside function (<string>, line 1)",
+          "ERROR: assert instant_success() == 42 -> NameError: name 'instant_success' is not defined",
+          "ERROR: assert instant_success.attempts == 1 -> NameError: name 'instant_success' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_08_graph",
+        "score": 0.75,
+        "tests_passed": 9,
+        "tests_total": 12,
+        "response_time": 41.235000000015134,
+        "test_errors": [
+          "ERROR: assert path[0] == \"A\" -> TypeError: 'int' object is not subscriptable",
+          "ERROR: assert path[-1] == \"E\" -> TypeError: 'int' object is not subscriptable",
+          "ERROR: assert len(path) <= 4 -> TypeError: object of type 'int' has no len()"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_09_rate_limiter",
+        "score": 0.2857142857142857,
+        "tests_passed": 4,
+        "tests_total": 14,
+        "response_time": 28.389999999984866,
+        "test_errors": [
+          "FAIL: assert rl.allow(5, now=0.0) == True -> ",
+          "FAIL: assert rl.available(now=0.0) == 5 -> ",
+          "FAIL: assert rl.allow(5, now=0.0) == True -> ",
+          "FAIL: assert rl.available(now=0.0) == 0 -> ",
+          "FAIL: assert abs(rl.wait_time(1, now=0.0) - 0.1) < 0.05 -> ",
+          "FAIL: assert rl.allow(1, now=0.5) == True -> ",
+          "FAIL: assert rl.available(now=0.5) == 4 -> ",
+          "FAIL: assert rl2.allow(5, now=0.0) == True -> ",
+          "FAIL: assert rl2.allow(1, now=1.0) == True -> ",
+          "FAIL: assert rl2.allow(1, now=2.0) == True -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_10_state_machine",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 10,
+        "response_time": 10.90700000000652,
+        "test_errors": [
+          "FAIL: sm = StateMachine(\"idle\") -> ",
+          "FAIL: try: -> Should raise ValueError",
+          "FAIL: sm2 = StateMachine(\"locked\") -> ",
+          "ERROR: try: -> NameError: name 'sm3' is not defined",
+          "ERROR: assert sm3.state == \"a\" -> NameError: name 'sm3' is not defined"
+        ],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t2_01_kv_store",
+        "score": 1.0,
+        "tests_passed": 18,
+        "tests_total": 18,
+        "response_time": 62.73399999999674,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_02_markdown_html",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 33.828000000008615,
+        "test_errors": [
+          "SyntaxError: unterminated string literal (detected at line 25) (<string>, line 25)"
+        ],
+        "exec_error": "SyntaxError: unterminated string literal (detected at line 25) (<string>, line 25)"
+      },
+      {
+        "test_id": "t2_03_task_scheduler",
+        "score": 0.3,
+        "tests_passed": 3,
+        "tests_total": 10,
+        "response_time": 42.655999999988126,
+        "test_errors": [
+          "FAIL: assert s.next_task() == \"build\" -> ",
+          "FAIL: assert set(s.ready_tasks()) == {\"build\", \"lint\"} -> ",
+          "FAIL: assert \"test\" in s.ready_tasks() -> ",
+          "ERROR: assert order.index(\"build\") < order.index(\"test\") or s.is_complete(\"build\") -> ValueError: 'build' is not in list",
+          "ERROR: assert order.index(\"test\") < order.index(\"deploy\") -> ValueError: 'test' is not in list",
+          "FAIL: assert s.next_task() == \"deploy\" -> ",
+          "FAIL: assert no_cyc.has_cycle() == False -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_04_mini_orm",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 16,
+        "response_time": 40.28200000000652,
+        "test_errors": [
+          "ERROR: class User(Model): -> IndentationError: expected an indented block after class definition on line 1 (<string>, line 1)",
+          "ERROR: sql = User.create_table_sql() -> NameError: name 'User' is not defined",
+          "ERROR: assert \"CREATE TABLE\" in sql -> NameError: name 'sql' is not defined",
+          "ERROR: assert \"users\" in sql -> NameError: name 'sql' is not defined",
+          "ERROR: assert \"INTEGER\" in sql -> NameError: name 'sql' is not defined",
+          "ERROR: assert \"TEXT\" in sql -> NameError: name 'sql' is not defined",
+          "ERROR: assert \"PRIMARY KEY\" in sql.upper() or \"primary key\" in sql.lower() -> NameError: name 'sql' is not defined",
+          "ERROR: u = User() -> NameError: name 'User' is not defined",
+          "ERROR: u.id = 1 -> NameError: name 'u' is not defined",
+          "ERROR: u.name = \"Alice\" -> NameError: name 'u' is not defined",
+          "ERROR: u.age = 30 -> NameError: name 'u' is not defined",
+          "ERROR: insert_sql, params = u.insert_sql() -> NameError: name 'u' is not defined",
+          "ERROR: assert \"INSERT\" in insert_sql.upper() -> NameError: name 'insert_sql' is not defined",
+          "ERROR: assert \"users\" in insert_sql -> NameError: name 'insert_sql' is not defined",
+          "ERROR: assert len(params) == 3 or len(params) >= 2 -> NameError: name 'params' is not defined",
+          "ERROR: select = User.select_sql() -> NameError: name 'User' is not defined",
+          "ERROR: assert \"SELECT\" in select.upper() -> NameError: name 'select' is not defined",
+          "ERROR: assert \"users\" in select -> NameError: name 'select' is not defined",
+          "ERROR: where_sql = User.select_sql(where={\"name\": \"Alice\"}) -> NameError: name 'User' is not defined",
+          "ERROR: assert \"WHERE\" in where_sql.upper() -> NameError: name 'where_sql' is not defined",
+          "ERROR: assert \"name\" in where_sql -> NameError: name 'where_sql' is not defined",
+          "ERROR: order_sql = User.select_sql(order_by=\"age\") -> NameError: name 'User' is not defined",
+          "ERROR: assert \"ORDER BY\" in order_sql.upper() -> NameError: name 'order_sql' is not defined",
+          "ERROR: assert \"age\" in order_sql -> NameError: name 'order_sql' is not defined",
+          "ERROR: limit_sql = User.select_sql(limit=10) -> NameError: name 'User' is not defined",
+          "ERROR: assert \"LIMIT\" in limit_sql.upper() -> NameError: name 'limit_sql' is not defined",
+          "ERROR: assert \"10\" in limit_sql -> NameError: name 'limit_sql' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_05_http_router",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 34.35899999999674,
+        "test_errors": [
+          "FAIL: router = Router() -> ",
+          "ERROR: try: -> TypeError: cannot unpack non-iterable NoneType object",
+          "ERROR: all_routes = router.routes() -> TypeError: 'list' object is not callable",
+          "ERROR: assert len(all_routes) == 5 -> NameError: name 'all_routes' is not defined"
+        ],
+        "exec_error": ""
+      }
+    ],
+    "tier3_results": [
+      {
+        "test_id": "t3_01_todo_app",
+        "description": "Build a Todo app step by step: dataclass -> priority -> persistence -> search/stats",
+        "steps_completed": 1,
+        "steps_total": 4,
+        "overall_score": 0.3625,
+        "total_time": 162.125,
+        "steps": [
+          {
+            "step_id": "t3_01_step1",
+            "score": 1.0,
+            "tests_passed": 9,
+            "tests_total": 9,
+            "response_time": 26.844000000011874,
+            "test_errors": [],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step2",
+            "score": 0.25,
+            "tests_passed": 1,
+            "tests_total": 4,
+            "response_time": 36.98399999999674,
+            "test_errors": [
+              "FAIL: assert sorted_items[0].title == \"High task\" -> ",
+              "FAIL: assert sorted_items[-1].title == \"Low task\" -> ",
+              "FAIL: assert len(pending) == 2 -> "
+            ],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step3",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 5,
+            "response_time": 43.405999999988126,
+            "test_errors": [
+              "NameError: name 'dataclass' is not defined"
+            ],
+            "exec_error": "NameError: name 'dataclass' is not defined"
+          },
+          {
+            "step_id": "t3_01_step4",
+            "score": 0.2,
+            "tests_passed": 2,
+            "tests_total": 10,
+            "response_time": 54.89100000000326,
+            "test_errors": [
+              "FAIL: assert len(filtered) == 3 -> ",
+              "FAIL: assert len(filtered) == 2 -> ",
+              "FAIL: assert len(filtered) == 1 -> ",
+              "FAIL: assert s[\"total\"] == 4 -> ",
+              "FAIL: assert s[\"done\"] == 1 -> ",
+              "FAIL: assert s[\"pending\"] == 3 -> ",
+              "FAIL: assert s[\"by_priority\"][\"high\"] == 2 -> ",
+              "FAIL: assert s[\"by_priority\"][\"low\"] == 1 -> "
+            ],
+            "exec_error": ""
+          }
+        ]
+      },
+      {
+        "test_id": "t3_02_calculator",
+        "description": "Build a Calculator step by step: basic -> parentheses -> variables -> functions",
+        "steps_completed": 0,
+        "steps_total": 4,
+        "overall_score": 0.125,
+        "total_time": 141.59299999999348,
+        "steps": [
+          {
+            "step_id": "t3_02_step1",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 6,
+            "response_time": 39.89000000001397,
+            "test_errors": [
+              "ValueError: could not convert string to float: '-'"
+            ],
+            "exec_error": "ValueError: could not convert string to float: '-'"
+          },
+          {
+            "step_id": "t3_02_step2",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 5,
+            "response_time": 55.45299999997951,
+            "test_errors": [
+              "'Calculator' not found in generated code"
+            ],
+            "exec_error": "'Calculator' not found in generated code"
+          },
+          {
+            "step_id": "t3_02_step3",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 7,
+            "response_time": 17.53100000001723,
+            "test_errors": [
+              "FAIL: calc = Calculator() -> ",
+              "FAIL: try: -> Should raise KeyError"
+            ],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_02_step4",
+            "score": 0.5,
+            "tests_passed": 4,
+            "tests_total": 8,
+            "response_time": 28.71899999998277,
+            "test_errors": [
+              "ERROR: assert abs(calc.evaluate(\"sqrt(16)\") - 4.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'",
+              "ERROR: assert abs(calc.evaluate(\"sqrt(16) + 1\") - 5.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'",
+              "ERROR: calc.set_var(\"x\", 25) -> AttributeError: 'Calculator' object has no attribute 'set_var'",
+              "ERROR: assert abs(calc.evaluate(\"sqrt(x)\") - 5.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'",
+              "ERROR: assert abs(calc.evaluate(\"sqrt(abs(-16))\") - 4.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'"
+            ],
+            "exec_error": ""
+          }
+        ]
+      }
+    ]
+  }
+]

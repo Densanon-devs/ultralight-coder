@@ -1,0 +1,98 @@
+[
+  {
+    "model_name": "qwen2.5-coder-1.5b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+    "model_size_mb": 1065.5601196289062,
+    "chat_format": "chatml",
+    "tier1_score": 1.0,
+    "tier2_score": 1.0,
+    "tier3_score": 0.3625,
+    "overall_score": 0.7875,
+    "total_time": 97.31299999996554,
+    "tier1_results": [
+      {
+        "test_id": "t1_01_lru_cache",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 7.562000000005355,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t2_01_kv_store",
+        "score": 1.0,
+        "tests_passed": 18,
+        "tests_total": 18,
+        "response_time": 21.73499999998603,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier3_results": [
+      {
+        "test_id": "t3_01_todo_app",
+        "description": "Build a Todo app step by step: dataclass -> priority -> persistence -> search/stats",
+        "steps_completed": 1,
+        "steps_total": 4,
+        "overall_score": 0.3625,
+        "total_time": 68.01599999997416,
+        "steps": [
+          {
+            "step_id": "t3_01_step1",
+            "score": 1.0,
+            "tests_passed": 9,
+            "tests_total": 9,
+            "response_time": 10.578000000008615,
+            "test_errors": [],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step2",
+            "score": 0.25,
+            "tests_passed": 1,
+            "tests_total": 4,
+            "response_time": 14.546999999991385,
+            "test_errors": [
+              "FAIL: assert sorted_items[0].title == \"High task\" -> ",
+              "FAIL: assert sorted_items[-1].title == \"Low task\" -> ",
+              "FAIL: assert len(pending) == 2 -> "
+            ],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step3",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 5,
+            "response_time": 18.98499999998603,
+            "test_errors": [
+              "FAIL: try: -> "
+            ],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step4",
+            "score": 0.2,
+            "tests_passed": 2,
+            "tests_total": 10,
+            "response_time": 23.905999999988126,
+            "test_errors": [
+              "FAIL: assert len(filtered) == 3 -> ",
+              "FAIL: assert len(filtered) == 2 -> ",
+              "FAIL: assert len(filtered) == 1 -> ",
+              "FAIL: assert s[\"total\"] == 4 -> ",
+              "FAIL: assert s[\"done\"] == 1 -> ",
+              "FAIL: assert s[\"pending\"] == 3 -> ",
+              "FAIL: assert s[\"by_priority\"][\"high\"] == 2 -> ",
+              "FAIL: assert s[\"by_priority\"][\"low\"] == 1 -> "
+            ],
+            "exec_error": ""
+          }
+        ]
+      }
+    ]
+  }
+]
