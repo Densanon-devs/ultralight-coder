@@ -1,0 +1,306 @@
+[
+  {
+    "model_name": "qwen2.5-coder-1.5b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+    "model_size_mb": 1065.5601196289062,
+    "chat_format": "chatml",
+    "tier1_score": 0.6916666666666667,
+    "tier2_score": 0.2088888888888889,
+    "tier3_score": 0.18125,
+    "overall_score": 0.36060185185185184,
+    "total_time": 1481.0149999999558,
+    "tier1_results": [
+      {
+        "test_id": "t1_01_lru_cache",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 21.64000000001397,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_02_expression_eval",
+        "score": 0.25,
+        "tests_passed": 2,
+        "tests_total": 8,
+        "response_time": 58.0,
+        "test_errors": [
+          "FAIL: assert abs(evaluate(\"2 + 3\") - 5.0) < 1e-9 -> ",
+          "FAIL: assert abs(evaluate(\"2 + 3 * 4\") - 14.0) < 1e-9 -> ",
+          "FAIL: assert abs(evaluate(\"(2 + 3) * 4\") - 20.0) < 1e-9 -> ",
+          "FAIL: assert abs(evaluate(\"10 / 2 - 1\") - 4.0) < 1e-9 -> ",
+          "FAIL: assert abs(evaluate(\"3 + 4 * 2 / (1 - 5)\") - 1.0) < 1e-9 -> ",
+          "ERROR: assert abs(evaluate(\"2.5 * 4\") - 10.0) < 1e-9 -> ValueError: Invalid token"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_03_trie",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 11,
+        "response_time": 83.53200000000652,
+        "test_errors": [
+          "AttributeError: 'TrieNode' object has no attribute 'word'"
+        ],
+        "exec_error": "AttributeError: 'TrieNode' object has no attribute 'word'"
+      },
+      {
+        "test_id": "t1_04_event_emitter",
+        "score": 1.0,
+        "tests_passed": 7,
+        "tests_total": 7,
+        "response_time": 33.109000000025844,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_05_csv_parser",
+        "score": 0.75,
+        "tests_passed": 6,
+        "tests_total": 8,
+        "response_time": 47.21899999998277,
+        "test_errors": [
+          "ERROR: quoted = parse_csv('name,bio\\nAlice,\"likes, commas\"\\nBob,\"says \"\"hi\"\"\"' ) -> IndexError: list index out of range",
+          "ERROR: assert quoted[0][\"bio\"] == \"likes, commas\" -> NameError: name 'quoted' is not defined",
+          "ERROR: assert quoted[1][\"bio\"] == 'says \"hi\"' -> NameError: name 'quoted' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_06_json_flatten",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 84.13999999998487,
+        "test_errors": [
+          "ValueError: dictionary update sequence element #1 has length 9; 2 is required"
+        ],
+        "exec_error": "ValueError: dictionary update sequence element #1 has length 9; 2 is required"
+      },
+      {
+        "test_id": "t1_07_retry_decorator",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 39.328999999997905,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_08_graph",
+        "score": 0.9166666666666666,
+        "tests_passed": 11,
+        "tests_total": 12,
+        "response_time": 77.45299999997951,
+        "test_errors": [
+          "FAIL: assert path[-1] == \"E\" -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_09_rate_limiter",
+        "score": 1.0,
+        "tests_passed": 14,
+        "tests_total": 14,
+        "response_time": 59.64100000000326,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_10_state_machine",
+        "score": 1.0,
+        "tests_passed": 10,
+        "tests_total": 10,
+        "response_time": 38.844000000011874,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t2_01_kv_store",
+        "score": 0.9444444444444444,
+        "tests_passed": 17,
+        "tests_total": 18,
+        "response_time": 100.32800000000861,
+        "test_errors": [
+          "FAIL: assert \"counter\" in keys -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_02_markdown_html",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 79.7960000000021,
+        "test_errors": [
+          "SyntaxError: unterminated string literal (detected at line 11) (<string>, line 11)"
+        ],
+        "exec_error": "SyntaxError: unterminated string literal (detected at line 11) (<string>, line 11)"
+      },
+      {
+        "test_id": "t2_03_task_scheduler",
+        "score": 0.1,
+        "tests_passed": 1,
+        "tests_total": 10,
+        "response_time": 88.67200000002049,
+        "test_errors": [
+          "FAIL: assert s.next_task() == \"build\" -> ",
+          "FAIL: assert set(s.ready_tasks()) == {\"build\", \"lint\"} -> ",
+          "FAIL: assert \"test\" in s.ready_tasks() -> ",
+          "ERROR: assert order.index(\"build\") < order.index(\"test\") or s.is_complete(\"build\") -> ValueError: 'test' is not in list",
+          "ERROR: assert order.index(\"test\") < order.index(\"deploy\") -> ValueError: 'test' is not in list",
+          "FAIL: assert s.next_task() == \"deploy\" -> ",
+          "FAIL: assert s.next_task() is None -> ",
+          "ERROR: cyc.add_task(\"a\", depends_on=[\"b\"]) -> ValueError: Task 'b' does not exist.",
+          "ERROR: cyc.add_task(\"b\", depends_on=[\"a\"]) -> ValueError: Task 'a' does not exist.",
+          "FAIL: assert cyc.has_cycle() == True -> ",
+          "FAIL: assert no_cyc.has_cycle() == False -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_04_mini_orm",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 16,
+        "response_time": 89.56299999999464,
+        "test_errors": [
+          "TypeError: User() takes no arguments"
+        ],
+        "exec_error": "TypeError: User() takes no arguments"
+      },
+      {
+        "test_id": "t2_05_http_router",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 69.93700000000536,
+        "test_errors": [
+          "TypeError: create_user() got an unexpected keyword argument 'name'"
+        ],
+        "exec_error": "TypeError: create_user() got an unexpected keyword argument 'name'"
+      }
+    ],
+    "tier3_results": [
+      {
+        "test_id": "t3_01_todo_app",
+        "description": "Build a Todo app step by step: dataclass -> priority -> persistence -> search/stats",
+        "steps_completed": 1,
+        "steps_total": 4,
+        "overall_score": 0.3625,
+        "total_time": 240.32699999996112,
+        "steps": [
+          {
+            "step_id": "t3_01_step1",
+            "score": 1.0,
+            "tests_passed": 9,
+            "tests_total": 9,
+            "response_time": 40.889999999984866,
+            "test_errors": [],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step2",
+            "score": 0.25,
+            "tests_passed": 1,
+            "tests_total": 4,
+            "response_time": 46.98399999999674,
+            "test_errors": [
+              "FAIL: assert sorted_items[0].title == \"High task\" -> ",
+              "FAIL: assert sorted_items[-1].title == \"Low task\" -> ",
+              "FAIL: assert len(pending) == 2 -> "
+            ],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step3",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 5,
+            "response_time": 76.07799999997951,
+            "test_errors": [
+              "NameError: name 'dataclass' is not defined"
+            ],
+            "exec_error": "NameError: name 'dataclass' is not defined"
+          },
+          {
+            "step_id": "t3_01_step4",
+            "score": 0.2,
+            "tests_passed": 2,
+            "tests_total": 10,
+            "response_time": 76.375,
+            "test_errors": [
+              "FAIL: assert len(filtered) == 3 -> ",
+              "FAIL: assert len(filtered) == 2 -> ",
+              "FAIL: assert len(filtered) == 1 -> ",
+              "FAIL: assert s[\"total\"] == 4 -> ",
+              "FAIL: assert s[\"done\"] == 1 -> ",
+              "FAIL: assert s[\"pending\"] == 3 -> ",
+              "FAIL: assert s[\"by_priority\"][\"high\"] == 2 -> ",
+              "FAIL: assert s[\"by_priority\"][\"low\"] == 1 -> "
+            ],
+            "exec_error": ""
+          }
+        ]
+      },
+      {
+        "test_id": "t3_02_calculator",
+        "description": "Build a Calculator step by step: basic -> parentheses -> variables -> functions",
+        "steps_completed": 0,
+        "steps_total": 4,
+        "overall_score": 0.0,
+        "total_time": 269.4849999999569,
+        "steps": [
+          {
+            "step_id": "t3_02_step1",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 6,
+            "response_time": 54.09399999998277,
+            "test_errors": [
+              "NameError: name '_tokenize' is not defined"
+            ],
+            "exec_error": "NameError: name '_tokenize' is not defined"
+          },
+          {
+            "step_id": "t3_02_step2",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 5,
+            "response_time": 77.18799999999464,
+            "test_errors": [
+              "UnboundLocalError: local variable 'i' referenced before assignment"
+            ],
+            "exec_error": "UnboundLocalError: local variable 'i' referenced before assignment"
+          },
+          {
+            "step_id": "t3_02_step3",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 7,
+            "response_time": 84.71899999998277,
+            "test_errors": [
+              "MemoryError: "
+            ],
+            "exec_error": "MemoryError: "
+          },
+          {
+            "step_id": "t3_02_step4",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 8,
+            "response_time": 53.48399999999674,
+            "test_errors": [
+              "MemoryError: "
+            ],
+            "exec_error": "MemoryError: "
+          }
+        ]
+      }
+    ]
+  }
+]
