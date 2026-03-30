@@ -1,0 +1,266 @@
+[
+  {
+    "model_name": "qwen2.5-coder-1.5b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+    "model_size_mb": 1065.5601196289062,
+    "chat_format": "chatml",
+    "tier1_score": 0.6202380952380953,
+    "tier2_score": 0.15584415584415584,
+    "overall_score": 0.3880411255411256,
+    "total_time": 217.39000000004307,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 0.8571428571428571,
+        "tests_passed": 6,
+        "tests_total": 7,
+        "response_time": 9.344000000011874,
+        "test_errors": [
+          "FAIL: assert list(r) == [0, 1, 2] -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_iter_02_pipeline",
+        "score": 0.16666666666666666,
+        "tests_passed": 1,
+        "tests_total": 6,
+        "response_time": 9.671000000002095,
+        "test_errors": [
+          "FAIL: assert Pipeline([1, 2, 3, 4, 5]).map(lambda x: x * 2).collect() == [2, 4, 6, 8, 10] -> ",
+          "FAIL: assert Pipeline(range(100)).filter(lambda x: x % 2 == 0).map(lambda x: x * x).take(5).collect() == [0, 4, 16, 36, 64] -> ",
+          "FAIL: assert Pipeline(range(10)).take(3).collect() == [0, 1, 2] -> ",
+          "FAIL: assert Pipeline([1, 2, 3]).filter(lambda x: x > 5).collect() == [] -> ",
+          "FAIL: assert Pipeline([10, 20, 30]).map(str).collect() == [\"10\", \"20\", \"30\"] -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 7.0,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 9.73399999999674,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 6,
+        "response_time": 7.51600000000326,
+        "test_errors": [
+          "ERROR: c = ThreadSafeCounter() -> AttributeError: can't set attribute 'value'",
+          "ERROR: assert c.value == 0 -> NameError: name 'c' is not defined",
+          "ERROR: c.increment() -> NameError: name 'c' is not defined",
+          "ERROR: assert c.value == 1 -> NameError: name 'c' is not defined",
+          "ERROR: c.increment(5) -> NameError: name 'c' is not defined",
+          "ERROR: assert c.value == 6 -> NameError: name 'c' is not defined",
+          "ERROR: c.decrement(2) -> NameError: name 'c' is not defined",
+          "ERROR: assert c.value == 4 -> NameError: name 'c' is not defined",
+          "ERROR: c2 = ThreadSafeCounter() -> AttributeError: can't set attribute 'value'",
+          "ERROR: assert c2.value == 10000 -> NameError: name 'c2' is not defined",
+          "ERROR: c3 = ThreadSafeCounter() -> AttributeError: can't set attribute 'value'",
+          "ERROR: assert c3.value == 0 -> NameError: name 'c3' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_01_schema_validate",
+        "score": 0.625,
+        "tests_passed": 5,
+        "tests_total": 8,
+        "response_time": 36.73499999998603,
+        "test_errors": [
+          "FAIL: assert len(errors) == 1 -> ",
+          "ERROR: assert \"age\" in errors[0] -> IndexError: list index out of range",
+          "FAIL: assert len(errors) == 2 -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_01_bst",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 38.42200000002049,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_02_traversals",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 18.32799999997951,
+        "test_errors": [
+          "ERROR: assert tree.preorder() == [1, 2, 4, 5, 3, 6] -> AttributeError: 'NoneType' object has no attribute 'preorder'",
+          "ERROR: assert tree.inorder() == [4, 2, 5, 1, 3, 6] -> AttributeError: 'NoneType' object has no attribute 'inorder'",
+          "ERROR: assert tree.postorder() == [4, 5, 2, 6, 3, 1] -> AttributeError: 'NoneType' object has no attribute 'postorder'",
+          "FAIL: assert tree.level_order() == [1, 2, 3, 4, 5, 6] -> ",
+          "ERROR: assert single.preorder() == [42] -> AttributeError: 'NoneType' object has no attribute 'preorder'",
+          "ERROR: assert single.inorder() == [42] -> AttributeError: 'NoneType' object has no attribute 'inorder'",
+          "ERROR: assert single.postorder() == [42] -> AttributeError: 'NoneType' object has no attribute 'postorder'",
+          "FAIL: assert single.level_order() == [42] -> ",
+          "ERROR: assert left_only.preorder() == [1, 2, 3] -> AttributeError: 'NoneType' object has no attribute 'preorder'",
+          "ERROR: assert left_only.inorder() == [3, 2, 1] -> AttributeError: 'NoneType' object has no attribute 'inorder'",
+          "ERROR: assert left_only.postorder() == [3, 2, 1] -> AttributeError: 'NoneType' object has no attribute 'postorder'",
+          "FAIL: assert left_only.level_order() == [1, 2, 3] -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_02_glob_match",
+        "score": 0.9333333333333333,
+        "tests_passed": 14,
+        "tests_total": 15,
+        "response_time": 22.54700000002049,
+        "test_errors": [
+          "FAIL: assert glob_match(\"*\", \"\") == True -> "
+        ],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t_ctx_02_transaction",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 4,
+        "response_time": 7.217999999993481,
+        "test_errors": [
+          "SyntaxError: invalid syntax (<string>, line 18)"
+        ],
+        "exec_error": "SyntaxError: invalid syntax (<string>, line 18)"
+      },
+      {
+        "test_id": "t_desc_02_cached_property",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 5.296999999991385,
+        "test_errors": [
+          "ERROR: assert obj.value == 42 -> RecursionError: maximum recursion depth exceeded while calling a Python object",
+          "FAIL: assert call_count == 1 -> ",
+          "ERROR: assert obj.value == 42 -> RecursionError: maximum recursion depth exceeded while calling a Python object",
+          "FAIL: assert call_count == 1 -> ",
+          "ERROR: del obj.value -> KeyError: 'value'",
+          "ERROR: assert obj.value == 42 -> RecursionError: maximum recursion depth exceeded while calling a Python object",
+          "FAIL: assert call_count == 2 -> ",
+          "ERROR: assert obj2.value == 42 -> RecursionError: maximum recursion depth exceeded while calling a Python object",
+          "FAIL: assert call_count == 1 -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_02_future",
+        "score": 0.8888888888888888,
+        "tests_passed": 8,
+        "tests_total": 9,
+        "response_time": 11.547000000020489,
+        "test_errors": [
+          "FAIL: try: -> Should raise RuntimeError"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_02_roundtrip",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 15,
+        "response_time": 8.719000000011874,
+        "test_errors": [
+          "ERROR: d = serialize(p) -> TypeError: isinstance() arg 2 must be a type, a tuple of types, or a union",
+          "ERROR: assert d[\"name\"] == \"Alice\" -> NameError: name 'd' is not defined",
+          "ERROR: assert d[\"age\"] == 30 -> NameError: name 'd' is not defined",
+          "ERROR: assert d[\"address\"][\"city\"] == \"NYC\" -> NameError: name 'd' is not defined",
+          "ERROR: assert \"__class__\" in d -> NameError: name 'd' is not defined",
+          "ERROR: p2 = deserialize(d, Person) -> NameError: name 'd' is not defined",
+          "ERROR: assert p2.name == \"Alice\" -> NameError: name 'p2' is not defined",
+          "ERROR: assert p2.age == 30 -> NameError: name 'p2' is not defined",
+          "ERROR: assert p2.address.city == \"NYC\" -> NameError: name 'p2' is not defined",
+          "ERROR: assert p2.address.zip_code == \"10001\" -> NameError: name 'p2' is not defined",
+          "ERROR: td = serialize(team) -> TypeError: isinstance() arg 2 must be a type, a tuple of types, or a union",
+          "ERROR: assert td[\"name\"] == \"Dev\" -> NameError: name 'td' is not defined",
+          "ERROR: assert len(td[\"members\"]) == 2 -> NameError: name 'td' is not defined",
+          "ERROR: assert td[\"members\"][0][\"name\"] == \"Bob\" -> NameError: name 'td' is not defined",
+          "ERROR: team2 = deserialize(td, Team) -> NameError: name 'td' is not defined",
+          "ERROR: assert team2.name == \"Dev\" -> NameError: name 'team2' is not defined",
+          "ERROR: assert len(team2.members) == 2 -> NameError: name 'team2' is not defined",
+          "ERROR: assert team2.members[0].name == \"Bob\" -> NameError: name 'team2' is not defined",
+          "ERROR: assert team2.members[1].name == \"Carol\" -> NameError: name 'team2' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_01_template",
+        "score": 0.09090909090909091,
+        "tests_passed": 1,
+        "tests_total": 11,
+        "response_time": 14.39000000001397,
+        "test_errors": [
+          "ERROR: assert render(\"Hello {{name}}\", {\"name\": \"World\"}) == \"Hello World\" -> TypeError: replace() argument 2 must be str, not function",
+          "ERROR: assert render(\"{{a}} + {{b}}\", {\"a\": \"1\", \"b\": \"2\"}) == \"1 + 2\" -> TypeError: replace() argument 2 must be str, not function",
+          "ERROR: assert render(\"{{missing}}\", {}) == \"\" -> TypeError: replace() argument 2 must be str, not function",
+          "ERROR: result = render(\"{% for x in items %}{{x}} {% endfor %}\", {\"items\": [\"a\", \"b\", \"c\"]}) -> TypeError: replace() argument 2 must be str, not function",
+          "ERROR: assert \"a\" in result -> NameError: name 'result' is not defined",
+          "ERROR: assert \"b\" in result -> NameError: name 'result' is not defined",
+          "ERROR: assert \"c\" in result -> NameError: name 'result' is not defined",
+          "ERROR: result2 = render(\"Users: {% for u in users %}{{u}}, {% endfor %}done\", {\"users\": [\"Alice\", \"Bob\"]}) -> TypeError: replace() argument 2 must be str, not function",
+          "ERROR: assert \"Alice\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert \"Bob\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert \"done\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert render(\"{% for x in items %}{{x}}{% endfor %}\", {\"items\": []}) == \"\" -> TypeError: replace() argument 2 must be str, not function"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_01_pipeline",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 5,
+        "response_time": 3.5309999999881256,
+        "test_errors": [
+          "ERROR: result = p.execute({\"name\": \"alice\"}) -> RecursionError: maximum recursion depth exceeded",
+          "ERROR: assert result[\"name\"] == \"ALICE\" -> NameError: name 'result' is not defined",
+          "ERROR: assert result[\"processed\"] == True -> NameError: name 'result' is not defined",
+          "FAIL: assert log == [\"before\", \"after\"] -> ",
+          "ERROR: p2.execute({}) -> RecursionError: maximum recursion depth exceeded",
+          "FAIL: assert order == [1, 2, 3, 4] -> ",
+          "FAIL: result3 = p3.execute({\"x\": 1}) -> should not run",
+          "ERROR: assert result3 == {\"short\": True} -> NameError: name 'result3' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_02_pubsub",
+        "score": 0.1111111111111111,
+        "tests_passed": 1,
+        "tests_total": 9,
+        "response_time": 7.39100000000326,
+        "test_errors": [
+          "FAIL: assert len(results) == 2 -> ",
+          "FAIL: assert (\"user\", {\"id\": 1}) in results -> ",
+          "FAIL: assert (\"all\", {\"id\": 1}) in results -> ",
+          "FAIL: assert len(results) == 1 -> ",
+          "ERROR: assert results[0][0] == \"all\" -> IndexError: list index out of range",
+          "FAIL: assert len(results) == 1 -> ",
+          "ERROR: assert results[0][0] == \"user\" -> IndexError: list index out of range",
+          "ERROR: ps2.publish(\"app.start\", \"go\") -> TypeError: <lambda>() takes 1 positional argument but 2 were given",
+          "FAIL: assert exact_results == [\"go\"] -> "
+        ],
+        "exec_error": ""
+      }
+    ]
+  }
+]

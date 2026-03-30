@@ -815,7 +815,7 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
         if not self.use_augmentors:
             return None
         from engine.augmentors import AugmentorRouter
-        router = AugmentorRouter(programmer=True)
+        router = AugmentorRouter(pack=True)
         try:
             from engine.embedder import get_embedder
             embedder = get_embedder()
