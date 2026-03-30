@@ -91,9 +91,10 @@ class Augmentor:
     def retrieve_examples(self, query: str, top_k: Optional[int] = None) -> list[SolvedExample]:
         """Find the most relevant solved examples for a query.
 
-        Uses category-aware retrieval: picks the best match, then fills
-        remaining slots preferring examples from the same category. Applies
-        a minimum similarity threshold to avoid injecting misleading examples.
+        Three-layer "do no harm" retrieval:
+        1. High similarity threshold (0.50) — reject loosely-related examples
+        2. Confidence-based injection limit — low confidence = fewer examples
+        3. Cross-category gate (0.55) — prevent unrelated patterns leaking in
         """
         if not self._embedder or self._example_embeddings is None or len(self.examples) == 0:
             return self.examples[:self.max_examples]
@@ -102,33 +103,40 @@ class Augmentor:
         query_vec = self._embedder.encode([query], normalize_embeddings=True)
 
         sims = np.dot(self._example_embeddings, query_vec.T).flatten()
-
-        # Minimum similarity threshold — don't inject irrelevant examples
-        min_sim = 0.35
         ranked = sims.argsort()[::-1]
 
-        # Best match sets the target category
+        # Layer 1: High threshold for best match
+        min_sim_best = 0.50
         best_idx = ranked[0]
-        if sims[best_idx] < min_sim:
+        if sims[best_idx] < min_sim_best:
             return []
+
+        # Layer 2: Confidence-based injection limit
+        # Low confidence (< 0.60) = inject only 1 example to minimize risk
+        max_inject = k
+        if sims[best_idx] < 0.60:
+            max_inject = 1
 
         best_category = self.examples[best_idx].category
         selected = [best_idx]
 
-        # Fill remaining slots: prefer same category, then highest similarity
-        same_cat = [i for i in ranked[1:] if sims[i] >= min_sim
+        # Layer 3: Tiered thresholds — same category is easier, cross-category is harder
+        min_sim_same_cat = 0.45
+        min_sim_cross_cat = 0.55
+
+        same_cat = [i for i in ranked[1:] if sims[i] >= min_sim_same_cat
                     and self.examples[i].category == best_category
                     and i not in selected]
-        other = [i for i in ranked[1:] if sims[i] >= min_sim
+        other = [i for i in ranked[1:] if sims[i] >= min_sim_cross_cat
                  and self.examples[i].category != best_category
                  and i not in selected]
 
         for i in same_cat:
-            if len(selected) >= k:
+            if len(selected) >= max_inject:
                 break
             selected.append(i)
         for i in other:
-            if len(selected) >= k:
+            if len(selected) >= max_inject:
                 break
             selected.append(i)
 
@@ -1160,6 +1168,97 @@ def build_programmer_pack_augmentor() -> Augmentor:
         ),
         category="pattern_tree",
     ))
+    examples.append(SolvedExample(
+        "Write a BinaryTree class built from nested tuples (value, left, right) "
+        "with preorder, inorder, postorder, and level_order traversal methods.",
+        (
+            "```python\n"
+            "from collections import deque\n"
+            "\n"
+            "\n"
+            "class BinaryTree:\n"
+            "    def __init__(self, data):\n"
+            "        if data is None:\n"
+            "            self.value = None\n"
+            "            self.left = None\n"
+            "            self.right = None\n"
+            "        elif isinstance(data, tuple):\n"
+            "            val, left, right = data\n"
+            "            self.value = val\n"
+            "            self.left = BinaryTree(left) if left else None\n"
+            "            self.right = BinaryTree(right) if right else None\n"
+            "        else:\n"
+            "            self.value = data\n"
+            "            self.left = None\n"
+            "            self.right = None\n"
+            "\n"
+            "    def preorder(self):\n"
+            "        result = [self.value]\n"
+            "        if self.left: result.extend(self.left.preorder())\n"
+            "        if self.right: result.extend(self.right.preorder())\n"
+            "        return result\n"
+            "\n"
+            "    def inorder(self):\n"
+            "        result = []\n"
+            "        if self.left: result.extend(self.left.inorder())\n"
+            "        result.append(self.value)\n"
+            "        if self.right: result.extend(self.right.inorder())\n"
+            "        return result\n"
+            "\n"
+            "    def postorder(self):\n"
+            "        result = []\n"
+            "        if self.left: result.extend(self.left.postorder())\n"
+            "        if self.right: result.extend(self.right.postorder())\n"
+            "        result.append(self.value)\n"
+            "        return result\n"
+            "\n"
+            "    def level_order(self):\n"
+            "        result = []\n"
+            "        q = deque([self])\n"
+            "        while q:\n"
+            "            node = q.popleft()\n"
+            "            if node:\n"
+            "                result.append(node.value)\n"
+            "                if node.left: q.append(node.left)\n"
+            "                if node.right: q.append(node.right)\n"
+            "        return result\n"
+            "```\n"
+            "\n"
+            "Key: __init__ recursively builds from (value, left, right) tuples. "
+            "preorder=root-left-right, inorder=left-root-right, "
+            "postorder=left-right-root, level_order=BFS with deque."
+        ),
+        category="pattern_tree",
+    ))
+
+    # ── Glob/Wildcard Matching ────────────────────────────────
+    examples.append(SolvedExample(
+        "Write a glob_match(pattern, text) function supporting * and ? wildcards "
+        "using dynamic programming.",
+        (
+            "```python\n"
+            "def glob_match(pattern, text):\n"
+            "    m, n = len(pattern), len(text)\n"
+            "    dp = [[False] * (n + 1) for _ in range(m + 1)]\n"
+            "    dp[0][0] = True\n"
+            "    for i in range(1, m + 1):\n"
+            "        if pattern[i - 1] == '*':\n"
+            "            dp[i][0] = dp[i - 1][0]\n"
+            "    for i in range(1, m + 1):\n"
+            "        for j in range(1, n + 1):\n"
+            "            if pattern[i - 1] == '*':\n"
+            "                dp[i][j] = dp[i - 1][j] or dp[i][j - 1]\n"
+            "            elif pattern[i - 1] == '?' or pattern[i - 1] == text[j - 1]:\n"
+            "                dp[i][j] = dp[i - 1][j - 1]\n"
+            "    return dp[m][n]\n"
+            "```\n"
+            "\n"
+            "Key: DP table dp[i][j] = can pattern[:i] match text[:j]. "
+            "* matches zero (dp[i-1][j]) or more (dp[i][j-1]) characters. "
+            "? matches exactly one (dp[i-1][j-1])."
+        ),
+        category="pattern_glob",
+    ))
 
     # ── Domain 7: Template Engine ──────────────────────────────
     examples.append(SolvedExample(
@@ -1248,11 +1347,11 @@ def build_programmer_pack_augmentor() -> Augmentor:
 
     # ── Domain 8: Middleware Chain ──────────────────────────────
     examples.append(SolvedExample(
-        "Write a Pipeline class with use(middleware_fn) and execute(request). "
+        "Write a MiddlewarePipeline class with use(middleware_fn) and execute(request). "
         "Middleware signature is fn(request, next_fn).",
         (
             "```python\n"
-            "class Pipeline:\n"
+            "class MiddlewarePipeline:\n"
             "    def __init__(self):\n"
             "        self._middlewares = []\n"
             "\n"
@@ -1309,7 +1408,8 @@ def build_programmer_pack_augmentor() -> Augmentor:
         system_context=(
             "You are a Python expert. Write complete, correct, runnable code "
             "in ```python blocks. Include all imports. Implement ALL requested "
-            "methods. For classes: use proper dunder methods (__iter__, __next__, "
+            "methods. Use the EXACT class and function names specified in the prompt. "
+            "For classes: use proper dunder methods (__iter__, __next__, "
             "__enter__, __exit__, __get__, __set__). For decorators: set attributes "
             "on the wrapper. For properties: use @property with _private backing. "
             "For thread safety: use threading.Lock or Condition."
