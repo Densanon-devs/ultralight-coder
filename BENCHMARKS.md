@@ -139,7 +139,99 @@ The model gets maximum attention budget for the actual code task.
 
 ---
 
+# Phase 3: Stress Benchmark (17 tests + 8 multi-turn steps)
+
+**Date:** 2026-03-30
+**Benchmark tool:** `benchmark_stress.py`
+
+The execution benchmark (Phase 2) tested single functions. Real coding requires multi-method classes, mini-apps, and incremental builds. This benchmark pushes models with three tiers of increasing difficulty.
+
+## Tier Structure
+
+| Tier | Difficulty | max_tokens | What it tests |
+|------|-----------|-----------|---------------|
+| **Tier 1** | Medium (10 tests) | 1024 | Multi-method classes: LRU Cache, Trie, Graph, Event Emitter, Expression Evaluator, CSV Parser, JSON Flatten/Unflatten, Retry Decorator, Rate Limiter, State Machine |
+| **Tier 2** | Heavy (5 tests) | 2048 | Mini-apps in one prompt: KV Store with TTL, Markdown-to-HTML, Task Scheduler with dependencies, Mini ORM, HTTP Router with path params |
+| **Tier 3** | Multi-turn (2 tests, 4 steps each) | 1024/step | Incremental app building: Todo App (dataclass -> priority -> persistence -> search/stats), Calculator (basic -> parens -> variables -> functions) |
+
+## Overall Rankings
+
+| # | Model | Params | Size | Tier 1 | Tier 2 | Tier 3 | Overall | Time |
+|---|-------|--------|------|:------:|:------:|:------:|:-------:|-----:|
+| **1** | **Qwen2.5-Coder-3B** | **3B** | **2.0 GB** | **55%** | **18%** | **53%** | **42%** | 1081s |
+| 2 | DeepSeek-Coder-1.3B | 1.3B | 834 MB | 39% | 11% | 27% | 26% | ~700s |
+| 3 | Qwen2.5-Coder-1.5B | 1.5B | 1.1 GB | 42% | 26% | 24% | 31% | 698s |
+| 4 | Qwen2.5-Coder-0.5B | 0.5B | 469 MB | 32% | 0% | 33% | 22% | 482s |
+
+## Tier 1 — Medium: Detailed Results
+
+| Test | Qwen 3B | Qwen 1.5B | DeepSeek 1.3B | Qwen 0.5B |
+|------|:-------:|:---------:|:------------:|:---------:|
+| LRU Cache | **100%** | **100%** | **100%** | **100%** |
+| Expression Evaluator | 75% | 0% | 0% | 0% |
+| Trie | 64% | 64% | **100%** | 55% |
+| Event Emitter | 43% | 43% | 43% | 43% |
+| CSV Parser | 75% | 75% | **100%** | 0% |
+| JSON Flatten/Unflatten | **88%** | 38% | 0% | 25% |
+| Retry Decorator | 0% | 0% | 0% | 0% |
+| Graph BFS/DFS | 75% | 75% | 0% | 25% |
+| Rate Limiter | 29% | 29% | 50% | **64%** |
+| State Machine | 0% | 0% | 0% | 10% |
+
+**Universal failures:** Retry Decorator (none could add `.attempts` attribute), State Machine (property + guard pattern too complex).
+
+## Tier 2 — Heavy: Detailed Results
+
+| Test | Qwen 3B | Qwen 1.5B | DeepSeek 1.3B | Qwen 0.5B |
+|------|:-------:|:---------:|:------------:|:---------:|
+| KV Store + TTL | 0% | **100%** | 6% | 0% |
+| Markdown to HTML | 0% | 0% | **50%** | 0% |
+| Task Scheduler | **90%** | 30% | 0% | 0% |
+| Mini ORM | 0% | 0% | 0% | 0% |
+| HTTP Router | 0% | 0% | 0% | 0% |
+
+**Universal failures:** Mini ORM (metaclass/descriptor pattern beyond all models), HTTP Router (decorator + regex path matching too complex).
+
+**Surprise:** Qwen 1.5B aced the KV Store (18/18) while the larger 3B scored 0%. Non-deterministic generation + prompt sensitivity.
+
+## Tier 3 — Multi-Turn: Detailed Results
+
+### Todo App (4 steps)
+
+| Step | Qwen 3B | Qwen 1.5B | DeepSeek 1.3B | Qwen 0.5B |
+|------|:-------:|:---------:|:------------:|:---------:|
+| 1: Basic CRUD | **100%** | **100%** | 78% | **100%** |
+| 2: Priority | 75% | 25% | 75% | 75% |
+| 3: Persistence (JSON) | **100%** | 0% | 0% | 0% |
+| 4: Search/Stats | **100%** | 20% | 60% | **90%** |
+| **Overall** | **94%** | 36% | 53% | **66%** |
+
+### Calculator (4 steps) — HARD
+
+| Step | Qwen 3B | Qwen 1.5B | DeepSeek 1.3B | Qwen 0.5B |
+|------|:-------:|:---------:|:------------:|:---------:|
+| 1: Basic +,-,*,/ | 0% | 0% | 0% | 0% |
+| 2: Parentheses | 0% | 0% | 0% | 0% |
+| 3: Variables | 0% | 0% | 0% | 0% |
+| 4: Functions | 50% | 50% | 0% | 0% |
+| **Overall** | 12% | 12% | 0% | 0% |
+
+**The Calculator is a model killer.** Building a recursive-descent parser with operator precedence is beyond every model tested — even step 1 (basic arithmetic with precedence) fails universally.
+
+## Execution vs Stress — The Gap
+
+| Model | Execution (Phase 2) | Stress (Phase 3) | Drop |
+|-------|:-------------------:|:-----------------:|:----:|
+| Qwen2.5-Coder-3B | 100% | 42% | **-58%** |
+| Qwen2.5-Coder-1.5B | 98.1% | 31% | **-67%** |
+| DeepSeek-Coder-1.3B | 96.9% | 26% | **-71%** |
+| Qwen2.5-Coder-0.5B | 77.4% | 22% | **-55%** |
+
+---
+
 # Key Lessons Learned
+
+## From Phase 2 (Execution)
 
 1. **Structural benchmarks lie.** SmolLM2-135M scored 96.7% structural but 50.5% execution. Always run the code.
 
@@ -152,3 +244,17 @@ The model gets maximum attention budget for the actual code task.
 5. **Lean orchestration is the right approach.** Strip prompt overhead, give the model clean input, let it code. The PIE system's value for coding is session management, not generation boosting.
 
 6. **PIE's quality boosters shine for NPCs, not code.** Few-shot experts work when "sounds right" = "is right" (dialogue). For code, "looks right" != "runs correctly."
+
+## From Phase 3 (Stress)
+
+7. **Simple function benchmarks massively overrate models.** 98% on single functions drops to 31% on real tasks. The gap between "write fibonacci" and "build an LRU cache class" is enormous for sub-3B models.
+
+8. **Multi-turn is where 3B pulls ahead.** Qwen 3B scored 94% on the Todo app (4 incremental steps) while 1.5B scored 36%. Larger context and better instruction following matter for iterative development.
+
+9. **Some patterns are universally beyond small models.** Retry decorators with function attributes, recursive-descent parsers with operator precedence, metaclass-based ORMs, and decorator-based HTTP routers all scored 0% across every model.
+
+10. **Model behavior is non-deterministic and surprising.** Qwen 1.5B aced the KV Store (100%) while the larger 3B scored 0% on the same test. Don't assume bigger always means better on any specific task.
+
+11. **The "medium" tier is the real differentiator.** Tier 2 (heavy) was too hard for all models. Tier 1 (medium) — multi-method classes, data structures, parsers — is where you see meaningful quality differences between models.
+
+12. **Multi-turn persistence (JSON save/load) is a cliff.** All models except Qwen 3B failed the persistence step of the Todo app. Coordinating dataclass serialization with file I/O and state recovery is a specific weakness.

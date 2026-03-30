@@ -1,0 +1,371 @@
+[
+  {
+    "model_name": "deepseek-coder-1.3b-instruct.Q4_K_M",
+    "model_path": "models\\deepseek-coder-1.3b-instruct.Q4_K_M.gguf",
+    "model_size_mb": 833.1133117675781,
+    "chat_format": "chatml",
+    "tier1_score": 0.39285714285714285,
+    "tier2_score": 0.11111111111111112,
+    "tier3_score": 0.2659722222222222,
+    "overall_score": 0.25664682539682543,
+    "total_time": 707.6559999999881,
+    "tier1_results": [
+      {
+        "test_id": "t1_01_lru_cache",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 15.687999999994645,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_02_expression_eval",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 33.171000000002095,
+        "test_errors": [
+          "ERROR: assert abs(evaluate(\"2 + 3\") - 5.0) < 1e-9 -> error: invalid group reference 1 at position 7",
+          "ERROR: assert abs(evaluate(\"2 + 3 * 4\") - 14.0) < 1e-9 -> error: invalid group reference 1 at position 7",
+          "ERROR: assert abs(evaluate(\"(2 + 3) * 4\") - 20.0) < 1e-9 -> error: invalid group reference 1 at position 7",
+          "ERROR: assert abs(evaluate(\"10 / 2 - 1\") - 4.0) < 1e-9 -> error: invalid group reference 1 at position 7",
+          "ERROR: assert abs(evaluate(\"3 + 4 * 2 / (1 - 5)\") - 1.0) < 1e-9 -> error: invalid group reference 1 at position 7",
+          "ERROR: assert abs(evaluate(\"100\") - 100.0) < 1e-9 -> error: invalid group reference 1 at position 7",
+          "ERROR: assert abs(evaluate(\"(((5)))\") - 5.0) < 1e-9 -> error: invalid group reference 1 at position 7",
+          "ERROR: assert abs(evaluate(\"2.5 * 4\") - 10.0) < 1e-9 -> error: invalid group reference 1 at position 7"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_03_trie",
+        "score": 1.0,
+        "tests_passed": 11,
+        "tests_total": 11,
+        "response_time": 37.312999999994645,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_04_event_emitter",
+        "score": 0.42857142857142855,
+        "tests_passed": 3,
+        "tests_total": 7,
+        "response_time": 18.90600000001723,
+        "test_errors": [
+          "ERROR: def on_data(x): -> IndentationError: expected an indented block after function definition on line 1 (<string>, line 1)",
+          "ERROR: results.append(x) -> NameError: name 'x' is not defined",
+          "ERROR: ee.on(\"data\", on_data) -> NameError: name 'on_data' is not defined",
+          "FAIL: assert results == [1, 2] -> ",
+          "FAIL: assert ee.listener_count(\"data\") == 1 -> ",
+          "ERROR: ee.off(\"data\", on_data) -> NameError: name 'on_data' is not defined",
+          "FAIL: assert results == [1, 2] -> ",
+          "ERROR: def on_once(x): -> IndentationError: expected an indented block after function definition on line 1 (<string>, line 1)",
+          "ERROR: once_results.append(x) -> NameError: name 'x' is not defined",
+          "ERROR: ee.once(\"ping\", on_once) -> NameError: name 'on_once' is not defined",
+          "FAIL: assert once_results == [\"a\"] -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_05_csv_parser",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 89.15599999998813,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_06_json_flatten",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 19.078999999997905,
+        "test_errors": [
+          "SyntaxError: closing parenthesis ')' does not match opening parenthesis '[' (<string>, line 12)"
+        ],
+        "exec_error": "SyntaxError: closing parenthesis ')' does not match opening parenthesis '[' (<string>, line 12)"
+      },
+      {
+        "test_id": "t1_07_retry_decorator",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 6,
+        "response_time": 28.312000000005355,
+        "test_errors": [
+          "UnboundLocalError: local variable 'e' referenced before assignment"
+        ],
+        "exec_error": "UnboundLocalError: local variable 'e' referenced before assignment"
+      },
+      {
+        "test_id": "t1_08_graph",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 41.062000000005355,
+        "test_errors": [
+          "ERROR: bfs_result = g.bfs(\"A\") -> KeyError: 'E'",
+          "ERROR: assert bfs_result[0] == \"A\" -> NameError: name 'bfs_result' is not defined",
+          "ERROR: assert \"E\" in bfs_result -> NameError: name 'bfs_result' is not defined",
+          "ERROR: assert len(bfs_result) == 5 -> NameError: name 'bfs_result' is not defined",
+          "ERROR: dfs_result = g.dfs(\"A\") -> TypeError: Graph.dfs() missing 2 required positional arguments: 'visited' and 'stack'",
+          "ERROR: assert dfs_result[0] == \"A\" -> NameError: name 'dfs_result' is not defined",
+          "ERROR: assert \"E\" in dfs_result -> NameError: name 'dfs_result' is not defined",
+          "ERROR: assert len(dfs_result) == 5 -> NameError: name 'dfs_result' is not defined",
+          "ERROR: path = g.shortest_path(\"A\", \"E\") -> KeyError: 'E'",
+          "ERROR: assert path[0] == \"A\" -> NameError: name 'path' is not defined",
+          "ERROR: assert path[-1] == \"E\" -> NameError: name 'path' is not defined",
+          "ERROR: assert len(path) <= 4 -> NameError: name 'path' is not defined",
+          "ERROR: assert g.shortest_path(\"E\", \"A\") == [] -> KeyError: 'E'",
+          "ERROR: assert g.has_cycle() == False -> KeyError: 'E'",
+          "ERROR: assert g.has_cycle() == True -> RecursionError: maximum recursion depth exceeded while calling a Python object"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_09_rate_limiter",
+        "score": 0.5,
+        "tests_passed": 7,
+        "tests_total": 14,
+        "response_time": 34.625,
+        "test_errors": [
+          "FAIL: assert rl.available(now=0.0) == 5 -> ",
+          "FAIL: assert rl.allow(1, now=0.0) == False -> ",
+          "FAIL: assert rl.available(now=0.0) == 0 -> ",
+          "FAIL: assert abs(rl.wait_time(1, now=0.0) - 0.1) < 0.05 -> ",
+          "FAIL: assert rl.available(now=0.5) == 4 -> ",
+          "FAIL: assert rl2.allow(1, now=0.0) == False -> ",
+          "FAIL: assert rl2.allow(1, now=1.5) == False -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_10_state_machine",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 10,
+        "response_time": 34.21899999998277,
+        "test_errors": [
+          "ERROR: sm = StateMachine(\"idle\") -> AttributeError: can't set attribute 'history'",
+          "ERROR: try: -> NameError: name 'sm' is not defined",
+          "ERROR: sm2 = StateMachine(\"locked\") -> AttributeError: can't set attribute 'history'",
+          "ERROR: try: -> NameError: name 'sm3' is not defined",
+          "ERROR: assert sm3.state == \"a\" -> NameError: name 'sm3' is not defined"
+        ],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t2_01_kv_store",
+        "score": 0.05555555555555555,
+        "tests_passed": 1,
+        "tests_total": 18,
+        "response_time": 61.328000000008615,
+        "test_errors": [
+          "FAIL: store = KVStore() -> ",
+          "ERROR: try: -> NameError: name 'ttl' is not defined",
+          "FAIL: assert \"counter\" in keys -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_02_markdown_html",
+        "score": 0.5,
+        "tests_passed": 6,
+        "tests_total": 12,
+        "response_time": 30.01600000000326,
+        "test_errors": [
+          "ERROR: assert \"<h1>Hello</h1>\" in markdown_to_html(\"# Hello\") -> AttributeError: 'int' object has no attribute 'index'",
+          "ERROR: assert \"<h3>Three</h3>\" in markdown_to_html(\"### Three\") -> AttributeError: 'int' object has no attribute 'index'",
+          "FAIL: assert \"<strong>bold</strong>\" in markdown_to_html(\"**bold**\") -> ",
+          "FAIL: assert \"<em>italic</em>\" in markdown_to_html(\"*italic*\") -> ",
+          "FAIL: assert \"<code>x</code>\" in markdown_to_html(\"`x`\") -> ",
+          "FAIL: assert '<a href=\"http://example.com\">link</a>' in markdown_to_html(\"[link](http://example.com)\") -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_03_task_scheduler",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 10,
+        "response_time": 58.10899999999674,
+        "test_errors": [
+          "ValueError: Task task2 does not exist."
+        ],
+        "exec_error": "ValueError: Task task2 does not exist."
+      },
+      {
+        "test_id": "t2_04_mini_orm",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 16,
+        "response_time": 20.73399999999674,
+        "test_errors": [
+          "ERROR: class User(Model): -> IndentationError: expected an indented block after class definition on line 1 (<string>, line 1)",
+          "ERROR: sql = User.create_table_sql() -> NameError: name 'User' is not defined",
+          "ERROR: assert \"CREATE TABLE\" in sql -> NameError: name 'sql' is not defined",
+          "ERROR: assert \"users\" in sql -> NameError: name 'sql' is not defined",
+          "ERROR: assert \"INTEGER\" in sql -> NameError: name 'sql' is not defined",
+          "ERROR: assert \"TEXT\" in sql -> NameError: name 'sql' is not defined",
+          "ERROR: assert \"PRIMARY KEY\" in sql.upper() or \"primary key\" in sql.lower() -> NameError: name 'sql' is not defined",
+          "ERROR: u = User() -> NameError: name 'User' is not defined",
+          "ERROR: u.id = 1 -> NameError: name 'u' is not defined",
+          "ERROR: u.name = \"Alice\" -> NameError: name 'u' is not defined",
+          "ERROR: u.age = 30 -> NameError: name 'u' is not defined",
+          "ERROR: insert_sql, params = u.insert_sql() -> NameError: name 'u' is not defined",
+          "ERROR: assert \"INSERT\" in insert_sql.upper() -> NameError: name 'insert_sql' is not defined",
+          "ERROR: assert \"users\" in insert_sql -> NameError: name 'insert_sql' is not defined",
+          "ERROR: assert len(params) == 3 or len(params) >= 2 -> NameError: name 'params' is not defined",
+          "ERROR: select = User.select_sql() -> NameError: name 'User' is not defined",
+          "ERROR: assert \"SELECT\" in select.upper() -> NameError: name 'select' is not defined",
+          "ERROR: assert \"users\" in select -> NameError: name 'select' is not defined",
+          "ERROR: where_sql = User.select_sql(where={\"name\": \"Alice\"}) -> NameError: name 'User' is not defined",
+          "ERROR: assert \"WHERE\" in where_sql.upper() -> NameError: name 'where_sql' is not defined",
+          "ERROR: assert \"name\" in where_sql -> NameError: name 'where_sql' is not defined",
+          "ERROR: order_sql = User.select_sql(order_by=\"age\") -> NameError: name 'User' is not defined",
+          "ERROR: assert \"ORDER BY\" in order_sql.upper() -> NameError: name 'order_sql' is not defined",
+          "ERROR: assert \"age\" in order_sql -> NameError: name 'order_sql' is not defined",
+          "ERROR: limit_sql = User.select_sql(limit=10) -> NameError: name 'User' is not defined",
+          "ERROR: assert \"LIMIT\" in limit_sql.upper() -> NameError: name 'limit_sql' is not defined",
+          "ERROR: assert \"10\" in limit_sql -> NameError: name 'limit_sql' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_05_http_router",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 30.860000000015134,
+        "test_errors": [
+          "TypeError: 'list' object is not callable"
+        ],
+        "exec_error": "TypeError: 'list' object is not callable"
+      }
+    ],
+    "tier3_results": [
+      {
+        "test_id": "t3_01_todo_app",
+        "description": "Build a Todo app step by step: dataclass -> priority -> persistence -> search/stats",
+        "steps_completed": 0,
+        "steps_total": 4,
+        "overall_score": 0.5319444444444444,
+        "total_time": 85.70299999997951,
+        "steps": [
+          {
+            "step_id": "t3_01_step1",
+            "score": 0.7777777777777778,
+            "tests_passed": 7,
+            "tests_total": 9,
+            "response_time": 13.530999999988126,
+            "test_errors": [
+              "FAIL: assert tl.remove(2) == True -> ",
+              "FAIL: assert len(tl.all()) == 1 -> "
+            ],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step2",
+            "score": 0.75,
+            "tests_passed": 3,
+            "tests_total": 4,
+            "response_time": 23.844000000011874,
+            "test_errors": [
+              "FAIL: assert sorted_items[-1].title == \"Low task\" -> "
+            ],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step3",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 5,
+            "response_time": 16.70299999997951,
+            "test_errors": [
+              "ERROR: import tempfile, os, json -> AttributeError: 'TodoList' object has no attribute 'add'",
+              "ERROR: try: -> AttributeError: 'TodoList' object has no attribute 'items'"
+            ],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step4",
+            "score": 0.6,
+            "tests_passed": 6,
+            "tests_total": 10,
+            "response_time": 31.625,
+            "test_errors": [
+              "FAIL: assert len(results) == 2 -> ",
+              "FAIL: assert len(results) == 2 -> ",
+              "FAIL: assert s[\"by_priority\"][\"high\"] == 2 -> ",
+              "FAIL: assert s[\"by_priority\"][\"low\"] == 1 -> "
+            ],
+            "exec_error": ""
+          }
+        ]
+      },
+      {
+        "test_id": "t3_02_calculator",
+        "description": "Build a Calculator step by step: basic -> parentheses -> variables -> functions",
+        "steps_completed": 0,
+        "steps_total": 4,
+        "overall_score": 0.0,
+        "total_time": 69.375,
+        "steps": [
+          {
+            "step_id": "t3_02_step1",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 6,
+            "response_time": 4.812000000005355,
+            "test_errors": [
+              "ERROR: calc = Calculator() -> AttributeError: can't set attribute 'history'",
+              "ERROR: assert abs(calc.evaluate(\"2 + 3\") - 5.0) < 1e-9 -> NameError: name 'calc' is not defined",
+              "ERROR: assert abs(calc.evaluate(\"2 + 3 * 4\") - 14.0) < 1e-9 -> NameError: name 'calc' is not defined",
+              "ERROR: assert abs(calc.evaluate(\"10 / 2 - 1\") - 4.0) < 1e-9 -> NameError: name 'calc' is not defined",
+              "ERROR: assert abs(calc.evaluate(\"10 - 2 * 3\") - 4.0) < 1e-9 -> NameError: name 'calc' is not defined",
+              "ERROR: assert len(calc.history) == 4 -> NameError: name 'calc' is not defined",
+              "ERROR: assert calc.history[0] == (\"2 + 3\", 5.0) -> NameError: name 'calc' is not defined"
+            ],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_02_step2",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 5,
+            "response_time": 16.40700000000652,
+            "test_errors": [
+              "ValueError: could not convert string to float: '(2'"
+            ],
+            "exec_error": "ValueError: could not convert string to float: '(2'"
+          },
+          {
+            "step_id": "t3_02_step3",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 7,
+            "response_time": 24.687000000005355,
+            "test_errors": [
+              "ValueError: could not convert string to float: 'x'"
+            ],
+            "exec_error": "ValueError: could not convert string to float: 'x'"
+          },
+          {
+            "step_id": "t3_02_step4",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 8,
+            "response_time": 23.46899999998277,
+            "test_errors": [
+              "ValueError: invalid literal for int() with base 10: 'x'"
+            ],
+            "exec_error": "ValueError: invalid literal for int() with base 10: 'x'"
+          }
+        ]
+      }
+    ]
+  }
+]
