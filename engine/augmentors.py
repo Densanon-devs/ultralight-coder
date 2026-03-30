@@ -264,6 +264,8 @@ class Augmentor:
 
         Returns force-injected examples for patterns that universally fail
         without augmentors (0% → 100% with the right example).
+        Uses similarity to pick the best example from each matched category
+        when embeddings are available.
         """
         q = query.lower()
         matched_categories: list[str] = []
@@ -275,13 +277,27 @@ class Augmentor:
         if not matched_categories:
             return []
 
-        # Find the best example from each matched category
+        # Collect candidates from matched categories
+        candidates: dict[str, list[tuple[int, SolvedExample]]] = {cat: [] for cat in matched_categories}
+        for i, ex in enumerate(self.examples):
+            if ex.category in candidates:
+                candidates[ex.category].append((i, ex))
+
+        # Pick best per category using similarity when available
         forced = []
-        for cat in matched_categories:
-            for ex in self.examples:
-                if ex.category == cat:
-                    forced.append(ex)
-                    break  # One per category
+        if self._embedder is not None and self._example_embeddings is not None:
+            query_vec = self._embedder.encode([query], normalize_embeddings=True)
+            sims = np.dot(self._example_embeddings, query_vec.T).flatten()
+            for cat in matched_categories:
+                if not candidates[cat]:
+                    continue
+                best_idx, best_ex = max(candidates[cat], key=lambda x: sims[x[0]])
+                forced.append(best_ex)
+        else:
+            # No embeddings — take first from each category
+            for cat in matched_categories:
+                if candidates[cat]:
+                    forced.append(candidates[cat][0][1])
 
         return forced
 

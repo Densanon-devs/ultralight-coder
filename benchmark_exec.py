@@ -105,23 +105,59 @@ def extract_code(response: str) -> str:
     return response
 
 
-def safe_exec(code: str, timeout: float = 5.0) -> tuple[dict, str]:
-    """Execute code in an isolated namespace. Returns (namespace, error_str)."""
+def safe_exec(code: str, timeout: float = 10.0) -> tuple[dict, str]:
+    """Execute code in an isolated namespace with timeout. Returns (namespace, error_str)."""
+    import threading
+
     namespace = {"__builtins__": __builtins__}
-    try:
-        exec(code, namespace)
-        return namespace, ""
-    except Exception as e:
-        return namespace, f"{type(e).__name__}: {e}"
+    error = [None]
+
+    def _run():
+        try:
+            exec(code, namespace)
+        except Exception as e:
+            error[0] = f"{type(e).__name__}: {e}"
+
+    thread = threading.Thread(target=_run, daemon=True)
+    thread.start()
+    thread.join(timeout=timeout)
+
+    if thread.is_alive():
+        return namespace, f"TimeoutError: code execution exceeded {timeout}s"
+    return namespace, error[0] or ""
 
 
-def run_tests(namespace: dict, test_code: str) -> tuple[int, int, list[str]]:
+def _exec_with_timeout(code: str, namespace: dict, timeout: float = 10.0):
+    """Execute a code block with timeout. Returns None on success, Exception or str on failure."""
+    import threading
+
+    error = [None]
+
+    def _run():
+        try:
+            exec(code, namespace)
+        except Exception as e:
+            error[0] = e
+
+    thread = threading.Thread(target=_run, daemon=True)
+    thread.start()
+    thread.join(timeout=timeout)
+
+    if thread.is_alive():
+        return f"TimeoutError: test block exceeded {timeout}s"
+    return error[0]
+
+
+def run_tests(namespace: dict, test_code: str, block_timeout: float = 10.0) -> tuple[int, int, list[str]]:
     """Run test assertions against the namespace. Returns (passed, total, errors).
 
     Strategy: parse test_code into top-level blocks using Python's own AST,
     then execute each block individually. This correctly handles inline def,
     class, decorators, try/except, and arbitrarily nested structures.
     Falls back to the old line-based parser if AST parsing fails.
+
+    Each block gets a timeout to prevent hangs from generated code with
+    infinite loops or blocking calls.
     """
     import ast
 
@@ -152,15 +188,19 @@ def run_tests(namespace: dict, test_code: str) -> tuple[int, int, list[str]]:
 
     for block in blocks:
         block_asserts = block.count("assert ")
-        try:
-            exec(block, namespace)
+        result = _exec_with_timeout(block, namespace, timeout=block_timeout)
+        if result is None:
             passed += block_asserts
-        except AssertionError as e:
+        elif isinstance(result, AssertionError):
             first_line = block.split("\n")[0].strip()
-            errors.append(f"FAIL: {first_line} -> {e}")
-        except Exception as e:
+            errors.append(f"FAIL: {first_line} -> {result}")
+        elif isinstance(result, Exception):
             first_line = block.split("\n")[0].strip()
-            errors.append(f"ERROR: {first_line} -> {type(e).__name__}: {e}")
+            errors.append(f"ERROR: {first_line} -> {type(result).__name__}: {result}")
+        else:
+            # Timeout string
+            first_line = block.split("\n")[0].strip()
+            errors.append(f"TIMEOUT: {first_line} -> {result}")
 
     return passed, total, errors
 
