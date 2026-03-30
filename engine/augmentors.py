@@ -62,7 +62,9 @@ FAILURE_PATTERNS: dict[str, list[str]] = {
     ],
     "pattern_middleware": [
         "middleware pipeline", "middleware chain", "next_fn",
-        "request pipeline",
+        "request pipeline", "middlewarepipeline",
+        "pubsub", "pub sub", "subscribe(", "publish(",
+        "wildcard subscription", "topic pattern",
     ],
     "pattern_serialization": [
         "serialize", "deserialize", "roundtrip", "__class__",
