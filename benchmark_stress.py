@@ -1127,12 +1127,54 @@ class StressModelResult:
 # Runner
 # ═══════════════════════════════════════════════════════════════════════
 
+class _ModelShim:
+    """Wraps raw llama model for ExpertRouter compatibility."""
+    def __init__(self, model, max_tokens, temperature):
+        self.model = model
+        self.max_tokens = max_tokens
+        self.temperature = temperature
+        self.total_time = 0
+
+    def generate(self, prompt, max_tokens=None, temperature=None, **kwargs):
+        mt = max_tokens or self.max_tokens
+        temp = temperature or self.temperature
+        stop = ["</s>", "<|im_end|>", "<|end|>", "<|eot_id|>", "\nUser:", "\nHuman:"]
+        kwargs.pop("grammar", None)
+        start = time.monotonic()
+        output = self.model(prompt, max_tokens=mt, temperature=temp, stop=stop, echo=False, **kwargs)
+        self.total_time += time.monotonic() - start
+        return output["choices"][0]["text"].strip()
+
+    def count_tokens(self, text):
+        try:
+            return len(self.model.tokenize(text.encode("utf-8")))
+        except Exception:
+            return len(text) // 4
+
+
 class StressBenchmarkRunner:
-    def __init__(self, gpu_layers: int = 99, threads: int = 8, context_length: int = 4096):
+    def __init__(self, gpu_layers: int = 99, threads: int = 8, context_length: int = 4096,
+                 use_experts: bool = False):
         self.gpu_layers = gpu_layers
         self.threads = threads
         self.context_length = context_length
+        self.use_experts = use_experts
         self.all_results: list[StressModelResult] = []
+
+    def _get_expert_router(self):
+        """Create a stress-targeted expert router."""
+        if not self.use_experts:
+            return None
+        from engine.experts import ExpertRouter
+        router = ExpertRouter(stress=True)
+        try:
+            from engine.embedder import get_embedder
+            embedder = get_embedder()
+            if embedder:
+                router.init_embeddings(embedder)
+        except Exception:
+            pass  # Falls back to positional example selection
+        return router
 
     def load_model(self, model_path: Path):
         from llama_cpp import Llama
@@ -1156,15 +1198,36 @@ class StressBenchmarkRunner:
         text = output["choices"][0]["text"].strip()
         return text, elapsed
 
-    def run_single_test(self, model, test: StressTest, chat_format: str) -> StressTestResult:
-        """Run a single-shot test (tier 1 or 2)."""
-        system = (
-            "You are a Python coding assistant. Write clean, correct, complete Python code. "
-            "Return ONLY the code in a ```python block. No explanation. "
-            "Include all necessary imports. The code must be runnable as-is."
-        )
-        prompt = wrap_chat(system, test.prompt, chat_format)
-        response, elapsed = self.generate(model, prompt, max_tokens=test.max_tokens)
+    def run_single_test(self, model, test: StressTest, chat_format: str,
+                        expert_router=None) -> StressTestResult:
+        """Run a single-shot test (tier 1 or 2). Uses expert router if provided."""
+        if expert_router:
+            shim = _ModelShim(model, test.max_tokens, 0.2)
+            expert_result = expert_router.process(
+                query=test.prompt, model=shim, chat_format=chat_format,
+                module_hint="code_gen",
+                gen_kwargs={"max_tokens": test.max_tokens, "temperature": 0.2},
+            )
+            if expert_result:
+                response = expert_result.response
+                elapsed = shim.total_time
+            else:
+                # Fallback to direct
+                system = (
+                    "You are a Python coding assistant. Write clean, correct, complete Python code. "
+                    "Return ONLY the code in a ```python block. No explanation. "
+                    "Include all necessary imports. The code must be runnable as-is."
+                )
+                prompt = wrap_chat(system, test.prompt, chat_format)
+                response, elapsed = self.generate(model, prompt, max_tokens=test.max_tokens)
+        else:
+            system = (
+                "You are a Python coding assistant. Write clean, correct, complete Python code. "
+                "Return ONLY the code in a ```python block. No explanation. "
+                "Include all necessary imports. The code must be runnable as-is."
+            )
+            prompt = wrap_chat(system, test.prompt, chat_format)
+            response, elapsed = self.generate(model, prompt, max_tokens=test.max_tokens)
 
         code = extract_code(response)
         namespace, exec_error = safe_exec(code)
@@ -1190,7 +1253,8 @@ class StressBenchmarkRunner:
         )
 
     def run_multi_turn_test(self, model, test: MultiTurnTest,
-                            chat_format: str) -> MultiTurnTestResult:
+                            chat_format: str,
+                            expert_router=None) -> MultiTurnTestResult:
         """Run a multi-turn test — each step builds on accumulated code."""
         step_results = []
         accumulated_code = ""
@@ -1207,14 +1271,34 @@ class StressBenchmarkRunner:
             else:
                 user_msg = step.prompt
 
-            system = (
-                "You are a Python coding assistant. Write clean, correct, complete Python code. "
-                "Return ONLY the full code in a ```python block. No explanation. "
-                "Include all necessary imports. The code must be runnable as-is."
-            )
+            # Use expert router if available (especially valuable for first step)
+            if expert_router:
+                shim = _ModelShim(model, step.max_tokens, 0.2)
+                expert_result = expert_router.process(
+                    query=user_msg, model=shim, chat_format=chat_format,
+                    module_hint="code_gen",
+                    gen_kwargs={"max_tokens": step.max_tokens, "temperature": 0.2},
+                )
+                if expert_result:
+                    response = expert_result.response
+                    elapsed = shim.total_time
+                else:
+                    system = (
+                        "You are a Python coding assistant. Write clean, correct, complete Python code. "
+                        "Return ONLY the full code in a ```python block. No explanation. "
+                        "Include all necessary imports. The code must be runnable as-is."
+                    )
+                    prompt = wrap_chat(system, user_msg, chat_format)
+                    response, elapsed = self.generate(model, prompt, max_tokens=step.max_tokens)
+            else:
+                system = (
+                    "You are a Python coding assistant. Write clean, correct, complete Python code. "
+                    "Return ONLY the full code in a ```python block. No explanation. "
+                    "Include all necessary imports. The code must be runnable as-is."
+                )
+                prompt = wrap_chat(system, user_msg, chat_format)
+                response, elapsed = self.generate(model, prompt, max_tokens=step.max_tokens)
 
-            prompt = wrap_chat(system, user_msg, chat_format)
-            response, elapsed = self.generate(model, prompt, max_tokens=step.max_tokens)
             total_time += elapsed
 
             code = extract_code(response)
@@ -1270,13 +1354,17 @@ class StressBenchmarkRunner:
         model_size_mb = model_path.stat().st_size / (1024 * 1024)
         chat_format = detect_chat_format(str(model_path))
 
+        mode_str = "EXPERTS" if self.use_experts else "DIRECT"
         print(f"\n{'='*70}")
-        print(f"  Model: {model_name}")
+        print(f"  Model: {model_name} [{mode_str}]")
         print(f"  Size: {model_size_mb:.0f} MB | Format: {chat_format}")
         print(f"  Tiers: {tiers}")
         print(f"{'='*70}")
 
         model = self.load_model(model_path)
+
+        # Create expert router if requested
+        expert_router = self._get_expert_router() if self.use_experts else None
 
         result = StressModelResult(
             model_name=model_name, model_path=str(model_path),
@@ -1291,7 +1379,7 @@ class StressBenchmarkRunner:
             print(f"\n  -- Tier 1: Medium ({len(tier1_tests)} tests) --")
             for test in tier1_tests:
                 print(f"    {test.test_id}...", end=" ", flush=True)
-                tr = self.run_single_test(model, test, chat_format)
+                tr = self.run_single_test(model, test, chat_format, expert_router=expert_router)
                 result.tier1_results.append(tr)
                 status = f"{tr.tests_passed}/{tr.tests_total}"
                 icon = "PASS" if tr.score == 1.0 else ("PARTIAL" if tr.score > 0 else "FAIL")
@@ -1311,7 +1399,7 @@ class StressBenchmarkRunner:
             print(f"\n  -- Tier 2: Heavy ({len(tier2_tests)} tests) --")
             for test in tier2_tests:
                 print(f"    {test.test_id}...", end=" ", flush=True)
-                tr = self.run_single_test(model, test, chat_format)
+                tr = self.run_single_test(model, test, chat_format, expert_router=expert_router)
                 result.tier2_results.append(tr)
                 status = f"{tr.tests_passed}/{tr.tests_total}"
                 icon = "PASS" if tr.score == 1.0 else ("PARTIAL" if tr.score > 0 else "FAIL")
@@ -1331,7 +1419,8 @@ class StressBenchmarkRunner:
             print(f"\n  -- Tier 3: Multi-Turn ({len(tier3_tests)} tests) --")
             for test in tier3_tests:
                 print(f"    {test.test_id} ({len(test.steps)} steps):")
-                tr = self.run_multi_turn_test(model, test, chat_format)
+                tr = self.run_multi_turn_test(model, test, chat_format,
+                                              expert_router=expert_router)
                 result.tier3_results.append(tr)
                 for sr in tr.step_results:
                     status = f"{sr.tests_passed}/{sr.tests_total}"
@@ -1495,6 +1584,8 @@ def main():
     parser.add_argument("--context-length", type=int, default=4096)
     parser.add_argument("--output", type=str, default="benchmark_stress_results.json",
                         help="Output JSON file")
+    parser.add_argument("--experts", action="store_true",
+                        help="Use stress-targeted expert system (few-shot examples)")
     parser.add_argument("--list-tests", action="store_true", help="List all tests and exit")
     args = parser.parse_args()
 
@@ -1535,7 +1626,8 @@ def main():
     if args.quick:
         total_tests = len(tiers)
 
-    print(f"\n  Stress Benchmark")
+    mode_str = "EXPERTS" if args.experts else "DIRECT"
+    print(f"\n  Stress Benchmark [{mode_str}]")
     print(f"  Models: {len(models)} | Tiers: {tiers} | Tests: {total_tests}/model")
     print(f"  {'Quick mode' if args.quick else 'Full run'}")
 
@@ -1543,6 +1635,7 @@ def main():
         gpu_layers=args.gpu_layers,
         threads=args.threads,
         context_length=args.context_length,
+        use_experts=args.experts,
     )
 
     for model_path in models:

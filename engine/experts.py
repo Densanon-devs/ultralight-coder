@@ -484,18 +484,170 @@ def build_tuned_code_gen_expert() -> Expert:
     )
 
 
+def build_stress_code_gen_expert() -> Expert:
+    """
+    Stress-targeted code_gen expert with few-shot examples for patterns
+    that sub-3B models universally fail on:
+
+    - Decorator with function attributes (.attempts tracking)
+    - Class with mutable history list (not a read-only property)
+    - Recursive-descent expression evaluator with operator precedence
+    - Event emitter with on/off/once/emit
+    - Metaclass-free ORM with classmethods
+    - Decorator-based HTTP router with path param extraction
+    - Markdown-to-HTML string processing
+    - State machine with guards and history
+    - Token bucket rate limiter with explicit time
+    """
+    examples = [
+        # ── Decorator with function attributes ──────────────────
+        SolvedExample(
+            "Write a Python decorator called `count_calls(func)` that counts how many "
+            "times the decorated function is called. Store the count as `func.call_count`.",
+            '```python\nimport functools\n\n\ndef count_calls(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        wrapper.call_count += 1\n        return func(*args, **kwargs)\n    wrapper.call_count = 0\n    return wrapper\n```\n\nKey: set attributes on `wrapper`, not `func`. The wrapper IS the new function object.',
+            category="pattern_decorator",
+        ),
+        # ── Retry decorator with attempts attribute ─────────────
+        SolvedExample(
+            "Write a decorator `retry(max_retries=3, exceptions=(Exception,))` that retries a "
+            "function and tracks attempts in `func.attempts`.",
+            '```python\nimport functools\nimport time\n\n\ndef retry(max_attempts=3, exceptions=(Exception,), backoff=0):\n    def decorator(func):\n        @functools.wraps(func)\n        def wrapper(*args, **kwargs):\n            last_exc = None\n            for attempt in range(1, max_attempts + 1):\n                try:\n                    result = func(*args, **kwargs)\n                    wrapper.attempts = attempt\n                    return result\n                except exceptions as e:\n                    last_exc = e\n                    wrapper.attempts = attempt\n                    if backoff and attempt < max_attempts:\n                        time.sleep(backoff)\n            raise last_exc\n        wrapper.attempts = 0\n        return wrapper\n    return decorator\n```\n\nKey patterns: triple-nested (factory -> decorator -> wrapper), set `wrapper.attempts` attribute, re-raise last exception after all retries.',
+            category="pattern_decorator",
+        ),
+        # ── State machine with history list ─────────────────────
+        SolvedExample(
+            "Write a class `TrafficLight` that cycles through states with a `history` list and guard functions.",
+            '```python\nclass TrafficLight:\n    def __init__(self, initial):\n        self._state = initial\n        self._history = [initial]\n        self._transitions = {}\n\n    @property\n    def state(self):\n        return self._state\n\n    @property\n    def history(self):\n        return list(self._history)\n\n    def add_transition(self, from_state, event, to_state, guard=None):\n        self._transitions[(from_state, event)] = (to_state, guard)\n\n    def trigger(self, event):\n        key = (self._state, event)\n        if key not in self._transitions:\n            raise ValueError(f"No transition for {event} from {self._state}")\n        to_state, guard = self._transitions[key]\n        if guard is not None and not guard():\n            raise ValueError(f"Guard blocked {event}")\n        self._state = to_state\n        self._history.append(to_state)\n        return self._state\n```\n\nKey: `history` is a property returning a COPY of `_history` list. Use `_history` internally to append. Guards are optional callables.',
+            category="pattern_state_machine",
+        ),
+        # ── Expression evaluator with operator precedence ───────
+        SolvedExample(
+            "Write a function `calc(expr)` that evaluates math expressions with +, -, *, / "
+            "and parentheses, respecting operator precedence.",
+            '```python\ndef calc(expr: str) -> float:\n    tokens = _tokenize(expr)\n    pos = [0]\n\n    def parse_expr():\n        result = parse_term()\n        while pos[0] < len(tokens) and tokens[pos[0]] in ("+", "-"):\n            op = tokens[pos[0]]\n            pos[0] += 1\n            right = parse_term()\n            result = result + right if op == "+" else result - right\n        return result\n\n    def parse_term():\n        result = parse_factor()\n        while pos[0] < len(tokens) and tokens[pos[0]] in ("*", "/"):\n            op = tokens[pos[0]]\n            pos[0] += 1\n            right = parse_factor()\n            result = result * right if op == "*" else result / right\n        return result\n\n    def parse_factor():\n        token = tokens[pos[0]]\n        if token == "(":\n            pos[0] += 1\n            result = parse_expr()\n            pos[0] += 1  # skip ")"\n            return result\n        pos[0] += 1\n        return float(token)\n\n    return parse_expr()\n\n\ndef _tokenize(expr: str) -> list[str]:\n    tokens = []\n    i = 0\n    while i < len(expr):\n        if expr[i].isspace():\n            i += 1\n        elif expr[i] in "+-*/()":\n            tokens.append(expr[i])\n            i += 1\n        else:\n            j = i\n            while j < len(expr) and (expr[j].isdigit() or expr[j] == "."):\n                j += 1\n            tokens.append(expr[i:j])\n            i = j\n    return tokens\n```\n\nKey: recursive descent with 3 levels (expr -> term -> factor). expr handles +/-, term handles *// , factor handles numbers and parentheses.',
+            category="pattern_parser",
+        ),
+        # ── Event emitter pattern ───────────────────────────────
+        SolvedExample(
+            "Write an `EventBus` class with on, off, emit, and once methods.",
+            '```python\nclass EventBus:\n    def __init__(self):\n        self._listeners = {}\n\n    def on(self, event, callback):\n        if event not in self._listeners:\n            self._listeners[event] = []\n        self._listeners[event].append(callback)\n\n    def off(self, event, callback):\n        if event in self._listeners:\n            self._listeners[event] = [\n                cb for cb in self._listeners[event] if cb != callback\n            ]\n\n    def emit(self, event, *args, **kwargs):\n        for cb in self._listeners.get(event, []):\n            cb(*args, **kwargs)\n\n    def once(self, event, callback):\n        def wrapper(*args, **kwargs):\n            callback(*args, **kwargs)\n            self.off(event, wrapper)\n        self.on(event, wrapper)\n\n    def listener_count(self, event):\n        return len(self._listeners.get(event, []))\n```\n\nKey: `once` wraps callback, auto-removes via `off`. `emit` calls a COPY or iterates safely. `listener_count` returns 0 for unknown events.',
+            category="pattern_event",
+        ),
+        # ── Mini ORM with classmethods ──────────────────────────
+        SolvedExample(
+            "Write a `Model` base class and `Field` descriptor for a simple ORM that generates SQL.",
+            (
+                "```python\n"
+                "class Field:\n"
+                "    def __init__(self, field_type, primary_key=False, default=None):\n"
+                "        self.field_type = field_type\n"
+                "        self.primary_key = primary_key\n"
+                "        self.default = default\n"
+                "        self.name = None\n"
+                "\n"
+                "\n"
+                "class ModelMeta(type):\n"
+                "    def __new__(mcs, name, bases, namespace):\n"
+                "        fields = {}\n"
+                "        for key, value in namespace.items():\n"
+                "            if isinstance(value, Field):\n"
+                "                value.name = key\n"
+                "                fields[key] = value\n"
+                '        namespace["_fields"] = fields\n'
+                "        return super().__new__(mcs, name, bases, namespace)\n"
+                "\n"
+                "\n"
+                "class Model(metaclass=ModelMeta):\n"
+                "    _fields = {}\n"
+                "\n"
+                "    @classmethod\n"
+                "    def create_table_sql(cls):\n"
+                "        cols = []\n"
+                "        for name, f in cls._fields.items():\n"
+                '            col = name + " " + f.field_type\n'
+                "            if f.primary_key:\n"
+                '                col += " PRIMARY KEY"\n'
+                "            cols.append(col)\n"
+                '        col_str = ", ".join(cols)\n'
+                '        return "CREATE TABLE " + cls.__tablename__ + " (" + col_str + ")"\n'
+                "\n"
+                "    def insert_sql(self):\n"
+                "        names = list(self._fields.keys())\n"
+                "        vals = [getattr(self, n, self._fields[n].default) for n in names]\n"
+                '        placeholders = ", ".join(["?"] * len(names))\n'
+                '        name_str = ", ".join(names)\n'
+                '        sql = "INSERT INTO " + self.__tablename__ + " (" + name_str + ") VALUES (" + placeholders + ")"\n'
+                "        return sql, vals\n"
+                "\n"
+                "    @classmethod\n"
+                "    def select_sql(cls, where=None, order_by=None, limit=None):\n"
+                '        sql = "SELECT * FROM " + cls.__tablename__\n'
+                "        if where:\n"
+                '            clauses = [k + " = ?" for k in where]\n'
+                '            sql += " WHERE " + " AND ".join(clauses)\n'
+                "        if order_by:\n"
+                '            sql += " ORDER BY " + order_by\n'
+                "        if limit:\n"
+                '            sql += " LIMIT " + str(limit)\n'
+                "        return sql\n"
+                "```\n"
+                "\n"
+                "Key: metaclass collects Field instances into _fields dict. "
+                "create_table_sql and select_sql are classmethods. "
+                "insert_sql is instance method returning (sql, params)."
+            ),
+            category="pattern_orm",
+        ),
+        # ── HTTP Router with path params ────────────────────────
+        SolvedExample(
+            "Write a `Router` class with decorator-based route registration and path parameter extraction.",
+            '```python\nimport re\n\n\nclass Router:\n    def __init__(self):\n        self._routes = []\n\n    def route(self, method, path):\n        pattern = re.sub(r"<(\\w+)>", r"(?P<\\1>[^/]+)", path)\n        pattern = f"^{pattern}$"\n        def decorator(func):\n            self._routes.append({\n                "method": method,\n                "path": path,\n                "pattern": re.compile(pattern),\n                "handler": func,\n            })\n            return func\n        return decorator\n\n    def match(self, method, path):\n        for r in self._routes:\n            if r["method"] != method:\n                continue\n            m = r["pattern"].match(path)\n            if m:\n                return r["handler"], m.groupdict()\n        return None\n\n    def dispatch(self, method, path, **kwargs):\n        result = self.match(method, path)\n        if result is None:\n            raise LookupError(f"No route for {method} {path}")\n        handler, params = result\n        params.update(kwargs)\n        return handler(**params)\n\n    def routes(self):\n        return [\n            {"method": r["method"], "path": r["path"], "handler": r["handler"].__name__}\n            for r in self._routes\n        ]\n```\n\nKey: `route()` returns a decorator. Convert `<param>` to regex named groups. `match` returns (handler, params_dict) or None. `dispatch` calls handler with merged params.',
+            category="pattern_router",
+        ),
+        # ── Token bucket rate limiter ───────────────────────────
+        SolvedExample(
+            "Write a `TokenBucket` rate limiter with explicit time parameter for testing.",
+            '```python\nimport time as _time\n\n\nclass TokenBucket:\n    def __init__(self, rate, capacity):\n        self.rate = rate\n        self.capacity = capacity\n        self._tokens = float(capacity)\n        self._last_time = None\n\n    def _refill(self, now=None):\n        now = now if now is not None else _time.time()\n        if self._last_time is None:\n            self._last_time = now\n            return\n        elapsed = now - self._last_time\n        self._tokens = min(self.capacity, self._tokens + elapsed * self.rate)\n        self._last_time = now\n\n    def allow(self, tokens=1, now=None):\n        self._refill(now)\n        if self._tokens >= tokens:\n            self._tokens -= tokens\n            return True\n        return False\n\n    def wait_time(self, tokens=1, now=None):\n        self._refill(now)\n        if self._tokens >= tokens:\n            return 0.0\n        needed = tokens - self._tokens\n        return needed / self.rate\n\n    def available(self, now=None):\n        self._refill(now)\n        return int(self._tokens)\n```\n\nKey: `_refill` computes elapsed time and adds tokens. `allow` consumes tokens. All methods accept optional `now` for deterministic testing.',
+            category="pattern_rate_limit",
+        ),
+        # ── LRU Cache (already works, include for good measure) ─
+        SolvedExample(
+            "Write an LRU Cache class with get, put, and capacity eviction.",
+            '```python\nfrom collections import OrderedDict\n\n\nclass LRUCache:\n    def __init__(self, capacity):\n        self.capacity = capacity\n        self._cache = OrderedDict()\n\n    def get(self, key):\n        if key not in self._cache:\n            return -1\n        self._cache.move_to_end(key)\n        return self._cache[key]\n\n    def put(self, key, value):\n        if key in self._cache:\n            self._cache.move_to_end(key)\n        self._cache[key] = value\n        if len(self._cache) > self.capacity:\n            self._cache.popitem(last=False)\n\n    def __len__(self):\n        return len(self._cache)\n```',
+            category="data_structure",
+        ),
+    ]
+
+    return Expert(
+        name="code_gen",
+        system_context=(
+            "You are a Python expert. Write complete, correct, runnable code. "
+            "Use ```python blocks. Include all imports. Handle edge cases. "
+            "For classes: implement ALL requested methods. "
+            "For decorators: set attributes on the WRAPPER function, not the original. "
+            "For properties: use @property for read-only access, store data in _private attributes."
+        ),
+        examples=examples,
+        verifier=verify_code_gen,
+        max_examples=3,
+        max_retries=1,
+    )
+
+
 # ── Expert Router ─────────────────────────────────────────────
 
 class ExpertRouter:
     """Routes queries to the right expert and runs generate -> verify -> retry."""
 
-    def __init__(self, tuned: bool = False):
+    def __init__(self, tuned: bool = False, stress: bool = False):
         self.experts: dict[str, Expert] = {}
         self._embedder = None
         self._tuned = tuned
-        # Keep both sets available for runtime switching
+        self._stress = stress
+        # Keep all sets available for runtime switching
         self._generic_experts: dict[str, Expert] = {}
         self._tuned_experts: dict[str, Expert] = {}
+        self._stress_experts: dict[str, Expert] = {}
         self._register_defaults()
 
     def _register_defaults(self):
@@ -513,17 +665,26 @@ class ExpertRouter:
             "debugger": build_debug_expert(),
             "explainer": build_explainer_expert(),
         }
+        self._stress_experts = {
+            "code_gen": build_stress_code_gen_expert(),
+            "code_review": build_code_review_expert(),
+            "debugger": build_debug_expert(),
+            "explainer": build_explainer_expert(),
+        }
 
-        if self._tuned:
+        if self._stress:
+            self.experts = dict(self._stress_experts)
+        elif self._tuned:
             self.experts = dict(self._tuned_experts)
         else:
             self.experts = dict(self._generic_experts)
 
     def init_embeddings(self, embedder):
-        """Initialize embeddings for all experts (both sets)."""
+        """Initialize embeddings for all experts (all sets)."""
         self._embedder = embedder
-        # Embed both sets so switching is instant
-        all_experts = set(self._generic_experts.values()) | set(self._tuned_experts.values())
+        all_experts = (set(self._generic_experts.values())
+                       | set(self._tuned_experts.values())
+                       | set(self._stress_experts.values()))
         for expert in all_experts:
             expert.init_embeddings(embedder)
         logger.info(f"Expert embeddings initialized for {len(self.experts)} active experts")
@@ -531,14 +692,23 @@ class ExpertRouter:
     def use_tuned_experts(self):
         """Swap in tuned code_gen expert (algorithm-specific few-shot examples)."""
         self._tuned = True
+        self._stress = False
         self.experts = dict(self._tuned_experts)
         logger.info("Switched to tuned experts")
 
     def use_generic_experts(self):
         """Revert to the original generic experts."""
         self._tuned = False
+        self._stress = False
         self.experts = dict(self._generic_experts)
         logger.info("Switched to generic experts")
+
+    def use_stress_experts(self):
+        """Swap in stress-targeted experts (pattern-specific few-shot examples)."""
+        self._tuned = False
+        self._stress = True
+        self.experts = dict(self._stress_experts)
+        logger.info("Switched to stress experts")
 
     def select_expert(self, query: str, module_hint: Optional[str] = None) -> Optional[Expert]:
         """Select the best expert for a query."""

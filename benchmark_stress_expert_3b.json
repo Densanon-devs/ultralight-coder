@@ -1,0 +1,299 @@
+[
+  {
+    "model_name": "qwen2.5-coder-3b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+    "model_size_mb": 2007.4203491210938,
+    "chat_format": "chatml",
+    "tier1_score": 0.6220238095238095,
+    "tier2_score": 0.32,
+    "tier3_score": 0.5,
+    "overall_score": 0.4806746031746032,
+    "total_time": 1652.7339999999967,
+    "tier1_results": [
+      {
+        "test_id": "t1_01_lru_cache",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 40.078000000008615,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_02_expression_eval",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 90.54699999999139,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_03_trie",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 11,
+        "response_time": 85.38999999998487,
+        "test_errors": [
+          "TypeError: argument of type 'bool' is not iterable"
+        ],
+        "exec_error": "TypeError: argument of type 'bool' is not iterable"
+      },
+      {
+        "test_id": "t1_04_event_emitter",
+        "score": 0.42857142857142855,
+        "tests_passed": 3,
+        "tests_total": 7,
+        "response_time": 42.530999999988126,
+        "test_errors": [
+          "ERROR: def on_data(x): -> IndentationError: expected an indented block after function definition on line 1 (<string>, line 1)",
+          "ERROR: results.append(x) -> NameError: name 'x' is not defined",
+          "ERROR: ee.on(\"data\", on_data) -> NameError: name 'on_data' is not defined",
+          "FAIL: assert results == [1, 2] -> ",
+          "FAIL: assert ee.listener_count(\"data\") == 1 -> ",
+          "ERROR: ee.off(\"data\", on_data) -> NameError: name 'on_data' is not defined",
+          "FAIL: assert results == [1, 2] -> ",
+          "ERROR: def on_once(x): -> IndentationError: expected an indented block after function definition on line 1 (<string>, line 1)",
+          "ERROR: once_results.append(x) -> NameError: name 'x' is not defined",
+          "ERROR: ee.once(\"ping\", on_once) -> NameError: name 'on_once' is not defined",
+          "FAIL: assert once_results == [\"a\"] -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_05_csv_parser",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 71.875,
+        "test_errors": [
+          "AttributeError: 'NoneType' object has no attribute 'replace'"
+        ],
+        "exec_error": "AttributeError: 'NoneType' object has no attribute 'replace'"
+      },
+      {
+        "test_id": "t1_06_json_flatten",
+        "score": 0.875,
+        "tests_passed": 7,
+        "tests_total": 8,
+        "response_time": 66.43799999999464,
+        "test_errors": [
+          "FAIL: assert u == {\"a\": {\"b\": 1, \"c\": [2, 3]}} -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_07_retry_decorator",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 6,
+        "response_time": 62.40600000001723,
+        "test_errors": [
+          "ERROR: if call_count < 3: -> IndentationError: unexpected indent (<string>, line 1)",
+          "FAIL: call_count = 0 -> ",
+          "ERROR: try: -> NameError: name 'always_fail' is not defined",
+          "ERROR: assert always_fail.attempts == 2 -> NameError: name 'always_fail' is not defined",
+          "ERROR: @retry(max_attempts=1, backoff=0) -> SyntaxError: invalid syntax (<string>, line 1)",
+          "ERROR: def instant_success(): -> IndentationError: expected an indented block after function definition on line 1 (<string>, line 1)",
+          "ERROR: return 42 -> SyntaxError: 'return' outside function (<string>, line 1)",
+          "ERROR: assert instant_success() == 42 -> NameError: name 'instant_success' is not defined",
+          "ERROR: assert instant_success.attempts == 1 -> NameError: name 'instant_success' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_08_graph",
+        "score": 0.9166666666666666,
+        "tests_passed": 11,
+        "tests_total": 12,
+        "response_time": 86.20300000000861,
+        "test_errors": [
+          "FAIL: assert g.has_cycle() == False -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_09_rate_limiter",
+        "score": 1.0,
+        "tests_passed": 14,
+        "tests_total": 14,
+        "response_time": 61.828000000008615,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_10_state_machine",
+        "score": 1.0,
+        "tests_passed": 10,
+        "tests_total": 10,
+        "response_time": 53.0,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t2_01_kv_store",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 18,
+        "response_time": 137.21900000001187,
+        "test_errors": [
+          "FAIL: store = KVStore() -> ",
+          "FAIL: try: -> Should raise TypeError",
+          "FAIL: assert \"x\" in keys -> ",
+          "FAIL: assert \"counter\" in keys -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_02_markdown_html",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 91.46900000001187,
+        "test_errors": [
+          "SyntaxError: unterminated string literal (detected at line 46) (<string>, line 46)"
+        ],
+        "exec_error": "SyntaxError: unterminated string literal (detected at line 46) (<string>, line 46)"
+      },
+      {
+        "test_id": "t2_03_task_scheduler",
+        "score": 0.6,
+        "tests_passed": 6,
+        "tests_total": 10,
+        "response_time": 118.59399999998277,
+        "test_errors": [
+          "ERROR: assert order.index(\"build\") < order.index(\"test\") or s.is_complete(\"build\") -> ValueError: 'test' is not in list",
+          "ERROR: assert order.index(\"test\") < order.index(\"deploy\") -> ValueError: 'test' is not in list",
+          "FAIL: assert s.next_task() == \"deploy\" -> ",
+          "FAIL: assert s.next_task() is None -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_04_mini_orm",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 16,
+        "response_time": 100.78100000001723,
+        "test_errors": [
+          "TypeError: User() takes no arguments"
+        ],
+        "exec_error": "TypeError: User() takes no arguments"
+      },
+      {
+        "test_id": "t2_05_http_router",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 84.23400000002584,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier3_results": [
+      {
+        "test_id": "t3_01_todo_app",
+        "description": "Build a Todo app step by step: dataclass -> priority -> persistence -> search/stats",
+        "steps_completed": 2,
+        "steps_total": 4,
+        "overall_score": 0.5,
+        "total_time": 204.40599999998813,
+        "steps": [
+          {
+            "step_id": "t3_01_step1",
+            "score": 1.0,
+            "tests_passed": 9,
+            "tests_total": 9,
+            "response_time": 64.09400000001187,
+            "test_errors": [],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step2",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 4,
+            "response_time": 51.71799999999348,
+            "test_errors": [
+              "TypeError: bad operand type for unary -: 'str'"
+            ],
+            "exec_error": "TypeError: bad operand type for unary -: 'str'"
+          },
+          {
+            "step_id": "t3_01_step3",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 5,
+            "response_time": 39.20299999997951,
+            "test_errors": [
+              "ERROR: import tempfile, os, json -> TypeError: TodoList.add() got an unexpected keyword argument 'priority'",
+              "FAIL: try: -> "
+            ],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step4",
+            "score": 1.0,
+            "tests_passed": 10,
+            "tests_total": 10,
+            "response_time": 49.39100000000326,
+            "test_errors": [],
+            "exec_error": ""
+          }
+        ]
+      },
+      {
+        "test_id": "t3_02_calculator",
+        "description": "Build a Calculator step by step: basic -> parentheses -> variables -> functions",
+        "steps_completed": 2,
+        "steps_total": 4,
+        "overall_score": 0.5,
+        "total_time": 255.73499999995693,
+        "steps": [
+          {
+            "step_id": "t3_02_step1",
+            "score": 1.0,
+            "tests_passed": 6,
+            "tests_total": 6,
+            "response_time": 53.125,
+            "test_errors": [],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_02_step2",
+            "score": 1.0,
+            "tests_passed": 5,
+            "tests_total": 5,
+            "response_time": 62.171999999991385,
+            "test_errors": [],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_02_step3",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 7,
+            "response_time": 71.17199999999139,
+            "test_errors": [
+              "ValueError: could not convert string to float: '+'"
+            ],
+            "exec_error": "ValueError: could not convert string to float: '+'"
+          },
+          {
+            "step_id": "t3_02_step4",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 8,
+            "response_time": 69.26599999997416,
+            "test_errors": [
+              "ValueError: could not convert string to float: ')'"
+            ],
+            "exec_error": "ValueError: could not convert string to float: ')'"
+          }
+        ]
+      }
+    ]
+  }
+]
