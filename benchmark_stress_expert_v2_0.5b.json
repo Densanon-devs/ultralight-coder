@@ -1,0 +1,304 @@
+[
+  {
+    "model_name": "qwen2.5-coder-0.5b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+    "model_size_mb": 468.6356201171875,
+    "chat_format": "chatml",
+    "tier1_score": 0.5886363636363636,
+    "tier2_score": 0.5555555555555556,
+    "tier3_score": 0.33125,
+    "overall_score": 0.49181397306397306,
+    "total_time": 1231.5769999999902,
+    "tier1_results": [
+      {
+        "test_id": "t1_01_lru_cache",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 4.671999999991385,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_02_expression_eval",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 8.73399999999674,
+        "test_errors": [
+          "ERROR: assert abs(evaluate(\"2 + 3\") - 5.0) < 1e-9 -> NameError: name 'tokens' is not defined",
+          "ERROR: assert abs(evaluate(\"2 + 3 * 4\") - 14.0) < 1e-9 -> NameError: name 'tokens' is not defined",
+          "ERROR: assert abs(evaluate(\"(2 + 3) * 4\") - 20.0) < 1e-9 -> NameError: name 'tokens' is not defined",
+          "ERROR: assert abs(evaluate(\"10 / 2 - 1\") - 4.0) < 1e-9 -> NameError: name 'tokens' is not defined",
+          "ERROR: assert abs(evaluate(\"3 + 4 * 2 / (1 - 5)\") - 1.0) < 1e-9 -> NameError: name 'tokens' is not defined",
+          "ERROR: assert abs(evaluate(\"100\") - 100.0) < 1e-9 -> NameError: name 'tokens' is not defined",
+          "ERROR: assert abs(evaluate(\"(((5)))\") - 5.0) < 1e-9 -> NameError: name 'tokens' is not defined",
+          "ERROR: assert abs(evaluate(\"2.5 * 4\") - 10.0) < 1e-9 -> NameError: name 'tokens' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_03_trie",
+        "score": 0.6363636363636364,
+        "tests_passed": 7,
+        "tests_total": 11,
+        "response_time": 15.703999999997905,
+        "test_errors": [
+          "FAIL: assert t.count_prefix(\"ap\") == 3 -> ",
+          "FAIL: assert t.count_prefix(\"app\") == 2 -> ",
+          "FAIL: assert t.count_prefix(\"banana\") == 1 -> ",
+          "FAIL: assert t.all_words() == [\"app\", \"apple\", \"apricot\", \"banana\"] -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_04_event_emitter",
+        "score": 1.0,
+        "tests_passed": 7,
+        "tests_total": 7,
+        "response_time": 10.922000000020489,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_05_csv_parser",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 22.98399999999674,
+        "test_errors": [
+          "FAIL: assert len(simple) == 2 -> ",
+          "FAIL: assert simple[0][\"name\"] == \"Alice\" -> ",
+          "FAIL: assert simple[0][\"age\"] == \"30\" -> ",
+          "ERROR: assert simple[1][\"name\"] == \"Bob\" -> KeyError: 'name'",
+          "ERROR: quoted = parse_csv('name,bio\\nAlice,\"likes, commas\"\\nBob,\"says \"\"hi\"\"\"' ) -> ValueError: Invalid CSV format: quoted field must contain exactly two parts.",
+          "ERROR: assert quoted[0][\"bio\"] == \"likes, commas\" -> NameError: name 'quoted' is not defined",
+          "ERROR: assert quoted[1][\"bio\"] == 'says \"hi\"' -> NameError: name 'quoted' is not defined",
+          "FAIL: assert tabbed[0][\"a\"] == \"1\" -> ",
+          "FAIL: assert tabbed[0][\"b\"] == \"2\" -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_06_json_flatten",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 52.671999999991385,
+        "test_errors": [
+          "NameError: name 'value' is not defined"
+        ],
+        "exec_error": "NameError: name 'value' is not defined"
+      },
+      {
+        "test_id": "t1_07_retry_decorator",
+        "score": 0.5,
+        "tests_passed": 3,
+        "tests_total": 6,
+        "response_time": 13.719000000011874,
+        "test_errors": [
+          "ERROR: result = fail_twice() -> ValueError: not yet",
+          "ERROR: assert result == \"success\" -> NameError: name 'result' is not defined",
+          "FAIL: assert fail_twice.attempts == 3 -> ",
+          "FAIL: assert always_fail.attempts == 2 -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_08_graph",
+        "score": 0.75,
+        "tests_passed": 9,
+        "tests_total": 12,
+        "response_time": 40.546999999991385,
+        "test_errors": [
+          "ERROR: assert path[0] == \"A\" -> IndexError: list index out of range",
+          "ERROR: assert path[-1] == \"E\" -> IndexError: list index out of range",
+          "FAIL: assert g.has_cycle() == False -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_09_rate_limiter",
+        "score": 1.0,
+        "tests_passed": 14,
+        "tests_total": 14,
+        "response_time": 28.203999999997905,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_10_state_machine",
+        "score": 1.0,
+        "tests_passed": 10,
+        "tests_total": 10,
+        "response_time": 62.60899999999674,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t2_01_kv_store",
+        "score": 0.7777777777777778,
+        "tests_passed": 14,
+        "tests_total": 18,
+        "response_time": 63.030999999988126,
+        "test_errors": [
+          "FAIL: assert store.delete(\"a\") == True -> ",
+          "FAIL: assert store.delete(\"a\") == False -> ",
+          "FAIL: assert result == {\"x\": 10, \"y\": 20, \"z\": 30} -> ",
+          "ERROR: assert store.incr(\"new_counter\", 1, now=0.0) == 1 -> UnboundLocalError: local variable 'value' referenced before assignment"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_02_markdown_html",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 367.0469999999914,
+        "test_errors": [
+          "SyntaxError: unterminated string literal (detected at line 14) (<string>, line 14)"
+        ],
+        "exec_error": "SyntaxError: unterminated string literal (detected at line 14) (<string>, line 14)"
+      },
+      {
+        "test_id": "t2_03_task_scheduler",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 10,
+        "response_time": 60.82799999997951,
+        "test_errors": [
+          "KeyError: 'name'"
+        ],
+        "exec_error": "KeyError: 'name'"
+      },
+      {
+        "test_id": "t2_04_mini_orm",
+        "score": 1.0,
+        "tests_passed": 16,
+        "tests_total": 16,
+        "response_time": 38.437000000005355,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_05_http_router",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 29.484000000025844,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier3_results": [
+      {
+        "test_id": "t3_01_todo_app",
+        "description": "Build a Todo app step by step: dataclass -> priority -> persistence -> search/stats",
+        "steps_completed": 1,
+        "steps_total": 4,
+        "overall_score": 0.6625,
+        "total_time": 197.68700000003446,
+        "steps": [
+          {
+            "step_id": "t3_01_step1",
+            "score": 1.0,
+            "tests_passed": 9,
+            "tests_total": 9,
+            "response_time": 42.29700000002049,
+            "test_errors": [],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step2",
+            "score": 0.75,
+            "tests_passed": 3,
+            "tests_total": 4,
+            "response_time": 36.21799999999348,
+            "test_errors": [
+              "FAIL: assert sorted_items[-1].title == \"Low task\" -> "
+            ],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step3",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 5,
+            "response_time": 61.953000000008615,
+            "test_errors": [
+              "ERROR: try: -> TypeError: Object of type TodoItem is not JSON serializable"
+            ],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step4",
+            "score": 0.9,
+            "tests_passed": 9,
+            "tests_total": 10,
+            "response_time": 57.219000000011874,
+            "test_errors": [
+              "FAIL: assert len(filtered) == 1 -> "
+            ],
+            "exec_error": ""
+          }
+        ]
+      },
+      {
+        "test_id": "t3_02_calculator",
+        "description": "Build a Calculator step by step: basic -> parentheses -> variables -> functions",
+        "steps_completed": 0,
+        "steps_total": 4,
+        "overall_score": 0.0,
+        "total_time": 214.295999999973,
+        "steps": [
+          {
+            "step_id": "t3_02_step1",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 6,
+            "response_time": 39.312000000005355,
+            "test_errors": [
+              "NameError: name '_tokenize' is not defined"
+            ],
+            "exec_error": "NameError: name '_tokenize' is not defined"
+          },
+          {
+            "step_id": "t3_02_step2",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 5,
+            "response_time": 82.92199999999139,
+            "test_errors": [
+              "SyntaxError: invalid syntax (<string>, line 116)"
+            ],
+            "exec_error": "SyntaxError: invalid syntax (<string>, line 116)"
+          },
+          {
+            "step_id": "t3_02_step3",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 7,
+            "response_time": 35.70299999997951,
+            "test_errors": [
+              "NameError: name '_tokenize' is not defined"
+            ],
+            "exec_error": "NameError: name '_tokenize' is not defined"
+          },
+          {
+            "step_id": "t3_02_step4",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 8,
+            "response_time": 56.35899999999674,
+            "test_errors": [
+              "'Calculator' not found in generated code"
+            ],
+            "exec_error": "'Calculator' not found in generated code"
+          }
+        ]
+      }
+    ]
+  }
+]
