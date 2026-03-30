@@ -1,0 +1,342 @@
+[
+  {
+    "model_name": "qwen2.5-coder-0.5b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+    "model_size_mb": 468.6356201171875,
+    "chat_format": "chatml",
+    "tier1_score": 0.49816017316017314,
+    "tier2_score": 0.24,
+    "tier3_score": 0.33125,
+    "overall_score": 0.3564700577200577,
+    "total_time": 607.0319999999774,
+    "tier1_results": [
+      {
+        "test_id": "t1_01_lru_cache",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 13.578000000008615,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_02_expression_eval",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 35.280999999988126,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_03_trie",
+        "score": 0.6363636363636364,
+        "tests_passed": 7,
+        "tests_total": 11,
+        "response_time": 18.203000000008615,
+        "test_errors": [
+          "FAIL: assert t.count_prefix(\"ap\") == 3 -> ",
+          "FAIL: assert t.count_prefix(\"app\") == 2 -> ",
+          "FAIL: assert t.count_prefix(\"banana\") == 1 -> ",
+          "ERROR: assert t.all_words() == [\"app\", \"apple\", \"apricot\", \"banana\"] -> KeyError: 'word'"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_04_event_emitter",
+        "score": 0.42857142857142855,
+        "tests_passed": 3,
+        "tests_total": 7,
+        "response_time": 11.671999999991385,
+        "test_errors": [
+          "ERROR: def on_data(x): -> IndentationError: expected an indented block after function definition on line 1 (<string>, line 1)",
+          "ERROR: results.append(x) -> NameError: name 'x' is not defined",
+          "ERROR: ee.on(\"data\", on_data) -> NameError: name 'on_data' is not defined",
+          "FAIL: assert results == [1, 2] -> ",
+          "FAIL: assert ee.listener_count(\"data\") == 1 -> ",
+          "ERROR: ee.off(\"data\", on_data) -> NameError: name 'on_data' is not defined",
+          "FAIL: assert results == [1, 2] -> ",
+          "ERROR: def on_once(x): -> IndentationError: expected an indented block after function definition on line 1 (<string>, line 1)",
+          "ERROR: once_results.append(x) -> NameError: name 'x' is not defined",
+          "ERROR: ee.once(\"ping\", on_once) -> NameError: name 'on_once' is not defined",
+          "FAIL: assert once_results == [\"a\"] -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_05_csv_parser",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 15.26600000000326,
+        "test_errors": [
+          "FAIL: assert len(simple) == 2 -> ",
+          "FAIL: assert simple[0][\"name\"] == \"Alice\" -> ",
+          "FAIL: assert simple[0][\"age\"] == \"30\" -> ",
+          "ERROR: assert simple[1][\"name\"] == \"Bob\" -> KeyError: 'name'",
+          "FAIL: assert quoted[0][\"bio\"] == \"likes, commas\" -> ",
+          "ERROR: assert quoted[1][\"bio\"] == 'says \"hi\"' -> KeyError: 'bio'",
+          "FAIL: assert tabbed[0][\"a\"] == \"1\" -> ",
+          "FAIL: assert tabbed[0][\"b\"] == \"2\" -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_06_json_flatten",
+        "score": 0.25,
+        "tests_passed": 2,
+        "tests_total": 8,
+        "response_time": 21.39100000000326,
+        "test_errors": [
+          "ERROR: assert flatten_json({\"a\": 1}) == {\"a\": 1} -> RuntimeError: dictionary changed size during iteration",
+          "ERROR: assert flatten_json({\"a\": {\"b\": 1}}) == {\"a.b\": 1} -> RuntimeError: dictionary changed size during iteration",
+          "ERROR: f = flatten_json({\"a\": {\"b\": 1, \"c\": [2, 3]}}) -> RuntimeError: dictionary changed size during iteration",
+          "ERROR: assert f == {\"a.b\": 1, \"a.c.0\": 2, \"a.c.1\": 3} -> NameError: name 'f' is not defined",
+          "ERROR: assert flatten_json({\"x\": {\"y\": {\"z\": 42}}}) == {\"x.y.z\": 42} -> RuntimeError: dictionary changed size during iteration",
+          "FAIL: assert unflatten_json({\"a.b\": 1}) == {\"a\": {\"b\": 1}} -> ",
+          "FAIL: assert u == {\"a\": {\"b\": 1, \"c\": [2, 3]}} -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_07_retry_decorator",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 6,
+        "response_time": 32.546999999991385,
+        "test_errors": [
+          "ERROR: if call_count < 3: -> IndentationError: unexpected indent (<string>, line 1)",
+          "FAIL: call_count = 0 -> ",
+          "ERROR: try: -> NameError: name 'always_fail' is not defined",
+          "ERROR: assert always_fail.attempts == 2 -> NameError: name 'always_fail' is not defined",
+          "ERROR: @retry(max_attempts=1, backoff=0) -> SyntaxError: invalid syntax (<string>, line 1)",
+          "ERROR: def instant_success(): -> IndentationError: expected an indented block after function definition on line 1 (<string>, line 1)",
+          "ERROR: return 42 -> SyntaxError: 'return' outside function (<string>, line 1)",
+          "ERROR: assert instant_success() == 42 -> NameError: name 'instant_success' is not defined",
+          "ERROR: assert instant_success.attempts == 1 -> NameError: name 'instant_success' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_08_graph",
+        "score": 0.6666666666666666,
+        "tests_passed": 8,
+        "tests_total": 12,
+        "response_time": 18.405999999988126,
+        "test_errors": [
+          "ERROR: assert bfs_result[0] == \"A\" -> TypeError: 'set' object is not subscriptable",
+          "ERROR: assert dfs_result[0] == \"A\" -> TypeError: 'set' object is not subscriptable",
+          "ERROR: assert path[0] == \"A\" -> TypeError: 'set' object is not subscriptable",
+          "ERROR: assert path[-1] == \"E\" -> TypeError: 'set' object is not subscriptable"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_09_rate_limiter",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 14,
+        "response_time": 54.344000000011874,
+        "test_errors": [
+          "'RateLimiter' not found in generated code"
+        ],
+        "exec_error": "'RateLimiter' not found in generated code"
+      },
+      {
+        "test_id": "t1_10_state_machine",
+        "score": 1.0,
+        "tests_passed": 10,
+        "tests_total": 10,
+        "response_time": 13.01500000001397,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t2_01_kv_store",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 18,
+        "response_time": 26.796000000002095,
+        "test_errors": [
+          "ERROR: store = KVStore() -> TypeError: KVStore.__init__() missing 1 required positional argument: 'initial'",
+          "ERROR: try: -> NameError: name 'store' is not defined",
+          "ERROR: keys = store.keys(now=0.0) -> NameError: name 'store' is not defined",
+          "ERROR: assert \"x\" in keys -> NameError: name 'keys' is not defined",
+          "ERROR: assert \"counter\" in keys -> NameError: name 'keys' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_02_markdown_html",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 23.64000000001397,
+        "test_errors": [
+          "SyntaxError: unterminated string literal (detected at line 19) (<string>, line 19)"
+        ],
+        "exec_error": "SyntaxError: unterminated string literal (detected at line 19) (<string>, line 19)"
+      },
+      {
+        "test_id": "t2_03_task_scheduler",
+        "score": 0.2,
+        "tests_passed": 2,
+        "tests_total": 10,
+        "response_time": 28.296999999991385,
+        "test_errors": [
+          "ERROR: s.add_task(\"build\", priority=5) -> NameError: name 'Task' is not defined",
+          "ERROR: s.add_task(\"test\", priority=3, depends_on=[\"build\"]) -> NameError: name 'Task' is not defined",
+          "ERROR: s.add_task(\"deploy\", priority=1, depends_on=[\"test\"]) -> NameError: name 'Task' is not defined",
+          "ERROR: s.add_task(\"lint\", priority=4) -> NameError: name 'Task' is not defined",
+          "FAIL: assert s.next_task() == \"build\" -> ",
+          "FAIL: assert set(s.ready_tasks()) == {\"build\", \"lint\"} -> ",
+          "ERROR: s.complete(\"build\") -> ValueError: Task build not found.",
+          "ERROR: assert s.is_complete(\"build\") == True -> ValueError: Task build not found.",
+          "FAIL: assert \"test\" in s.ready_tasks() -> ",
+          "ERROR: assert order.index(\"build\") < order.index(\"test\") or s.is_complete(\"build\") -> ValueError: 'build' is not in list",
+          "ERROR: assert order.index(\"test\") < order.index(\"deploy\") -> ValueError: 'test' is not in list",
+          "ERROR: s.complete(\"lint\") -> ValueError: Task lint not found.",
+          "ERROR: s.complete(\"test\") -> ValueError: Task test not found.",
+          "FAIL: assert s.next_task() == \"deploy\" -> ",
+          "ERROR: s.complete(\"deploy\") -> ValueError: Task deploy not found.",
+          "ERROR: cyc.add_task(\"a\", depends_on=[\"b\"]) -> NameError: name 'Task' is not defined",
+          "ERROR: cyc.add_task(\"b\", depends_on=[\"a\"]) -> NameError: name 'Task' is not defined",
+          "FAIL: assert cyc.has_cycle() == True -> ",
+          "ERROR: no_cyc.add_task(\"x\") -> NameError: name 'Task' is not defined",
+          "ERROR: no_cyc.add_task(\"y\", depends_on=[\"x\"]) -> NameError: name 'Task' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_04_mini_orm",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 16,
+        "response_time": 31.85999999998603,
+        "test_errors": [
+          "NameError: name 'ModelMeta' is not defined"
+        ],
+        "exec_error": "NameError: name 'ModelMeta' is not defined"
+      },
+      {
+        "test_id": "t2_05_http_router",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 19.235000000015134,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier3_results": [
+      {
+        "test_id": "t3_01_todo_app",
+        "description": "Build a Todo app step by step: dataclass -> priority -> persistence -> search/stats",
+        "steps_completed": 1,
+        "steps_total": 4,
+        "overall_score": 0.6625,
+        "total_time": 87.76600000000326,
+        "steps": [
+          {
+            "step_id": "t3_01_step1",
+            "score": 1.0,
+            "tests_passed": 9,
+            "tests_total": 9,
+            "response_time": 16.89100000000326,
+            "test_errors": [],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step2",
+            "score": 0.75,
+            "tests_passed": 3,
+            "tests_total": 4,
+            "response_time": 20.46799999999348,
+            "test_errors": [
+              "FAIL: assert sorted_items[-1].title == \"Low task\" -> "
+            ],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step3",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 5,
+            "response_time": 24.65700000000652,
+            "test_errors": [
+              "ERROR: try: -> TypeError: Object of type TodoItem is not JSON serializable"
+            ],
+            "exec_error": ""
+          },
+          {
+            "step_id": "t3_01_step4",
+            "score": 0.9,
+            "tests_passed": 9,
+            "tests_total": 10,
+            "response_time": 25.75,
+            "test_errors": [
+              "FAIL: assert len(filtered) == 1 -> "
+            ],
+            "exec_error": ""
+          }
+        ]
+      },
+      {
+        "test_id": "t3_02_calculator",
+        "description": "Build a Calculator step by step: basic -> parentheses -> variables -> functions",
+        "steps_completed": 0,
+        "steps_total": 4,
+        "overall_score": 0.0,
+        "total_time": 155.73499999995693,
+        "steps": [
+          {
+            "step_id": "t3_02_step1",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 6,
+            "response_time": 33.32799999997951,
+            "test_errors": [
+              "NameError: name '_tokenize' is not defined"
+            ],
+            "exec_error": "NameError: name '_tokenize' is not defined"
+          },
+          {
+            "step_id": "t3_02_step2",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 5,
+            "response_time": 32.98499999998603,
+            "test_errors": [
+              "'Calculator' not found in generated code"
+            ],
+            "exec_error": "'Calculator' not found in generated code"
+          },
+          {
+            "step_id": "t3_02_step3",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 7,
+            "response_time": 49.70299999997951,
+            "test_errors": [
+              "SyntaxError: '[' was never closed (<string>, line 123)"
+            ],
+            "exec_error": "SyntaxError: '[' was never closed (<string>, line 123)"
+          },
+          {
+            "step_id": "t3_02_step4",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 8,
+            "response_time": 39.719000000011874,
+            "test_errors": [
+              "'Calculator' not found in generated code"
+            ],
+            "exec_error": "'Calculator' not found in generated code"
+          }
+        ]
+      }
+    ]
+  }
+]
