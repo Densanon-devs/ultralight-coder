@@ -667,20 +667,676 @@ def build_stress_code_gen_augmentor() -> Augmentor:
     )
 
 
+# ── Programmer Pack Augmentor ────────────────────────────────
+
+def build_programmer_pack_augmentor() -> Augmentor:
+    """
+    Comprehensive programmer pack — superset of stress augmentor.
+
+    Includes all 9 stress examples PLUS 16 new examples across 8 domains:
+    iterator protocol, context managers, descriptors, threading,
+    serialization, BST, template engine, middleware chain.
+    """
+    # ── Pull in all 9 stress examples as the base ──────────────
+    stress = build_stress_code_gen_augmentor()
+    examples = list(stress.examples)
+
+    # ── Domain 1: Iterator Protocol ────────────────────────────
+    examples.append(SolvedExample(
+        "Write a reusable range iterator class that supports multiple "
+        "iterations over the same object by returning a fresh iterator from __iter__.",
+        (
+            "```python\n"
+            "class _RangeIterator:\n"
+            "    def __init__(self, start, stop, step):\n"
+            "        self._current = start\n"
+            "        self._stop = stop\n"
+            "        self._step = step\n"
+            "\n"
+            "    def __iter__(self):\n"
+            "        return self\n"
+            "\n"
+            "    def __next__(self):\n"
+            "        if self._current >= self._stop:\n"
+            "            raise StopIteration\n"
+            "        val = self._current\n"
+            "        self._current += self._step\n"
+            "        return val\n"
+            "\n"
+            "\n"
+            "class ReusableRange:\n"
+            "    def __init__(self, start, stop=None, step=1):\n"
+            "        if stop is None:\n"
+            "            start, stop = 0, start\n"
+            "        self._start = start\n"
+            "        self._stop = stop\n"
+            "        self._step = step\n"
+            "\n"
+            "    def __iter__(self):\n"
+            "        return _RangeIterator(self._start, self._stop, self._step)\n"
+            "\n"
+            "    def __len__(self):\n"
+            "        return max(0, (self._stop - self._start + self._step - 1) // self._step)\n"
+            "```\n"
+            "\n"
+            "Key: __iter__ returns a NEW _RangeIterator each time, so the "
+            "container can be iterated multiple times independently."
+        ),
+        category="pattern_iterator",
+    ))
+    examples.append(SolvedExample(
+        "Write a class that iterates over chunks of a list, yielding "
+        "sublists of a given size. Support re-iteration.",
+        (
+            "```python\n"
+            "class Chunked:\n"
+            "    def __init__(self, data, size):\n"
+            "        self._data = list(data)\n"
+            "        self._size = size\n"
+            "\n"
+            "    def __iter__(self):\n"
+            "        for i in range(0, len(self._data), self._size):\n"
+            "            yield self._data[i:i + self._size]\n"
+            "\n"
+            "    def __len__(self):\n"
+            "        return (len(self._data) + self._size - 1) // self._size\n"
+            "```\n"
+            "\n"
+            "Key: __iter__ is a generator function so each call produces a "
+            "fresh generator object, enabling re-iteration."
+        ),
+        category="pattern_iterator",
+    ))
+
+    # ── Domain 2: Context Manager ──────────────────────────────
+    examples.append(SolvedExample(
+        "Write a Transaction context manager that wraps a dict, snapshots "
+        "state on enter, and auto-reverts on exception.",
+        (
+            "```python\n"
+            "class Transaction:\n"
+            "    def __init__(self, data: dict):\n"
+            "        self._data = data\n"
+            "        self._snapshot = None\n"
+            "\n"
+            "    def __enter__(self):\n"
+            "        self._snapshot = dict(self._data)\n"
+            "        return self._data\n"
+            "\n"
+            "    def __exit__(self, exc_type, exc_val, exc_tb):\n"
+            "        if exc_type is not None:\n"
+            "            self._data.clear()\n"
+            "            self._data.update(self._snapshot)\n"
+            "        self._snapshot = None\n"
+            "        return False\n"
+            "```\n"
+            "\n"
+            "Key: __exit__ checks exc_type to decide rollback. Returns False "
+            "so exceptions propagate. Snapshot is a shallow copy."
+        ),
+        category="pattern_context_manager",
+    ))
+    examples.append(SolvedExample(
+        "Write a Timer context manager that measures elapsed time and "
+        "stores it in a .elapsed attribute.",
+        (
+            "```python\n"
+            "import time\n"
+            "\n"
+            "\n"
+            "class Timer:\n"
+            "    def __init__(self):\n"
+            "        self.elapsed = 0.0\n"
+            "        self._start = None\n"
+            "\n"
+            "    def __enter__(self):\n"
+            "        self._start = time.perf_counter()\n"
+            "        return self\n"
+            "\n"
+            "    def __exit__(self, exc_type, exc_val, exc_tb):\n"
+            "        self.elapsed = time.perf_counter() - self._start\n"
+            "        return False\n"
+            "```\n"
+            "\n"
+            "Key: __enter__ returns self so caller can access .elapsed "
+            "after the with block. Does not suppress exceptions."
+        ),
+        category="pattern_context_manager",
+    ))
+
+    # ── Domain 3: Descriptor Protocol ──────────────────────────
+    examples.append(SolvedExample(
+        "Write a TypedField descriptor that validates the type of values "
+        "assigned to it using __set_name__, __get__, and __set__.",
+        (
+            "```python\n"
+            "class TypedField:\n"
+            "    def __init__(self, expected_type):\n"
+            "        self.expected_type = expected_type\n"
+            "        self.name = None\n"
+            "\n"
+            "    def __set_name__(self, owner, name):\n"
+            "        self.name = name\n"
+            "\n"
+            "    def __get__(self, obj, objtype=None):\n"
+            "        if obj is None:\n"
+            "            return self\n"
+            "        return obj.__dict__.get(self.name)\n"
+            "\n"
+            "    def __set__(self, obj, value):\n"
+            "        if not isinstance(value, self.expected_type):\n"
+            "            raise TypeError(\n"
+            "                f\"{self.name} must be {self.expected_type.__name__}, \"\n"
+            "                f\"got {type(value).__name__}\"\n"
+            "            )\n"
+            "        obj.__dict__[self.name] = value\n"
+            "```\n"
+            "\n"
+            "Key: stores data on instance.__dict__[self.name], NOT on the "
+            "descriptor. __get__ returns self when obj is None (class access)."
+        ),
+        category="pattern_descriptor",
+    ))
+    examples.append(SolvedExample(
+        "Write a Validated descriptor that accepts a validator function "
+        "and rejects invalid values with a clear error.",
+        (
+            "```python\n"
+            "class Validated:\n"
+            "    def __init__(self, validator, message=None):\n"
+            "        self.validator = validator\n"
+            "        self.message = message or 'validation failed'\n"
+            "        self.name = None\n"
+            "\n"
+            "    def __set_name__(self, owner, name):\n"
+            "        self.name = name\n"
+            "\n"
+            "    def __get__(self, obj, objtype=None):\n"
+            "        if obj is None:\n"
+            "            return self\n"
+            "        return obj.__dict__.get(self.name)\n"
+            "\n"
+            "    def __set__(self, obj, value):\n"
+            "        if not self.validator(value):\n"
+            "            raise ValueError(f\"{self.name}: {self.message}\")\n"
+            "        obj.__dict__[self.name] = value\n"
+            "```\n"
+            "\n"
+            "Key: same storage pattern as TypedField — data lives on the "
+            "instance dict. Validator is any callable returning bool."
+        ),
+        category="pattern_descriptor",
+    ))
+
+    # ── Domain 4: Thread Safety ────────────────────────────────
+    examples.append(SolvedExample(
+        "Write a ThreadSafeCounter with Lock and a Future class with "
+        "Condition variable for set_result/result(timeout).",
+        (
+            "```python\n"
+            "import threading\n"
+            "\n"
+            "\n"
+            "class ThreadSafeCounter:\n"
+            "    def __init__(self, initial=0):\n"
+            "        self._value = initial\n"
+            "        self._lock = threading.Lock()\n"
+            "\n"
+            "    def increment(self):\n"
+            "        with self._lock:\n"
+            "            self._value += 1\n"
+            "\n"
+            "    def decrement(self):\n"
+            "        with self._lock:\n"
+            "            self._value -= 1\n"
+            "\n"
+            "    @property\n"
+            "    def value(self):\n"
+            "        with self._lock:\n"
+            "            return self._value\n"
+            "\n"
+            "\n"
+            "class Future:\n"
+            "    def __init__(self):\n"
+            "        self._result = None\n"
+            "        self._done = False\n"
+            "        self._cond = threading.Condition()\n"
+            "\n"
+            "    def set_result(self, value):\n"
+            "        with self._cond:\n"
+            "            self._result = value\n"
+            "            self._done = True\n"
+            "            self._cond.notify_all()\n"
+            "\n"
+            "    def result(self, timeout=None):\n"
+            "        with self._cond:\n"
+            "            if not self._done:\n"
+            "                self._cond.wait(timeout=timeout)\n"
+            "            if not self._done:\n"
+            "                raise TimeoutError('result not available')\n"
+            "            return self._result\n"
+            "```\n"
+            "\n"
+            "Key: Lock for simple mutual exclusion, Condition for "
+            "wait/notify pattern. Property reads also need the lock."
+        ),
+        category="pattern_threading",
+    ))
+    examples.append(SolvedExample(
+        "Write a thread-safe BoundedQueue with put(item, timeout) and "
+        "get(timeout) using Condition variables.",
+        (
+            "```python\n"
+            "import threading\n"
+            "from collections import deque\n"
+            "\n"
+            "\n"
+            "class BoundedQueue:\n"
+            "    def __init__(self, maxsize):\n"
+            "        self._queue = deque()\n"
+            "        self._maxsize = maxsize\n"
+            "        self._lock = threading.Lock()\n"
+            "        self._not_full = threading.Condition(self._lock)\n"
+            "        self._not_empty = threading.Condition(self._lock)\n"
+            "\n"
+            "    def put(self, item, timeout=None):\n"
+            "        with self._not_full:\n"
+            "            if len(self._queue) >= self._maxsize:\n"
+            "                if not self._not_full.wait(timeout=timeout):\n"
+            "                    raise TimeoutError('queue full')\n"
+            "            self._queue.append(item)\n"
+            "            self._not_empty.notify()\n"
+            "\n"
+            "    def get(self, timeout=None):\n"
+            "        with self._not_empty:\n"
+            "            if not self._queue:\n"
+            "                if not self._not_empty.wait(timeout=timeout):\n"
+            "                    raise TimeoutError('queue empty')\n"
+            "            item = self._queue.popleft()\n"
+            "            self._not_full.notify()\n"
+            "            return item\n"
+            "\n"
+            "    def __len__(self):\n"
+            "        with self._lock:\n"
+            "            return len(self._queue)\n"
+            "```\n"
+            "\n"
+            "Key: two Condition variables sharing one Lock. put waits on "
+            "not_full, notifies not_empty. get does the reverse."
+        ),
+        category="pattern_threading",
+    ))
+
+    # ── Domain 5: Serialization ────────────────────────────────
+    examples.append(SolvedExample(
+        "Write serialize(obj) and deserialize(data, cls) functions for "
+        "dataclass-like objects with nested types.",
+        (
+            "```python\n"
+            "def serialize(obj):\n"
+            "    if isinstance(obj, (int, float, str, bool, type(None))):\n"
+            "        return obj\n"
+            "    if isinstance(obj, list):\n"
+            "        return [serialize(item) for item in obj]\n"
+            "    if isinstance(obj, dict):\n"
+            "        return {k: serialize(v) for k, v in obj.items()}\n"
+            "    fields = vars(obj)\n"
+            "    data = {'__type__': type(obj).__name__}\n"
+            "    for key, val in fields.items():\n"
+            "        data[key] = serialize(val)\n"
+            "    return data\n"
+            "\n"
+            "\n"
+            "def deserialize(data, registry):\n"
+            "    if isinstance(data, (int, float, str, bool, type(None))):\n"
+            "        return data\n"
+            "    if isinstance(data, list):\n"
+            "        return [deserialize(item, registry) for item in data]\n"
+            "    if isinstance(data, dict) and '__type__' in data:\n"
+            "        cls = registry[data['__type__']]\n"
+            "        kwargs = {}\n"
+            "        for k, v in data.items():\n"
+            "            if k != '__type__':\n"
+            "                kwargs[k] = deserialize(v, registry)\n"
+            "        obj = cls.__new__(cls)\n"
+            "        obj.__dict__.update(kwargs)\n"
+            "        return obj\n"
+            "    return {k: deserialize(v, registry) for k, v in data.items()}\n"
+            "```\n"
+            "\n"
+            "Key: serialize uses vars() for field discovery, recurses into "
+            "nested objects and lists. deserialize uses a type registry dict."
+        ),
+        category="pattern_serialization",
+    ))
+    examples.append(SolvedExample(
+        "Write a to_json(obj) function that converts dataclass instances "
+        "to JSON-compatible dicts, handling datetime and Enum types.",
+        (
+            "```python\n"
+            "from datetime import datetime, date\n"
+            "from enum import Enum\n"
+            "\n"
+            "\n"
+            "def to_json(obj):\n"
+            "    if isinstance(obj, (str, int, float, bool, type(None))):\n"
+            "        return obj\n"
+            "    if isinstance(obj, Enum):\n"
+            "        return obj.value\n"
+            "    if isinstance(obj, (datetime, date)):\n"
+            "        return obj.isoformat()\n"
+            "    if isinstance(obj, (list, tuple)):\n"
+            "        return [to_json(item) for item in obj]\n"
+            "    if isinstance(obj, dict):\n"
+            "        return {str(k): to_json(v) for k, v in obj.items()}\n"
+            "    if hasattr(obj, '__dict__'):\n"
+            "        return {k: to_json(v) for k, v in vars(obj).items()\n"
+            "                if not k.startswith('_')}\n"
+            "    return str(obj)\n"
+            "```\n"
+            "\n"
+            "Key: handles Enum via .value, datetime via .isoformat(), "
+            "objects via vars(). Skips private _fields."
+        ),
+        category="pattern_serialization",
+    ))
+
+    # ── Domain 6: Binary Search Tree ───────────────────────────
+    examples.append(SolvedExample(
+        "Write a BST class with insert, search, delete (all 3 cases), "
+        "and inorder() returning a sorted list.",
+        (
+            "```python\n"
+            "class _Node:\n"
+            "    def __init__(self, key):\n"
+            "        self.key = key\n"
+            "        self.left = None\n"
+            "        self.right = None\n"
+            "\n"
+            "\n"
+            "class BST:\n"
+            "    def __init__(self):\n"
+            "        self._root = None\n"
+            "\n"
+            "    def insert(self, key):\n"
+            "        self._root = self._insert(self._root, key)\n"
+            "\n"
+            "    def _insert(self, node, key):\n"
+            "        if node is None:\n"
+            "            return _Node(key)\n"
+            "        if key < node.key:\n"
+            "            node.left = self._insert(node.left, key)\n"
+            "        elif key > node.key:\n"
+            "            node.right = self._insert(node.right, key)\n"
+            "        return node\n"
+            "\n"
+            "    def search(self, key):\n"
+            "        node = self._root\n"
+            "        while node:\n"
+            "            if key == node.key:\n"
+            "                return True\n"
+            "            node = node.left if key < node.key else node.right\n"
+            "        return False\n"
+            "\n"
+            "    def delete(self, key):\n"
+            "        self._root = self._delete(self._root, key)\n"
+            "\n"
+            "    def _delete(self, node, key):\n"
+            "        if node is None:\n"
+            "            return None\n"
+            "        if key < node.key:\n"
+            "            node.left = self._delete(node.left, key)\n"
+            "        elif key > node.key:\n"
+            "            node.right = self._delete(node.right, key)\n"
+            "        else:\n"
+            "            if node.left is None:\n"
+            "                return node.right\n"
+            "            if node.right is None:\n"
+            "                return node.left\n"
+            "            successor = node.right\n"
+            "            while successor.left:\n"
+            "                successor = successor.left\n"
+            "            node.key = successor.key\n"
+            "            node.right = self._delete(node.right, successor.key)\n"
+            "        return node\n"
+            "\n"
+            "    def inorder(self):\n"
+            "        result = []\n"
+            "        self._inorder(self._root, result)\n"
+            "        return result\n"
+            "\n"
+            "    def _inorder(self, node, result):\n"
+            "        if node:\n"
+            "            self._inorder(node.left, result)\n"
+            "            result.append(node.key)\n"
+            "            self._inorder(node.right, result)\n"
+            "```\n"
+            "\n"
+            "Key: delete handles 3 cases — no children, one child, two "
+            "children (in-order successor). All mutations return the node."
+        ),
+        category="pattern_tree",
+    ))
+    examples.append(SolvedExample(
+        "Write a Trie (prefix tree) with insert, search, and starts_with methods.",
+        (
+            "```python\n"
+            "class TrieNode:\n"
+            "    def __init__(self):\n"
+            "        self.children = {}\n"
+            "        self.is_end = False\n"
+            "\n"
+            "\n"
+            "class Trie:\n"
+            "    def __init__(self):\n"
+            "        self._root = TrieNode()\n"
+            "\n"
+            "    def insert(self, word):\n"
+            "        node = self._root\n"
+            "        for ch in word:\n"
+            "            if ch not in node.children:\n"
+            "                node.children[ch] = TrieNode()\n"
+            "            node = node.children[ch]\n"
+            "        node.is_end = True\n"
+            "\n"
+            "    def search(self, word):\n"
+            "        node = self._find(word)\n"
+            "        return node is not None and node.is_end\n"
+            "\n"
+            "    def starts_with(self, prefix):\n"
+            "        return self._find(prefix) is not None\n"
+            "\n"
+            "    def _find(self, prefix):\n"
+            "        node = self._root\n"
+            "        for ch in prefix:\n"
+            "            if ch not in node.children:\n"
+            "                return None\n"
+            "            node = node.children[ch]\n"
+            "        return node\n"
+            "```\n"
+            "\n"
+            "Key: insert creates nodes on the fly. search checks is_end. "
+            "starts_with only checks node existence. _find is shared helper."
+        ),
+        category="pattern_tree",
+    ))
+
+    # ── Domain 7: Template Engine ──────────────────────────────
+    examples.append(SolvedExample(
+        "Write a render(template, context) function that handles {{var}} "
+        "substitution and {% for x in list %}...{% endfor %} loops.",
+        (
+            "```python\n"
+            "import re\n"
+            "\n"
+            "\n"
+            "def render(template, context):\n"
+            "    result = ''\n"
+            "    pos = 0\n"
+            "    for_pat = re.compile(\n"
+            "        r'\\{%\\s*for\\s+(\\w+)\\s+in\\s+(\\w+)\\s*%\\}'\n"
+            "        r'(.*?)'\n"
+            "        r'\\{%\\s*endfor\\s*%\\}',\n"
+            "        re.DOTALL\n"
+            "    )\n"
+            "    var_pat = re.compile(r'\\{\\{\\s*(\\w+)\\s*\\}\\}')\n"
+            "\n"
+            "    def replace_vars(text, ctx):\n"
+            "        return var_pat.sub(\n"
+            "            lambda m: str(ctx.get(m.group(1), '')), text\n"
+            "        )\n"
+            "\n"
+            "    def process(text, ctx):\n"
+            "        parts = []\n"
+            "        last = 0\n"
+            "        for m in for_pat.finditer(text):\n"
+            "            parts.append(replace_vars(text[last:m.start()], ctx))\n"
+            "            var_name, list_name = m.group(1), m.group(2)\n"
+            "            body = m.group(3)\n"
+            "            for item in ctx.get(list_name, []):\n"
+            "                inner_ctx = dict(ctx, **{var_name: item})\n"
+            "                parts.append(process(body, inner_ctx))\n"
+            "            last = m.end()\n"
+            "        parts.append(replace_vars(text[last:], ctx))\n"
+            "        return ''.join(parts)\n"
+            "\n"
+            "    return process(template, context)\n"
+            "```\n"
+            "\n"
+            "Key: regex finds for-loops, processes body per item with "
+            "merged context. Variable substitution uses a separate regex."
+        ),
+        category="pattern_template",
+    ))
+    examples.append(SolvedExample(
+        "Write a simple template function that supports {{var}}, "
+        "{{var|upper}}, and {{var|default:fallback}} filters.",
+        (
+            "```python\n"
+            "import re\n"
+            "\n"
+            "\n"
+            "def render_filtered(template, context):\n"
+            "    def apply_filter(value, filt):\n"
+            "        if filt == 'upper':\n"
+            "            return str(value).upper()\n"
+            "        if filt == 'lower':\n"
+            "            return str(value).lower()\n"
+            "        if filt == 'title':\n"
+            "            return str(value).title()\n"
+            "        if filt.startswith('default:'):\n"
+            "            return value if value else filt.split(':', 1)[1]\n"
+            "        return str(value)\n"
+            "\n"
+            "    def replacer(match):\n"
+            "        expr = match.group(1).strip()\n"
+            "        parts = expr.split('|')\n"
+            "        name = parts[0].strip()\n"
+            "        value = context.get(name, '')\n"
+            "        for filt in parts[1:]:\n"
+            "            value = apply_filter(value, filt.strip())\n"
+            "        return str(value)\n"
+            "\n"
+            "    return re.sub(r'\\{\\{(.+?)\\}\\}', replacer, template)\n"
+            "```\n"
+            "\n"
+            "Key: split on | to extract filters. Apply filters left to right. "
+            "default:fallback uses the fallback if value is falsy."
+        ),
+        category="pattern_template",
+    ))
+
+    # ── Domain 8: Middleware Chain ──────────────────────────────
+    examples.append(SolvedExample(
+        "Write a Pipeline class with use(middleware_fn) and execute(request). "
+        "Middleware signature is fn(request, next_fn).",
+        (
+            "```python\n"
+            "class Pipeline:\n"
+            "    def __init__(self):\n"
+            "        self._middlewares = []\n"
+            "\n"
+            "    def use(self, middleware):\n"
+            "        self._middlewares.append(middleware)\n"
+            "        return self\n"
+            "\n"
+            "    def execute(self, request):\n"
+            "        def dispatch(i, req):\n"
+            "            if i >= len(self._middlewares):\n"
+            "                return req\n"
+            "            return self._middlewares[i](req, lambda r: dispatch(i + 1, r))\n"
+            "        return dispatch(0, request)\n"
+            "```\n"
+            "\n"
+            "Key: dispatch builds a chain via nested closures. Each middleware "
+            "calls next_fn(req) to continue or returns directly to short-circuit."
+        ),
+        category="pattern_middleware",
+    ))
+    examples.append(SolvedExample(
+        "Write an async-style middleware pipeline where middleware can "
+        "modify both the request and the response.",
+        (
+            "```python\n"
+            "class AsyncPipeline:\n"
+            "    def __init__(self, handler):\n"
+            "        self._handler = handler\n"
+            "        self._middlewares = []\n"
+            "\n"
+            "    def use(self, middleware):\n"
+            "        self._middlewares.append(middleware)\n"
+            "        return self\n"
+            "\n"
+            "    def execute(self, request):\n"
+            "        def build_chain(index):\n"
+            "            if index >= len(self._middlewares):\n"
+            "                return self._handler\n"
+            "            mw = self._middlewares[index]\n"
+            "            nxt = build_chain(index + 1)\n"
+            "            return lambda req: mw(req, nxt)\n"
+            "        chain = build_chain(0)\n"
+            "        return chain(request)\n"
+            "```\n"
+            "\n"
+            "Key: build_chain constructs the handler stack from the inside "
+            "out. Each middleware wraps the next handler function."
+        ),
+        category="pattern_middleware",
+    ))
+
+    return Augmentor(
+        name="code_gen",
+        system_context=(
+            "You are a Python expert. Write complete, correct, runnable code "
+            "in ```python blocks. Include all imports. Implement ALL requested "
+            "methods. For classes: use proper dunder methods (__iter__, __next__, "
+            "__enter__, __exit__, __get__, __set__). For decorators: set attributes "
+            "on the wrapper. For properties: use @property with _private backing. "
+            "For thread safety: use threading.Lock or Condition."
+        ),
+        examples=examples,
+        verifier=verify_code_gen,
+        max_examples=3,
+        max_retries=1,
+    )
+
+
 # ── Augmentor Router ─────────────────────────────────────────
 
 class AugmentorRouter:
     """Routes queries to the right augmentor and runs generate -> verify -> retry."""
 
-    def __init__(self, tuned: bool = False, stress: bool = False):
+    def __init__(self, tuned: bool = False, stress: bool = False, pack: bool = False):
         self.augmentors: dict[str, Augmentor] = {}
         self._embedder = None
         self._tuned = tuned
         self._stress = stress
+        self._pack = pack
         # Keep all sets available for runtime switching
         self._generic_augmentors: dict[str, Augmentor] = {}
         self._tuned_augmentors: dict[str, Augmentor] = {}
         self._stress_augmentors: dict[str, Augmentor] = {}
+        self._pack_augmentors: dict[str, Augmentor] = {}
         self._register_defaults()
 
     def _register_defaults(self):
@@ -704,8 +1360,16 @@ class AugmentorRouter:
             "debugger": build_debug_augmentor(),
             "explainer": build_explainer_augmentor(),
         }
+        self._pack_augmentors = {
+            "code_gen": build_programmer_pack_augmentor(),
+            "code_review": build_code_review_augmentor(),
+            "debugger": build_debug_augmentor(),
+            "explainer": build_explainer_augmentor(),
+        }
 
-        if self._stress:
+        if self._pack:
+            self.augmentors = dict(self._pack_augmentors)
+        elif self._stress:
             self.augmentors = dict(self._stress_augmentors)
         elif self._tuned:
             self.augmentors = dict(self._tuned_augmentors)
@@ -717,7 +1381,8 @@ class AugmentorRouter:
         self._embedder = embedder
         all_augmentors = (set(self._generic_augmentors.values())
                           | set(self._tuned_augmentors.values())
-                          | set(self._stress_augmentors.values()))
+                          | set(self._stress_augmentors.values())
+                          | set(self._pack_augmentors.values()))
         for augmentor in all_augmentors:
             augmentor.init_embeddings(embedder)
         logger.info(f"Augmentor embeddings initialized for {len(self.augmentors)} active augmentors")
@@ -726,6 +1391,7 @@ class AugmentorRouter:
         """Swap in tuned code_gen augmentor (algorithm-specific few-shot examples)."""
         self._tuned = True
         self._stress = False
+        self._pack = False
         self.augmentors = dict(self._tuned_augmentors)
         logger.info("Switched to tuned augmentors")
 
@@ -733,6 +1399,7 @@ class AugmentorRouter:
         """Revert to the original generic augmentors."""
         self._tuned = False
         self._stress = False
+        self._pack = False
         self.augmentors = dict(self._generic_augmentors)
         logger.info("Switched to generic augmentors")
 
@@ -740,8 +1407,17 @@ class AugmentorRouter:
         """Swap in stress-targeted augmentors (pattern-specific few-shot examples)."""
         self._tuned = False
         self._stress = True
+        self._pack = False
         self.augmentors = dict(self._stress_augmentors)
         logger.info("Switched to stress augmentors")
+
+    def use_pack_augmentors(self):
+        """Swap in programmer pack augmentors (superset of stress + 8 new domains)."""
+        self._tuned = False
+        self._stress = False
+        self._pack = True
+        self.augmentors = dict(self._pack_augmentors)
+        logger.info("Switched to programmer pack augmentors")
 
     def select_augmentor(self, query: str, module_hint: Optional[str] = None) -> Optional[Augmentor]:
         """Select the best augmentor for a query."""
