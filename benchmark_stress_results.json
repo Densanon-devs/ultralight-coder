@@ -1,93 +1,317 @@
 [
   {
-    "model_name": "qwen2.5-coder-1.5b-instruct-q4_k_m",
-    "model_path": "models\\qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
-    "model_size_mb": 1065.5601196289062,
+    "model_name": "qwen2.5-coder-3b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+    "model_size_mb": 2007.4203491210938,
     "chat_format": "chatml",
-    "tier1_score": 1.0,
-    "tier2_score": 1.0,
-    "tier3_score": 0.3625,
-    "overall_score": 0.7875,
-    "total_time": 97.31299999996554,
+    "tier1_score": 0.547564935064935,
+    "tier2_score": 0.18,
+    "tier3_score": 0.53125,
+    "overall_score": 0.4196049783549783,
+    "total_time": 1080.671000000002,
     "tier1_results": [
       {
         "test_id": "t1_01_lru_cache",
         "score": 1.0,
         "tests_passed": 9,
         "tests_total": 9,
-        "response_time": 7.562000000005355,
+        "response_time": 40.29700000002049,
         "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_02_expression_eval",
+        "score": 0.75,
+        "tests_passed": 6,
+        "tests_total": 8,
+        "response_time": 69.92199999999139,
+        "test_errors": [
+          "FAIL: assert abs(evaluate(\"(2 + 3) * 4\") - 20.0) < 1e-9 -> ",
+          "FAIL: assert abs(evaluate(\"3 + 4 * 2 / (1 - 5)\") - 1.0) < 1e-9 -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_03_trie",
+        "score": 0.6363636363636364,
+        "tests_passed": 7,
+        "tests_total": 11,
+        "response_time": 49.687999999994645,
+        "test_errors": [
+          "ERROR: assert t.count_prefix(\"ap\") == 3 -> TypeError: argument of type 'bool' is not iterable",
+          "ERROR: assert t.count_prefix(\"app\") == 2 -> TypeError: argument of type 'bool' is not iterable",
+          "ERROR: assert t.count_prefix(\"banana\") == 1 -> TypeError: argument of type 'bool' is not iterable",
+          "ERROR: assert t.all_words() == [\"app\", \"apple\", \"apricot\", \"banana\"] -> TypeError: argument of type 'bool' is not iterable"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_04_event_emitter",
+        "score": 0.42857142857142855,
+        "tests_passed": 3,
+        "tests_total": 7,
+        "response_time": 34.85899999999674,
+        "test_errors": [
+          "ERROR: def on_data(x): -> IndentationError: expected an indented block after function definition on line 1 (<string>, line 1)",
+          "ERROR: results.append(x) -> NameError: name 'x' is not defined",
+          "ERROR: ee.on(\"data\", on_data) -> NameError: name 'on_data' is not defined",
+          "FAIL: assert results == [1, 2] -> ",
+          "FAIL: assert ee.listener_count(\"data\") == 1 -> ",
+          "ERROR: ee.off(\"data\", on_data) -> NameError: name 'on_data' is not defined",
+          "FAIL: assert results == [1, 2] -> ",
+          "ERROR: def on_once(x): -> IndentationError: expected an indented block after function definition on line 1 (<string>, line 1)",
+          "ERROR: once_results.append(x) -> NameError: name 'x' is not defined",
+          "ERROR: ee.once(\"ping\", on_once) -> NameError: name 'on_once' is not defined",
+          "FAIL: assert once_results == [\"a\"] -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_05_csv_parser",
+        "score": 0.75,
+        "tests_passed": 6,
+        "tests_total": 8,
+        "response_time": 47.28100000001723,
+        "test_errors": [
+          "ERROR: quoted = parse_csv('name,bio\\nAlice,\"likes, commas\"\\nBob,\"says \"\"hi\"\"\"' ) -> IndexError: list index out of range",
+          "ERROR: assert quoted[0][\"bio\"] == \"likes, commas\" -> NameError: name 'quoted' is not defined",
+          "ERROR: assert quoted[1][\"bio\"] == 'says \"hi\"' -> NameError: name 'quoted' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_06_json_flatten",
+        "score": 0.875,
+        "tests_passed": 7,
+        "tests_total": 8,
+        "response_time": 38.780999999988126,
+        "test_errors": [
+          "FAIL: assert u == {\"a\": {\"b\": 1, \"c\": [2, 3]}} -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_07_retry_decorator",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 6,
+        "response_time": 45.812999999994645,
+        "test_errors": [
+          "AttributeError: 'function' object has no attribute 'attempts'"
+        ],
+        "exec_error": "AttributeError: 'function' object has no attribute 'attempts'"
+      },
+      {
+        "test_id": "t1_08_graph",
+        "score": 0.75,
+        "tests_passed": 9,
+        "tests_total": 12,
+        "response_time": 72.31200000000536,
+        "test_errors": [
+          "ERROR: assert path[0] == \"A\" -> IndexError: list index out of range",
+          "ERROR: assert path[-1] == \"E\" -> IndexError: list index out of range",
+          "FAIL: assert g.has_cycle() == False -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_09_rate_limiter",
+        "score": 0.2857142857142857,
+        "tests_passed": 4,
+        "tests_total": 14,
+        "response_time": 45.812999999994645,
+        "test_errors": [
+          "FAIL: assert rl.allow(5, now=0.0) == True -> ",
+          "FAIL: assert rl.available(now=0.0) == 5 -> ",
+          "FAIL: assert rl.allow(5, now=0.0) == True -> ",
+          "FAIL: assert rl.available(now=0.0) == 0 -> ",
+          "FAIL: assert abs(rl.wait_time(1, now=0.0) - 0.1) < 0.05 -> ",
+          "FAIL: assert rl.allow(1, now=0.5) == True -> ",
+          "FAIL: assert rl.available(now=0.5) == 4 -> ",
+          "FAIL: assert rl2.allow(5, now=0.0) == True -> ",
+          "FAIL: assert rl2.allow(1, now=1.0) == True -> ",
+          "FAIL: assert rl2.allow(1, now=2.0) == True -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t1_10_state_machine",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 10,
+        "response_time": 39.375,
+        "test_errors": [
+          "ERROR: sm = StateMachine(\"idle\") -> AttributeError: can't set attribute 'history'",
+          "ERROR: try: -> NameError: name 'sm' is not defined",
+          "ERROR: sm2 = StateMachine(\"locked\") -> AttributeError: can't set attribute 'history'",
+          "ERROR: try: -> NameError: name 'sm3' is not defined",
+          "ERROR: assert sm3.state == \"a\" -> NameError: name 'sm3' is not defined"
+        ],
         "exec_error": ""
       }
     ],
     "tier2_results": [
       {
         "test_id": "t2_01_kv_store",
-        "score": 1.0,
-        "tests_passed": 18,
+        "score": 0.0,
+        "tests_passed": 0,
         "tests_total": 18,
-        "response_time": 21.73499999998603,
-        "test_errors": [],
+        "response_time": 107.26600000000326,
+        "test_errors": [
+          "FAIL: store = KVStore() -> ",
+          "FAIL: try: -> Should raise TypeError",
+          "FAIL: assert \"x\" in keys -> ",
+          "FAIL: assert \"counter\" in keys -> "
+        ],
         "exec_error": ""
+      },
+      {
+        "test_id": "t2_02_markdown_html",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 70.71799999999348,
+        "test_errors": [
+          "SyntaxError: unterminated string literal (detected at line 26) (<string>, line 26)"
+        ],
+        "exec_error": "SyntaxError: unterminated string literal (detected at line 26) (<string>, line 26)"
+      },
+      {
+        "test_id": "t2_03_task_scheduler",
+        "score": 0.9,
+        "tests_passed": 9,
+        "tests_total": 10,
+        "response_time": 48.860000000015134,
+        "test_errors": [
+          "ERROR: assert order.index(\"build\") < order.index(\"test\") or s.is_complete(\"build\") -> ValueError: 'build' is not in list"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t2_04_mini_orm",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 16,
+        "response_time": 44.264999999984866,
+        "test_errors": [
+          "SyntaxError: f-string: unmatched '[' (<string>, line 34)"
+        ],
+        "exec_error": "SyntaxError: f-string: unmatched '[' (<string>, line 34)"
+      },
+      {
+        "test_id": "t2_05_http_router",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 44.578000000008615,
+        "test_errors": [
+          "TypeError: 'dict' object is not callable"
+        ],
+        "exec_error": "TypeError: 'dict' object is not callable"
       }
     ],
     "tier3_results": [
       {
         "test_id": "t3_01_todo_app",
         "description": "Build a Todo app step by step: dataclass -> priority -> persistence -> search/stats",
-        "steps_completed": 1,
+        "steps_completed": 3,
         "steps_total": 4,
-        "overall_score": 0.3625,
-        "total_time": 68.01599999997416,
+        "overall_score": 0.9375,
+        "total_time": 174.93700000000536,
         "steps": [
           {
             "step_id": "t3_01_step1",
             "score": 1.0,
             "tests_passed": 9,
             "tests_total": 9,
-            "response_time": 10.578000000008615,
+            "response_time": 20.578000000008615,
             "test_errors": [],
             "exec_error": ""
           },
           {
             "step_id": "t3_01_step2",
-            "score": 0.25,
-            "tests_passed": 1,
+            "score": 0.75,
+            "tests_passed": 3,
             "tests_total": 4,
-            "response_time": 14.546999999991385,
+            "response_time": 30.875,
             "test_errors": [
-              "FAIL: assert sorted_items[0].title == \"High task\" -> ",
-              "FAIL: assert sorted_items[-1].title == \"Low task\" -> ",
-              "FAIL: assert len(pending) == 2 -> "
+              "FAIL: assert sorted_items[-1].title == \"Low task\" -> "
             ],
             "exec_error": ""
           },
           {
             "step_id": "t3_01_step3",
-            "score": 0.0,
-            "tests_passed": 0,
+            "score": 1.0,
+            "tests_passed": 5,
             "tests_total": 5,
-            "response_time": 18.98499999998603,
-            "test_errors": [
-              "FAIL: try: -> "
-            ],
+            "response_time": 47.530999999988126,
+            "test_errors": [],
             "exec_error": ""
           },
           {
             "step_id": "t3_01_step4",
-            "score": 0.2,
-            "tests_passed": 2,
+            "score": 1.0,
+            "tests_passed": 10,
             "tests_total": 10,
-            "response_time": 23.905999999988126,
+            "response_time": 75.95300000000861,
+            "test_errors": [],
+            "exec_error": ""
+          }
+        ]
+      },
+      {
+        "test_id": "t3_02_calculator",
+        "description": "Build a Calculator step by step: basic -> parentheses -> variables -> functions",
+        "steps_completed": 0,
+        "steps_total": 4,
+        "overall_score": 0.125,
+        "total_time": 105.90599999998813,
+        "steps": [
+          {
+            "step_id": "t3_02_step1",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 6,
+            "response_time": 25.73499999998603,
             "test_errors": [
-              "FAIL: assert len(filtered) == 3 -> ",
-              "FAIL: assert len(filtered) == 2 -> ",
-              "FAIL: assert len(filtered) == 1 -> ",
-              "FAIL: assert s[\"total\"] == 4 -> ",
-              "FAIL: assert s[\"done\"] == 1 -> ",
-              "FAIL: assert s[\"pending\"] == 3 -> ",
-              "FAIL: assert s[\"by_priority\"][\"high\"] == 2 -> ",
-              "FAIL: assert s[\"by_priority\"][\"low\"] == 1 -> "
+              "ValueError: could not convert string to float: '10*2/5'"
+            ],
+            "exec_error": "ValueError: could not convert string to float: '10*2/5'"
+          },
+          {
+            "step_id": "t3_02_step2",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 5,
+            "response_time": 28.125,
+            "test_errors": [
+              "TypeError: can only concatenate str (not \"float\") to str"
+            ],
+            "exec_error": "TypeError: can only concatenate str (not \"float\") to str"
+          },
+          {
+            "step_id": "t3_02_step3",
+            "score": 0.0,
+            "tests_passed": 0,
+            "tests_total": 7,
+            "response_time": 34.921000000002095,
+            "test_errors": [
+              "ValueError: Error evaluating expression: invalid syntax (<string>, line 1)"
+            ],
+            "exec_error": "ValueError: Error evaluating expression: invalid syntax (<string>, line 1)"
+          },
+          {
+            "step_id": "t3_02_step4",
+            "score": 0.5,
+            "tests_passed": 4,
+            "tests_total": 8,
+            "response_time": 17.125,
+            "test_errors": [
+              "ERROR: assert abs(calc.evaluate(\"sqrt(16)\") - 4.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'",
+              "ERROR: assert abs(calc.evaluate(\"sqrt(16) + 1\") - 5.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'",
+              "ERROR: calc.set_var(\"x\", 25) -> AttributeError: 'Calculator' object has no attribute 'set_var'",
+              "ERROR: assert abs(calc.evaluate(\"sqrt(x)\") - 5.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'",
+              "ERROR: assert abs(calc.evaluate(\"sqrt(abs(-16))\") - 4.0) < 1e-9 -> TypeError: unsupported operand type(s) for -: 'str' and 'float'"
             ],
             "exec_error": ""
           }
