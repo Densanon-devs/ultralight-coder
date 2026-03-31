@@ -1,75 +1,75 @@
 {
-  "qwen2.5-coder-0.5b-instruct-q4_k_m": {
+  "qwen2.5-coder-1.5b-instruct-q4_k_m": {
     "flat": {
-      "overall_score": 0.75,
-      "tier1_score": 0.75,
+      "overall_score": 1.0,
+      "tier1_score": 1.0,
       "tier2_score": 0.0,
-      "total_time": 27.15700000000652,
+      "total_time": 44.51699999993434,
       "total_prompt_tokens": 1926,
       "tests": {
         "t_iter_01_reusable_range": {
           "score": 1.0,
           "tests_passed": 7,
           "tests_total": 7,
-          "response_time": 9.688000000023749,
+          "response_time": 15.655999999959022,
           "prompt_tokens": 494
         },
         "t_ctx_01_timer": {
           "score": 1.0,
           "tests_passed": 4,
           "tests_total": 4,
-          "response_time": 2.7660000000032596,
+          "response_time": 7.64100000000326,
           "prompt_tokens": 339
         },
         "t_desc_01_typed_field": {
-          "score": 0.0,
-          "tests_passed": 0,
+          "score": 1.0,
+          "tests_passed": 8,
           "tests_total": 8,
-          "response_time": 9.26600000000326,
+          "response_time": 11.35999999998603,
           "prompt_tokens": 479
         },
         "t_thread_01_safe_counter": {
           "score": 1.0,
           "tests_passed": 6,
           "tests_total": 6,
-          "response_time": 5.436999999976251,
+          "response_time": 9.85999999998603,
           "prompt_tokens": 614
         }
       }
     },
     "graph": {
-      "overall_score": 1.0,
-      "tier1_score": 1.0,
+      "overall_score": 0.75,
+      "tier1_score": 0.75,
       "tier2_score": 0.0,
-      "total_time": 20.46800000005169,
+      "total_time": 54.23499999998603,
       "total_prompt_tokens": 3714,
       "tests": {
         "t_iter_01_reusable_range": {
           "score": 1.0,
           "tests_passed": 7,
           "tests_total": 7,
-          "response_time": 5.76500000001397,
+          "response_time": 19.56299999996554,
           "prompt_tokens": 651
         },
         "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
+          "score": 0.0,
+          "tests_passed": 0,
           "tests_total": 4,
-          "response_time": 3.312000000034459,
+          "response_time": 8.03100000001723,
           "prompt_tokens": 855
         },
         "t_desc_01_typed_field": {
           "score": 1.0,
           "tests_passed": 8,
           "tests_total": 8,
-          "response_time": 6.23399999999674,
+          "response_time": 15.89100000000326,
           "prompt_tokens": 1159
         },
         "t_thread_01_safe_counter": {
           "score": 1.0,
           "tests_passed": 6,
           "tests_total": 6,
-          "response_time": 5.157000000006519,
+          "response_time": 10.75,
           "prompt_tokens": 1049
         }
       }
