@@ -1,0 +1,180 @@
+[
+  {
+    "model_name": "qwen2.5-coder-0.5b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+    "model_size_mb": 468.6356201171875,
+    "chat_format": "chatml",
+    "tier1_score": 0.8888888888888888,
+    "tier2_score": 0.5714285714285714,
+    "overall_score": 0.7301587301587301,
+    "total_time": 154.15800000011222,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 1.0,
+        "tests_passed": 7,
+        "tests_total": 7,
+        "response_time": 13.938000000023749,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_iter_02_pipeline",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 4.375,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 2.89000000001397,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 12.327999999979511,
+        "test_errors": [
+          "TypeError: 'TypedFieldDescriptor' object is not callable"
+        ],
+        "exec_error": "TypeError: 'TypedFieldDescriptor' object is not callable"
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 6.375,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_01_schema_validate",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 14.735000000044238,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_01_bst",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 11.688000000023749,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_02_traversals",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 9.34399999998277,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_02_glob_match",
+        "score": 1.0,
+        "tests_passed": 15,
+        "tests_total": 15,
+        "response_time": 8.53100000001723,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t_ctx_02_transaction",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 9.938000000023749,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_02_cached_property",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 4.5,
+        "test_errors": [
+          "SyntaxError: cannot delete function call (<string>, line 21)"
+        ],
+        "exec_error": "SyntaxError: cannot delete function call (<string>, line 21)"
+      },
+      {
+        "test_id": "t_thread_02_future",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 6.3439999999827705,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_02_roundtrip",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 15,
+        "response_time": 16.59399999998277,
+        "test_errors": [
+          "'serialize' not found in generated code"
+        ],
+        "exec_error": "'serialize' not found in generated code"
+      },
+      {
+        "test_id": "t_text_01_template",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 11,
+        "response_time": 13.186999999976251,
+        "test_errors": [
+          "ERROR: assert render(\"Hello {{name}}\", {\"name\": \"World\"}) == \"Hello World\" -> NameError: name '_FOR_RE' is not defined",
+          "ERROR: assert render(\"{{a}} + {{b}}\", {\"a\": \"1\", \"b\": \"2\"}) == \"1 + 2\" -> NameError: name '_FOR_RE' is not defined",
+          "ERROR: assert render(\"{{missing}}\", {}) == \"\" -> NameError: name '_FOR_RE' is not defined",
+          "ERROR: result = render(\"{% for x in items %}{{x}} {% endfor %}\", {\"items\": [\"a\", \"b\", \"c\"]}) -> NameError: name '_FOR_RE' is not defined",
+          "ERROR: assert \"a\" in result -> NameError: name 'result' is not defined",
+          "ERROR: assert \"b\" in result -> NameError: name 'result' is not defined",
+          "ERROR: assert \"c\" in result -> NameError: name 'result' is not defined",
+          "ERROR: result2 = render(\"Users: {% for u in users %}{{u}}, {% endfor %}done\", {\"users\": [\"Alice\", \"Bob\"]}) -> NameError: name '_FOR_RE' is not defined",
+          "ERROR: assert \"Alice\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert \"Bob\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert \"done\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert render(\"No vars here\", {}) == \"No vars here\" -> NameError: name '_FOR_RE' is not defined",
+          "ERROR: assert render(\"{% for x in items %}{{x}}{% endfor %}\", {\"items\": []}) == \"\" -> NameError: name '_FOR_RE' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_01_pipeline",
+        "score": 1.0,
+        "tests_passed": 5,
+        "tests_total": 5,
+        "response_time": 5.094000000040978,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_02_pubsub",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 14.297000000020489,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ]
+  }
+]
