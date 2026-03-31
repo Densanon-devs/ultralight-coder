@@ -1669,8 +1669,9 @@ def build_yaml_augmentors(base_dir: str = "data/augmentor_examples") -> dict[str
             "You are a Python expert. Write complete, correct, runnable code "
             "in ```python blocks. Include all imports. Implement ALL requested "
             "methods. Use the EXACT class and function names specified in the prompt. "
-            "For iterators use __iter__/__next__. For context managers use __enter__/__exit__. "
-            "For descriptors use __get__/__set__/__set_name__."
+            "For classes: use proper dunder methods (__iter__, __next__, "
+            "__enter__, __exit__, __get__, __set__). For decorators: set attributes "
+            "on the wrapper. For properties: use @property with _private backing."
         ),
         examples=groups["code_gen"],
         verifier=verify_code_gen,
