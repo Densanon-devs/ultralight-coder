@@ -229,9 +229,9 @@ def graph_retrieve_examples(
     graph: PatternGraph,
     failure_patterns: Optional[dict] = None,
     top_k: int = 3,
-    seed_threshold: float = 0.40,
-    max_seed_categories: int = 2,
-    max_expanded_categories: int = 4,
+    seed_threshold: float = 0.35,
+    max_seed_categories: int = 3,
+    max_expanded_categories: int = 5,
 ) -> list:
     """Graph-enhanced example retrieval.
 
@@ -261,13 +261,16 @@ def graph_retrieve_examples(
     if not embedder or example_embeddings is None or len(examples) == 0:
         return examples[:top_k]
 
-    # Step 0: Failure-aware routing (reuse existing safety net)
+    # Step 0: Failure-aware routing with graph expansion
+    # Unlike flat retrieval which just force-injects, graph retrieval expands
+    # matched failure categories via the graph to pull in prerequisites.
     if failure_patterns:
-        forced = _check_failure_patterns_graph(
-            query, examples, embedder, example_embeddings, failure_patterns
+        forced = _check_failure_patterns_with_graph(
+            query, examples, embedder, example_embeddings, failure_patterns,
+            graph, top_k,
         )
         if forced:
-            return forced[:top_k]
+            return forced
 
     # Step 1: Embed and score
     query_vec = embedder.encode([query], normalize_embeddings=True)
@@ -311,25 +314,40 @@ def graph_retrieve_examples(
 
     # Step 4: Filter examples to expanded categories
     # Step 5: Pick top_k by similarity from filtered set
+    # Use a lower threshold for graph-expanded categories since the graph
+    # provides structural precision — we trust the expansion.
+    expanded_threshold = seed_threshold * 0.65  # ~0.26 for default 0.40
+    seed_set = set(seed_names)
     selected = []
     for idx in ranked:
         if len(selected) >= top_k:
             break
         ex = examples[idx]
-        if ex.category in expanded_set and sims[idx] >= seed_threshold:
+        if ex.category not in expanded_set:
+            continue
+        # Seed categories use full threshold, expanded use lower
+        threshold = seed_threshold if ex.category in seed_set else expanded_threshold
+        if sims[idx] >= threshold:
             selected.append(ex)
 
     return selected
 
 
-def _check_failure_patterns_graph(
+def _check_failure_patterns_with_graph(
     query: str,
     examples: list,
     embedder,
     example_embeddings: np.ndarray,
     failure_patterns: dict,
+    graph: PatternGraph,
+    top_k: int,
 ) -> list:
-    """Check failure patterns (shared logic with flat retrieval)."""
+    """Failure-aware routing with graph expansion.
+
+    When failure patterns match, expand matched categories via graph to also
+    pull in prerequisite patterns. E.g., "http router" matches pattern_router,
+    graph expands to include pattern_decorator (router's prerequisite).
+    """
     q = query.lower()
     matched_categories: list[str] = []
 
@@ -340,21 +358,45 @@ def _check_failure_patterns_graph(
     if not matched_categories:
         return []
 
-    # Collect candidates from matched categories
-    candidates: dict[str, list[tuple[int, object]]] = {cat: [] for cat in matched_categories}
+    # Expand matched categories via graph
+    expanded = graph.get_neighborhood(
+        matched_categories,
+        max_depth=1,
+        max_categories=max(top_k + 1, len(matched_categories) + 2),
+    )
+    expanded_set = set(expanded)
+
+    logger.debug(
+        f"Failure-aware graph: matched={matched_categories} -> expanded={expanded}"
+    )
+
+    # Collect candidates from expanded categories
+    candidates: dict[str, list[tuple[int, object]]] = {cat: [] for cat in expanded_set}
     for i, ex in enumerate(examples):
         if ex.category in candidates:
             candidates[ex.category].append((i, ex))
 
-    # Pick best per category using similarity
-    forced = []
+    # Pick best per category using similarity, prioritizing matched categories first
     query_vec = embedder.encode([query], normalize_embeddings=True)
     sims = np.dot(example_embeddings, query_vec.T).flatten()
 
+    forced = []
+    # First: matched categories (the failure patterns)
     for cat in matched_categories:
-        if not candidates[cat]:
+        if not candidates.get(cat):
             continue
         best_idx, best_ex = max(candidates[cat], key=lambda x: sims[x[0]])
         forced.append(best_ex)
 
-    return forced
+    # Then: graph-expanded categories (prerequisites/related)
+    for cat in expanded:
+        if cat in matched_categories:
+            continue  # already added
+        if not candidates.get(cat):
+            continue
+        if len(forced) >= top_k:
+            break
+        best_idx, best_ex = max(candidates[cat], key=lambda x: sims[x[0]])
+        forced.append(best_ex)
+
+    return forced[:top_k]

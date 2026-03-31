@@ -46,10 +46,15 @@ MODELS = {
         "filename": "Phi-3.5-mini-instruct-Q4_K_M.gguf",
         "description": "Phi-3.5-mini 3.8B Q4_K_M (~2.3GB) — Microsoft, strong code perf",
     },
-    "codegemma-2b": {
-        "repo": "bartowski/codegemma-2b-GGUF",
-        "filename": "codegemma-2b-Q4_K_M.gguf",
-        "description": "CodeGemma-2B Q4_K_M (~1.5GB) — Google, code-specialized",
+    "stable-code-3b": {
+        "repo": "bartowski/stable-code-instruct-3b-GGUF",
+        "filename": "stable-code-instruct-3b-Q4_K_M.gguf",
+        "description": "Stable Code Instruct 3B Q4_K_M (~1.8GB) — StabilityAI, chatml format",
+    },
+    "yi-coder-1.5b": {
+        "repo": "bartowski/Yi-Coder-1.5B-Chat-GGUF",
+        "filename": "Yi-Coder-1.5B-Chat-Q4_K_M.gguf",
+        "description": "Yi-Coder-1.5B-Chat Q4_K_M (~1.0GB) — 01-ai, chatml, Apache 2.0",
     },
 }
 

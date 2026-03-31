@@ -44,8 +44,10 @@ logger = logging.getLogger("bench_exec")
 
 def detect_chat_format(model_path: str) -> str:
     name = Path(model_path).name.lower()
-    for sub, fmt in [("qwen","chatml"),("smollm","chatml"),("llama-3","llama3"),
-                     ("Llama-3","llama3"),("phi-3","phi3"),("Phi-3","phi3"),
+    for sub, fmt in [("qwen","chatml"),("smollm","chatml"),("deepseek","chatml"),
+                     ("stable-code","chatml"),("yi-coder","chatml"),
+                     ("llama-3","llama3"),("Llama-3","llama3"),
+                     ("phi-3","phi3"),("Phi-3","phi3"),
                      ("tinyllama","alpaca"),("TinyLlama","alpaca"),
                      ("gemma","gemma"),("codegemma","gemma")]:
         if sub.lower() in name:

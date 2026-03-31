@@ -1118,7 +1118,7 @@ def main():
             comparison[model_name] = {}
 
             # Run flat YAML
-            print(f"\n  ── {model_name}: FLAT YAML ──")
+            print(f"\n  -- {model_name}: FLAT YAML --")
             flat_runner = ProgrammerBenchmarkRunner(
                 gpu_layers=args.gpu_layers, threads=args.threads,
                 context_length=args.context_length,
@@ -1127,7 +1127,7 @@ def main():
             comparison[model_name]["flat"] = flat_runner.run_model(model_path, quick=args.quick)
 
             # Run graph
-            print(f"\n  ── {model_name}: GRAPH ──")
+            print(f"\n  -- {model_name}: GRAPH --")
             graph_runner = ProgrammerBenchmarkRunner(
                 gpu_layers=args.gpu_layers, threads=args.threads,
                 context_length=args.context_length,
