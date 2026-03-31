@@ -1,0 +1,186 @@
+[
+  {
+    "model_name": "stable-code-instruct-3b-Q4_K_M",
+    "model_path": "models\\stable-code-instruct-3b-Q4_K_M.gguf",
+    "model_size_mb": 1629.4440612792969,
+    "chat_format": "chatml",
+    "tier1_score": 0.2222222222222222,
+    "tier2_score": 0.26785714285714285,
+    "overall_score": 0.24503968253968253,
+    "total_time": 1997.7979999999516,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 7,
+        "response_time": 50.93699999997625,
+        "test_errors": [
+          "SyntaxError: unmatched ')' (<string>, line 4)"
+        ],
+        "exec_error": "SyntaxError: unmatched ')' (<string>, line 4)"
+      },
+      {
+        "test_id": "t_iter_02_pipeline",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 6,
+        "response_time": 84.81299999996554,
+        "test_errors": [
+          "SyntaxError: unmatched ')' (<string>, line 7)"
+        ],
+        "exec_error": "SyntaxError: unmatched ')' (<string>, line 7)"
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 47.15600000001723,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 61.42199999996228,
+        "test_errors": [
+          "SyntaxError: unmatched ')' (<string>, line 12)"
+        ],
+        "exec_error": "SyntaxError: unmatched ')' (<string>, line 12)"
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 43.10999999998603,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_01_schema_validate",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 155.59299999999348,
+        "test_errors": [
+          "SyntaxError: unmatched ')' (<string>, line 9)"
+        ],
+        "exec_error": "SyntaxError: unmatched ')' (<string>, line 9)"
+      },
+      {
+        "test_id": "t_tree_01_bst",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 169.09399999998277,
+        "test_errors": [
+          "SyntaxError: unmatched ')' (<string>, line 15)"
+        ],
+        "exec_error": "SyntaxError: unmatched ')' (<string>, line 15)"
+      },
+      {
+        "test_id": "t_tree_02_traversals",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 84.23499999998603,
+        "test_errors": [
+          "SyntaxError: unmatched ')' (<string>, line 12)"
+        ],
+        "exec_error": "SyntaxError: unmatched ')' (<string>, line 12)"
+      },
+      {
+        "test_id": "t_text_02_glob_match",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 15,
+        "response_time": 178.329000000027,
+        "test_errors": [
+          "SyntaxError: closing parenthesis ')' does not match opening parenthesis '[' (<string>, line 3)"
+        ],
+        "exec_error": "SyntaxError: closing parenthesis ')' does not match opening parenthesis '[' (<string>, line 3)"
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t_ctx_02_transaction",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 59.125,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_02_cached_property",
+        "score": 0.875,
+        "tests_passed": 7,
+        "tests_total": 8,
+        "response_time": 63.51600000000326,
+        "test_errors": [
+          "FAIL: assert call_count == 1 -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_02_future",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 9,
+        "response_time": 53.54700000002049,
+        "test_errors": [
+          "SyntaxError: unmatched ')' (<string>, line 29)"
+        ],
+        "exec_error": "SyntaxError: unmatched ')' (<string>, line 29)"
+      },
+      {
+        "test_id": "t_serial_02_roundtrip",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 15,
+        "response_time": 138.40600000001723,
+        "test_errors": [
+          "SyntaxError: unmatched ')' (<string>, line 16)"
+        ],
+        "exec_error": "SyntaxError: unmatched ')' (<string>, line 16)"
+      },
+      {
+        "test_id": "t_text_01_template",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 11,
+        "response_time": 596.6870000000345,
+        "test_errors": [
+          "SyntaxError: f-string: single '}' is not allowed (<string>, line 4)"
+        ],
+        "exec_error": "SyntaxError: f-string: single '}' is not allowed (<string>, line 4)"
+      },
+      {
+        "test_id": "t_mw_01_pipeline",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 5,
+        "response_time": 78.375,
+        "test_errors": [
+          "SyntaxError: unmatched ')' (<string>, line 13)"
+        ],
+        "exec_error": "SyntaxError: unmatched ')' (<string>, line 13)"
+      },
+      {
+        "test_id": "t_mw_02_pubsub",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 9,
+        "response_time": 133.4529999999795,
+        "test_errors": [
+          "SyntaxError: closing parenthesis ')' does not match opening parenthesis '[' on line 11 (<string>, line 14)"
+        ],
+        "exec_error": "SyntaxError: closing parenthesis ')' does not match opening parenthesis '[' on line 11 (<string>, line 14)"
+      }
+    ]
+  }
+]
