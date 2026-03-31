@@ -416,6 +416,9 @@ def _wrap_augmentor_chat(system: str, user: str, chat_format: str) -> str:
                 f"<|start_header_id|>user<|end_header_id|>\n\n"
                 f"{user}<|eot_id|>"
                 f"<|start_header_id|>assistant<|end_header_id|>\n\n")
+    elif chat_format == "gemma":
+        return (f"<start_of_turn>user\n{system}\n\n{user}<end_of_turn>\n"
+                f"<start_of_turn>model\n")
     else:
         return f"System: {system}\n\nUser: {user}\n\nAssistant:"
 

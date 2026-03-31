@@ -31,6 +31,26 @@ MODELS = {
         "filename": "qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
         "description": "Qwen2.5-Coder-0.5B Q4_K_M (~400MB) — Floor model, 93% w/ augmentors",
     },
+    "coder-3b": {
+        "repo": "Qwen/Qwen2.5-Coder-3B-Instruct-GGUF",
+        "filename": "qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+        "description": "Qwen2.5-Coder-3B Q4_K_M (~1.9GB) — Premium model, 100% benchmark",
+    },
+    "deepseek-1.3b": {
+        "repo": "TheBloke/deepseek-coder-1.3b-instruct-GGUF",
+        "filename": "deepseek-coder-1.3b-instruct.Q4_K_M.gguf",
+        "description": "DeepSeek-Coder-1.3B Q4_K_M (~834MB) — Efficient, 96.9% execution",
+    },
+    "phi-3.5-mini": {
+        "repo": "bartowski/Phi-3.5-mini-instruct-GGUF",
+        "filename": "Phi-3.5-mini-instruct-Q4_K_M.gguf",
+        "description": "Phi-3.5-mini 3.8B Q4_K_M (~2.3GB) — Microsoft, strong code perf",
+    },
+    "codegemma-2b": {
+        "repo": "bartowski/codegemma-2b-GGUF",
+        "filename": "codegemma-2b-Q4_K_M.gguf",
+        "description": "CodeGemma-2B Q4_K_M (~1.5GB) — Google, code-specialized",
+    },
 }
 
 MODELS_DIR = Path(__file__).parent / "models"

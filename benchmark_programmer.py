@@ -14,6 +14,9 @@ Usage:
     python benchmark_programmer.py --all                        # All models on disk
     python benchmark_programmer.py --quick                      # 4 tests (quick check)
     python benchmark_programmer.py --augmentors                 # With programmer pack augmentors
+    python benchmark_programmer.py --yaml                       # With YAML-based augmentors
+    python benchmark_programmer.py --graph                      # With graph-based retrieval
+    python benchmark_programmer.py --compare                    # YAML vs graph comparison
     python benchmark_programmer.py --list-tests                 # Show all test definitions
 """
 

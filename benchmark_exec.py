@@ -46,7 +46,8 @@ def detect_chat_format(model_path: str) -> str:
     name = Path(model_path).name.lower()
     for sub, fmt in [("qwen","chatml"),("smollm","chatml"),("llama-3","llama3"),
                      ("Llama-3","llama3"),("phi-3","phi3"),("Phi-3","phi3"),
-                     ("tinyllama","alpaca"),("TinyLlama","alpaca")]:
+                     ("tinyllama","alpaca"),("TinyLlama","alpaca"),
+                     ("gemma","gemma"),("codegemma","gemma")]:
         if sub.lower() in name:
             return fmt
     return "chatml"
@@ -61,6 +62,9 @@ def wrap_chat(system: str, user: str, fmt: str) -> str:
                 f"<|start_header_id|>assistant<|end_header_id|>\n\n")
     elif fmt == "phi3":
         return f"<|system|>\n{system}<|end|>\n<|user|>\n{user}<|end|>\n<|assistant|>\n"
+    elif fmt == "gemma":
+        return (f"<start_of_turn>user\n{system}\n\n{user}<end_of_turn>\n"
+                f"<start_of_turn>model\n")
     elif fmt == "alpaca":
         return f"### System:\n{system}\n\n### Instruction:\n{user}\n\n### Response:\n"
     return f"System: {system}\n\nUser: {user}\n\nAssistant:"

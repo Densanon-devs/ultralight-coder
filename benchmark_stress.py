@@ -1139,7 +1139,7 @@ class _ModelShim:
     def generate(self, prompt, max_tokens=None, temperature=None, **kwargs):
         mt = max_tokens or self.max_tokens
         temp = temperature or self.temperature
-        stop = ["</s>", "<|im_end|>", "<|end|>", "<|eot_id|>", "\nUser:", "\nHuman:"]
+        stop = ["</s>", "<|im_end|>", "<|end|>", "<|eot_id|>", "<end_of_turn>", "\nUser:", "\nHuman:"]
         kwargs.pop("grammar", None)
         start = time.monotonic()
         output = self.model(prompt, max_tokens=mt, temperature=temp, stop=stop, echo=False, **kwargs)
@@ -1213,7 +1213,7 @@ class StressBenchmarkRunner:
     def generate(self, model, prompt: str, max_tokens: int = 1024,
                  temperature: float = 0.2) -> tuple[str, float]:
         """Generate a response. Returns (text, elapsed_seconds)."""
-        stop = ["</s>", "<|im_end|>", "<|end|>", "<|eot_id|>", "\nUser:", "\nHuman:"]
+        stop = ["</s>", "<|im_end|>", "<|end|>", "<|eot_id|>", "<end_of_turn>", "\nUser:", "\nHuman:"]
         start = time.monotonic()
         output = model(prompt, max_tokens=max_tokens, temperature=temperature,
                        stop=stop, echo=False)
