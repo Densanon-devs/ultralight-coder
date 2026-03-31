@@ -4,119 +4,119 @@
       "overall_score": 0.3880411255411256,
       "tier1_score": 0.6202380952380953,
       "tier2_score": 0.15584415584415584,
-      "total_time": 232.78200000006473,
+      "total_time": 251.48399999993853,
       "total_prompt_tokens": 3237,
       "tests": {
         "t_iter_01_reusable_range": {
           "score": 0.8571428571428571,
           "tests_passed": 6,
           "tests_total": 7,
-          "response_time": 9.436999999976251,
+          "response_time": 9.186999999976251,
           "prompt_tokens": 180
         },
         "t_iter_02_pipeline": {
           "score": 0.16666666666666666,
           "tests_passed": 1,
           "tests_total": 6,
-          "response_time": 9.938000000023749,
+          "response_time": 9.40600000001723,
           "prompt_tokens": 181
         },
         "t_ctx_01_timer": {
           "score": 1.0,
           "tests_passed": 4,
           "tests_total": 4,
-          "response_time": 5.7810000000172295,
+          "response_time": 5.2189999999827705,
           "prompt_tokens": 162
         },
         "t_desc_01_typed_field": {
           "score": 1.0,
           "tests_passed": 8,
           "tests_total": 8,
-          "response_time": 9.64100000000326,
+          "response_time": 11.046999999962281,
           "prompt_tokens": 222
         },
         "t_thread_01_safe_counter": {
           "score": 0.0,
           "tests_passed": 0,
           "tests_total": 6,
-          "response_time": 7.5310000000172295,
+          "response_time": 8.313000000023749,
           "prompt_tokens": 161
         },
         "t_serial_01_schema_validate": {
           "score": 0.625,
           "tests_passed": 5,
           "tests_total": 8,
-          "response_time": 36.76600000000326,
+          "response_time": 39.70400000002701,
           "prompt_tokens": 205
         },
         "t_tree_01_bst": {
           "score": 1.0,
           "tests_passed": 12,
           "tests_total": 12,
-          "response_time": 37.60999999998603,
+          "response_time": 40.09399999998277,
           "prompt_tokens": 199
         },
         "t_tree_02_traversals": {
           "score": 0.0,
           "tests_passed": 0,
           "tests_total": 12,
-          "response_time": 16.60899999999674,
+          "response_time": 17.95299999997951,
           "prompt_tokens": 201
         },
         "t_text_02_glob_match": {
           "score": 0.9333333333333333,
           "tests_passed": 14,
           "tests_total": 15,
-          "response_time": 21.719000000040978,
+          "response_time": 23.68800000002375,
           "prompt_tokens": 165
         },
         "t_ctx_02_transaction": {
           "score": 0.0,
           "tests_passed": 0,
           "tests_total": 4,
-          "response_time": 9.625,
+          "response_time": 9.59299999999348,
           "prompt_tokens": 188
         },
         "t_desc_02_cached_property": {
           "score": 0.0,
           "tests_passed": 0,
           "tests_total": 8,
-          "response_time": 8.719000000040978,
+          "response_time": 9.186999999976251,
           "prompt_tokens": 204
         },
         "t_thread_02_future": {
           "score": 0.8888888888888888,
           "tests_passed": 8,
           "tests_total": 9,
-          "response_time": 15.077999999979511,
+          "response_time": 18.79700000002049,
           "prompt_tokens": 212
         },
         "t_serial_02_roundtrip": {
           "score": 0.0,
           "tests_passed": 0,
           "tests_total": 15,
-          "response_time": 8.25,
+          "response_time": 11.73399999999674,
           "prompt_tokens": 261
         },
         "t_text_01_template": {
           "score": 0.09090909090909091,
           "tests_passed": 1,
           "tests_total": 11,
-          "response_time": 19.09399999998277,
+          "response_time": 17.125,
           "prompt_tokens": 223
         },
         "t_mw_01_pipeline": {
           "score": 0.0,
           "tests_passed": 0,
           "tests_total": 5,
-          "response_time": 5.2810000000172295,
+          "response_time": 5.702999999979511,
           "prompt_tokens": 249
         },
         "t_mw_02_pubsub": {
           "score": 0.1111111111111111,
           "tests_passed": 1,
           "tests_total": 9,
-          "response_time": 11.702999999979511,
+          "response_time": 14.73399999999674,
           "prompt_tokens": 224
         }
       }
@@ -125,119 +125,119 @@
       "overall_score": 0.9682539682539683,
       "tier1_score": 1.0,
       "tier2_score": 0.9365079365079365,
-      "total_time": 393.3289999999688,
+      "total_time": 418.86000000004424,
       "total_prompt_tokens": 9634,
       "tests": {
         "t_iter_01_reusable_range": {
           "score": 1.0,
           "tests_passed": 7,
           "tests_total": 7,
-          "response_time": 25.67099999997299,
+          "response_time": 28.030999999959022,
           "prompt_tokens": 494
         },
         "t_iter_02_pipeline": {
           "score": 1.0,
           "tests_passed": 6,
           "tests_total": 6,
-          "response_time": 18.25,
+          "response_time": 19.96799999999348,
           "prompt_tokens": 462
         },
         "t_ctx_01_timer": {
           "score": 1.0,
           "tests_passed": 4,
           "tests_total": 4,
-          "response_time": 12.530999999959022,
+          "response_time": 14.875,
           "prompt_tokens": 339
         },
         "t_desc_01_typed_field": {
           "score": 1.0,
           "tests_passed": 8,
           "tests_total": 8,
-          "response_time": 18.04700000002049,
+          "response_time": 19.76600000000326,
           "prompt_tokens": 479
         },
         "t_thread_01_safe_counter": {
           "score": 1.0,
           "tests_passed": 6,
           "tests_total": 6,
-          "response_time": 16.625,
+          "response_time": 16.90600000001723,
           "prompt_tokens": 614
         },
         "t_serial_01_schema_validate": {
           "score": 1.0,
           "tests_passed": 8,
           "tests_total": 8,
-          "response_time": 19.094000000040978,
+          "response_time": 20.32800000003772,
           "prompt_tokens": 849
         },
         "t_tree_01_bst": {
           "score": 1.0,
           "tests_passed": 12,
           "tests_total": 12,
-          "response_time": 45.875,
+          "response_time": 49.82799999997951,
           "prompt_tokens": 793
         },
         "t_tree_02_traversals": {
           "score": 1.0,
           "tests_passed": 12,
           "tests_total": 12,
-          "response_time": 33.93799999996554,
+          "response_time": 36.92200000002049,
           "prompt_tokens": 646
         },
         "t_text_02_glob_match": {
           "score": 1.0,
           "tests_passed": 15,
           "tests_total": 15,
-          "response_time": 31.34399999998277,
+          "response_time": 30.14100000000326,
           "prompt_tokens": 612
         },
         "t_ctx_02_transaction": {
           "score": 1.0,
           "tests_passed": 4,
           "tests_total": 4,
-          "response_time": 16.15700000000652,
+          "response_time": 16.53200000000652,
           "prompt_tokens": 390
         },
         "t_desc_02_cached_property": {
           "score": 1.0,
           "tests_passed": 8,
           "tests_total": 8,
-          "response_time": 18.64100000000326,
+          "response_time": 23.625,
           "prompt_tokens": 486
         },
         "t_thread_02_future": {
           "score": 1.0,
           "tests_passed": 9,
           "tests_total": 9,
-          "response_time": 29.39100000000326,
+          "response_time": 32.0,
           "prompt_tokens": 654
         },
         "t_serial_02_roundtrip": {
           "score": 1.0,
           "tests_passed": 15,
           "tests_total": 15,
-          "response_time": 28.625,
+          "response_time": 29.84399999998277,
           "prompt_tokens": 600
         },
         "t_text_01_template": {
           "score": 1.0,
           "tests_passed": 11,
           "tests_total": 11,
-          "response_time": 33.375,
+          "response_time": 33.28100000001723,
           "prompt_tokens": 907
         },
         "t_mw_01_pipeline": {
           "score": 1.0,
           "tests_passed": 5,
           "tests_total": 5,
-          "response_time": 18.85899999999674,
+          "response_time": 19.45300000003772,
           "prompt_tokens": 738
         },
         "t_mw_02_pubsub": {
           "score": 0.5555555555555556,
           "tests_passed": 5,
           "tests_total": 9,
-          "response_time": 26.90600000001723,
+          "response_time": 27.35999999998603,
           "prompt_tokens": 571
         }
       }
@@ -246,119 +246,361 @@
       "overall_score": 1.0,
       "tier1_score": 1.0,
       "tier2_score": 1.0,
-      "total_time": 263.5940000002156,
+      "total_time": 441.9199999999255,
       "total_prompt_tokens": 13902,
       "tests": {
         "t_iter_01_reusable_range": {
           "score": 1.0,
           "tests_passed": 7,
           "tests_total": 7,
-          "response_time": 23.98399999999674,
+          "response_time": 26.5,
           "prompt_tokens": 494
         },
         "t_iter_02_pipeline": {
           "score": 1.0,
           "tests_passed": 6,
           "tests_total": 6,
-          "response_time": 12.014999999955762,
+          "response_time": 18.18699999997625,
           "prompt_tokens": 462
         },
         "t_ctx_01_timer": {
           "score": 1.0,
           "tests_passed": 4,
           "tests_total": 4,
-          "response_time": 7.203000000037719,
+          "response_time": 11.311999999976251,
           "prompt_tokens": 454
         },
         "t_desc_01_typed_field": {
           "score": 1.0,
           "tests_passed": 8,
           "tests_total": 8,
-          "response_time": 14.14000000001397,
+          "response_time": 24.54699999996228,
           "prompt_tokens": 953
         },
         "t_thread_01_safe_counter": {
           "score": 1.0,
           "tests_passed": 6,
           "tests_total": 6,
-          "response_time": 11.313000000023749,
+          "response_time": 19.64100000000326,
           "prompt_tokens": 1049
         },
         "t_serial_01_schema_validate": {
           "score": 1.0,
           "tests_passed": 8,
           "tests_total": 8,
-          "response_time": 11.735000000044238,
+          "response_time": 21.28100000001723,
           "prompt_tokens": 981
         },
         "t_tree_01_bst": {
           "score": 1.0,
           "tests_passed": 12,
           "tests_total": 12,
-          "response_time": 26.93700000003446,
+          "response_time": 48.14100000000326,
           "prompt_tokens": 900
         },
         "t_tree_02_traversals": {
           "score": 1.0,
           "tests_passed": 12,
           "tests_total": 12,
-          "response_time": 18.094000000040978,
+          "response_time": 32.26600000000326,
           "prompt_tokens": 753
         },
         "t_text_02_glob_match": {
           "score": 1.0,
           "tests_passed": 15,
           "tests_total": 15,
-          "response_time": 18.18700000003446,
+          "response_time": 33.68699999997625,
           "prompt_tokens": 1012
         },
         "t_ctx_02_transaction": {
           "score": 1.0,
           "tests_passed": 4,
           "tests_total": 4,
-          "response_time": 9.5,
+          "response_time": 16.125,
           "prompt_tokens": 605
         },
         "t_desc_02_cached_property": {
           "score": 1.0,
           "tests_passed": 8,
           "tests_total": 8,
-          "response_time": 11.09399999998277,
+          "response_time": 20.18700000003446,
           "prompt_tokens": 961
         },
         "t_thread_02_future": {
           "score": 1.0,
           "tests_passed": 9,
           "tests_total": 9,
-          "response_time": 15.35899999999674,
+          "response_time": 26.23399999999674,
           "prompt_tokens": 1111
         },
         "t_serial_02_roundtrip": {
           "score": 1.0,
           "tests_passed": 15,
           "tests_total": 15,
-          "response_time": 35.11000000004424,
+          "response_time": 59.71799999999348,
           "prompt_tokens": 1075
         },
         "t_text_01_template": {
           "score": 1.0,
           "tests_passed": 11,
           "tests_total": 11,
-          "response_time": 20.51600000000326,
+          "response_time": 37.07900000002701,
           "prompt_tokens": 1018
         },
         "t_mw_01_pipeline": {
           "score": 1.0,
           "tests_passed": 5,
           "tests_total": 5,
-          "response_time": 12.375,
+          "response_time": 20.23399999999674,
           "prompt_tokens": 953
         },
         "t_mw_02_pubsub": {
           "score": 1.0,
           "tests_passed": 9,
           "tests_total": 9,
-          "response_time": 16.03200000000652,
+          "response_time": 26.780999999959022,
+          "prompt_tokens": 1121
+        }
+      }
+    },
+    "adaptive": {
+      "overall_score": 1.0,
+      "tier1_score": 1.0,
+      "tier2_score": 1.0,
+      "total_time": 329.45300000015413,
+      "total_prompt_tokens": 13440,
+      "tests": {
+        "t_iter_01_reusable_range": {
+          "score": 1.0,
+          "tests_passed": 7,
+          "tests_total": 7,
+          "response_time": 25.20300000003772,
+          "prompt_tokens": 494
+        },
+        "t_iter_02_pipeline": {
+          "score": 1.0,
+          "tests_passed": 6,
+          "tests_total": 6,
+          "response_time": 19.28100000001723,
+          "prompt_tokens": 462
+        },
+        "t_ctx_01_timer": {
+          "score": 1.0,
+          "tests_passed": 4,
+          "tests_total": 4,
+          "response_time": 13.780999999959022,
+          "prompt_tokens": 339
+        },
+        "t_desc_01_typed_field": {
+          "score": 1.0,
+          "tests_passed": 8,
+          "tests_total": 8,
+          "response_time": 25.29700000002049,
+          "prompt_tokens": 953
+        },
+        "t_thread_01_safe_counter": {
+          "score": 1.0,
+          "tests_passed": 6,
+          "tests_total": 6,
+          "response_time": 22.67200000002049,
+          "prompt_tokens": 1049
+        },
+        "t_serial_01_schema_validate": {
+          "score": 1.0,
+          "tests_passed": 8,
+          "tests_total": 8,
+          "response_time": 19.594000000040978,
+          "prompt_tokens": 849
+        },
+        "t_tree_01_bst": {
+          "score": 1.0,
+          "tests_passed": 12,
+          "tests_total": 12,
+          "response_time": 35.125,
+          "prompt_tokens": 900
+        },
+        "t_tree_02_traversals": {
+          "score": 1.0,
+          "tests_passed": 12,
+          "tests_total": 12,
+          "response_time": 19.29700000002049,
+          "prompt_tokens": 753
+        },
+        "t_text_02_glob_match": {
+          "score": 1.0,
+          "tests_passed": 15,
+          "tests_total": 15,
+          "response_time": 18.860000000044238,
+          "prompt_tokens": 1012
+        },
+        "t_ctx_02_transaction": {
+          "score": 1.0,
+          "tests_passed": 4,
+          "tests_total": 4,
+          "response_time": 9.01500000001397,
+          "prompt_tokens": 390
+        },
+        "t_desc_02_cached_property": {
+          "score": 1.0,
+          "tests_passed": 8,
+          "tests_total": 8,
+          "response_time": 11.687999999965541,
+          "prompt_tokens": 961
+        },
+        "t_thread_02_future": {
+          "score": 1.0,
+          "tests_passed": 9,
+          "tests_total": 9,
+          "response_time": 15.5,
+          "prompt_tokens": 1111
+        },
+        "t_serial_02_roundtrip": {
+          "score": 1.0,
+          "tests_passed": 15,
+          "tests_total": 15,
+          "response_time": 37.45300000003772,
+          "prompt_tokens": 1075
+        },
+        "t_text_01_template": {
+          "score": 1.0,
+          "tests_passed": 11,
+          "tests_total": 11,
+          "response_time": 22.875,
+          "prompt_tokens": 1018
+        },
+        "t_mw_01_pipeline": {
+          "score": 1.0,
+          "tests_passed": 5,
+          "tests_total": 5,
+          "response_time": 14.59399999998277,
+          "prompt_tokens": 953
+        },
+        "t_mw_02_pubsub": {
+          "score": 1.0,
+          "tests_passed": 9,
+          "tests_total": 9,
+          "response_time": 19.21799999999348,
+          "prompt_tokens": 1121
+        }
+      }
+    },
+    "hybrid": {
+      "overall_score": 1.0,
+      "tier1_score": 1.0,
+      "tier2_score": 1.0,
+      "total_time": 270.85900000011316,
+      "total_prompt_tokens": 13902,
+      "tests": {
+        "t_iter_01_reusable_range": {
+          "score": 1.0,
+          "tests_passed": 7,
+          "tests_total": 7,
+          "response_time": 15.76600000000326,
+          "prompt_tokens": 494
+        },
+        "t_iter_02_pipeline": {
+          "score": 1.0,
+          "tests_passed": 6,
+          "tests_total": 6,
+          "response_time": 11.672000000020489,
+          "prompt_tokens": 462
+        },
+        "t_ctx_01_timer": {
+          "score": 1.0,
+          "tests_passed": 4,
+          "tests_total": 4,
+          "response_time": 7.671999999962281,
+          "prompt_tokens": 454
+        },
+        "t_desc_01_typed_field": {
+          "score": 1.0,
+          "tests_passed": 8,
+          "tests_total": 8,
+          "response_time": 16.42200000002049,
+          "prompt_tokens": 953
+        },
+        "t_thread_01_safe_counter": {
+          "score": 1.0,
+          "tests_passed": 6,
+          "tests_total": 6,
+          "response_time": 13.672000000020489,
+          "prompt_tokens": 1049
+        },
+        "t_serial_01_schema_validate": {
+          "score": 1.0,
+          "tests_passed": 8,
+          "tests_total": 8,
+          "response_time": 12.811999999976251,
+          "prompt_tokens": 981
+        },
+        "t_tree_01_bst": {
+          "score": 1.0,
+          "tests_passed": 12,
+          "tests_total": 12,
+          "response_time": 29.219000000040978,
+          "prompt_tokens": 900
+        },
+        "t_tree_02_traversals": {
+          "score": 1.0,
+          "tests_passed": 12,
+          "tests_total": 12,
+          "response_time": 19.56300000002375,
+          "prompt_tokens": 753
+        },
+        "t_text_02_glob_match": {
+          "score": 1.0,
+          "tests_passed": 15,
+          "tests_total": 15,
+          "response_time": 19.0,
+          "prompt_tokens": 1012
+        },
+        "t_ctx_02_transaction": {
+          "score": 1.0,
+          "tests_passed": 4,
+          "tests_total": 4,
+          "response_time": 10.09399999998277,
+          "prompt_tokens": 605
+        },
+        "t_desc_02_cached_property": {
+          "score": 1.0,
+          "tests_passed": 8,
+          "tests_total": 8,
+          "response_time": 12.170999999972992,
+          "prompt_tokens": 961
+        },
+        "t_thread_02_future": {
+          "score": 1.0,
+          "tests_passed": 9,
+          "tests_total": 9,
+          "response_time": 15.297000000020489,
+          "prompt_tokens": 1111
+        },
+        "t_serial_02_roundtrip": {
+          "score": 1.0,
+          "tests_passed": 15,
+          "tests_total": 15,
+          "response_time": 36.0,
+          "prompt_tokens": 1075
+        },
+        "t_text_01_template": {
+          "score": 1.0,
+          "tests_passed": 11,
+          "tests_total": 11,
+          "response_time": 21.53100000001723,
+          "prompt_tokens": 1018
+        },
+        "t_mw_01_pipeline": {
+          "score": 1.0,
+          "tests_passed": 5,
+          "tests_total": 5,
+          "response_time": 13.28100000001723,
+          "prompt_tokens": 953
+        },
+        "t_mw_02_pubsub": {
+          "score": 1.0,
+          "tests_passed": 9,
+          "tests_total": 9,
+          "response_time": 16.68700000003446,
           "prompt_tokens": 1121
         }
       }

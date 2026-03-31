@@ -426,6 +426,8 @@ def _check_failure_patterns_with_graph(
         forced.append(best_ex)
 
     # Then: graph-expanded categories (prerequisites/related)
+    # Apply similarity threshold — don't inject low-relevance expanded examples
+    expanded_min_sim = 0.35
     for cat in expanded:
         if cat in matched_categories:
             continue  # already added
@@ -434,6 +436,9 @@ def _check_failure_patterns_with_graph(
         if len(forced) >= top_k:
             break
         best_idx, best_ex = max(candidates[cat], key=lambda x: sims[x[0]])
+        if sims[best_idx] < expanded_min_sim:
+            logger.debug(f"Failure-aware graph: skipping {cat} (best sim={sims[best_idx]:.3f} < {expanded_min_sim})")
+            continue
         forced.append(best_ex)
 
     return forced[:top_k]

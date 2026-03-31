@@ -1,607 +1,187 @@
 {
   "qwen2.5-coder-0.5b-instruct-q4_k_m": {
     "direct": {
-      "overall_score": 0.16694324194324192,
-      "tier1_score": 0.15740740740740738,
-      "tier2_score": 0.17647907647907646,
-      "total_time": 208.64100000000326,
-      "total_prompt_tokens": 3237,
+      "overall_score": 0.3125,
+      "tier1_score": 0.3125,
+      "tier2_score": 0.0,
+      "total_time": 13.40700000000652,
+      "total_prompt_tokens": 725,
       "tests": {
         "t_iter_01_reusable_range": {
           "score": 0.0,
           "tests_passed": 0,
           "tests_total": 7,
-          "response_time": 4.171999999962281,
+          "response_time": 3.3290000000270084,
           "prompt_tokens": 180
-        },
-        "t_iter_02_pipeline": {
-          "score": 0.16666666666666666,
-          "tests_passed": 1,
-          "tests_total": 6,
-          "response_time": 10.953000000037719,
-          "prompt_tokens": 181
         },
         "t_ctx_01_timer": {
           "score": 0.0,
           "tests_passed": 0,
           "tests_total": 4,
-          "response_time": 9.85999999998603,
+          "response_time": 3.827999999979511,
           "prompt_tokens": 162
         },
         "t_desc_01_typed_field": {
           "score": 0.25,
           "tests_passed": 2,
           "tests_total": 8,
-          "response_time": 11.64100000000326,
+          "response_time": 4.063000000023749,
           "prompt_tokens": 222
         },
         "t_thread_01_safe_counter": {
           "score": 1.0,
           "tests_passed": 6,
           "tests_total": 6,
-          "response_time": 4.094000000040978,
+          "response_time": 2.1869999999762513,
           "prompt_tokens": 161
-        },
-        "t_serial_01_schema_validate": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 8,
-          "response_time": 10.796999999962281,
-          "prompt_tokens": 205
-        },
-        "t_tree_01_bst": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 12,
-          "response_time": 29.90600000001723,
-          "prompt_tokens": 199
-        },
-        "t_tree_02_traversals": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 12,
-          "response_time": 16.15600000001723,
-          "prompt_tokens": 201
-        },
-        "t_text_02_glob_match": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 15,
-          "response_time": 23.860000000044238,
-          "prompt_tokens": 165
-        },
-        "t_ctx_02_transaction": {
-          "score": 0.5,
-          "tests_passed": 2,
-          "tests_total": 4,
-          "response_time": 8.202999999979511,
-          "prompt_tokens": 188
-        },
-        "t_desc_02_cached_property": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 8,
-          "response_time": 9.01600000000326,
-          "prompt_tokens": 204
-        },
-        "t_thread_02_future": {
-          "score": 0.1111111111111111,
-          "tests_passed": 1,
-          "tests_total": 9,
-          "response_time": 20.29599999997299,
-          "prompt_tokens": 212
-        },
-        "t_serial_02_roundtrip": {
-          "score": 0.5333333333333333,
-          "tests_passed": 8,
-          "tests_total": 15,
-          "response_time": 15.75,
-          "prompt_tokens": 261
-        },
-        "t_text_01_template": {
-          "score": 0.09090909090909091,
-          "tests_passed": 1,
-          "tests_total": 11,
-          "response_time": 6.827999999979511,
-          "prompt_tokens": 223
-        },
-        "t_mw_01_pipeline": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 5,
-          "response_time": 5.2189999999827705,
-          "prompt_tokens": 249
-        },
-        "t_mw_02_pubsub": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 9,
-          "response_time": 21.89000000001397,
-          "prompt_tokens": 224
         }
       }
     },
     "flat": {
-      "overall_score": 0.9444444444444444,
-      "tier1_score": 0.8888888888888888,
-      "tier2_score": 1.0,
-      "total_time": 250.20400000008522,
-      "total_prompt_tokens": 9634,
+      "overall_score": 0.75,
+      "tier1_score": 0.75,
+      "tier2_score": 0.0,
+      "total_time": 26.469000000040978,
+      "total_prompt_tokens": 1926,
       "tests": {
         "t_iter_01_reusable_range": {
           "score": 1.0,
           "tests_passed": 7,
           "tests_total": 7,
-          "response_time": 22.0,
+          "response_time": 9.422000000020489,
           "prompt_tokens": 494
-        },
-        "t_iter_02_pipeline": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 7.172000000020489,
-          "prompt_tokens": 462
         },
         "t_ctx_01_timer": {
           "score": 1.0,
           "tests_passed": 4,
           "tests_total": 4,
-          "response_time": 3.672000000020489,
+          "response_time": 2.6560000000172295,
           "prompt_tokens": 339
         },
         "t_desc_01_typed_field": {
           "score": 0.0,
           "tests_passed": 0,
           "tests_total": 8,
-          "response_time": 15.625,
+          "response_time": 9.03100000001723,
           "prompt_tokens": 479
         },
         "t_thread_01_safe_counter": {
           "score": 1.0,
           "tests_passed": 6,
           "tests_total": 6,
-          "response_time": 12.98399999999674,
+          "response_time": 5.35999999998603,
           "prompt_tokens": 614
-        },
-        "t_serial_01_schema_validate": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 8.39000000001397,
-          "prompt_tokens": 849
-        },
-        "t_tree_01_bst": {
-          "score": 1.0,
-          "tests_passed": 12,
-          "tests_total": 12,
-          "response_time": 25.67200000002049,
-          "prompt_tokens": 793
-        },
-        "t_tree_02_traversals": {
-          "score": 1.0,
-          "tests_passed": 12,
-          "tests_total": 12,
-          "response_time": 24.15700000000652,
-          "prompt_tokens": 646
-        },
-        "t_text_02_glob_match": {
-          "score": 1.0,
-          "tests_passed": 15,
-          "tests_total": 15,
-          "response_time": 16.84399999998277,
-          "prompt_tokens": 612
-        },
-        "t_ctx_02_transaction": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 6.01600000000326,
-          "prompt_tokens": 390
-        },
-        "t_desc_02_cached_property": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 11.23499999998603,
-          "prompt_tokens": 486
-        },
-        "t_thread_02_future": {
-          "score": 1.0,
-          "tests_passed": 9,
-          "tests_total": 9,
-          "response_time": 15.03100000001723,
-          "prompt_tokens": 654
-        },
-        "t_serial_02_roundtrip": {
-          "score": 1.0,
-          "tests_passed": 15,
-          "tests_total": 15,
-          "response_time": 28.0,
-          "prompt_tokens": 600
-        },
-        "t_text_01_template": {
-          "score": 1.0,
-          "tests_passed": 11,
-          "tests_total": 11,
-          "response_time": 28.96899999998277,
-          "prompt_tokens": 907
-        },
-        "t_mw_01_pipeline": {
-          "score": 1.0,
-          "tests_passed": 5,
-          "tests_total": 5,
-          "response_time": 9.922000000020489,
-          "prompt_tokens": 738
-        },
-        "t_mw_02_pubsub": {
-          "score": 1.0,
-          "tests_passed": 9,
-          "tests_total": 9,
-          "response_time": 14.51500000001397,
-          "prompt_tokens": 571
         }
       }
     },
     "graph": {
-      "overall_score": 0.9239417989417991,
-      "tier1_score": 0.9907407407407409,
-      "tier2_score": 0.8571428571428571,
-      "total_time": 266.5329999999376,
-      "total_prompt_tokens": 13902,
+      "overall_score": 0.75,
+      "tier1_score": 0.75,
+      "tier2_score": 0.0,
+      "total_time": 26.56300000002375,
+      "total_prompt_tokens": 1926,
       "tests": {
         "t_iter_01_reusable_range": {
           "score": 1.0,
           "tests_passed": 7,
           "tests_total": 7,
-          "response_time": 20.0,
+          "response_time": 9.344000000040978,
           "prompt_tokens": 494
-        },
-        "t_iter_02_pipeline": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 10.155999999959022,
-          "prompt_tokens": 462
         },
         "t_ctx_01_timer": {
           "score": 1.0,
           "tests_passed": 4,
           "tests_total": 4,
-          "response_time": 5.4060000000172295,
-          "prompt_tokens": 454
+          "response_time": 2.75,
+          "prompt_tokens": 339
         },
         "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
+          "score": 0.0,
+          "tests_passed": 0,
           "tests_total": 8,
-          "response_time": 9.562999999965541,
-          "prompt_tokens": 953
+          "response_time": 9.15700000000652,
+          "prompt_tokens": 479
         },
         "t_thread_01_safe_counter": {
           "score": 1.0,
           "tests_passed": 6,
           "tests_total": 6,
-          "response_time": 11.48499999998603,
-          "prompt_tokens": 1049
-        },
-        "t_serial_01_schema_validate": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 9.578000000037719,
-          "prompt_tokens": 981
-        },
-        "t_tree_01_bst": {
-          "score": 0.9166666666666666,
-          "tests_passed": 11,
-          "tests_total": 12,
-          "response_time": 27.53100000001723,
-          "prompt_tokens": 900
-        },
-        "t_tree_02_traversals": {
-          "score": 1.0,
-          "tests_passed": 12,
-          "tests_total": 12,
-          "response_time": 19.51600000000326,
-          "prompt_tokens": 753
-        },
-        "t_text_02_glob_match": {
-          "score": 1.0,
-          "tests_passed": 15,
-          "tests_total": 15,
-          "response_time": 18.42200000002049,
-          "prompt_tokens": 1012
-        },
-        "t_ctx_02_transaction": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 7.032000000006519,
-          "prompt_tokens": 605
-        },
-        "t_desc_02_cached_property": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 30.92199999996228,
-          "prompt_tokens": 961
-        },
-        "t_thread_02_future": {
-          "score": 1.0,
-          "tests_passed": 9,
-          "tests_total": 9,
-          "response_time": 15.702999999979511,
-          "prompt_tokens": 1111
-        },
-        "t_serial_02_roundtrip": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 15,
-          "response_time": 20.71899999998277,
-          "prompt_tokens": 1075
-        },
-        "t_text_01_template": {
-          "score": 1.0,
-          "tests_passed": 11,
-          "tests_total": 11,
-          "response_time": 12.938000000023749,
-          "prompt_tokens": 1018
-        },
-        "t_mw_01_pipeline": {
-          "score": 1.0,
-          "tests_passed": 5,
-          "tests_total": 5,
-          "response_time": 10.35899999999674,
-          "prompt_tokens": 953
-        },
-        "t_mw_02_pubsub": {
-          "score": 1.0,
-          "tests_passed": 9,
-          "tests_total": 9,
-          "response_time": 37.20299999997951,
-          "prompt_tokens": 1121
+          "response_time": 5.311999999976251,
+          "prompt_tokens": 614
         }
       }
     },
     "adaptive": {
-      "overall_score": 0.9239417989417991,
-      "tier1_score": 0.9907407407407409,
-      "tier2_score": 0.8571428571428571,
-      "total_time": 262.7820000000647,
-      "total_prompt_tokens": 13440,
+      "overall_score": 0.75,
+      "tier1_score": 0.75,
+      "tier2_score": 0.0,
+      "total_time": 26.688000000081956,
+      "total_prompt_tokens": 1926,
       "tests": {
         "t_iter_01_reusable_range": {
           "score": 1.0,
           "tests_passed": 7,
           "tests_total": 7,
-          "response_time": 19.92200000002049,
+          "response_time": 9.469000000040978,
           "prompt_tokens": 494
-        },
-        "t_iter_02_pipeline": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 10.84399999998277,
-          "prompt_tokens": 462
         },
         "t_ctx_01_timer": {
           "score": 1.0,
           "tests_passed": 4,
           "tests_total": 4,
-          "response_time": 5.657000000006519,
+          "response_time": 2.797000000020489,
           "prompt_tokens": 339
         },
         "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
+          "score": 0.0,
+          "tests_passed": 0,
           "tests_total": 8,
-          "response_time": 8.703000000037719,
-          "prompt_tokens": 953
+          "response_time": 8.98399999999674,
+          "prompt_tokens": 479
         },
         "t_thread_01_safe_counter": {
           "score": 1.0,
           "tests_passed": 6,
           "tests_total": 6,
-          "response_time": 11.797000000020489,
-          "prompt_tokens": 1049
-        },
-        "t_serial_01_schema_validate": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 7.467999999993481,
-          "prompt_tokens": 849
-        },
-        "t_tree_01_bst": {
-          "score": 0.9166666666666666,
-          "tests_passed": 11,
-          "tests_total": 12,
-          "response_time": 24.20299999997951,
-          "prompt_tokens": 900
-        },
-        "t_tree_02_traversals": {
-          "score": 1.0,
-          "tests_passed": 12,
-          "tests_total": 12,
-          "response_time": 15.35999999998603,
-          "prompt_tokens": 753
-        },
-        "t_text_02_glob_match": {
-          "score": 1.0,
-          "tests_passed": 15,
-          "tests_total": 15,
-          "response_time": 18.35899999999674,
-          "prompt_tokens": 1012
-        },
-        "t_ctx_02_transaction": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 5.6560000000172295,
-          "prompt_tokens": 390
-        },
-        "t_desc_02_cached_property": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 31.78200000000652,
-          "prompt_tokens": 961
-        },
-        "t_thread_02_future": {
-          "score": 1.0,
-          "tests_passed": 9,
-          "tests_total": 9,
-          "response_time": 13.78100000001723,
-          "prompt_tokens": 1111
-        },
-        "t_serial_02_roundtrip": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 15,
-          "response_time": 21.01600000000326,
-          "prompt_tokens": 1075
-        },
-        "t_text_01_template": {
-          "score": 1.0,
-          "tests_passed": 11,
-          "tests_total": 11,
-          "response_time": 17.75,
-          "prompt_tokens": 1018
-        },
-        "t_mw_01_pipeline": {
-          "score": 1.0,
-          "tests_passed": 5,
-          "tests_total": 5,
-          "response_time": 11.60899999999674,
-          "prompt_tokens": 953
-        },
-        "t_mw_02_pubsub": {
-          "score": 1.0,
-          "tests_passed": 9,
-          "tests_total": 9,
-          "response_time": 38.875,
-          "prompt_tokens": 1121
+          "response_time": 5.438000000023749,
+          "prompt_tokens": 614
         }
       }
     },
     "hybrid": {
-      "overall_score": 0.9239417989417991,
-      "tier1_score": 0.9907407407407409,
-      "tier2_score": 0.8571428571428571,
-      "total_time": 264.89100000000326,
-      "total_prompt_tokens": 13902,
+      "overall_score": 0.75,
+      "tier1_score": 0.75,
+      "tier2_score": 0.0,
+      "total_time": 26.595000000030268,
+      "total_prompt_tokens": 1926,
       "tests": {
         "t_iter_01_reusable_range": {
           "score": 1.0,
           "tests_passed": 7,
           "tests_total": 7,
-          "response_time": 18.85999999998603,
+          "response_time": 9.40700000000652,
           "prompt_tokens": 494
-        },
-        "t_iter_02_pipeline": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 8.686999999976251,
-          "prompt_tokens": 462
         },
         "t_ctx_01_timer": {
           "score": 1.0,
           "tests_passed": 4,
           "tests_total": 4,
-          "response_time": 5.5310000000172295,
-          "prompt_tokens": 454
+          "response_time": 2.7660000000032596,
+          "prompt_tokens": 339
         },
         "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
+          "score": 0.0,
+          "tests_passed": 0,
           "tests_total": 8,
-          "response_time": 10.73399999999674,
-          "prompt_tokens": 953
+          "response_time": 9.047000000020489,
+          "prompt_tokens": 479
         },
         "t_thread_01_safe_counter": {
           "score": 1.0,
           "tests_passed": 6,
           "tests_total": 6,
-          "response_time": 10.65600000001723,
-          "prompt_tokens": 1049
-        },
-        "t_serial_01_schema_validate": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 7.4060000000172295,
-          "prompt_tokens": 981
-        },
-        "t_tree_01_bst": {
-          "score": 0.9166666666666666,
-          "tests_passed": 11,
-          "tests_total": 12,
-          "response_time": 24.39100000000326,
-          "prompt_tokens": 900
-        },
-        "t_tree_02_traversals": {
-          "score": 1.0,
-          "tests_passed": 12,
-          "tests_total": 12,
-          "response_time": 17.57799999997951,
-          "prompt_tokens": 753
-        },
-        "t_text_02_glob_match": {
-          "score": 1.0,
-          "tests_passed": 15,
-          "tests_total": 15,
-          "response_time": 16.14100000000326,
-          "prompt_tokens": 1012
-        },
-        "t_ctx_02_transaction": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 6.672000000020489,
-          "prompt_tokens": 605
-        },
-        "t_desc_02_cached_property": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 30.60999999998603,
-          "prompt_tokens": 961
-        },
-        "t_thread_02_future": {
-          "score": 1.0,
-          "tests_passed": 9,
-          "tests_total": 9,
-          "response_time": 13.875,
-          "prompt_tokens": 1111
-        },
-        "t_serial_02_roundtrip": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 15,
-          "response_time": 23.09399999998277,
-          "prompt_tokens": 1075
-        },
-        "t_text_01_template": {
-          "score": 1.0,
-          "tests_passed": 11,
-          "tests_total": 11,
-          "response_time": 18.07799999997951,
-          "prompt_tokens": 1018
-        },
-        "t_mw_01_pipeline": {
-          "score": 1.0,
-          "tests_passed": 5,
-          "tests_total": 5,
-          "response_time": 11.063000000023749,
-          "prompt_tokens": 953
-        },
-        "t_mw_02_pubsub": {
-          "score": 1.0,
-          "tests_passed": 9,
-          "tests_total": 9,
-          "response_time": 41.51500000001397,
-          "prompt_tokens": 1121
+          "response_time": 5.375,
+          "prompt_tokens": 614
         }
       }
     }
