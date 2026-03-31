@@ -233,27 +233,23 @@ def graph_retrieve_examples(
     max_seed_categories: int = 3,
     max_expanded_categories: int = 5,
 ) -> list:
-    """Graph-enhanced example retrieval.
+    """Graph-enhanced example retrieval with confidence-gated expansion.
+
+    Key insight from benchmarks: graph expansion helps weak models on composite
+    tasks but hurts on simple single-pattern tasks by injecting noise. Solution:
+    only expand when the query looks composite (multiple categories close in
+    similarity). Single-pattern queries get focused retrieval from just the
+    seed category + its direct dependencies.
 
     Steps:
-    1. Check failure patterns first (same as flat — keeps the safety net)
+    1. Check failure patterns first (with graph-aware expansion)
     2. Embed query, compute similarities to all examples
-    3. Identify top seed categories from similarity scores
-    4. Expand via graph neighborhood (prerequisites + related)
+    3. Identify seed categories from similarity scores
+    4. Decide expansion strategy based on seed confidence gap:
+       - Strong single seed (dominant category) → minimal expansion (deps only)
+       - Multiple close seeds (composite task) → full graph expansion
     5. Filter examples to expanded category set
     6. Pick top_k by similarity from the filtered set
-
-    Args:
-        query: User's input prompt
-        embedder: Sentence-transformers encoder
-        example_embeddings: Pre-computed example embeddings (N x D)
-        examples: List of SolvedExample objects
-        graph: PatternGraph instance
-        failure_patterns: Optional dict of category -> trigger keywords
-        top_k: Max examples to return
-        seed_threshold: Min similarity to consider a category as seed
-        max_seed_categories: Max seed categories to extract
-        max_expanded_categories: Max total categories after graph expansion
 
     Returns:
         List of SolvedExample objects (up to top_k)
@@ -262,8 +258,6 @@ def graph_retrieve_examples(
         return examples[:top_k]
 
     # Step 0: Failure-aware routing with graph expansion
-    # Unlike flat retrieval which just force-injects, graph retrieval expands
-    # matched failure categories via the graph to pull in prerequisites.
     if failure_patterns:
         forced = _check_failure_patterns_with_graph(
             query, examples, embedder, example_embeddings, failure_patterns,
@@ -278,16 +272,15 @@ def graph_retrieve_examples(
     ranked = sims.argsort()[::-1]
 
     # Step 2: Identify seed categories
-    # Find the best similarity per category
     cat_best: dict[str, float] = {}
     for idx in ranked:
         cat = examples[idx].category
         if cat and cat not in cat_best:
             cat_best[cat] = float(sims[idx])
-            if len(cat_best) >= max_seed_categories * 2:
-                break  # enough candidates scanned
+            if len(cat_best) >= max_seed_categories * 3:
+                break
 
-    # Filter to those above threshold, take top N
+    # Filter to those above threshold
     seeds = sorted(
         [(cat, score) for cat, score in cat_best.items() if score >= seed_threshold],
         key=lambda x: x[1],
@@ -299,24 +292,51 @@ def graph_retrieve_examples(
 
     seed_names = [cat for cat, _ in seeds]
 
-    # Step 3: Expand via graph
-    expanded = graph.get_neighborhood(
-        seed_names,
-        max_depth=1,
-        max_categories=max_expanded_categories,
-    )
+    # Step 3: Confidence-gated expansion
+    # If the top seed dominates (big gap to #2), this is a single-pattern task.
+    # Only expand to direct dependencies, skip related_to.
+    # If seeds are close together, it's composite — do full expansion.
+    if len(seeds) >= 2:
+        gap = seeds[0][1] - seeds[1][1]
+    else:
+        gap = 1.0  # single seed = treat as dominant
+
+    if gap > 0.08:
+        # Dominant single category — deps + top 1 related per seed
+        expanded = list(seed_names)
+        seen = set(expanded)
+        for cat in seed_names:
+            for dep, weight in graph.get_dependencies(cat, depth=1):
+                if dep not in seen:
+                    expanded.append(dep)
+                    seen.add(dep)
+            # Add strongest related (provides usage context)
+            related = graph.get_related(cat, depth=1)
+            if related and related[0][0] not in seen:
+                expanded.append(related[0][0])
+                seen.add(related[0][0])
+        # Cap at seeds + 3 max
+        expanded = expanded[:len(seed_names) + 3]
+        mode = "focused"
+    else:
+        # Composite task — full graph expansion
+        expanded = graph.get_neighborhood(
+            seed_names,
+            max_depth=1,
+            max_categories=max_expanded_categories,
+        )
+        mode = "expanded"
+
     expanded_set = set(expanded)
 
     logger.debug(
-        f"Graph retrieval: seeds={seed_names} -> expanded={expanded} "
-        f"(+{len(expanded) - len(seed_names)} from graph)"
+        f"Graph retrieval [{mode}]: seeds={seeds[:3]} -> expanded={expanded} "
+        f"(gap={gap:.3f}, +{len(expanded) - len(seed_names)} from graph)"
     )
 
-    # Step 4: Filter examples to expanded categories
-    # Step 5: Pick top_k by similarity from filtered set
-    # Use a lower threshold for graph-expanded categories since the graph
-    # provides structural precision — we trust the expansion.
-    expanded_threshold = seed_threshold * 0.65  # ~0.26 for default 0.40
+    # Step 4+5: Filter and select
+    # Seed categories use full threshold, expanded categories use lower
+    expanded_threshold = seed_threshold * 0.65
     seed_set = set(seed_names)
     selected = []
     for idx in ranked:
@@ -325,7 +345,6 @@ def graph_retrieve_examples(
         ex = examples[idx]
         if ex.category not in expanded_set:
             continue
-        # Seed categories use full threshold, expanded use lower
         threshold = seed_threshold if ex.category in seed_set else expanded_threshold
         if sims[idx] >= threshold:
             selected.append(ex)
@@ -342,11 +361,12 @@ def _check_failure_patterns_with_graph(
     graph: PatternGraph,
     top_k: int,
 ) -> list:
-    """Failure-aware routing with graph expansion.
+    """Failure-aware routing with confidence-gated graph expansion.
 
-    When failure patterns match, expand matched categories via graph to also
-    pull in prerequisite patterns. E.g., "http router" matches pattern_router,
-    graph expands to include pattern_decorator (router's prerequisite).
+    Single matched category → focused: only add direct dependencies (prevents
+    noise on simple single-pattern tasks like Timer).
+    Multiple matched categories → expanded: full graph neighborhood (composite
+    tasks like "router with rate limiting").
     """
     q = query.lower()
     matched_categories: list[str] = []
@@ -358,16 +378,33 @@ def _check_failure_patterns_with_graph(
     if not matched_categories:
         return []
 
-    # Expand matched categories via graph
-    expanded = graph.get_neighborhood(
-        matched_categories,
-        max_depth=1,
-        max_categories=max(top_k + 1, len(matched_categories) + 2),
-    )
+    # Confidence-gated expansion based on number of matches
+    if len(matched_categories) == 1:
+        # Single match → focused: deps + top 1 related
+        expanded = list(matched_categories)
+        seen = set(expanded)
+        for dep, weight in graph.get_dependencies(matched_categories[0], depth=1):
+            if dep not in seen:
+                expanded.append(dep)
+                seen.add(dep)
+        # Add the single strongest related_to (provides usage context)
+        related = graph.get_related(matched_categories[0], depth=1)
+        if related and related[0][0] not in seen:
+            expanded.append(related[0][0])
+        mode = "focused"
+    else:
+        # Multiple matches → full graph expansion
+        expanded = graph.get_neighborhood(
+            matched_categories,
+            max_depth=1,
+            max_categories=max(top_k + 1, len(matched_categories) + 2),
+        )
+        mode = "expanded"
+
     expanded_set = set(expanded)
 
     logger.debug(
-        f"Failure-aware graph: matched={matched_categories} -> expanded={expanded}"
+        f"Failure-aware graph [{mode}]: matched={matched_categories} -> expanded={expanded}"
     )
 
     # Collect candidates from expanded categories

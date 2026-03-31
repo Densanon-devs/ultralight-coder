@@ -1,38 +1,75 @@
 {
   "deepseek-coder-1.3b-instruct.Q4_K_M": {
+    "direct": {
+      "overall_score": 0.39285714285714285,
+      "tier1_score": 0.39285714285714285,
+      "tier2_score": 0.0,
+      "total_time": 33.5,
+      "total_prompt_tokens": 725,
+      "tests": {
+        "t_iter_01_reusable_range": {
+          "score": 0.5714285714285714,
+          "tests_passed": 4,
+          "tests_total": 7,
+          "response_time": 7.172000000020489,
+          "prompt_tokens": 180
+        },
+        "t_ctx_01_timer": {
+          "score": 1.0,
+          "tests_passed": 4,
+          "tests_total": 4,
+          "response_time": 5.4689999999827705,
+          "prompt_tokens": 162
+        },
+        "t_desc_01_typed_field": {
+          "score": 0.0,
+          "tests_passed": 0,
+          "tests_total": 8,
+          "response_time": 13.514999999955762,
+          "prompt_tokens": 222
+        },
+        "t_thread_01_safe_counter": {
+          "score": 0.0,
+          "tests_passed": 0,
+          "tests_total": 6,
+          "response_time": 7.344000000040978,
+          "prompt_tokens": 161
+        }
+      }
+    },
     "flat": {
       "overall_score": 0.4642857142857143,
       "tier1_score": 0.4642857142857143,
       "tier2_score": 0.0,
-      "total_time": 67.40500000002794,
+      "total_time": 64.31300000002375,
       "total_prompt_tokens": 2397,
       "tests": {
         "t_iter_01_reusable_range": {
           "score": 0.8571428571428571,
           "tests_passed": 6,
           "tests_total": 7,
-          "response_time": 9.264999999955762,
+          "response_time": 9.46899999998277,
           "prompt_tokens": 608
         },
         "t_ctx_01_timer": {
           "score": 1.0,
           "tests_passed": 4,
           "tests_total": 4,
-          "response_time": 7.5,
+          "response_time": 6.797000000020489,
           "prompt_tokens": 419
         },
         "t_desc_01_typed_field": {
           "score": 0.0,
           "tests_passed": 0,
           "tests_total": 8,
-          "response_time": 17.06200000003446,
+          "response_time": 16.10899999999674,
           "prompt_tokens": 605
         },
         "t_thread_01_safe_counter": {
           "score": 0.0,
           "tests_passed": 0,
           "tests_total": 6,
-          "response_time": 33.57800000003772,
+          "response_time": 31.93800000002375,
           "prompt_tokens": 765
         }
       }
@@ -41,872 +78,36 @@
       "overall_score": 0.7142857142857143,
       "tier1_score": 0.7142857142857143,
       "tier2_score": 0.0,
-      "total_time": 100.34299999993527,
-      "total_prompt_tokens": 4779,
+      "total_time": 89.54700000002049,
+      "total_prompt_tokens": 3807,
       "tests": {
         "t_iter_01_reusable_range": {
           "score": 0.8571428571428571,
           "tests_passed": 6,
           "tests_total": 7,
-          "response_time": 9.811999999976251,
-          "prompt_tokens": 809
+          "response_time": 9.48399999999674,
+          "prompt_tokens": 608
         },
         "t_ctx_01_timer": {
           "score": 1.0,
           "tests_passed": 4,
           "tests_total": 4,
-          "response_time": 11.875,
-          "prompt_tokens": 1073
+          "response_time": 7.76600000000326,
+          "prompt_tokens": 570
         },
         "t_desc_01_typed_field": {
           "score": 0.0,
           "tests_passed": 0,
           "tests_total": 8,
-          "response_time": 63.59399999998277,
-          "prompt_tokens": 1560
+          "response_time": 57.43800000002375,
+          "prompt_tokens": 1292
         },
         "t_thread_01_safe_counter": {
           "score": 1.0,
           "tests_passed": 6,
           "tests_total": 6,
-          "response_time": 15.061999999976251,
+          "response_time": 14.85899999999674,
           "prompt_tokens": 1337
-        }
-      }
-    }
-  },
-  "Phi-3.5-mini-instruct-Q4_K_M": {
-    "flat": {
-      "overall_score": 1.0,
-      "tier1_score": 1.0,
-      "tier2_score": 0.0,
-      "total_time": 188.3279999999213,
-      "total_prompt_tokens": 2180,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 1.0,
-          "tests_passed": 7,
-          "tests_total": 7,
-          "response_time": 67.70299999997951,
-          "prompt_tokens": 534
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 32.67199999996228,
-          "prompt_tokens": 378
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 53.5,
-          "prompt_tokens": 553
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 34.45299999997951,
-          "prompt_tokens": 715
-        }
-      }
-    },
-    "graph": {
-      "overall_score": 1.0,
-      "tier1_score": 1.0,
-      "tier2_score": 0.0,
-      "total_time": 236.32800000009593,
-      "total_prompt_tokens": 4386,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 1.0,
-          "tests_passed": 7,
-          "tests_total": 7,
-          "response_time": 79.84400000004098,
-          "prompt_tokens": 728
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 44.39000000001397,
-          "prompt_tokens": 1009
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 55.28200000000652,
-          "prompt_tokens": 1401
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 56.81200000003446,
-          "prompt_tokens": 1248
-        }
-      }
-    }
-  },
-  "qwen2.5-coder-0.5b-instruct-q4_k_m": {
-    "flat": {
-      "overall_score": 0.75,
-      "tier1_score": 0.75,
-      "tier2_score": 0.0,
-      "total_time": 26.71999999997206,
-      "total_prompt_tokens": 1926,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 1.0,
-          "tests_passed": 7,
-          "tests_total": 7,
-          "response_time": 9.59399999998277,
-          "prompt_tokens": 494
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 2.6570000000065193,
-          "prompt_tokens": 339
-        },
-        "t_desc_01_typed_field": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 8,
-          "response_time": 9.172000000020489,
-          "prompt_tokens": 479
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 5.296999999962281,
-          "prompt_tokens": 614
-        }
-      }
-    },
-    "graph": {
-      "overall_score": 1.0,
-      "tier1_score": 1.0,
-      "tier2_score": 0.0,
-      "total_time": 20.87599999998929,
-      "total_prompt_tokens": 3714,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 1.0,
-          "tests_passed": 7,
-          "tests_total": 7,
-          "response_time": 5.952999999979511,
-          "prompt_tokens": 651
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 3.2660000000032596,
-          "prompt_tokens": 855
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 6.5,
-          "prompt_tokens": 1159
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 5.157000000006519,
-          "prompt_tokens": 1049
-        }
-      }
-    }
-  },
-  "qwen2.5-coder-1.5b-instruct-q4_k_m": {
-    "flat": {
-      "overall_score": 1.0,
-      "tier1_score": 1.0,
-      "tier2_score": 0.0,
-      "total_time": 44.39100000006147,
-      "total_prompt_tokens": 1926,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 1.0,
-          "tests_passed": 7,
-          "tests_total": 7,
-          "response_time": 15.327999999979511,
-          "prompt_tokens": 494
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 7.7810000000172295,
-          "prompt_tokens": 339
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 11.329000000027008,
-          "prompt_tokens": 479
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 9.953000000037719,
-          "prompt_tokens": 614
-        }
-      }
-    },
-    "graph": {
-      "overall_score": 0.75,
-      "tier1_score": 0.75,
-      "tier2_score": 0.0,
-      "total_time": 53.06299999996554,
-      "total_prompt_tokens": 3714,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 1.0,
-          "tests_passed": 7,
-          "tests_total": 7,
-          "response_time": 19.375,
-          "prompt_tokens": 651
-        },
-        "t_ctx_01_timer": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 4,
-          "response_time": 7.7810000000172295,
-          "prompt_tokens": 855
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 15.35999999998603,
-          "prompt_tokens": 1159
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 10.546999999962281,
-          "prompt_tokens": 1049
-        }
-      }
-    }
-  },
-  "qwen2.5-coder-3b-instruct-q4_k_m": {
-    "flat": {
-      "overall_score": 1.0,
-      "tier1_score": 1.0,
-      "tier2_score": 0.0,
-      "total_time": 94.6710000000312,
-      "total_prompt_tokens": 1926,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 1.0,
-          "tests_passed": 7,
-          "tests_total": 7,
-          "response_time": 45.20299999997951,
-          "prompt_tokens": 494
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 13.687000000034459,
-          "prompt_tokens": 339
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 21.01500000001397,
-          "prompt_tokens": 479
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 14.76600000000326,
-          "prompt_tokens": 614
-        }
-      }
-    },
-    "graph": {
-      "overall_score": 1.0,
-      "tier1_score": 1.0,
-      "tier2_score": 0.0,
-      "total_time": 89.25099999993108,
-      "total_prompt_tokens": 3714,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 1.0,
-          "tests_passed": 7,
-          "tests_total": 7,
-          "response_time": 31.71899999998277,
-          "prompt_tokens": 651
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 15.375,
-          "prompt_tokens": 855
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 23.42199999996228,
-          "prompt_tokens": 1159
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 18.73499999998603,
-          "prompt_tokens": 1049
-        }
-      }
-    }
-  },
-  "stable-code-instruct-3b-Q4_K_M": {
-    "flat": {
-      "overall_score": 0.5,
-      "tier1_score": 0.5,
-      "tier2_score": 0.0,
-      "total_time": 118.15399999998044,
-      "total_prompt_tokens": 2230,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 7,
-          "response_time": 26.79599999997299,
-          "prompt_tokens": 559
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 29.09299999999348,
-          "prompt_tokens": 381
-        },
-        "t_desc_01_typed_field": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 8,
-          "response_time": 37.15600000001723,
-          "prompt_tokens": 568
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 25.10899999999674,
-          "prompt_tokens": 722
-        }
-      }
-    },
-    "graph": {
-      "overall_score": 0.6428571428571428,
-      "tier1_score": 0.6428571428571428,
-      "tier2_score": 0.0,
-      "total_time": 163.15599999995902,
-      "total_prompt_tokens": 4541,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 0.5714285714285714,
-          "tests_passed": 4,
-          "tests_total": 7,
-          "response_time": 50.73399999999674,
-          "prompt_tokens": 753
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 34.13999999995576,
-          "prompt_tokens": 1022
-        },
-        "t_desc_01_typed_field": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 8,
-          "response_time": 43.43800000002375,
-          "prompt_tokens": 1504
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 34.84399999998277,
-          "prompt_tokens": 1262
-        }
-      }
-    }
-  },
-  "Yi-Coder-1.5B-Chat-Q4_K_M": {
-    "flat": {
-      "overall_score": 1.0,
-      "tier1_score": 1.0,
-      "tier2_score": 0.0,
-      "total_time": 56.67200000002049,
-      "total_prompt_tokens": 2286,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 1.0,
-          "tests_passed": 7,
-          "tests_total": 7,
-          "response_time": 19.21899999998277,
-          "prompt_tokens": 565
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 7.452999999979511,
-          "prompt_tokens": 394
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 16.04700000002049,
-          "prompt_tokens": 571
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 13.953000000037719,
-          "prompt_tokens": 756
-        }
-      }
-    },
-    "graph": {
-      "overall_score": 0.75,
-      "tier1_score": 0.75,
-      "tier2_score": 0.0,
-      "total_time": 174.18800000002375,
-      "total_prompt_tokens": 4556,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 7,
-          "response_time": 16.875,
-          "prompt_tokens": 761
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 37.04700000002049,
-          "prompt_tokens": 1055
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 58.76600000000326,
-          "prompt_tokens": 1445
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 61.5,
-          "prompt_tokens": 1295
-        }
-      }
-    }
-  },
-  "Llama-3.2-1B-Instruct-Q4_K_M": {
-    "flat": {
-      "overall_score": 0.6071428571428572,
-      "tier1_score": 0.6071428571428572,
-      "tier2_score": 0.0,
-      "total_time": 60.204000000085216,
-      "total_prompt_tokens": 2038,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 0.42857142857142855,
-          "tests_passed": 3,
-          "tests_total": 7,
-          "response_time": 22.40600000001723,
-          "prompt_tokens": 522
-        },
-        "t_ctx_01_timer": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 4,
-          "response_time": 7.813000000023749,
-          "prompt_tokens": 367
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 15.829000000027008,
-          "prompt_tokens": 507
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 14.15600000001723,
-          "prompt_tokens": 642
-        }
-      }
-    },
-    "graph": {
-      "overall_score": 0.6071428571428572,
-      "tier1_score": 0.6071428571428572,
-      "tier2_score": 0.0,
-      "total_time": 59.375,
-      "total_prompt_tokens": 3826,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 0.42857142857142855,
-          "tests_passed": 3,
-          "tests_total": 7,
-          "response_time": 13.40600000001723,
-          "prompt_tokens": 679
-        },
-        "t_ctx_01_timer": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 4,
-          "response_time": 13.796999999962281,
-          "prompt_tokens": 883
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 22.0,
-          "prompt_tokens": 1187
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 10.172000000020489,
-          "prompt_tokens": 1077
-        }
-      }
-    }
-  },
-  "qwen2.5-0.5b-instruct-q4_k_m": {
-    "flat": {
-      "overall_score": 0.75,
-      "tier1_score": 0.75,
-      "tier2_score": 0.0,
-      "total_time": 13.827999999979511,
-      "total_prompt_tokens": 1926,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 1.0,
-          "tests_passed": 7,
-          "tests_total": 7,
-          "response_time": 5.0,
-          "prompt_tokens": 494
-        },
-        "t_ctx_01_timer": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 4,
-          "response_time": 2.047000000020489,
-          "prompt_tokens": 339
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 3.4369999999762513,
-          "prompt_tokens": 479
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 3.3439999999827705,
-          "prompt_tokens": 614
-        }
-      }
-    },
-    "graph": {
-      "overall_score": 0.8571428571428572,
-      "tier1_score": 0.8571428571428572,
-      "tier2_score": 0.0,
-      "total_time": 16.17099999997299,
-      "total_prompt_tokens": 3714,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 0.42857142857142855,
-          "tests_passed": 3,
-          "tests_total": 7,
-          "response_time": 4.75,
-          "prompt_tokens": 651
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 2.8589999999967404,
-          "prompt_tokens": 855
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 4.921999999962281,
-          "prompt_tokens": 1159
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 3.64000000001397,
-          "prompt_tokens": 1049
-        }
-      }
-    }
-  },
-  "qwen3-0.6b-q4_k_m": {
-    "flat": {
-      "overall_score": 0.75,
-      "tier1_score": 0.75,
-      "tier2_score": 0.0,
-      "total_time": 96.76600000000326,
-      "total_prompt_tokens": 1926,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 7,
-          "response_time": 26.10999999998603,
-          "prompt_tokens": 494
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 18.40600000001723,
-          "prompt_tokens": 339
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 26.125,
-          "prompt_tokens": 479
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 26.125,
-          "prompt_tokens": 614
-        }
-      }
-    },
-    "graph": {
-      "overall_score": 0.25,
-      "tier1_score": 0.25,
-      "tier2_score": 0.0,
-      "total_time": 108.78100000001723,
-      "total_prompt_tokens": 3714,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 7,
-          "response_time": 27.375,
-          "prompt_tokens": 651
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 20.95300000003772,
-          "prompt_tokens": 855
-        },
-        "t_desc_01_typed_field": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 8,
-          "response_time": 30.59299999999348,
-          "prompt_tokens": 1159
-        },
-        "t_thread_01_safe_counter": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 6,
-          "response_time": 29.85999999998603,
-          "prompt_tokens": 1049
-        }
-      }
-    }
-  },
-  "SmolLM2-135M-Instruct-Q4_K_M": {
-    "flat": {
-      "overall_score": 0.25,
-      "tier1_score": 0.25,
-      "tier2_score": 0.0,
-      "total_time": 22.610000000044238,
-      "total_prompt_tokens": 2072,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 7,
-          "response_time": 8.297000000020489,
-          "prompt_tokens": 515
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 1.2350000000442378,
-          "prompt_tokens": 371
-        },
-        "t_desc_01_typed_field": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 8,
-          "response_time": 4.280999999959022,
-          "prompt_tokens": 530
-        },
-        "t_thread_01_safe_counter": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 6,
-          "response_time": 8.797000000020489,
-          "prompt_tokens": 656
-        }
-      }
-    },
-    "graph": {
-      "overall_score": 0.0,
-      "tier1_score": 0.0,
-      "tier2_score": 0.0,
-      "total_time": 18.843999999924563,
-      "total_prompt_tokens": 4019,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 7,
-          "response_time": 2.125,
-          "prompt_tokens": 683
-        },
-        "t_ctx_01_timer": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 4,
-          "response_time": 9.077999999979511,
-          "prompt_tokens": 922
-        },
-        "t_desc_01_typed_field": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 8,
-          "response_time": 3.812999999965541,
-          "prompt_tokens": 1291
-        },
-        "t_thread_01_safe_counter": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 6,
-          "response_time": 3.827999999979511,
-          "prompt_tokens": 1123
-        }
-      }
-    }
-  },
-  "SmolLM2-360M-Instruct-Q4_K_M": {
-    "flat": {
-      "overall_score": 0.75,
-      "tier1_score": 0.75,
-      "tier2_score": 0.0,
-      "total_time": 23.42200000002049,
-      "total_prompt_tokens": 2072,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 7,
-          "response_time": 8.85899999999674,
-          "prompt_tokens": 515
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 2.625,
-          "prompt_tokens": 371
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 5.407000000006519,
-          "prompt_tokens": 530
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 6.5310000000172295,
-          "prompt_tokens": 656
-        }
-      }
-    },
-    "graph": {
-      "overall_score": 0.75,
-      "tier1_score": 0.75,
-      "tier2_score": 0.0,
-      "total_time": 33.15600000001723,
-      "total_prompt_tokens": 4019,
-      "tests": {
-        "t_iter_01_reusable_range": {
-          "score": 0.0,
-          "tests_passed": 0,
-          "tests_total": 7,
-          "response_time": 4.14100000000326,
-          "prompt_tokens": 683
-        },
-        "t_ctx_01_timer": {
-          "score": 1.0,
-          "tests_passed": 4,
-          "tests_total": 4,
-          "response_time": 4.172000000020489,
-          "prompt_tokens": 922
-        },
-        "t_desc_01_typed_field": {
-          "score": 1.0,
-          "tests_passed": 8,
-          "tests_total": 8,
-          "response_time": 20.06199999997625,
-          "prompt_tokens": 1291
-        },
-        "t_thread_01_safe_counter": {
-          "score": 1.0,
-          "tests_passed": 6,
-          "tests_total": 6,
-          "response_time": 4.7810000000172295,
-          "prompt_tokens": 1123
         }
       }
     }

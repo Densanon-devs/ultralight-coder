@@ -1105,9 +1105,9 @@ def main():
     test_count = 4 if args.quick else len(all_tests)
 
     if args.compare:
-        # ── Comparison mode: run flat YAML and graph for each model ──
-        print(f"\n  Programmer Pack Benchmark [COMPARE: YAML vs GRAPH]")
-        print(f"  Models: {len(models)} | Tests: {test_count}/model × 2 methods")
+        # ── 3-way comparison: DIRECT vs FLAT YAML vs GRAPH ──
+        print(f"\n  Programmer Pack Benchmark [COMPARE: DIRECT vs FLAT vs GRAPH]")
+        print(f"  Models: {len(models)} | Tests: {test_count}/model x 3 methods")
         print(f"  Domains: 8 (Iterator, Context, Descriptor, Thread, Serial, Tree, Text, Middleware)")
         print(f"  {'Quick mode' if args.quick else 'Full run'}")
 
@@ -1117,8 +1117,16 @@ def main():
             model_name = model_path.stem
             comparison[model_name] = {}
 
+            # Run direct (no augmentors)
+            print(f"\n  -- {model_name}: DIRECT --")
+            direct_runner = ProgrammerBenchmarkRunner(
+                gpu_layers=args.gpu_layers, threads=args.threads,
+                context_length=args.context_length,
+            )
+            comparison[model_name]["direct"] = direct_runner.run_model(model_path, quick=args.quick)
+
             # Run flat YAML
-            print(f"\n  -- {model_name}: FLAT YAML --")
+            print(f"\n  -- {model_name}: FLAT --")
             flat_runner = ProgrammerBenchmarkRunner(
                 gpu_layers=args.gpu_layers, threads=args.threads,
                 context_length=args.context_length,
@@ -1161,49 +1169,76 @@ def main():
 
 
 def print_comparison_table(comparison: dict):
-    """Print a comparison table of flat YAML vs graph retrieval."""
-    print(f"\n{'='*80}")
-    print(f"  FLAT YAML vs GRAPH RETRIEVAL COMPARISON")
-    print(f"{'='*80}\n")
+    """Print a 3-way comparison table: direct vs flat YAML vs graph."""
+    methods = ["direct", "flat", "graph"]
+    # Detect which methods are present
+    all_methods = set()
+    for methods_dict in comparison.values():
+        all_methods.update(methods_dict.keys())
+    methods = [m for m in methods if m in all_methods]
 
-    print(f"  {'Model':<40} {'Method':>8} {'Score':>8} {'Time':>7} {'Tokens':>8}")
-    print(f"  {'-'*40} {'-'*8} {'-'*8} {'-'*7} {'-'*8}")
+    print(f"\n{'='*90}")
+    print(f"  RETRIEVAL METHOD COMPARISON: {' vs '.join(m.upper() for m in methods)}")
+    print(f"{'='*90}\n")
+
+    header = f"  {'Model':<35}"
+    for m in methods:
+        header += f" {m.upper():>8}"
+    header += f" {'Time(g)':>8} {'Tok(g)':>7}"
+    print(header)
+    print(f"  {'-'*35}" + f" {'-'*8}" * len(methods) + f" {'-'*8} {'-'*7}")
 
     for model_name in sorted(comparison.keys()):
-        for method in ["flat", "graph"]:
-            result = comparison[model_name].get(method)
-            if result is None:
-                continue
-            # Sum prompt tokens across all test results
-            all_results = result.tier1_results + result.tier2_results
+        row = f"  {model_name:<35}"
+        for m in methods:
+            result = comparison[model_name].get(m)
+            if result:
+                row += f" {result.overall_score:>7.0%}"
+            else:
+                row += f" {'--':>8}"
+        # Show time and tokens for graph (or last method)
+        graph_result = comparison[model_name].get("graph") or comparison[model_name].get("flat")
+        if graph_result:
+            all_results = graph_result.tier1_results + graph_result.tier2_results
             total_tokens = sum(getattr(r, "prompt_tokens", 0) for r in all_results)
-            print(
-                f"  {model_name:<40} {method:>8} "
-                f"{result.overall_score:>7.0%} "
-                f"{result.total_time:>6.0f}s "
-                f"{total_tokens:>8}"
-            )
-        print()
+            row += f" {graph_result.total_time:>7.0f}s {total_tokens:>7}"
+        print(row)
 
-    # Per-test breakdown
-    print(f"\n  Per-Test Breakdown:")
-    print(f"  {'Test':<35} {'Flat':>8} {'Graph':>8} {'Delta':>8}")
-    print(f"  {'-'*35} {'-'*8} {'-'*8} {'-'*8}")
+    # Per-test breakdown for each model
+    print(f"\n  Per-Test Breakdown (all models):")
+    header2 = f"  {'Model':<30} {'Test':<30}"
+    for m in methods:
+        header2 += f" {m[:5]:>6}"
+    header2 += f" {'Best':>6}"
+    print(header2)
+    print(f"  {'-'*30} {'-'*30}" + f" {'-'*6}" * len(methods) + f" {'-'*6}")
 
-    # Use first model for per-test comparison
-    first_model = next(iter(comparison.values()), {})
-    flat_result = first_model.get("flat")
-    graph_result = first_model.get("graph")
-    if flat_result and graph_result:
-        flat_tests = {r.test_id: r for r in flat_result.tier1_results + flat_result.tier2_results}
-        graph_tests = {r.test_id: r for r in graph_result.tier1_results + graph_result.tier2_results}
-        for test_id in sorted(flat_tests.keys()):
-            ft = flat_tests.get(test_id)
-            gt = graph_tests.get(test_id)
-            if ft and gt:
-                delta = gt.score - ft.score
-                delta_str = f"{delta:>+7.0%}" if delta != 0 else "     =="
-                print(f"  {test_id:<35} {ft.score:>7.0%} {gt.score:>7.0%} {delta_str}")
+    for model_name in sorted(comparison.keys()):
+        tests_by_method: dict[str, dict[str, float]] = {}
+        for m in methods:
+            result = comparison[model_name].get(m)
+            if result:
+                for r in result.tier1_results + result.tier2_results:
+                    if r.test_id not in tests_by_method:
+                        tests_by_method[r.test_id] = {}
+                    tests_by_method[r.test_id][m] = r.score
+
+        for test_id in sorted(tests_by_method.keys()):
+            scores = tests_by_method[test_id]
+            row = f"  {model_name:<30} {test_id:<30}"
+            best_score = max(scores.values()) if scores else 0
+            for m in methods:
+                s = scores.get(m, 0)
+                row += f" {s:>5.0%}"
+            # Mark best method
+            best_methods = [m for m in methods if scores.get(m, 0) == best_score]
+            if len(best_methods) == len(methods):
+                row += f"   all"
+            else:
+                row += f" {'+'.join(m[:3] for m in best_methods):>6}"
+            print(row)
+        if tests_by_method:
+            print()  # blank line between models
 
 
 def save_comparison_results(comparison: dict, output_path: str):
