@@ -1762,6 +1762,8 @@ class AugmentorRouter:
         self._pack = pack
         self._yaml = bool(yaml_dir) or False
         self._graph_mode = graph
+        self._adaptive_mode = False
+        self._hybrid_mode = False
         self._examples_dir = yaml_dir or examples_dir
         # Keep all sets available for runtime switching
         self._generic_augmentors: dict[str, Augmentor] = {}
@@ -1926,6 +1928,8 @@ class AugmentorRouter:
         self._pack = False
         self._yaml = False
         self._graph_mode = True
+        self._adaptive_mode = False
+        self._hybrid_mode = False
         if not self._graph_augmentors:
             self._graph_augmentors = self._build_graph_augmentors()
         self.augmentors = dict(self._graph_augmentors)
@@ -1937,6 +1941,44 @@ class AugmentorRouter:
             f"Switched to graph augmentors: "
             f"{', '.join(f'{k}({len(v.examples)})' for k, v in self.augmentors.items())}"
         )
+
+    def use_adaptive_augmentors(self):
+        """Adaptive mode: auto-select flat vs graph per-query based on composite signal."""
+        self._tuned = False
+        self._stress = False
+        self._pack = False
+        self._yaml = False
+        self._graph_mode = False
+        self._adaptive_mode = True
+        self._hybrid_mode = False
+        # Adaptive uses flat as active set, but accesses graph augmentors for composite queries
+        self.augmentors = dict(self._yaml_augmentors)
+        if not self._graph_augmentors:
+            self._graph_augmentors = self._build_graph_augmentors()
+        if self._embedder:
+            for aug in list(self._yaml_augmentors.values()) + list(self._graph_augmentors.values()):
+                if aug._embedder is None:
+                    aug.init_embeddings(self._embedder)
+        logger.info("Switched to adaptive augmentors (auto flat/graph per-query)")
+
+    def use_hybrid_augmentors(self):
+        """Hybrid mode: try graph first, fall back to flat on exec failure."""
+        self._tuned = False
+        self._stress = False
+        self._pack = False
+        self._yaml = False
+        self._graph_mode = False
+        self._adaptive_mode = False
+        self._hybrid_mode = True
+        # Hybrid uses graph as primary, flat as fallback
+        if not self._graph_augmentors:
+            self._graph_augmentors = self._build_graph_augmentors()
+        self.augmentors = dict(self._graph_augmentors)
+        if self._embedder:
+            for aug in list(self._yaml_augmentors.values()) + list(self._graph_augmentors.values()):
+                if aug._embedder is None:
+                    aug.init_embeddings(self._embedder)
+        logger.info("Switched to hybrid augmentors (graph first, flat fallback)")
 
     def reload_yaml(self, base_dir: str = ""):
         """Reload YAML examples from disk (hot-reload for development)."""
@@ -1977,12 +2019,59 @@ class AugmentorRouter:
 
         return None
 
+    def _is_composite_query(self, query: str) -> bool:
+        """Detect if a query requires multiple pattern domains (composite task).
+
+        Composite signals: multiple pattern keywords from different domains,
+        words like "with", "and", "that also", combining different concepts.
+        """
+        q = query.lower()
+
+        # Count how many distinct failure pattern categories match
+        matched = 0
+        for category, triggers in FAILURE_PATTERNS.items():
+            if any(trigger in q for trigger in triggers):
+                matched += 1
+
+        if matched >= 2:
+            return True
+
+        # Check for composition keywords alongside pattern triggers
+        composition_words = ["with", "and also", "that also", "plus", "including",
+                             "combined with", "along with"]
+        has_composition = any(w in q for w in composition_words)
+
+        if has_composition and matched >= 1:
+            return True
+
+        return False
+
     def process(self, query: str, model, chat_format: str,
                 module_hint: Optional[str] = None,
                 gen_kwargs: Optional[dict] = None) -> Optional[AugmentorResult]:
-        """Full augmentor pipeline: select -> build prompt -> generate -> verify -> retry."""
+        """Full augmentor pipeline: select -> build prompt -> generate -> verify -> retry.
+
+        In adaptive mode: auto-selects flat vs graph based on query composite signal.
+        In hybrid mode: tries graph first, falls back to flat on verification failure.
+        """
         kwargs = gen_kwargs or {}
-        augmentor = self.select_augmentor(query, module_hint)
+
+        # Adaptive mode: pick flat or graph per-query
+        if self._adaptive_mode:
+            if self._is_composite_query(query):
+                augmentor = self._graph_augmentors.get(
+                    module_hint or "code_gen",
+                    self.select_augmentor(query, module_hint),
+                )
+                logger.debug(f"Adaptive: composite query, using GRAPH for '{query[:50]}'")
+            else:
+                augmentor = self._yaml_augmentors.get(
+                    module_hint or "code_gen",
+                    self.select_augmentor(query, module_hint),
+                )
+                logger.debug(f"Adaptive: single-pattern query, using FLAT for '{query[:50]}'")
+        else:
+            augmentor = self.select_augmentor(query, module_hint)
 
         if augmentor is None:
             return None
@@ -2017,6 +2106,19 @@ class AugmentorRouter:
             attempts += 1
 
         verified, _ = augmentor.verify(response, query)
+
+        # Hybrid mode: if graph failed verification, retry with flat
+        if self._hybrid_mode and not verified and augmentor._graph is not None:
+            flat_augmentor = self._yaml_augmentors.get(augmentor.name)
+            if flat_augmentor:
+                logger.debug(f"Hybrid fallback: graph failed, retrying with flat for '{query[:50]}'")
+                flat_prompt = flat_augmentor.build_prompt(query, chat_format)
+                flat_tokens = model.count_tokens(flat_prompt)
+                response = model.generate(flat_prompt, **kwargs)
+                attempts += 1
+                verified, _ = flat_augmentor.verify(response, query)
+                prompt_tokens = flat_tokens  # report flat tokens since that's what produced the result
+
         examples_used = len(augmentor.retrieve_examples(query))
 
         return AugmentorResult(

@@ -1155,40 +1155,39 @@ class _ModelShim:
 
 class StressBenchmarkRunner:
     def __init__(self, gpu_layers: int = 99, threads: int = 8, context_length: int = 4096,
-                 use_augmentors: bool = False, use_yaml: bool = False, use_graph: bool = False):
+                 use_augmentors: bool = False, use_yaml: bool = False, use_graph: bool = False,
+                 use_adaptive: bool = False, use_hybrid: bool = False):
         self.gpu_layers = gpu_layers
         self.threads = threads
         self.context_length = context_length
         self.use_augmentors = use_augmentors
         self.use_yaml = use_yaml
         self.use_graph = use_graph
+        self.use_adaptive = use_adaptive
+        self.use_hybrid = use_hybrid
         self.all_results: list[StressModelResult] = []
 
     def _get_augmentor_router(self):
         """Create a stress-targeted augmentor router."""
-        if not self.use_augmentors and not self.use_yaml and not self.use_graph:
+        any_aug = self.use_augmentors or self.use_yaml or self.use_graph or self.use_adaptive or self.use_hybrid
+        if not any_aug:
             return None
         from engine.augmentors import AugmentorRouter
-        if self.use_graph:
-            router = AugmentorRouter(yaml_dir="data/augmentor_examples")
-            try:
-                from engine.embedder import get_embedder
-                embedder = get_embedder()
-                if embedder:
-                    router.init_embeddings(embedder)
-            except Exception:
-                pass
+        router = AugmentorRouter(yaml_dir="data/augmentor_examples")
+        try:
+            from engine.embedder import get_embedder
+            embedder = get_embedder()
+            if embedder:
+                router.init_embeddings(embedder)
+        except Exception:
+            pass
+        if self.use_adaptive:
+            router.use_adaptive_augmentors()
+        elif self.use_hybrid:
+            router.use_hybrid_augmentors()
+        elif self.use_graph:
             router.use_graph_augmentors()
-        elif self.use_yaml:
-            router = AugmentorRouter(yaml_dir="data/augmentor_examples")
-            try:
-                from engine.embedder import get_embedder
-                embedder = get_embedder()
-                if embedder:
-                    router.init_embeddings(embedder)
-            except Exception:
-                pass
-        else:
+        elif self.use_augmentors:
             router = AugmentorRouter(stress=True)
             try:
                 from engine.embedder import get_embedder
@@ -1197,6 +1196,7 @@ class StressBenchmarkRunner:
                     router.init_embeddings(embedder)
             except Exception:
                 pass
+        # else: use_yaml — already set up
         return router
 
     def load_model(self, model_path: Path):

@@ -815,24 +815,11 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
 
     def _get_augmentor_router(self):
         """Create a programmer-targeted augmentor router."""
-        if not self.use_augmentors and not self.use_yaml and not self.use_graph:
+        any_aug = self.use_augmentors or self.use_yaml or self.use_graph or self.use_adaptive or self.use_hybrid
+        if not any_aug:
             return None
         from engine.augmentors import AugmentorRouter
-        if self.use_graph:
-            router = AugmentorRouter(yaml_dir="data/augmentor_examples")
-            try:
-                from engine.embedder import get_embedder
-                embedder = get_embedder()
-                if embedder:
-                    router.init_embeddings(embedder)
-            except Exception:
-                pass
-            router.use_graph_augmentors()
-            return router
-        elif self.use_yaml:
-            router = AugmentorRouter(yaml_dir="data/augmentor_examples")
-        else:
-            router = AugmentorRouter(pack=True)
+        router = AugmentorRouter(yaml_dir="data/augmentor_examples")
         try:
             from engine.embedder import get_embedder
             embedder = get_embedder()
@@ -840,6 +827,21 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
                 router.init_embeddings(embedder)
         except Exception:
             pass
+        if self.use_adaptive:
+            router.use_adaptive_augmentors()
+        elif self.use_hybrid:
+            router.use_hybrid_augmentors()
+        elif self.use_graph:
+            router.use_graph_augmentors()
+        elif self.use_augmentors:
+            router = AugmentorRouter(pack=True)
+            try:
+                from engine.embedder import get_embedder
+                embedder = get_embedder()
+                if embedder:
+                    router.init_embeddings(embedder)
+            except Exception:
+                pass
         return router
 
     def run_model(self, model_path: Path, tiers: list[int] = None,
@@ -849,7 +851,18 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
         model_size_mb = model_path.stat().st_size / (1024 * 1024)
         chat_format = detect_chat_format(str(model_path))
 
-        mode_str = "GRAPH" if self.use_graph else ("YAML" if self.use_yaml else ("AUGMENTORS" if self.use_augmentors else "DIRECT"))
+        if self.use_adaptive:
+            mode_str = "ADAPTIVE"
+        elif self.use_hybrid:
+            mode_str = "HYBRID"
+        elif self.use_graph:
+            mode_str = "GRAPH"
+        elif self.use_yaml:
+            mode_str = "YAML"
+        elif self.use_augmentors:
+            mode_str = "AUGMENTORS"
+        else:
+            mode_str = "DIRECT"
         print(f"\n{'='*70}")
         print(f"  Model: {model_name} [{mode_str}]")
         print(f"  Size: {model_size_mb:.0f} MB | Format: {chat_format}")
@@ -857,7 +870,7 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
         print(f"{'='*70}")
 
         model = self.load_model(model_path)
-        augmentor_router = self._get_augmentor_router() if (self.use_augmentors or self.use_yaml or self.use_graph) else None
+        augmentor_router = self._get_augmentor_router()
 
         result = StressModelResult(
             model_name=model_name, model_path=str(model_path),
@@ -1052,8 +1065,12 @@ def main():
                         help="Use YAML-based augmentors from data/augmentor_examples/")
     parser.add_argument("--graph", action="store_true",
                         help="Use graph-based augmentors (pattern dependency traversal)")
+    parser.add_argument("--adaptive", action="store_true",
+                        help="Adaptive mode: auto flat/graph per-query based on composite signal")
+    parser.add_argument("--hybrid", action="store_true",
+                        help="Hybrid mode: try graph first, fall back to flat on failure")
     parser.add_argument("--compare", action="store_true",
-                        help="Run both flat YAML and graph retrieval, output comparison table")
+                        help="Run all retrieval methods, output comparison table")
     parser.add_argument("--list-tests", action="store_true", help="List all tests and exit")
     args = parser.parse_args()
 
@@ -1105,9 +1122,17 @@ def main():
     test_count = 4 if args.quick else len(all_tests)
 
     if args.compare:
-        # ── 3-way comparison: DIRECT vs FLAT YAML vs GRAPH ──
-        print(f"\n  Programmer Pack Benchmark [COMPARE: DIRECT vs FLAT vs GRAPH]")
-        print(f"  Models: {len(models)} | Tests: {test_count}/model x 3 methods")
+        # ── 5-way comparison: DIRECT vs FLAT vs GRAPH vs ADAPTIVE vs HYBRID ──
+        methods = [
+            ("direct",   {}),
+            ("flat",     {"use_yaml": True}),
+            ("graph",    {"use_graph": True}),
+            ("adaptive", {"use_adaptive": True}),
+            ("hybrid",   {"use_hybrid": True}),
+        ]
+        method_names = [m[0] for m in methods]
+        print(f"\n  Programmer Pack Benchmark [COMPARE: {' vs '.join(m.upper() for m in method_names)}]")
+        print(f"  Models: {len(models)} | Tests: {test_count}/model x {len(methods)} methods")
         print(f"  Domains: 8 (Iterator, Context, Descriptor, Thread, Serial, Tree, Text, Middleware)")
         print(f"  {'Quick mode' if args.quick else 'Full run'}")
 
@@ -1117,36 +1142,30 @@ def main():
             model_name = model_path.stem
             comparison[model_name] = {}
 
-            # Run direct (no augmentors)
-            print(f"\n  -- {model_name}: DIRECT --")
-            direct_runner = ProgrammerBenchmarkRunner(
-                gpu_layers=args.gpu_layers, threads=args.threads,
-                context_length=args.context_length,
-            )
-            comparison[model_name]["direct"] = direct_runner.run_model(model_path, quick=args.quick)
-
-            # Run flat YAML
-            print(f"\n  -- {model_name}: FLAT --")
-            flat_runner = ProgrammerBenchmarkRunner(
-                gpu_layers=args.gpu_layers, threads=args.threads,
-                context_length=args.context_length,
-                use_yaml=True,
-            )
-            comparison[model_name]["flat"] = flat_runner.run_model(model_path, quick=args.quick)
-
-            # Run graph
-            print(f"\n  -- {model_name}: GRAPH --")
-            graph_runner = ProgrammerBenchmarkRunner(
-                gpu_layers=args.gpu_layers, threads=args.threads,
-                context_length=args.context_length,
-                use_graph=True,
-            )
-            comparison[model_name]["graph"] = graph_runner.run_model(model_path, quick=args.quick)
+            for method_name, method_kwargs in methods:
+                print(f"\n  -- {model_name}: {method_name.upper()} --")
+                runner = ProgrammerBenchmarkRunner(
+                    gpu_layers=args.gpu_layers, threads=args.threads,
+                    context_length=args.context_length,
+                    **method_kwargs,
+                )
+                comparison[model_name][method_name] = runner.run_model(model_path, quick=args.quick)
 
         print_comparison_table(comparison)
         save_comparison_results(comparison, args.output)
     else:
-        mode_str = "GRAPH" if args.graph else ("YAML" if args.yaml else ("AUGMENTORS" if args.augmentors else "DIRECT"))
+        if args.adaptive:
+            mode_str = "ADAPTIVE"
+        elif args.hybrid:
+            mode_str = "HYBRID"
+        elif args.graph:
+            mode_str = "GRAPH"
+        elif args.yaml:
+            mode_str = "YAML"
+        elif args.augmentors:
+            mode_str = "AUGMENTORS"
+        else:
+            mode_str = "DIRECT"
         print(f"\n  Programmer Pack Benchmark [{mode_str}]")
         print(f"  Models: {len(models)} | Tests: {test_count}/model")
         print(f"  Domains: 8 (Iterator, Context, Descriptor, Thread, Serial, Tree, Text, Middleware)")
@@ -1159,6 +1178,8 @@ def main():
             use_augmentors=args.augmentors,
             use_yaml=args.yaml,
             use_graph=args.graph,
+            use_adaptive=args.adaptive,
+            use_hybrid=args.hybrid,
         )
 
         for model_path in models:
