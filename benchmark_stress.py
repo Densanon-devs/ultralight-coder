@@ -1079,6 +1079,7 @@ class StressTestResult:
     test_errors: list[str]
     response_time: float
     score: float
+    prompt_tokens: int = 0
 
 
 @dataclass
@@ -1154,30 +1155,48 @@ class _ModelShim:
 
 class StressBenchmarkRunner:
     def __init__(self, gpu_layers: int = 99, threads: int = 8, context_length: int = 4096,
-                 use_augmentors: bool = False, use_yaml: bool = False):
+                 use_augmentors: bool = False, use_yaml: bool = False, use_graph: bool = False):
         self.gpu_layers = gpu_layers
         self.threads = threads
         self.context_length = context_length
         self.use_augmentors = use_augmentors
         self.use_yaml = use_yaml
+        self.use_graph = use_graph
         self.all_results: list[StressModelResult] = []
 
     def _get_augmentor_router(self):
         """Create a stress-targeted augmentor router."""
-        if not self.use_augmentors and not self.use_yaml:
+        if not self.use_augmentors and not self.use_yaml and not self.use_graph:
             return None
         from engine.augmentors import AugmentorRouter
-        if self.use_yaml:
+        if self.use_graph:
             router = AugmentorRouter(yaml_dir="data/augmentor_examples")
+            try:
+                from engine.embedder import get_embedder
+                embedder = get_embedder()
+                if embedder:
+                    router.init_embeddings(embedder)
+            except Exception:
+                pass
+            router.use_graph_augmentors()
+        elif self.use_yaml:
+            router = AugmentorRouter(yaml_dir="data/augmentor_examples")
+            try:
+                from engine.embedder import get_embedder
+                embedder = get_embedder()
+                if embedder:
+                    router.init_embeddings(embedder)
+            except Exception:
+                pass
         else:
             router = AugmentorRouter(stress=True)
-        try:
-            from engine.embedder import get_embedder
-            embedder = get_embedder()
-            if embedder:
-                router.init_embeddings(embedder)
-        except Exception:
-            pass  # Falls back to positional example selection
+            try:
+                from engine.embedder import get_embedder
+                embedder = get_embedder()
+                if embedder:
+                    router.init_embeddings(embedder)
+            except Exception:
+                pass
         return router
 
     def load_model(self, model_path: Path):
@@ -1205,6 +1224,7 @@ class StressBenchmarkRunner:
     def run_single_test(self, model, test: StressTest, chat_format: str,
                         augmentor_router=None) -> StressTestResult:
         """Run a single-shot test (tier 1 or 2). Uses augmentor router if provided."""
+        prompt_tokens = 0
         if augmentor_router:
             shim = _ModelShim(model, test.max_tokens, 0.2)
             augmentor_result = augmentor_router.process(
@@ -1215,6 +1235,7 @@ class StressBenchmarkRunner:
             if augmentor_result:
                 response = augmentor_result.response
                 elapsed = shim.total_time
+                prompt_tokens = augmentor_result.prompt_tokens
             else:
                 # Fallback to direct
                 system = (
@@ -1224,6 +1245,7 @@ class StressBenchmarkRunner:
                 )
                 prompt = wrap_chat(system, test.prompt, chat_format)
                 response, elapsed = self.generate(model, prompt, max_tokens=test.max_tokens)
+                prompt_tokens = len(prompt) // 4
         else:
             system = (
                 "You are a Python coding assistant. Write clean, correct, complete Python code. "
@@ -1232,6 +1254,7 @@ class StressBenchmarkRunner:
             )
             prompt = wrap_chat(system, test.prompt, chat_format)
             response, elapsed = self.generate(model, prompt, max_tokens=test.max_tokens)
+            prompt_tokens = len(prompt) // 4
 
         code = extract_code(response)
         namespace, exec_error = safe_exec(code)
@@ -1245,7 +1268,7 @@ class StressBenchmarkRunner:
                 test_id=test.test_id, tier=test.tier, prompt=test.prompt,
                 response=response, extracted_code=code, exec_error=exec_error,
                 tests_passed=0, tests_total=total, test_errors=[exec_error],
-                response_time=elapsed, score=0.0,
+                response_time=elapsed, score=0.0, prompt_tokens=prompt_tokens,
             )
 
         passed, total, errors = run_tests(namespace, test.test_code)
@@ -1254,6 +1277,7 @@ class StressBenchmarkRunner:
             response=response, extracted_code=code, exec_error="",
             tests_passed=passed, tests_total=total, test_errors=errors,
             response_time=elapsed, score=passed / total if total > 0 else 0.0,
+            prompt_tokens=prompt_tokens,
         )
 
     def run_multi_turn_test(self, model, test: MultiTurnTest,

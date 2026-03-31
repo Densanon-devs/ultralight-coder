@@ -812,10 +812,21 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
 
     def _get_augmentor_router(self):
         """Create a programmer-targeted augmentor router."""
-        if not self.use_augmentors and not self.use_yaml:
+        if not self.use_augmentors and not self.use_yaml and not self.use_graph:
             return None
         from engine.augmentors import AugmentorRouter
-        if self.use_yaml:
+        if self.use_graph:
+            router = AugmentorRouter(yaml_dir="data/augmentor_examples")
+            try:
+                from engine.embedder import get_embedder
+                embedder = get_embedder()
+                if embedder:
+                    router.init_embeddings(embedder)
+            except Exception:
+                pass
+            router.use_graph_augmentors()
+            return router
+        elif self.use_yaml:
             router = AugmentorRouter(yaml_dir="data/augmentor_examples")
         else:
             router = AugmentorRouter(pack=True)
@@ -835,7 +846,7 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
         model_size_mb = model_path.stat().st_size / (1024 * 1024)
         chat_format = detect_chat_format(str(model_path))
 
-        mode_str = "YAML" if self.use_yaml else ("AUGMENTORS" if self.use_augmentors else "DIRECT")
+        mode_str = "GRAPH" if self.use_graph else ("YAML" if self.use_yaml else ("AUGMENTORS" if self.use_augmentors else "DIRECT"))
         print(f"\n{'='*70}")
         print(f"  Model: {model_name} [{mode_str}]")
         print(f"  Size: {model_size_mb:.0f} MB | Format: {chat_format}")
@@ -843,7 +854,7 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
         print(f"{'='*70}")
 
         model = self.load_model(model_path)
-        augmentor_router = self._get_augmentor_router() if (self.use_augmentors or self.use_yaml) else None
+        augmentor_router = self._get_augmentor_router() if (self.use_augmentors or self.use_yaml or self.use_graph) else None
 
         result = StressModelResult(
             model_name=model_name, model_path=str(model_path),
@@ -1036,6 +1047,10 @@ def main():
                         help="Use programmer-pack augmentor system (few-shot examples)")
     parser.add_argument("--yaml", action="store_true",
                         help="Use YAML-based augmentors from data/augmentor_examples/")
+    parser.add_argument("--graph", action="store_true",
+                        help="Use graph-based augmentors (pattern dependency traversal)")
+    parser.add_argument("--compare", action="store_true",
+                        help="Run both flat YAML and graph retrieval, output comparison table")
     parser.add_argument("--list-tests", action="store_true", help="List all tests and exit")
     args = parser.parse_args()
 
@@ -1086,25 +1101,137 @@ def main():
     all_tests = build_programmer_tests()
     test_count = 4 if args.quick else len(all_tests)
 
-    mode_str = "YAML" if args.yaml else ("AUGMENTORS" if args.augmentors else "DIRECT")
-    print(f"\n  Programmer Pack Benchmark [{mode_str}]")
-    print(f"  Models: {len(models)} | Tests: {test_count}/model")
-    print(f"  Domains: 8 (Iterator, Context, Descriptor, Thread, Serial, Tree, Text, Middleware)")
-    print(f"  {'Quick mode' if args.quick else 'Full run'}")
+    if args.compare:
+        # ── Comparison mode: run flat YAML and graph for each model ──
+        print(f"\n  Programmer Pack Benchmark [COMPARE: YAML vs GRAPH]")
+        print(f"  Models: {len(models)} | Tests: {test_count}/model × 2 methods")
+        print(f"  Domains: 8 (Iterator, Context, Descriptor, Thread, Serial, Tree, Text, Middleware)")
+        print(f"  {'Quick mode' if args.quick else 'Full run'}")
 
-    runner = ProgrammerBenchmarkRunner(
-        gpu_layers=args.gpu_layers,
-        threads=args.threads,
-        context_length=args.context_length,
-        use_augmentors=args.augmentors,
-        use_yaml=args.yaml,
-    )
+        comparison: dict[str, dict[str, StressModelResult]] = {}
 
-    for model_path in models:
-        runner.run_model(model_path, quick=args.quick)
+        for model_path in models:
+            model_name = model_path.stem
+            comparison[model_name] = {}
 
-    print_programmer_summary(runner.all_results)
-    save_programmer_results(runner.all_results, args.output)
+            # Run flat YAML
+            print(f"\n  ── {model_name}: FLAT YAML ──")
+            flat_runner = ProgrammerBenchmarkRunner(
+                gpu_layers=args.gpu_layers, threads=args.threads,
+                context_length=args.context_length,
+                use_yaml=True,
+            )
+            comparison[model_name]["flat"] = flat_runner.run_model(model_path, quick=args.quick)
+
+            # Run graph
+            print(f"\n  ── {model_name}: GRAPH ──")
+            graph_runner = ProgrammerBenchmarkRunner(
+                gpu_layers=args.gpu_layers, threads=args.threads,
+                context_length=args.context_length,
+                use_graph=True,
+            )
+            comparison[model_name]["graph"] = graph_runner.run_model(model_path, quick=args.quick)
+
+        print_comparison_table(comparison)
+        save_comparison_results(comparison, args.output)
+    else:
+        mode_str = "GRAPH" if args.graph else ("YAML" if args.yaml else ("AUGMENTORS" if args.augmentors else "DIRECT"))
+        print(f"\n  Programmer Pack Benchmark [{mode_str}]")
+        print(f"  Models: {len(models)} | Tests: {test_count}/model")
+        print(f"  Domains: 8 (Iterator, Context, Descriptor, Thread, Serial, Tree, Text, Middleware)")
+        print(f"  {'Quick mode' if args.quick else 'Full run'}")
+
+        runner = ProgrammerBenchmarkRunner(
+            gpu_layers=args.gpu_layers,
+            threads=args.threads,
+            context_length=args.context_length,
+            use_augmentors=args.augmentors,
+            use_yaml=args.yaml,
+            use_graph=args.graph,
+        )
+
+        for model_path in models:
+            runner.run_model(model_path, quick=args.quick)
+
+        print_programmer_summary(runner.all_results)
+        save_programmer_results(runner.all_results, args.output)
+
+
+def print_comparison_table(comparison: dict):
+    """Print a comparison table of flat YAML vs graph retrieval."""
+    print(f"\n{'='*80}")
+    print(f"  FLAT YAML vs GRAPH RETRIEVAL COMPARISON")
+    print(f"{'='*80}\n")
+
+    print(f"  {'Model':<40} {'Method':>8} {'Score':>8} {'Time':>7} {'Tokens':>8}")
+    print(f"  {'-'*40} {'-'*8} {'-'*8} {'-'*7} {'-'*8}")
+
+    for model_name in sorted(comparison.keys()):
+        for method in ["flat", "graph"]:
+            result = comparison[model_name].get(method)
+            if result is None:
+                continue
+            # Sum prompt tokens across all test results
+            all_results = result.tier1_results + result.tier2_results
+            total_tokens = sum(getattr(r, "prompt_tokens", 0) for r in all_results)
+            print(
+                f"  {model_name:<40} {method:>8} "
+                f"{result.overall_score:>7.0%} "
+                f"{result.total_time:>6.0f}s "
+                f"{total_tokens:>8}"
+            )
+        print()
+
+    # Per-test breakdown
+    print(f"\n  Per-Test Breakdown:")
+    print(f"  {'Test':<35} {'Flat':>8} {'Graph':>8} {'Delta':>8}")
+    print(f"  {'-'*35} {'-'*8} {'-'*8} {'-'*8}")
+
+    # Use first model for per-test comparison
+    first_model = next(iter(comparison.values()), {})
+    flat_result = first_model.get("flat")
+    graph_result = first_model.get("graph")
+    if flat_result and graph_result:
+        flat_tests = {r.test_id: r for r in flat_result.tier1_results + flat_result.tier2_results}
+        graph_tests = {r.test_id: r for r in graph_result.tier1_results + graph_result.tier2_results}
+        for test_id in sorted(flat_tests.keys()):
+            ft = flat_tests.get(test_id)
+            gt = graph_tests.get(test_id)
+            if ft and gt:
+                delta = gt.score - ft.score
+                delta_str = f"{delta:>+7.0%}" if delta != 0 else "     =="
+                print(f"  {test_id:<35} {ft.score:>7.0%} {gt.score:>7.0%} {delta_str}")
+
+
+def save_comparison_results(comparison: dict, output_path: str):
+    """Save comparison results to JSON."""
+    data = {}
+    for model_name, methods in comparison.items():
+        data[model_name] = {}
+        for method, result in methods.items():
+            all_results = result.tier1_results + result.tier2_results
+            data[model_name][method] = {
+                "overall_score": result.overall_score,
+                "tier1_score": result.tier1_score,
+                "tier2_score": result.tier2_score,
+                "total_time": result.total_time,
+                "total_prompt_tokens": sum(getattr(r, "prompt_tokens", 0) for r in all_results),
+                "tests": {
+                    r.test_id: {
+                        "score": r.score,
+                        "tests_passed": r.tests_passed,
+                        "tests_total": r.tests_total,
+                        "response_time": r.response_time,
+                        "prompt_tokens": getattr(r, "prompt_tokens", 0),
+                    }
+                    for r in all_results
+                },
+            }
+
+    out = Path(output_path).with_suffix(".comparison.json")
+    with open(out, "w") as f:
+        json.dump(data, f, indent=2)
+    print(f"\n  Comparison results saved to: {out}")
 
 
 if __name__ == "__main__":

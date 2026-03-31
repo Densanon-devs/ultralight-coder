@@ -143,6 +143,7 @@ class Augmentor:
 
         self._example_embeddings = None
         self._embedder = None
+        self._graph = None  # Optional PatternGraph for graph-enhanced retrieval
 
     def init_embeddings(self, embedder):
         """Pre-embed all examples for fast retrieval."""
@@ -157,6 +158,30 @@ class Augmentor:
             ex.embedding = embeddings[i].tolist()
 
         logger.debug(f"Augmentor '{self.name}': embedded {len(self.examples)} examples")
+
+    def set_graph(self, graph):
+        """Attach a PatternGraph for graph-enhanced retrieval."""
+        self._graph = graph
+
+    def retrieve_examples_graph(self, query: str, top_k: Optional[int] = None) -> list[SolvedExample]:
+        """Graph-enhanced retrieval. Uses pattern graph to expand category search.
+
+        Falls back to standard retrieve_examples() if graph or embeddings unavailable.
+        """
+        if self._graph is None or self._embedder is None or self._example_embeddings is None:
+            return self.retrieve_examples(query, top_k=top_k)
+
+        from engine.pattern_graph import graph_retrieve_examples
+        k = min(top_k or self.max_examples, len(self.examples))
+        return graph_retrieve_examples(
+            query=query,
+            embedder=self._embedder,
+            example_embeddings=self._example_embeddings,
+            examples=self.examples,
+            graph=self._graph,
+            failure_patterns=FAILURE_PATTERNS,
+            top_k=k,
+        )
 
     def retrieve_examples(self, query: str, top_k: Optional[int] = None,
                           multi_expert: Optional[bool] = None) -> list[SolvedExample]:
@@ -319,7 +344,10 @@ class Augmentor:
         """Build a minimal, high-signal prompt."""
         parts = [self.system_context.strip()]
 
-        examples = self.retrieve_examples(user_input, multi_expert=self.multi_expert)
+        if self._graph is not None:
+            examples = self.retrieve_examples_graph(user_input)
+        else:
+            examples = self.retrieve_examples(user_input, multi_expert=self.multi_expert)
         if examples:
             parts.append("")
             for ex in examples:
@@ -339,7 +367,10 @@ class Augmentor:
         """Build a retry prompt with feedback from the failed attempt."""
         parts = [self.system_context.strip()]
 
-        examples = self.retrieve_examples(user_input, top_k=2, multi_expert=self.multi_expert)
+        if self._graph is not None:
+            examples = self.retrieve_examples_graph(user_input, top_k=2)
+        else:
+            examples = self.retrieve_examples(user_input, top_k=2, multi_expert=self.multi_expert)
         if examples:
             parts.append("")
             for ex in examples:
@@ -1719,13 +1750,15 @@ class AugmentorRouter:
     """Routes queries to the right augmentor and runs generate -> verify -> retry."""
 
     def __init__(self, tuned: bool = False, stress: bool = False, pack: bool = False,
-                 yaml_dir: str = "", examples_dir: str = "data/augmentor_examples"):
+                 yaml_dir: str = "", examples_dir: str = "data/augmentor_examples",
+                 graph: bool = False):
         self.augmentors: dict[str, Augmentor] = {}
         self._embedder = None
         self._tuned = tuned
         self._stress = stress
         self._pack = pack
         self._yaml = bool(yaml_dir) or False
+        self._graph_mode = graph
         self._examples_dir = yaml_dir or examples_dir
         # Keep all sets available for runtime switching
         self._generic_augmentors: dict[str, Augmentor] = {}
@@ -1733,6 +1766,7 @@ class AugmentorRouter:
         self._stress_augmentors: dict[str, Augmentor] = {}
         self._pack_augmentors: dict[str, Augmentor] = {}
         self._yaml_augmentors: dict[str, Augmentor] = {}
+        self._graph_augmentors: dict[str, Augmentor] = {}
         self._register_defaults()
 
     def _register_defaults(self):
@@ -1764,8 +1798,12 @@ class AugmentorRouter:
         }
         # YAML-based augmentors — loads from data/augmentor_examples/
         self._yaml_augmentors = build_yaml_augmentors(self._examples_dir)
+        # Graph-enhanced augmentors — same YAML examples, graph-based retrieval
+        self._graph_augmentors = self._build_graph_augmentors()
 
-        if self._yaml:
+        if self._graph_mode:
+            self.augmentors = dict(self._graph_augmentors)
+        elif self._yaml:
             self.augmentors = dict(self._yaml_augmentors)
         elif self._pack:
             self.augmentors = dict(self._pack_augmentors)
@@ -1776,6 +1814,41 @@ class AugmentorRouter:
         else:
             self.augmentors = dict(self._generic_augmentors)
 
+    def _build_graph_augmentors(self) -> dict[str, Augmentor]:
+        """Build graph-enhanced augmentors reusing YAML examples."""
+        try:
+            from engine.pattern_graph import PatternGraph
+            graph = PatternGraph("data/pattern_graph.yaml")
+            if not graph.nodes:
+                logger.warning("Pattern graph empty, graph augmentors unavailable")
+                return {}
+        except Exception as e:
+            logger.warning(f"Failed to load pattern graph: {e}")
+            return {}
+
+        # Clone the YAML augmentors but attach the graph
+        graph_augs = {}
+        for name, aug in self._yaml_augmentors.items():
+            clone = Augmentor(
+                name=aug.name,
+                system_context=aug.system_context,
+                examples=aug.examples,  # shared list — same embeddings
+                verifier=aug.verifier,
+                max_examples=aug.max_examples,
+                max_retries=aug.max_retries,
+                multi_expert=aug.multi_expert,
+            )
+            clone.set_graph(graph)
+            # Share pre-computed embeddings (set during init_embeddings)
+            clone._example_embeddings = aug._example_embeddings
+            clone._embedder = aug._embedder
+            graph_augs[name] = clone
+
+        logger.info(
+            f"Built graph augmentors: {', '.join(f'{k}({len(v.examples)})' for k, v in graph_augs.items())}"
+        )
+        return graph_augs
+
     def init_embeddings(self, embedder):
         """Initialize embeddings for all augmentors (all sets)."""
         self._embedder = embedder
@@ -1783,9 +1856,16 @@ class AugmentorRouter:
                           | set(self._tuned_augmentors.values())
                           | set(self._stress_augmentors.values())
                           | set(self._pack_augmentors.values())
-                          | set(self._yaml_augmentors.values()))
+                          | set(self._yaml_augmentors.values())
+                          | set(self._graph_augmentors.values()))
         for augmentor in all_augmentors:
             augmentor.init_embeddings(embedder)
+        # Sync graph augmentor embeddings from YAML augmentors (shared data)
+        for name, gaug in self._graph_augmentors.items():
+            if name in self._yaml_augmentors:
+                yaug = self._yaml_augmentors[name]
+                gaug._example_embeddings = yaug._example_embeddings
+                gaug._embedder = yaug._embedder
         logger.info(f"Augmentor embeddings initialized for {len(self.augmentors)} active augmentors")
 
     def use_tuned_augmentors(self):
@@ -1833,6 +1913,25 @@ class AugmentorRouter:
                 aug.init_embeddings(self._embedder)
         logger.info(
             f"Switched to YAML augmentors: "
+            f"{', '.join(f'{k}({len(v.examples)})' for k, v in self.augmentors.items())}"
+        )
+
+    def use_graph_augmentors(self):
+        """Swap in graph-enhanced augmentors (pattern dependency traversal)."""
+        self._tuned = False
+        self._stress = False
+        self._pack = False
+        self._yaml = False
+        self._graph_mode = True
+        if not self._graph_augmentors:
+            self._graph_augmentors = self._build_graph_augmentors()
+        self.augmentors = dict(self._graph_augmentors)
+        if self._embedder:
+            for gaug in self._graph_augmentors.values():
+                if gaug._embedder is None:
+                    gaug.init_embeddings(self._embedder)
+        logger.info(
+            f"Switched to graph augmentors: "
             f"{', '.join(f'{k}({len(v.examples)})' for k, v in self.augmentors.items())}"
         )
 
