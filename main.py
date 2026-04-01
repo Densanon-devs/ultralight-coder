@@ -91,8 +91,8 @@ class UltralightCodeAssistant:
         # Tools
         self.tools = ToolRegistry()
 
-        # Augmentor system (code-focused)
-        self.augmentor_router = AugmentorRouter()
+        # Augmentor system (code-focused, YAML examples + auto mode)
+        self.augmentor_router = AugmentorRouter(yaml_dir="data/augmentor_examples")
         self._augmentors_enabled = self._should_enable_augmentors()
 
         # Response cache
@@ -102,14 +102,18 @@ class UltralightCodeAssistant:
         self._perf_history: list[dict] = []
 
     def _should_enable_augmentors(self) -> bool:
-        """Auto-enable augmentors for small models."""
+        """Enable augmentors for all supported models.
+
+        Phase 6 proved auto mode works for all model sizes:
+        - Sub-1.5GB: rerank1 (single example injection)
+        - 1.5GB+: rerank (two example injection)
+        """
         model_path = Path(self.config.base_model.path)
         if not model_path.exists():
             return True
         size_mb = model_path.stat().st_size / (1024 * 1024)
-        enabled = size_mb < 2000  # Enable for sub-3B models (our target range)
-        logger.info(f"Augmentor system: {'ON' if enabled else 'OFF'} (model={size_mb:.0f}MB)")
-        return enabled
+        logger.info(f"Augmentor system: ON (model={size_mb:.0f}MB, 230 YAML examples)")
+        return True
 
     def _apply_tuned_config(self):
         """Load and apply tuned_config.json if it exists."""
@@ -187,7 +191,7 @@ class UltralightCodeAssistant:
         else:
             logger.info("DRY RUN mode — no model loaded")
 
-        # Initialize augmentor embeddings
+        # Initialize augmentor embeddings + auto mode
         try:
             from engine.embedder import get_embedder
             embedder = get_embedder()
@@ -195,6 +199,11 @@ class UltralightCodeAssistant:
                 self.augmentor_router.init_embeddings(embedder)
         except Exception as e:
             logger.debug(f"Augmentor embeddings not initialized: {e}")
+
+        if self._augmentors_enabled:
+            model_path = Path(self.config.base_model.path)
+            model_size_mb = model_path.stat().st_size / (1024 * 1024) if model_path.exists() else 1000
+            self.augmentor_router.use_auto_augmentors(model_size_mb)
 
         self.pipeline.start()
         logger.info("Ready")

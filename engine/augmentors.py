@@ -58,7 +58,7 @@ FAILURE_PATTERNS: dict[str, list[str]] = {
     ],
     "pattern_threading": [
         "thread safe", "threadsafe", "threading.lock", "threading.condition",
-        "bounded queue", "producer consumer",
+        "bounded queue",
     ],
     "pattern_middleware": [
         "middleware pipeline", "middleware chain", "next_fn",
@@ -74,8 +74,8 @@ FAILURE_PATTERNS: dict[str, list[str]] = {
         "glob_match", "wildcard matching", "glob pattern",
     ],
     "pattern_iterator": [
-        "lazy data processing", "pipeline", ".map(", ".filter(",
-        ".take(", ".collect(", "reusable range", "reusablerange",
+        "lazy data processing", ".take(", ".collect(",
+        "reusable range", "reusablerange",
     ],
     "pattern_template": [
         "template", "{{var}}", "{% for", "{% endfor", "render(",
@@ -84,6 +84,101 @@ FAILURE_PATTERNS: dict[str, list[str]] = {
     "pattern_tree": [
         "binary search tree", "bst", "inorder", "in-order successor",
         "tree height", "preorder", "postorder", "level_order", "trie",
+    ],
+    # ── New domain packs ──
+    "async_coroutine": [
+        "async def", "async for", "async with", "async generator",
+        "async context manager", "__aenter__", "__aexit__",
+        "async iterator", "__aiter__", "__anext__",
+    ],
+    "async_concurrency": [
+        "asyncio.gather", "asyncio.semaphore", "semaphore",
+        "concurrent async", "rate limit async", "gather(",
+        "asyncio.wait", "asyncio.create_task",
+    ],
+    "async_queue": [
+        "asyncio.queue", "async producer", "async consumer",
+        "async worker", "worker pool async", "async queue",
+        "producer consumer",
+    ],
+    "web_routes": [
+        "fastapi", "rest api", "rest endpoint",
+        "@app.get", "@app.post", "@app.delete", "@app.put",
+        "path parameter", "query parameter", "api route",
+    ],
+    "web_middleware": [
+        "wsgi middleware", "request timing", "api key middleware",
+        "authentication middleware", "auth middleware",
+        "request logging middleware",
+    ],
+    "web_validation": [
+        "pydantic", "request validation", "field(",
+        "validation error", "requestvalidationerror",
+        "pydantic model", "basemodel",
+    ],
+    "db_crud": [
+        "sqlite crud", "sqlite3", "create_table", "insert into",
+        "parameterized query", "executemany", "sql injection",
+        "database crud", "crud class",
+    ],
+    "db_connection": [
+        "connection pool", "database connection", "auto commit",
+        "rollback on exception", "connection manager",
+        "db context manager",
+    ],
+    "db_repository": [
+        "repository pattern", "find_all", "find_by_id",
+        "migration runner", "database migration", "apply migration",
+        "generic repository",
+    ],
+    "test_fixtures": [
+        "pytest fixture", "pytest.fixture", "@pytest.fixture",
+        "parametrize", "@pytest.mark.parametrize", "yield fixture",
+        "setup teardown", "conftest",
+    ],
+    "test_mocking": [
+        "mock.patch", "unittest.mock", "mock_open", "mocker",
+        "mock api call", "mock external", "side_effect",
+        "return_value", "assert_called",
+    ],
+    "test_patterns": [
+        "test factory", "make_user", "make_order",
+        "custom assertion", "assert_valid", "test helper",
+        "test builder",
+    ],
+    "data_file_io": [
+        "csv reader", "csv writer", "csv.dictreader", "csv.dictwriter",
+        "stream lines", "line by line", "large file",
+        "read csv", "write csv",
+    ],
+    "data_transform": [
+        "data pipeline", "chainable", ".map(", ".filter(", ".reduce(",
+        "flatten dict", "unflatten", "dot notation",
+        "nested dict", "functional pipeline",
+    ],
+    "data_validation": [
+        "schema validator", "validate schema", "field validation",
+        "config loader", "load config", "dataclass config",
+        "json config", "type validation",
+    ],
+    "cli_argparse": [
+        "argparse", "subcommands", "add_subparsers", "subparser",
+        "cli tool", "command line", "cli app",
+        "config override", "config file arg",
+    ],
+    "cli_logging": [
+        "logging setup", "setup_logging", "rotating log",
+        "rotatingfilehandler", "file handler", "console handler",
+        "log format", "log level",
+    ],
+    "cli_subprocess": [
+        "subprocess.run", "subprocess.popen", "capture output",
+        "shell command", "run command", "pipe commands",
+        "command pipeline", "subprocess timeout",
+    ],
+    "resilience_retry": [
+        "retry with backoff", "exponential backoff", "retry on exception",
+        "retry decorator", "max retries", "circuit breaker",
     ],
 }
 
