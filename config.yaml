@@ -1,165 +1,139 @@
-# ============================================================
-# Ultralight Code Assistant — Configuration
-# Lowest-viable local coding assistant
-# Branched from Plug-in Intelligence Engine
-# ============================================================
-
 system:
-  name: "Ultralight Code Assistant"
-  version: "0.1.0"
-  log_level: "INFO"
-
-# ----------------------------------------------------------
-# Base Model — Qwen2.5-Coder-1.5B Q4_K_M (1066MB)
-# EXECUTION benchmark winner: 98.1% (code runs correctly)
-# With AUTO augmentors (Phase 6): 97% on programmer-pack (16 tests)
-# 0.5B model hits 100% with augmentors — expertise > parameters
-# ----------------------------------------------------------
+  name: Ultralight Code Assistant
+  version: 0.1.0
+  log_level: INFO
 base_model:
-  path: "models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
+  path: models/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf
   context_length: 4096
   gpu_layers: 99
   threads: 8
-  temperature: 0.2                         # Low for code accuracy
-  max_tokens: 512                          # Code needs room
+  temperature: 0.2
+  max_tokens: 512
   batch_size: 512
-
-# ----------------------------------------------------------
-# Router — Code task routing
-# ----------------------------------------------------------
 router:
-  mode: "hybrid"
+  mode: hybrid
   max_active_modules: 2
-  default_modules: ["code_gen"]
-
+  default_modules:
+  - code_gen
   rules:
-    - keywords: ["write", "create", "implement", "build", "generate", "make", "add", "function", "class", "script"]
-      module: "code_gen"
-      priority: 12
-
-    - keywords: ["review", "check", "audit", "improve", "refactor", "optimize", "clean", "simplify"]
-      module: "code_review"
-      priority: 10
-
-    - keywords: ["bug", "fix", "error", "broken", "crash", "debug", "wrong", "fails", "issue", "traceback", "exception"]
-      module: "debugger"
-      priority: 11
-
-    - keywords: ["explain", "how", "why", "what does", "understand", "teach", "learn", "difference"]
-      module: "explainer"
-      priority: 8
-
+  - keywords:
+    - write
+    - create
+    - implement
+    - build
+    - generate
+    - make
+    - add
+    - function
+    - class
+    - script
+    module: code_gen
+    priority: 12
+  - keywords:
+    - review
+    - check
+    - audit
+    - improve
+    - refactor
+    - optimize
+    - clean
+    - simplify
+    module: code_review
+    priority: 10
+  - keywords:
+    - bug
+    - fix
+    - error
+    - broken
+    - crash
+    - debug
+    - wrong
+    - fails
+    - issue
+    - traceback
+    - exception
+    module: debugger
+    priority: 11
+  - keywords:
+    - explain
+    - how
+    - why
+    - what does
+    - understand
+    - teach
+    - learn
+    - difference
+    module: explainer
+    priority: 8
   classifier:
-    type: "neural"
-    model_path: "data/router_model"
+    type: neural
+    model_path: data/router_model
     min_training_samples: 10
     confidence_threshold: 0.4
     retrain_interval: 50
     max_features: 5000
-    embedding_model: "all-MiniLM-L6-v2"
-
+    embedding_model: all-MiniLM-L6-v2
   blending:
     enabled: true
-    strategy: "weighted"
+    strategy: weighted
     max_blend_modules: 2
-    conflict_resolution: "priority"
+    conflict_resolution: priority
     weight_decay: 0.7
-
-# ----------------------------------------------------------
-# Augmentors — Few-shot example injection (Phase 6 validated)
-# 230 YAML examples across 39 categories, 33 failure patterns
-# Auto mode: rerank1 for <1.5GB models, rerank for >=1.5GB
-# ----------------------------------------------------------
 augmentors:
   enabled: true
-  mode: "auto"                           # auto, yaml, rerank, rerank1, plan
-  examples_dir: "data/augmentor_examples"
-  model_size_threshold: 1500             # MB — below=1 example, above=2 examples
-  failure_routing: true                  # Keyword-based force-injection for known patterns
-
-# ----------------------------------------------------------
-# Modules
-# ----------------------------------------------------------
+  mode: auto
+  examples_dir: data/augmentor_examples
+  model_size_threshold: 1500
+  failure_routing: true
 modules:
-  directory: "modules"
+  directory: modules
   cache_ttl: 300
   max_cached: 5
   predictive_preload: true
   preload_top_k: 2
-
-# ----------------------------------------------------------
-# Memory — Project context persistence
-# ----------------------------------------------------------
 memory:
   enabled: true
-
   short_term:
     max_turns: 30
     max_tokens: 2048
-
   long_term:
     enabled: true
-    backend: "faiss"
-    storage_dir: "data/memory"
+    backend: faiss
+    storage_dir: data/memory
     top_k: 5
     similarity_threshold: 0.3
-    embedding_model: "all-MiniLM-L6-v2"
-
+    embedding_model: all-MiniLM-L6-v2
   system:
     enabled: true
-    knowledge_dir: "data/knowledge"
-
+    knowledge_dir: data/knowledge
   compressor:
     max_summary_sentences: 10
     max_topics: 8
-
-# ----------------------------------------------------------
-# Fusion — Code-optimized prompt assembly
-# Lean mode: minimal system prompt, no XML tags, max room for user code
-# ----------------------------------------------------------
 fusion:
-  mode: "lean"                             # "lean" (code-optimized) or "structured" (PIE default)
-  chat_format: "chatml"                    # Qwen native format
-  system_prompt: "You are a coding assistant. Write clean, correct Python in ```python blocks."
-
+  mode: lean
+  chat_format: chatml
+  system_prompt: You are a coding assistant. Write clean, correct Python in ```python
+    blocks.
   max_prompt_tokens: 2048
-
-  # Lean budget: maximize user input + conversation, minimize overhead
   budget_system: 0.05
-  budget_modules: 0.10                     # Minimal — module context is mostly noise for code models
-  budget_memory: 0.10
-  budget_conversation: 0.55               # Most room for multi-turn context
-  budget_reserve: 0.20                     # Reserve for user's code pastes
-
-# ----------------------------------------------------------
-# Pipeline
-# ----------------------------------------------------------
+  budget_modules: 0.1
+  budget_memory: 0.1
+  budget_conversation: 0.55
+  budget_reserve: 0.2
 pipeline:
   enabled: true
   parallel_workers: 3
   enable_generation_queue: true
   generation_timeout: 180
-
-# ----------------------------------------------------------
-# KV Cache
-# ----------------------------------------------------------
 kv_cache:
   enabled: true
-  compression_threshold: 0.80
-
-# ----------------------------------------------------------
-# Micro-Adapters
-# ----------------------------------------------------------
+  compression_threshold: 0.8
 micro_adapters:
   enabled: true
-  storage_dir: "data/adapters"
-  embedding_model: "all-MiniLM-L6-v2"
+  storage_dir: data/adapters
+  embedding_model: all-MiniLM-L6-v2
   min_cluster_size: 5
   max_adapters: 8
   regenerate_interval: 20
-
-# ----------------------------------------------------------
-# NPC Mode — Disabled (this is a utility, not a character)
-# ----------------------------------------------------------
 npc:
   enabled: false
