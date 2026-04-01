@@ -1156,7 +1156,8 @@ class _ModelShim:
 class StressBenchmarkRunner:
     def __init__(self, gpu_layers: int = 99, threads: int = 8, context_length: int = 4096,
                  use_augmentors: bool = False, use_yaml: bool = False, use_graph: bool = False,
-                 use_adaptive: bool = False, use_hybrid: bool = False):
+                 use_adaptive: bool = False, use_hybrid: bool = False,
+                 use_rerank: bool = False, use_plan: bool = False):
         self.gpu_layers = gpu_layers
         self.threads = threads
         self.context_length = context_length
@@ -1165,11 +1166,15 @@ class StressBenchmarkRunner:
         self.use_graph = use_graph
         self.use_adaptive = use_adaptive
         self.use_hybrid = use_hybrid
+        self.use_rerank = use_rerank
+        self.use_plan = use_plan
         self.all_results: list[StressModelResult] = []
 
     def _get_augmentor_router(self):
         """Create a stress-targeted augmentor router."""
-        any_aug = self.use_augmentors or self.use_yaml or self.use_graph or self.use_adaptive or self.use_hybrid
+        any_aug = (self.use_augmentors or self.use_yaml or self.use_graph
+                   or self.use_adaptive or self.use_hybrid
+                   or self.use_rerank or self.use_plan)
         if not any_aug:
             return None
         from engine.augmentors import AugmentorRouter
@@ -1181,7 +1186,11 @@ class StressBenchmarkRunner:
                 router.init_embeddings(embedder)
         except Exception:
             pass
-        if self.use_adaptive:
+        if self.use_rerank:
+            router.use_rerank_augmentors()
+        elif self.use_plan:
+            router.use_plan_augmentors()
+        elif self.use_adaptive:
             router.use_adaptive_augmentors()
         elif self.use_hybrid:
             router.use_hybrid_augmentors()

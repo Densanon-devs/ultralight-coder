@@ -815,7 +815,9 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
 
     def _get_augmentor_router(self):
         """Create a programmer-targeted augmentor router."""
-        any_aug = self.use_augmentors or self.use_yaml or self.use_graph or self.use_adaptive or self.use_hybrid
+        any_aug = (self.use_augmentors or self.use_yaml or self.use_graph
+                   or self.use_adaptive or self.use_hybrid
+                   or self.use_rerank or self.use_plan)
         if not any_aug:
             return None
         from engine.augmentors import AugmentorRouter
@@ -827,7 +829,11 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
                 router.init_embeddings(embedder)
         except Exception:
             pass
-        if self.use_adaptive:
+        if self.use_rerank:
+            router.use_rerank_augmentors()
+        elif self.use_plan:
+            router.use_plan_augmentors()
+        elif self.use_adaptive:
             router.use_adaptive_augmentors()
         elif self.use_hybrid:
             router.use_hybrid_augmentors()
@@ -851,7 +857,11 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
         model_size_mb = model_path.stat().st_size / (1024 * 1024)
         chat_format = detect_chat_format(str(model_path))
 
-        if self.use_adaptive:
+        if self.use_rerank:
+            mode_str = "RERANK"
+        elif self.use_plan:
+            mode_str = "PLAN"
+        elif self.use_adaptive:
             mode_str = "ADAPTIVE"
         elif self.use_hybrid:
             mode_str = "HYBRID"
@@ -1069,6 +1079,10 @@ def main():
                         help="Adaptive mode: auto flat/graph per-query based on composite signal")
     parser.add_argument("--hybrid", action="store_true",
                         help="Hybrid mode: try graph first, fall back to flat on failure")
+    parser.add_argument("--rerank", action="store_true",
+                        help="Graph-rerank mode: flat candidates reranked by graph coherence (1-2 injected)")
+    parser.add_argument("--plan", action="store_true",
+                        help="Graph-plan mode: graph identifies subpatterns, injects only 1 example")
     parser.add_argument("--compare", action="store_true",
                         help="Run all retrieval methods, output comparison table")
     parser.add_argument("--list-tests", action="store_true", help="List all tests and exit")
@@ -1122,11 +1136,13 @@ def main():
     test_count = 4 if args.quick else len(all_tests)
 
     if args.compare:
-        # ── 5-way comparison: DIRECT vs FLAT vs GRAPH vs ADAPTIVE vs HYBRID ──
+        # ── 7-way comparison: DIRECT vs FLAT vs GRAPH vs RERANK vs PLAN vs ADAPTIVE vs HYBRID ──
         methods = [
             ("direct",   {}),
             ("flat",     {"use_yaml": True}),
             ("graph",    {"use_graph": True}),
+            ("rerank",   {"use_rerank": True}),
+            ("plan",     {"use_plan": True}),
             ("adaptive", {"use_adaptive": True}),
             ("hybrid",   {"use_hybrid": True}),
         ]
@@ -1154,7 +1170,11 @@ def main():
         print_comparison_table(comparison)
         save_comparison_results(comparison, args.output)
     else:
-        if args.adaptive:
+        if args.rerank:
+            mode_str = "RERANK"
+        elif args.plan:
+            mode_str = "PLAN"
+        elif args.adaptive:
             mode_str = "ADAPTIVE"
         elif args.hybrid:
             mode_str = "HYBRID"
@@ -1180,6 +1200,8 @@ def main():
             use_graph=args.graph,
             use_adaptive=args.adaptive,
             use_hybrid=args.hybrid,
+            use_rerank=args.rerank,
+            use_plan=args.plan,
         )
 
         for model_path in models:
@@ -1190,8 +1212,8 @@ def main():
 
 
 def print_comparison_table(comparison: dict):
-    """Print a 3-way comparison table: direct vs flat YAML vs graph."""
-    methods = ["direct", "flat", "graph"]
+    """Print comparison table across all tested retrieval methods."""
+    methods = ["direct", "flat", "graph", "rerank", "plan", "adaptive", "hybrid"]
     # Detect which methods are present
     all_methods = set()
     for methods_dict in comparison.values():

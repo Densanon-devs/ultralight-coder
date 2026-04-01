@@ -144,6 +144,7 @@ class Augmentor:
         self._example_embeddings = None
         self._embedder = None
         self._graph = None  # Optional PatternGraph for graph-enhanced retrieval
+        self._retrieval_mode = "flat"  # "flat", "graph", "rerank", "plan"
 
     def init_embeddings(self, embedder):
         """Pre-embed all examples for fast retrieval."""
@@ -181,6 +182,51 @@ class Augmentor:
             graph=self._graph,
             failure_patterns=FAILURE_PATTERNS,
             top_k=k,
+        )
+
+    def retrieve_examples_rerank(self, query: str, top_k: Optional[int] = None) -> list[SolvedExample]:
+        """Graph-as-reranker: flat candidates reranked by graph coherence.
+
+        Flat retrieves a broad candidate pool, graph scores structural coherence,
+        returns 1-2 high-confidence picks. Graph filters OUT noise rather than
+        bringing IN neighbors.
+
+        Falls back to standard retrieve_examples() if graph or embeddings unavailable.
+        """
+        if self._graph is None or self._embedder is None or self._example_embeddings is None:
+            return self.retrieve_examples(query, top_k=top_k)
+
+        from engine.pattern_graph import graph_rerank_examples
+        k = min(top_k or 2, len(self.examples))  # default 2 for rerank
+        return graph_rerank_examples(
+            query=query,
+            embedder=self._embedder,
+            example_embeddings=self._example_embeddings,
+            examples=self.examples,
+            graph=self._graph,
+            failure_patterns=FAILURE_PATTERNS,
+            top_k=k,
+        )
+
+    def retrieve_examples_plan(self, query: str) -> list[SolvedExample]:
+        """Graph-as-planner: graph identifies subpatterns, injects only 1 example.
+
+        Graph expands the search space to find the single most authoritative
+        blueprint, but never injects more than one example.
+
+        Falls back to standard retrieve_examples() (limited to 1) if unavailable.
+        """
+        if self._graph is None or self._embedder is None or self._example_embeddings is None:
+            return self.retrieve_examples(query, top_k=1)
+
+        from engine.pattern_graph import graph_plan_examples
+        return graph_plan_examples(
+            query=query,
+            embedder=self._embedder,
+            example_embeddings=self._example_embeddings,
+            examples=self.examples,
+            graph=self._graph,
+            failure_patterns=FAILURE_PATTERNS,
         )
 
     def retrieve_examples(self, query: str, top_k: Optional[int] = None,
@@ -340,14 +386,22 @@ class Augmentor:
 
         return forced
 
+    def _retrieve_for_mode(self, query: str, top_k: Optional[int] = None) -> list[SolvedExample]:
+        """Dispatch retrieval based on current mode."""
+        if self._retrieval_mode == "rerank" and self._graph is not None:
+            return self.retrieve_examples_rerank(query, top_k=top_k)
+        elif self._retrieval_mode == "plan" and self._graph is not None:
+            return self.retrieve_examples_plan(query)
+        elif self._retrieval_mode == "graph" and self._graph is not None:
+            return self.retrieve_examples_graph(query, top_k=top_k)
+        else:
+            return self.retrieve_examples(query, top_k=top_k, multi_expert=self.multi_expert)
+
     def build_prompt(self, user_input: str, chat_format: str) -> str:
         """Build a minimal, high-signal prompt."""
         parts = [self.system_context.strip()]
 
-        if self._graph is not None:
-            examples = self.retrieve_examples_graph(user_input)
-        else:
-            examples = self.retrieve_examples(user_input, multi_expert=self.multi_expert)
+        examples = self._retrieve_for_mode(user_input)
         if examples:
             parts.append("")
             for ex in examples:
@@ -367,10 +421,7 @@ class Augmentor:
         """Build a retry prompt with feedback from the failed attempt."""
         parts = [self.system_context.strip()]
 
-        if self._graph is not None:
-            examples = self.retrieve_examples_graph(user_input, top_k=2)
-        else:
-            examples = self.retrieve_examples(user_input, top_k=2, multi_expert=self.multi_expert)
+        examples = self._retrieve_for_mode(user_input, top_k=2)
         if examples:
             parts.append("")
             for ex in examples:
@@ -1754,7 +1805,7 @@ class AugmentorRouter:
 
     def __init__(self, tuned: bool = False, stress: bool = False, pack: bool = False,
                  yaml_dir: str = "", examples_dir: str = "data/augmentor_examples",
-                 graph: bool = False):
+                 graph: bool = False, rerank: bool = False, plan: bool = False):
         self.augmentors: dict[str, Augmentor] = {}
         self._embedder = None
         self._tuned = tuned
@@ -1762,6 +1813,8 @@ class AugmentorRouter:
         self._pack = pack
         self._yaml = bool(yaml_dir) or False
         self._graph_mode = graph
+        self._rerank_mode = rerank
+        self._plan_mode = plan
         self._adaptive_mode = False
         self._hybrid_mode = False
         self._examples_dir = yaml_dir or examples_dir
@@ -1772,6 +1825,8 @@ class AugmentorRouter:
         self._pack_augmentors: dict[str, Augmentor] = {}
         self._yaml_augmentors: dict[str, Augmentor] = {}
         self._graph_augmentors: dict[str, Augmentor] = {}
+        self._rerank_augmentors: dict[str, Augmentor] = {}
+        self._plan_augmentors: dict[str, Augmentor] = {}
         self._register_defaults()
 
     def _register_defaults(self):
@@ -1805,8 +1860,16 @@ class AugmentorRouter:
         self._yaml_augmentors = build_yaml_augmentors(self._examples_dir)
         # Graph-enhanced augmentors — same YAML examples, graph-based retrieval
         self._graph_augmentors = self._build_graph_augmentors()
+        # Graph-rerank augmentors — flat candidates reranked by graph coherence
+        self._rerank_augmentors = self._build_mode_augmentors("rerank")
+        # Graph-plan augmentors — graph plans subpatterns, injects only 1 example
+        self._plan_augmentors = self._build_mode_augmentors("plan")
 
-        if self._graph_mode:
+        if self._rerank_mode:
+            self.augmentors = dict(self._rerank_augmentors)
+        elif self._plan_mode:
+            self.augmentors = dict(self._plan_augmentors)
+        elif self._graph_mode:
             self.augmentors = dict(self._graph_augmentors)
         elif self._yaml:
             self.augmentors = dict(self._yaml_augmentors)
@@ -1854,6 +1917,44 @@ class AugmentorRouter:
         )
         return graph_augs
 
+    def _build_mode_augmentors(self, mode: str) -> dict[str, Augmentor]:
+        """Build augmentors with a specific retrieval mode (rerank or plan).
+
+        Clones the YAML augmentors, attaches the graph, and sets the retrieval
+        mode so build_prompt dispatches to the right retrieval method.
+        """
+        try:
+            from engine.pattern_graph import PatternGraph
+            graph = PatternGraph("data/pattern_graph.yaml")
+            if not graph.nodes:
+                logger.warning(f"Pattern graph empty, {mode} augmentors unavailable")
+                return {}
+        except Exception as e:
+            logger.warning(f"Failed to load pattern graph for {mode}: {e}")
+            return {}
+
+        mode_augs = {}
+        for name, aug in self._yaml_augmentors.items():
+            clone = Augmentor(
+                name=aug.name,
+                system_context=aug.system_context,
+                examples=aug.examples,
+                verifier=aug.verifier,
+                max_examples=aug.max_examples,
+                max_retries=aug.max_retries,
+                multi_expert=aug.multi_expert,
+            )
+            clone.set_graph(graph)
+            clone._retrieval_mode = mode
+            clone._example_embeddings = aug._example_embeddings
+            clone._embedder = aug._embedder
+            mode_augs[name] = clone
+
+        logger.info(
+            f"Built {mode} augmentors: {', '.join(f'{k}({len(v.examples)})' for k, v in mode_augs.items())}"
+        )
+        return mode_augs
+
     def init_embeddings(self, embedder):
         """Initialize embeddings for all augmentors (all sets)."""
         self._embedder = embedder
@@ -1862,15 +1963,18 @@ class AugmentorRouter:
                           | set(self._stress_augmentors.values())
                           | set(self._pack_augmentors.values())
                           | set(self._yaml_augmentors.values())
-                          | set(self._graph_augmentors.values()))
+                          | set(self._graph_augmentors.values())
+                          | set(self._rerank_augmentors.values())
+                          | set(self._plan_augmentors.values()))
         for augmentor in all_augmentors:
             augmentor.init_embeddings(embedder)
-        # Sync graph augmentor embeddings from YAML augmentors (shared data)
-        for name, gaug in self._graph_augmentors.items():
-            if name in self._yaml_augmentors:
-                yaug = self._yaml_augmentors[name]
-                gaug._example_embeddings = yaug._example_embeddings
-                gaug._embedder = yaug._embedder
+        # Sync graph/rerank/plan augmentor embeddings from YAML augmentors (shared data)
+        for mode_augs in (self._graph_augmentors, self._rerank_augmentors, self._plan_augmentors):
+            for name, maug in mode_augs.items():
+                if name in self._yaml_augmentors:
+                    yaug = self._yaml_augmentors[name]
+                    maug._example_embeddings = yaug._example_embeddings
+                    maug._embedder = yaug._embedder
         logger.info(f"Augmentor embeddings initialized for {len(self.augmentors)} active augmentors")
 
     def use_tuned_augmentors(self):
@@ -1979,6 +2083,52 @@ class AugmentorRouter:
                 if aug._embedder is None:
                     aug.init_embeddings(self._embedder)
         logger.info("Switched to hybrid augmentors (graph first, flat fallback)")
+
+    def use_rerank_augmentors(self):
+        """Swap in graph-rerank augmentors (flat candidates, graph-scored reranking)."""
+        self._tuned = False
+        self._stress = False
+        self._pack = False
+        self._yaml = False
+        self._graph_mode = False
+        self._rerank_mode = True
+        self._plan_mode = False
+        self._adaptive_mode = False
+        self._hybrid_mode = False
+        if not self._rerank_augmentors:
+            self._rerank_augmentors = self._build_mode_augmentors("rerank")
+        self.augmentors = dict(self._rerank_augmentors)
+        if self._embedder:
+            for aug in self._rerank_augmentors.values():
+                if aug._embedder is None:
+                    aug.init_embeddings(self._embedder)
+        logger.info(
+            f"Switched to rerank augmentors: "
+            f"{', '.join(f'{k}({len(v.examples)})' for k, v in self.augmentors.items())}"
+        )
+
+    def use_plan_augmentors(self):
+        """Swap in graph-plan augmentors (graph identifies subpatterns, injects only 1)."""
+        self._tuned = False
+        self._stress = False
+        self._pack = False
+        self._yaml = False
+        self._graph_mode = False
+        self._rerank_mode = False
+        self._plan_mode = True
+        self._adaptive_mode = False
+        self._hybrid_mode = False
+        if not self._plan_augmentors:
+            self._plan_augmentors = self._build_mode_augmentors("plan")
+        self.augmentors = dict(self._plan_augmentors)
+        if self._embedder:
+            for aug in self._plan_augmentors.values():
+                if aug._embedder is None:
+                    aug.init_embeddings(self._embedder)
+        logger.info(
+            f"Switched to plan augmentors: "
+            f"{', '.join(f'{k}({len(v.examples)})' for k, v in self.augmentors.items())}"
+        )
 
     def reload_yaml(self, base_dir: str = ""):
         """Reload YAML examples from disk (hot-reload for development)."""

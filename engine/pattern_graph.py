@@ -352,6 +352,223 @@ def graph_retrieve_examples(
     return selected
 
 
+def graph_rerank_examples(
+    query: str,
+    embedder,
+    example_embeddings: np.ndarray,
+    examples: list,
+    graph: PatternGraph,
+    failure_patterns: Optional[dict] = None,
+    top_k: int = 2,
+    flat_candidates: int = 5,
+    min_sim_best: float = 0.50,
+) -> list:
+    """Graph-as-reranker: flat retrieval for candidates, graph for scoring.
+
+    Instead of using the graph to *expand* the candidate set (which adds noise),
+    use flat similarity to retrieve a broad candidate pool, then use graph
+    structural coherence to *rerank* and filter down to 1-2 high-confidence picks.
+
+    Steps:
+    1. Check failure patterns first (same as flat — no graph expansion here)
+    2. Flat-retrieve top `flat_candidates` examples by cosine similarity
+    3. For each candidate, compute a graph coherence score:
+       - Does its category appear in the graph neighborhood of other candidates?
+       - Does it have depends_on edges to/from other candidate categories?
+       - Higher score = more structurally coherent with the query's pattern family
+    4. Rerank by: (0.7 * similarity) + (0.3 * graph_coherence)
+    5. Return top_k (default 2) from the reranked list
+
+    Key insight: graph intelligence without graph-driven expansion. The graph
+    filters *out* noise rather than bringing *in* neighbors.
+    """
+    if not embedder or example_embeddings is None or len(examples) == 0:
+        return examples[:top_k]
+
+    # Step 0: Failure-aware routing (flat-style, no graph expansion)
+    if failure_patterns:
+        q = query.lower()
+        matched_categories: list[str] = []
+        for category, triggers in failure_patterns.items():
+            if any(trigger in q for trigger in triggers):
+                matched_categories.append(category)
+        if matched_categories:
+            # Pick best per matched category by similarity
+            query_vec = embedder.encode([query], normalize_embeddings=True)
+            sims = np.dot(example_embeddings, query_vec.T).flatten()
+            forced = []
+            for cat in matched_categories:
+                cat_examples = [(i, ex) for i, ex in enumerate(examples) if ex.category == cat]
+                if cat_examples:
+                    best_idx, best_ex = max(cat_examples, key=lambda x: sims[x[0]])
+                    forced.append(best_ex)
+            if forced:
+                return forced[:top_k]
+
+    # Step 1: Embed and flat-rank
+    query_vec = embedder.encode([query], normalize_embeddings=True)
+    sims = np.dot(example_embeddings, query_vec.T).flatten()
+    ranked = sims.argsort()[::-1]
+
+    # Gate: reject if best match is too weak
+    if sims[ranked[0]] < min_sim_best:
+        return []
+
+    # Step 2: Collect top flat_candidates
+    candidates = []
+    for idx in ranked[:flat_candidates * 2]:  # oversample to allow threshold filtering
+        if sims[idx] < min_sim_best * 0.8:  # don't consider very weak matches
+            break
+        candidates.append((int(idx), float(sims[idx])))
+        if len(candidates) >= flat_candidates:
+            break
+
+    if not candidates:
+        return []
+
+    # Step 3: Compute graph coherence for each candidate
+    candidate_categories = [examples[idx].category for idx, _ in candidates]
+    unique_cats = list(set(candidate_categories))
+
+    # Build a "neighborhood set" from the top candidate's category
+    top_cat = examples[candidates[0][0]].category
+    neighborhood = set()
+    if top_cat:
+        neighborhood.add(top_cat)
+        for dep, _ in graph.get_dependencies(top_cat, depth=1):
+            neighborhood.add(dep)
+        for rel, _ in graph.get_related(top_cat, depth=1):
+            neighborhood.add(rel)
+
+    reranked = []
+    for idx, sim_score in candidates:
+        cat = examples[idx].category
+        # Graph coherence: is this candidate's category in the neighborhood?
+        coherence = 0.0
+        if cat in neighborhood:
+            coherence = 1.0
+        elif cat:
+            # Check if this candidate has *any* graph connection to the top category
+            cat_deps = {d for d, _ in graph.get_dependencies(cat, depth=1)}
+            cat_rels = {r for r, _ in graph.get_related(cat, depth=1)}
+            if top_cat in cat_deps:
+                coherence = 0.8  # depends on the top pattern
+            elif top_cat in cat_rels:
+                coherence = 0.5  # related to the top pattern
+            # Also check if it connects to any other candidate's category
+            elif cat_deps & set(unique_cats):
+                coherence = 0.4
+            elif cat_rels & set(unique_cats):
+                coherence = 0.3
+
+        combined = 0.7 * sim_score + 0.3 * coherence
+        reranked.append((idx, combined, sim_score, coherence))
+
+    # Sort by combined score
+    reranked.sort(key=lambda x: x[1], reverse=True)
+
+    logger.debug(
+        f"Graph rerank: top_cat={top_cat}, neighborhood={len(neighborhood)} cats, "
+        f"candidates={len(candidates)} -> reranked top: "
+        f"{[(examples[idx].category, f'{comb:.3f}={sim:.3f}+{coh:.3f}') for idx, comb, sim, coh in reranked[:top_k]]}"
+    )
+
+    return [examples[idx] for idx, _, _, _ in reranked[:top_k]]
+
+
+def graph_plan_examples(
+    query: str,
+    embedder,
+    example_embeddings: np.ndarray,
+    examples: list,
+    graph: PatternGraph,
+    failure_patterns: Optional[dict] = None,
+    min_sim_best: float = 0.50,
+) -> list:
+    """Graph-as-planner: graph identifies subpattern needs, injects only 1 example.
+
+    The graph's role is purely analytical — it identifies what conceptual
+    subpatterns are involved in the query. But instead of injecting examples
+    for each subpattern (which causes noise), it picks only the single most
+    decisive concrete example.
+
+    Steps:
+    1. Check failure patterns first (flat-style)
+    2. Embed query, identify the top seed category
+    3. Use graph to identify the full pattern family (deps + related)
+    4. Among ALL examples in the pattern family, pick the single one with
+       highest similarity to the query
+    5. Return exactly 1 example (or 0 if nothing passes threshold)
+
+    Key insight: graph expands the *search space* for the best single match,
+    but never injects more than one example. This gives the model the single
+    most authoritative blueprint without overcrowding its context.
+    """
+    if not embedder or example_embeddings is None or len(examples) == 0:
+        return examples[:1]
+
+    # Step 0: Failure-aware routing (flat-style, no graph expansion)
+    if failure_patterns:
+        q = query.lower()
+        matched_categories: list[str] = []
+        for category, triggers in failure_patterns.items():
+            if any(trigger in q for trigger in triggers):
+                matched_categories.append(category)
+        if matched_categories:
+            query_vec = embedder.encode([query], normalize_embeddings=True)
+            sims = np.dot(example_embeddings, query_vec.T).flatten()
+            # Even with failure patterns, pick only the single best
+            best_sim = -1.0
+            best_ex = None
+            for cat in matched_categories:
+                for i, ex in enumerate(examples):
+                    if ex.category == cat and sims[i] > best_sim:
+                        best_sim = sims[i]
+                        best_ex = ex
+            if best_ex:
+                return [best_ex]
+
+    # Step 1: Embed and find seed category
+    query_vec = embedder.encode([query], normalize_embeddings=True)
+    sims = np.dot(example_embeddings, query_vec.T).flatten()
+    ranked = sims.argsort()[::-1]
+
+    if sims[ranked[0]] < min_sim_best:
+        return []
+
+    # Step 2: Identify seed category from the best flat match
+    seed_cat = examples[ranked[0]].category
+
+    # Step 3: Graph-expand the search space (but NOT the injection set)
+    search_cats = {seed_cat}
+    if seed_cat:
+        for dep, _ in graph.get_dependencies(seed_cat, depth=1):
+            search_cats.add(dep)
+        for rel, _ in graph.get_related(seed_cat, depth=1):
+            search_cats.add(rel)
+
+    # Step 4: Find the single best example across the entire pattern family
+    best_idx = -1
+    best_sim = -1.0
+    for idx in ranked:
+        ex = examples[idx]
+        if ex.category in search_cats and sims[idx] > best_sim:
+            best_idx = int(idx)
+            best_sim = float(sims[idx])
+            break  # ranked is sorted, so first match in family is the best
+
+    if best_idx < 0 or best_sim < min_sim_best:
+        return []
+
+    logger.debug(
+        f"Graph plan: seed={seed_cat}, search_space={len(search_cats)} cats, "
+        f"selected={examples[best_idx].category} (sim={best_sim:.3f})"
+    )
+
+    # Return exactly 1
+    return [examples[best_idx]]
+
+
 def _check_failure_patterns_with_graph(
     query: str,
     examples: list,
