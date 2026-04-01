@@ -180,6 +180,12 @@ FAILURE_PATTERNS: dict[str, list[str]] = {
         "retry with backoff", "exponential backoff", "retry on exception",
         "retry decorator", "max retries", "circuit breaker",
     ],
+    "algorithm": [
+        "digits of pi", "compute pi", "calculate pi", "pi to n",
+        "nth digit of pi", "decimal places of pi", "arbitrary precision",
+        "pi_digits", "compute_pi", "n digits of pi",
+        "amount of pi", "nth of pi", "places of pi",
+    ],
 }
 
 logger = logging.getLogger(__name__)
@@ -473,11 +479,15 @@ class Augmentor:
         if self._embedder is not None and self._example_embeddings is not None:
             query_vec = self._embedder.encode([query], normalize_embeddings=True)
             sims = np.dot(self._example_embeddings, query_vec.T).flatten()
+            scored = []
             for cat in matched_categories:
                 if not candidates[cat]:
                     continue
                 best_idx, best_ex = max(candidates[cat], key=lambda x: sims[x[0]])
-                forced.append(best_ex)
+                scored.append((best_ex, float(sims[best_idx])))
+            # Sort by similarity so the most relevant category comes first
+            scored.sort(key=lambda x: x[1], reverse=True)
+            forced = [ex for ex, _ in scored]
         else:
             # No embeddings — take first from each category
             for cat in matched_categories:
