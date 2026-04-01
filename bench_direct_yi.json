@@ -1,0 +1,219 @@
+[
+  {
+    "model_name": "Yi-Coder-1.5B-Chat-Q4_K_M",
+    "model_path": "models\\Yi-Coder-1.5B-Chat-Q4_K_M.gguf",
+    "model_size_mb": 919.0314331054688,
+    "chat_format": "chatml",
+    "tier1_score": 0.5462962962962963,
+    "tier2_score": 0.15873015873015875,
+    "overall_score": 0.3525132275132275,
+    "total_time": 741.9359999999288,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 1.0,
+        "tests_passed": 7,
+        "tests_total": 7,
+        "response_time": 15.40600000001723,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_iter_02_pipeline",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 6,
+        "response_time": 14.09399999998277,
+        "test_errors": [
+          "TimeoutError: code execution exceeded 10.0s"
+        ],
+        "exec_error": "TimeoutError: code execution exceeded 10.0s"
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 4,
+        "response_time": 55.03099999995902,
+        "test_errors": [
+          "IndentationError: expected an indented block after 'with' statement on line 14 (<string>, line 15)"
+        ],
+        "exec_error": "IndentationError: expected an indented block after 'with' statement on line 14 (<string>, line 15)"
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 305.60899999999674,
+        "test_errors": [
+          "TypeError: Expected int, got str"
+        ],
+        "exec_error": "TypeError: Expected int, got str"
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 127.93699999997625,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_01_schema_validate",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 22.07799999997951,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_01_bst",
+        "score": 0.9166666666666666,
+        "tests_passed": 11,
+        "tests_total": 12,
+        "response_time": 43.81200000003446,
+        "test_errors": [
+          "FAIL: assert empty.search(1) == False -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_02_traversals",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 12,
+        "response_time": 22.06299999996554,
+        "test_errors": [
+          "FAIL: assert tree.preorder() == [1, 2, 4, 5, 3, 6] -> ",
+          "FAIL: assert tree.inorder() == [4, 2, 5, 1, 3, 6] -> ",
+          "FAIL: assert tree.postorder() == [4, 5, 2, 6, 3, 1] -> ",
+          "FAIL: assert tree.level_order() == [1, 2, 3, 4, 5, 6] -> ",
+          "FAIL: assert single.preorder() == [42] -> ",
+          "FAIL: assert single.inorder() == [42] -> ",
+          "FAIL: assert single.postorder() == [42] -> ",
+          "FAIL: assert single.level_order() == [42] -> ",
+          "FAIL: assert left_only.preorder() == [1, 2, 3] -> ",
+          "FAIL: assert left_only.inorder() == [3, 2, 1] -> ",
+          "FAIL: assert left_only.postorder() == [3, 2, 1] -> ",
+          "FAIL: assert left_only.level_order() == [1, 2, 3] -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_02_glob_match",
+        "score": 1.0,
+        "tests_passed": 15,
+        "tests_total": 15,
+        "response_time": 20.875,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t_ctx_02_transaction",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 4,
+        "response_time": 11.562000000034459,
+        "test_errors": [
+          "ValueError: An error occurred"
+        ],
+        "exec_error": "ValueError: An error occurred"
+      },
+      {
+        "test_id": "t_desc_02_cached_property",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 12.312999999965541,
+        "test_errors": [
+          "'cached_property' not found in generated code"
+        ],
+        "exec_error": "'cached_property' not found in generated code"
+      },
+      {
+        "test_id": "t_thread_02_future",
+        "score": 0.8888888888888888,
+        "tests_passed": 8,
+        "tests_total": 9,
+        "response_time": 15.25,
+        "test_errors": [
+          "FAIL: try: -> Should raise TimeoutError"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_02_roundtrip",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 15,
+        "response_time": 29.48399999999674,
+        "test_errors": [
+          "ERROR: d = serialize(p) -> AttributeError: 'Person' object has no attribute '__serialize__'",
+          "ERROR: assert d[\"name\"] == \"Alice\" -> NameError: name 'd' is not defined",
+          "ERROR: assert d[\"age\"] == 30 -> NameError: name 'd' is not defined",
+          "ERROR: assert d[\"address\"][\"city\"] == \"NYC\" -> NameError: name 'd' is not defined",
+          "ERROR: assert \"__class__\" in d -> NameError: name 'd' is not defined",
+          "ERROR: p2 = deserialize(d, Person) -> NameError: name 'd' is not defined",
+          "ERROR: assert p2.name == \"Alice\" -> NameError: name 'p2' is not defined",
+          "ERROR: assert p2.age == 30 -> NameError: name 'p2' is not defined",
+          "ERROR: assert p2.address.city == \"NYC\" -> NameError: name 'p2' is not defined",
+          "ERROR: assert p2.address.zip_code == \"10001\" -> NameError: name 'p2' is not defined",
+          "ERROR: td = serialize(team) -> AttributeError: 'Team' object has no attribute '__serialize__'",
+          "ERROR: assert td[\"name\"] == \"Dev\" -> NameError: name 'td' is not defined",
+          "ERROR: assert len(td[\"members\"]) == 2 -> NameError: name 'td' is not defined",
+          "ERROR: assert td[\"members\"][0][\"name\"] == \"Bob\" -> NameError: name 'td' is not defined",
+          "ERROR: team2 = deserialize(td, Team) -> NameError: name 'td' is not defined",
+          "ERROR: assert team2.name == \"Dev\" -> NameError: name 'team2' is not defined",
+          "ERROR: assert len(team2.members) == 2 -> NameError: name 'team2' is not defined",
+          "ERROR: assert team2.members[0].name == \"Bob\" -> NameError: name 'team2' is not defined",
+          "ERROR: assert team2.members[1].name == \"Carol\" -> NameError: name 'team2' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_01_template",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 11,
+        "response_time": 17.73399999999674,
+        "test_errors": [
+          "NameError: name 're' is not defined"
+        ],
+        "exec_error": "NameError: name 're' is not defined"
+      },
+      {
+        "test_id": "t_mw_01_pipeline",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 5,
+        "response_time": 17.485000000044238,
+        "test_errors": [
+          "RecursionError: maximum recursion depth exceeded"
+        ],
+        "exec_error": "RecursionError: maximum recursion depth exceeded"
+      },
+      {
+        "test_id": "t_mw_02_pubsub",
+        "score": 0.2222222222222222,
+        "tests_passed": 2,
+        "tests_total": 9,
+        "response_time": 11.202999999979511,
+        "test_errors": [
+          "FAIL: assert len(results) == 2 -> ",
+          "FAIL: assert (\"user\", {\"id\": 1}) in results -> ",
+          "FAIL: assert (\"all\", {\"id\": 1}) in results -> ",
+          "FAIL: assert len(results) == 1 -> ",
+          "ERROR: assert results[0][0] == \"all\" -> IndexError: list index out of range",
+          "FAIL: assert len(results) == 1 -> ",
+          "ERROR: assert results[0][0] == \"user\" -> IndexError: list index out of range"
+        ],
+        "exec_error": ""
+      }
+    ]
+  }
+]

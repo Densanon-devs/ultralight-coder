@@ -1,0 +1,180 @@
+[
+  {
+    "model_name": "deepseek-coder-1.3b-instruct.Q4_K_M",
+    "model_path": "models\\deepseek-coder-1.3b-instruct.Q4_K_M.gguf",
+    "model_size_mb": 833.1133117675781,
+    "chat_format": "chatml",
+    "tier1_score": 0.8814814814814815,
+    "tier2_score": 0.4805194805194805,
+    "overall_score": 0.681000481000481,
+    "total_time": 359.1099999998696,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 7,
+        "response_time": 8.140999999945052,
+        "test_errors": [
+          "SyntaxError: invalid syntax (<string>, line 1)"
+        ],
+        "exec_error": "SyntaxError: invalid syntax (<string>, line 1)"
+      },
+      {
+        "test_id": "t_iter_02_pipeline",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 56.18699999997625,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 8.73499999998603,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 16.375,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 10.952999999979511,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_01_schema_validate",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 18.89100000000326,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_01_bst",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 41.46900000004098,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_02_traversals",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 28.76500000001397,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_02_glob_match",
+        "score": 0.9333333333333333,
+        "tests_passed": 14,
+        "tests_total": 15,
+        "response_time": 22.71899999998277,
+        "test_errors": [
+          "ERROR: assert glob_match(\"?\", \"\") == False -> IndexError: string index out of range"
+        ],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t_ctx_02_transaction",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 4,
+        "response_time": 17.57799999997951,
+        "test_errors": [
+          "AttributeError: module 'contextlib' has no attribute 'ContextManager'"
+        ],
+        "exec_error": "AttributeError: module 'contextlib' has no attribute 'ContextManager'"
+      },
+      {
+        "test_id": "t_desc_02_cached_property",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 7.7189999999827705,
+        "test_errors": [
+          "SyntaxError: unterminated string literal (detected at line 4) (<string>, line 4)"
+        ],
+        "exec_error": "SyntaxError: unterminated string literal (detected at line 4) (<string>, line 4)"
+      },
+      {
+        "test_id": "t_thread_02_future",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 9,
+        "response_time": 10.59299999999348,
+        "test_errors": [
+          "SyntaxError: invalid syntax (<string>, line 1)"
+        ],
+        "exec_error": "SyntaxError: invalid syntax (<string>, line 1)"
+      },
+      {
+        "test_id": "t_serial_02_roundtrip",
+        "score": 1.0,
+        "tests_passed": 15,
+        "tests_total": 15,
+        "response_time": 20.57799999997951,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_01_template",
+        "score": 0.36363636363636365,
+        "tests_passed": 4,
+        "tests_total": 11,
+        "response_time": 53.70299999997951,
+        "test_errors": [
+          "ERROR: result = render(\"{% for x in items %}{{x}} {% endfor %}\", {\"items\": [\"a\", \"b\", \"c\"]}) -> IndexError: list index out of range",
+          "ERROR: assert \"a\" in result -> NameError: name 'result' is not defined",
+          "ERROR: assert \"b\" in result -> NameError: name 'result' is not defined",
+          "ERROR: assert \"c\" in result -> NameError: name 'result' is not defined",
+          "ERROR: result2 = render(\"Users: {% for u in users %}{{u}}, {% endfor %}done\", {\"users\": [\"Alice\", \"Bob\"]}) -> IndexError: list index out of range",
+          "ERROR: assert \"Alice\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert \"Bob\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert \"done\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert render(\"{% for x in items %}{{x}}{% endfor %}\", {\"items\": []}) == \"\" -> IndexError: list index out of range"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_01_pipeline",
+        "score": 1.0,
+        "tests_passed": 5,
+        "tests_total": 5,
+        "response_time": 19.735000000044238,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_02_pubsub",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 16.96899999998277,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ]
+  }
+]

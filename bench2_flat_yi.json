@@ -1,0 +1,164 @@
+[
+  {
+    "model_name": "Yi-Coder-1.5B-Chat-Q4_K_M",
+    "model_path": "models\\Yi-Coder-1.5B-Chat-Q4_K_M.gguf",
+    "model_size_mb": 919.0314331054688,
+    "chat_format": "chatml",
+    "tier1_score": 1.0,
+    "tier2_score": 0.7142857142857143,
+    "overall_score": 0.8571428571428572,
+    "total_time": 379.98400000017136,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 1.0,
+        "tests_passed": 7,
+        "tests_total": 7,
+        "response_time": 18.875,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_iter_02_pipeline",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 18.68800000002375,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 9.328000000037719,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 13.78100000001723,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 15.703000000037719,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_01_schema_validate",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 66.84299999999348,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_01_bst",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 32.84399999998277,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_02_traversals",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 27.375,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_02_glob_match",
+        "score": 1.0,
+        "tests_passed": 15,
+        "tests_total": 15,
+        "response_time": 25.18699999997625,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t_ctx_02_transaction",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 4,
+        "response_time": 13.14100000000326,
+        "test_errors": [
+          "ValueError: An error occurred"
+        ],
+        "exec_error": "ValueError: An error occurred"
+      },
+      {
+        "test_id": "t_desc_02_cached_property",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 12.078000000037719,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_02_future",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 17.68800000002375,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_02_roundtrip",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 15,
+        "response_time": 31.48399999999674,
+        "test_errors": [
+          "AttributeError: 'dict' object has no attribute '__dict__'"
+        ],
+        "exec_error": "AttributeError: 'dict' object has no attribute '__dict__'"
+      },
+      {
+        "test_id": "t_text_01_template",
+        "score": 1.0,
+        "tests_passed": 11,
+        "tests_total": 11,
+        "response_time": 28.79700000002049,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_01_pipeline",
+        "score": 1.0,
+        "tests_passed": 5,
+        "tests_total": 5,
+        "response_time": 31.82799999997951,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_02_pubsub",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 16.344000000040978,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ]
+  }
+]
