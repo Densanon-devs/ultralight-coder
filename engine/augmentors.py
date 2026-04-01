@@ -188,6 +188,9 @@ FAILURE_PATTERNS: dict[str, list[str]] = {
         "decimal places", "arbitrary precision", "n decimal",
         "to n digits", "precision math", "high precision",
         "sqrt(2) to", "golden ratio to", "constant to n",
+        "digits of precision", "square root of 2", "square root of",
+        "to 100 digits", "to 50 digits", "to n places",
+        "high precision math", "precision calculation",
     ],
 }
 
