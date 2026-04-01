@@ -182,11 +182,12 @@ FAILURE_PATTERNS: dict[str, list[str]] = {
     ],
     "algorithm": [
         "digits of pi", "compute pi", "calculate pi", "pi to n",
-        "nth digit of pi", "decimal places of pi", "arbitrary precision",
-        "pi_digits", "compute_pi", "n digits of pi",
-        "amount of pi", "nth of pi", "places of pi",
-        "numbers of pi", "number of pi", "of pi",
-        "decimals of pi", "precision of pi",
+        "nth digit of pi", "n digits of pi", "numbers of pi",
+        "number of pi", "of pi", "amount of pi",
+        "compute e ", "euler's number", "compute e(", "compute_e",
+        "decimal places", "arbitrary precision", "n decimal",
+        "to n digits", "precision math", "high precision",
+        "sqrt(2) to", "golden ratio to", "constant to n",
     ],
 }
 
