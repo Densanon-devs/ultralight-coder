@@ -1158,7 +1158,8 @@ class StressBenchmarkRunner:
                  use_augmentors: bool = False, use_yaml: bool = False, use_graph: bool = False,
                  use_adaptive: bool = False, use_hybrid: bool = False,
                  use_rerank: bool = False, use_rerank1: bool = False,
-                 use_plan: bool = False, no_failure_routing: bool = False):
+                 use_plan: bool = False, use_auto: bool = False,
+                 no_failure_routing: bool = False):
         self.gpu_layers = gpu_layers
         self.threads = threads
         self.context_length = context_length
@@ -1170,6 +1171,7 @@ class StressBenchmarkRunner:
         self.use_rerank = use_rerank
         self.use_rerank1 = use_rerank1
         self.use_plan = use_plan
+        self.use_auto = use_auto
         self.no_failure_routing = no_failure_routing
         self.all_results: list[StressModelResult] = []
 
@@ -1177,7 +1179,8 @@ class StressBenchmarkRunner:
         """Create a stress-targeted augmentor router."""
         any_aug = (self.use_augmentors or self.use_yaml or self.use_graph
                    or self.use_adaptive or self.use_hybrid
-                   or self.use_rerank or self.use_rerank1 or self.use_plan)
+                   or self.use_rerank or self.use_rerank1 or self.use_plan
+                   or self.use_auto)
         if not any_aug:
             return None
         from engine.augmentors import AugmentorRouter

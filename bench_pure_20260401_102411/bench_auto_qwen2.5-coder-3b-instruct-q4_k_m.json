@@ -1,0 +1,177 @@
+[
+  {
+    "model_name": "qwen2.5-coder-3b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+    "model_size_mb": 2007.4203491210938,
+    "chat_format": "chatml",
+    "tier1_score": 0.9777777777777779,
+    "tier2_score": 0.6984126984126985,
+    "overall_score": 0.8380952380952382,
+    "total_time": 552.6720000001951,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 1.0,
+        "tests_passed": 7,
+        "tests_total": 7,
+        "response_time": 43.0,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_iter_02_pipeline",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 27.71799999999348,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 11.938000000023749,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 21.23499999998603,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 17.344000000040978,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_01_schema_validate",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 20.39100000000326,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_01_bst",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 56.51500000001397,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_02_traversals",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 47.65600000001723,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_02_glob_match",
+        "score": 0.8,
+        "tests_passed": 12,
+        "tests_total": 15,
+        "response_time": 76.125,
+        "test_errors": [
+          "FAIL: assert glob_match(\"t?st\", \"test\") == True -> ",
+          "FAIL: assert glob_match(\"?\", \"a\") == True -> ",
+          "ERROR: assert glob_match(\"?\", \"\") == False -> IndexError: string index out of range"
+        ],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t_ctx_02_transaction",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 18.53100000001723,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_02_cached_property",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 21.25,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_02_future",
+        "score": 0.8888888888888888,
+        "tests_passed": 8,
+        "tests_total": 9,
+        "response_time": 32.73399999999674,
+        "test_errors": [
+          "TIMEOUT: try: -> TimeoutError: test block exceeded 10.0s"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_02_roundtrip",
+        "score": 1.0,
+        "tests_passed": 15,
+        "tests_total": 15,
+        "response_time": 49.07800000003772,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_01_template",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 11,
+        "response_time": 58.54700000002049,
+        "test_errors": [
+          "'render' not found in generated code"
+        ],
+        "exec_error": "'render' not found in generated code"
+      },
+      {
+        "test_id": "t_mw_01_pipeline",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 5,
+        "response_time": 24.04700000002049,
+        "test_errors": [
+          "ERROR: result = p.execute({\"name\": \"alice\"}) -> RecursionError: maximum recursion depth exceeded",
+          "ERROR: assert result[\"name\"] == \"ALICE\" -> NameError: name 'result' is not defined",
+          "ERROR: assert result[\"processed\"] == True -> NameError: name 'result' is not defined",
+          "FAIL: assert log == [\"before\", \"after\"] -> ",
+          "ERROR: p2.execute({}) -> RecursionError: maximum recursion depth exceeded",
+          "FAIL: assert order == [1, 2, 3, 4] -> ",
+          "FAIL: result3 = p3.execute({\"x\": 1}) -> should not run",
+          "ERROR: assert result3 == {\"short\": True} -> NameError: name 'result3' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_02_pubsub",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 26.56300000002375,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ]
+  }
+]

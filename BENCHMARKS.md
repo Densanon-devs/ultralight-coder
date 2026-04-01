@@ -668,3 +668,121 @@ The YAML augmentor system delivers **+48 to +58 percentage points** over direct 
 34. **Iterative example refinement works.** Seven rounds of benchmark → diagnose → fix → re-benchmark took the system from 54% to 94% (0.5B) and 83% to 100% (1.5B). Each round revealed a specific bottleneck — wrong example selected, system prompt poisoning, too-complex example structure, missing method in example. The YAML system made each fix a file edit, not a code change.
 
 35. **The micro-expert thesis is confirmed at scale.** 60 examples across 28 YAML files (~70 KB total) + a 469 MB model = 94% on 16 diverse programming tests covering iterators, context managers, descriptors, threading, serialization, trees, text processing, and middleware. This matches a 1.1 GB model running the same system. The strategic play is definitively: **curate expertise, don't scale the model.**
+
+---
+
+# Phase 6: Retrieval Strategy Showdown — From 3 Examples to 1
+
+**Date:** 2026-04-01
+**Benchmark tool:** `benchmark_programmer.py` with `--no-failure-routing`
+
+Phase 5 proved the YAML augmentor system works. Phase 6 asks: **how should examples be selected and how many should be injected?** Tested 5 retrieval strategies head-to-head, and discovered that failure-aware routing was masking all differences between them.
+
+## New Retrieval Strategies
+
+| Strategy | How it selects | How many injected | Key idea |
+|----------|---------------|:-----------------:|----------|
+| **Flat** (baseline) | Cosine similarity, category-tiered thresholds | 1–3 | Conservative precision tool |
+| **Graph** | Graph-expanded category search, confidence-gated | 1–3 | Recall tool — pulls in neighbors |
+| **Rerank** | Flat top-5 candidates, graph coherence scoring | 2 | Graph filters noise, doesn't expand |
+| **Rerank1** | Same as Rerank, but outputs single best | **1** | Maximum precision, minimum noise |
+| **Plan** | Graph identifies subpattern family, picks single best match from expanded search space | **1** | Graph-as-planner, not graph-as-injector |
+
+## Discovery: Failure Routing Masks Everything
+
+**15 of 16 tests** were being force-injected via FAILURE_PATTERNS keyword matching, completely bypassing the retrieval algorithm. Only `t_serial_01_schema_validate` actually exercised similarity-based retrieval.
+
+With failure routing enabled, all augmented modes scored identically:
+
+| Model | Flat | Graph | Rerank | Rerank1 | Plan |
+|-------|:----:|:-----:|:------:|:-------:|:----:|
+| Qwen 0.5B | 100% | 100% | 100% | 100% | 100% |
+| Qwen 1.5B | 97% | 97% | 97% | 97% | 97% |
+| Qwen 3B | 84% | 84% | 84% | 84% | **92%** |
+| DeepSeek 1.3B | 72% | 72% | 72% | 72% | 72% |
+
+Only Plan showed any signal on 3B: `t_text_01_template` scored 100% (Plan) vs 0% (all others) — single injection avoided confusing the model.
+
+Added `--no-failure-routing` flag to disable FAILURE_PATTERNS bypass and force pure similarity retrieval.
+
+## Pure Retrieval Results — The Real Test
+
+With failure routing disabled, 24 of 64 test×model pairs diverged across modes.
+
+### Overall Scores
+
+| Model | Size | Direct | Flat | Graph | Rerank(2) | **Rerank1** | **Plan** |
+|-------|------|:------:|:----:|:-----:|:---------:|:-----------:|:--------:|
+| **Qwen 0.5B** | 469 MB | 17% | 83% | 83% | 90% | **100%** | **100%** |
+| **Qwen 1.5B** | 1.1 GB | 39% | 89% | 89% | 80% | **97%** | **97%** |
+| **Qwen 3B** | 2.0 GB | 68% | 94% | 94% | **95%** | 92% | 92% |
+| **DeepSeek 1.3B** | 834 MB | 49% | 49% | 49% | 35% | **72%** | **72%** |
+
+### Tier Breakdown
+
+**Tier 1 (medium):**
+
+| Model | Direct | Flat | Graph | Rerank | Rerank1 | Plan |
+|-------|:------:|:----:|:-----:|:------:|:-------:|:----:|
+| Qwen 0.5B | 16% | 98% | 98% | 94% | **100%** | **100%** |
+| Qwen 1.5B | 62% | 78% | 78% | 74% | **100%** | **100%** |
+| Qwen 3B | 78% | 89% | 89% | **90%** | 98% | 98% |
+| DeepSeek 1.3B | 63% | 65% | 65% | 56% | **87%** | **87%** |
+
+**Tier 2 (hard):**
+
+| Model | Direct | Flat | Graph | Rerank | Rerank1 | Plan |
+|-------|:------:|:----:|:-----:|:------:|:-------:|:----:|
+| Qwen 0.5B | 18% | 68% | 68% | 86% | **100%** | **100%** |
+| Qwen 1.5B | 16% | **100%** | **100%** | 86% | 94% | 94% |
+| Qwen 3B | 59% | **100%** | **100%** | **100%** | 87% | 87% |
+| DeepSeek 1.3B | 35% | 34% | 34% | 14% | **57%** | **57%** |
+
+### Where Modes Diverge — Key Tests
+
+**Single injection avoids wrong-example damage (sub-3B):**
+
+| Model | Test | Flat(3) | Rerank1(1) | Plan(1) | What happened |
+|-------|------|:-------:|:----------:|:-------:|--------------|
+| 0.5B | serial_02_roundtrip | **0%** | **100%** | **100%** | Flat injected wrong cross-category example |
+| 0.5B | text_01_template | **0%** | **100%** | **100%** | Multiple examples caused mashup generation |
+| 1.5B | iter_01_reusable_range | **0%** | **100%** | **100%** | Wrong example overrode correct model knowledge |
+| 1.5B | ctx_01_timer | **0%** | **100%** | **100%** | Cross-category example poisoned context manager |
+| DeepSeek | tree_02_traversals | **0%** | **100%** | **100%** | Wrong example regression; single example worked |
+| DeepSeek | ctx_02_transaction | **0%** | **100%** | **100%** | Same pattern — 1 example > 3 examples |
+
+**Multi-example still wins on 3B for complex tasks:**
+
+| Model | Test | Flat(3) | Rerank(2) | Rerank1(1) | What happened |
+|-------|------|:-------:|:---------:|:----------:|--------------|
+| 3B | mw_01_pipeline | **100%** | **100%** | 20% | Pipeline needs multiple pattern examples |
+| 3B | thread_02_future | **100%** | **100%** | 89% | Stronger model uses extra context productively |
+
+### Flat vs Graph: Still Identical
+
+Flat and graph produced the same score on every single test across all 4 models (64 test×model pairs). With 60 examples, the library isn't large enough for graph traversal to find different candidates than cosine similarity alone.
+
+## Key Lessons from Phase 6
+
+36. **Failure-aware routing masks retrieval quality.** 15/16 tests were force-injected via keyword matching, making all retrieval strategies produce identical results. The routing is highly effective (it's why Phase 5 hit 97-100%) but it prevents evaluating retrieval improvements. Testing retrieval changes requires `--no-failure-routing`.
+
+37. **Single-example injection dominates for sub-3B models.** Rerank1 and Plan both outperform Flat by 8-23 points on 0.5B, 1.5B, and DeepSeek. The mechanism is simple: injecting 1 precise example avoids injecting 2 wrong ones. Small models have limited attention — every extra example competes for it.
+
+38. **Multi-example injection helps only the 3B model.** Qwen 3B scored 95% with Rerank(2) and 94% with Flat(3), vs 92% with single-example modes. Larger models productively use additional context; smaller models are confused by it.
+
+39. **Rerank1 and Plan are functionally equivalent.** They tied on 3 of 4 models (100%/97%/72%) and differed by 0 points overall. Both inject exactly 1 example; the selection mechanism (graph-coherence-reranked vs graph-family-expanded) makes no practical difference at 60 examples. Either is a valid implementation.
+
+40. **The damage from wrong examples is severe.** Flat's 3-example injection caused 0% scores on tests the model can solve perfectly with 1 example or no examples. `t_iter_01_reusable_range` (1.5B): 86% direct, 0% flat, 100% rerank1. The wrong second/third example actively overwrites the model's correct knowledge.
+
+41. **Graph expansion adds zero value at 60 examples.** Graph and flat produced identical results across all 64 test×model pairs in pure retrieval mode. The library needs to be significantly larger (likely 200+) before graph traversal finds candidates that flat similarity misses.
+
+42. **The optimal injection strategy is model-size-dependent.** Sub-3B → inject 1 example (rerank1 or plan). 3B+ → inject 2 examples (rerank). This is the adaptive strategy to implement as the default.
+
+## Recommended Default Configuration
+
+| Model Size | Strategy | Injection Count | Rationale |
+|-----------|----------|:---------------:|-----------|
+| < 1.5 GB (0.5B, 1.3B) | rerank1 or plan | 1 | Avoids wrong-example damage |
+| 1.0–1.5 GB (1.5B) | rerank1 or plan | 1 | Still benefits from precision |
+| ≥ 2.0 GB (3B+) | rerank | 2 | Productively uses extra context |
+| All sizes (with failure routing) | any | 1–3 | Failure routing handles selection correctly |

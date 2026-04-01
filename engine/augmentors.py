@@ -2174,6 +2174,26 @@ class AugmentorRouter:
             f"{', '.join(f'{k}({len(v.examples)})' for k, v in self.augmentors.items())}"
         )
 
+    def use_auto_augmentors(self, model_size_mb: float = 0):
+        """Auto-select the best retrieval strategy based on model size.
+
+        Phase 6 findings:
+        - Sub-3B models: single-example injection (rerank1) avoids wrong-example damage
+        - 3B+ models: two-example injection (rerank) uses extra context productively
+        - Failure-aware routing stays enabled (it correctly handles known patterns)
+
+        Args:
+            model_size_mb: Model file size in MB. Used to determine tier.
+                          < 1500 MB → rerank1 (single example)
+                          >= 1500 MB → rerank (two examples)
+        """
+        if model_size_mb >= 1500:
+            self.use_rerank_augmentors()
+            logger.info(f"Auto mode: model {model_size_mb:.0f}MB >= 1500MB → RERANK (2 examples)")
+        else:
+            self.use_rerank1_augmentors()
+            logger.info(f"Auto mode: model {model_size_mb:.0f}MB < 1500MB → RERANK1 (1 example)")
+
     def set_skip_failure_routing(self, skip: bool):
         """Toggle failure-aware routing bypass on ALL augmentor sets.
 

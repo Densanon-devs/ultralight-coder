@@ -817,7 +817,8 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
         """Create a programmer-targeted augmentor router."""
         any_aug = (self.use_augmentors or self.use_yaml or self.use_graph
                    or self.use_adaptive or self.use_hybrid
-                   or self.use_rerank or self.use_rerank1 or self.use_plan)
+                   or self.use_rerank or self.use_rerank1 or self.use_plan
+                   or self.use_auto)
         if not any_aug:
             return None
         from engine.augmentors import AugmentorRouter
@@ -861,7 +862,9 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
         model_size_mb = model_path.stat().st_size / (1024 * 1024)
         chat_format = detect_chat_format(str(model_path))
 
-        if self.use_rerank1:
+        if self.use_auto:
+            mode_str = f"AUTO ({'rerank' if model_size_mb >= 1500 else 'rerank1'})"
+        elif self.use_rerank1:
             mode_str = "RERANK1"
         elif self.use_rerank:
             mode_str = "RERANK"
@@ -889,6 +892,8 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
 
         model = self.load_model(model_path)
         augmentor_router = self._get_augmentor_router()
+        if self.use_auto and augmentor_router:
+            augmentor_router.use_auto_augmentors(model_size_mb)
 
         result = StressModelResult(
             model_name=model_name, model_path=str(model_path),
@@ -1093,6 +1098,8 @@ def main():
                         help="Graph-rerank1 mode: rerank to single best example")
     parser.add_argument("--plan", action="store_true",
                         help="Graph-plan mode: graph identifies subpatterns, injects only 1 example")
+    parser.add_argument("--auto", action="store_true",
+                        help="Auto-select retrieval strategy by model size (rerank1 for <1.5GB, rerank for >=1.5GB)")
     parser.add_argument("--no-failure-routing", action="store_true",
                         help="Disable FAILURE_PATTERNS bypass — pure similarity retrieval only")
     parser.add_argument("--compare", action="store_true",
@@ -1154,10 +1161,10 @@ def main():
         methods = [
             ("direct",   {}),
             ("flat",     {"use_yaml": True}),
-            ("graph",    {"use_graph": True}),
             ("rerank",   {"use_rerank": True}),
             ("rerank1",  {"use_rerank1": True}),
             ("plan",     {"use_plan": True}),
+            ("auto",     {"use_auto": True}),
         ]
         # Apply no-failure-routing to all methods if set
         if no_fr:
@@ -1186,7 +1193,9 @@ def main():
         print_comparison_table(comparison)
         save_comparison_results(comparison, args.output)
     else:
-        if args.rerank1:
+        if args.auto:
+            mode_str = "AUTO"
+        elif args.rerank1:
             mode_str = "RERANK1"
         elif args.rerank:
             mode_str = "RERANK"
@@ -1223,6 +1232,7 @@ def main():
             use_rerank=args.rerank,
             use_rerank1=args.rerank1,
             use_plan=args.plan,
+            use_auto=args.auto,
             no_failure_routing=no_fr,
         )
 
