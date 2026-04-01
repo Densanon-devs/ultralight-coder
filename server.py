@@ -46,7 +46,8 @@ def create_app():
     try:
         from fastapi import FastAPI
         from fastapi.middleware.cors import CORSMiddleware
-        from fastapi.responses import StreamingResponse
+        from fastapi.responses import StreamingResponse, FileResponse
+        from fastapi.staticfiles import StaticFiles
         from pydantic import BaseModel as PydanticModel
         from typing import Optional
     except ImportError:
@@ -65,6 +66,11 @@ def create_app():
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Serve static files (web UI)
+    static_dir = PROJECT_ROOT / "static"
+    if static_dir.exists():
+        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
     class GenerateRequest(PydanticModel):
         prompt: str
@@ -91,6 +97,35 @@ def create_app():
     @app.on_event("startup")
     async def startup():
         get_engine()
+
+    @app.get("/", include_in_schema=False)
+    async def root():
+        """Serve the web UI."""
+        index = PROJECT_ROOT / "static" / "index.html"
+        if index.exists():
+            return FileResponse(str(index))
+        return {"message": "Ultralight Code Assistant API. See /docs for endpoints."}
+
+    @app.get("/models/available")
+    async def list_available_models():
+        """List all .gguf model files on disk with size and active status."""
+        engine = get_engine()
+        models_dir = PROJECT_ROOT / "models"
+        if not models_dir.exists():
+            return {"models": []}
+
+        current_path = engine.config.base_model.path
+        result = []
+        for p in sorted(models_dir.glob("*.gguf"), key=lambda x: x.stat().st_size):
+            size_mb = p.stat().st_size / (1024 * 1024)
+            rel = str(p.relative_to(PROJECT_ROOT)).replace("\\", "/")
+            result.append({
+                "name": p.stem,
+                "path": rel,
+                "size_mb": round(size_mb),
+                "active": rel == current_path.replace("\\", "/"),
+            })
+        return {"models": result}
 
     @app.post("/generate", response_model=GenerateResponse)
     async def generate(req: GenerateRequest):
@@ -142,6 +177,7 @@ def create_app():
     @app.get("/status")
     async def status():
         engine = get_engine()
+        model_name = Path(engine.config.base_model.path).stem
         return {
             "system": {
                 "name": engine.config.system.name,
@@ -150,6 +186,7 @@ def create_app():
             "model": {
                 "loaded": engine.base_model.is_loaded,
             },
+            "model_name": model_name,
             "augmentors": engine._augmentors_enabled,
             "modules": engine.modules.available_modules,
             "memory": engine.memory.status(),
@@ -206,9 +243,9 @@ def main():
         print("uvicorn not installed. Install with: pip install uvicorn")
         sys.exit(1)
 
-    print(f"\n  Ultralight Code Assistant API")
-    print(f"  http://{args.host}:{args.port}")
-    print(f"  Docs: http://{args.host}:{args.port}/docs\n")
+    print(f"\n  Ultralight Code Assistant")
+    print(f"  Web UI: http://{args.host}:{args.port}")
+    print(f"  API Docs: http://{args.host}:{args.port}/docs\n")
 
     uvicorn.run(
         "server:create_app",
