@@ -393,17 +393,18 @@ def graph_rerank_examples(
             if any(trigger in q for trigger in triggers):
                 matched_categories.append(category)
         if matched_categories:
-            # Pick best per matched category by similarity
+            # Pick best per matched category by similarity, sorted by relevance
             query_vec = embedder.encode([query], normalize_embeddings=True)
             sims = np.dot(example_embeddings, query_vec.T).flatten()
-            forced = []
+            scored = []
             for cat in matched_categories:
                 cat_examples = [(i, ex) for i, ex in enumerate(examples) if ex.category == cat]
                 if cat_examples:
                     best_idx, best_ex = max(cat_examples, key=lambda x: sims[x[0]])
-                    forced.append(best_ex)
-            if forced:
-                return forced[:top_k]
+                    scored.append((best_ex, float(sims[best_idx])))
+            scored.sort(key=lambda x: x[1], reverse=True)
+            if scored:
+                return [ex for ex, _ in scored][:top_k]
 
     # Step 1: Embed and flat-rank
     query_vec = embedder.encode([query], normalize_embeddings=True)
