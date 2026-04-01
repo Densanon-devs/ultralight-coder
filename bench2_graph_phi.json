@@ -1,0 +1,183 @@
+[
+  {
+    "model_name": "Phi-3.5-mini-instruct-Q4_K_M",
+    "model_path": "models\\Phi-3.5-mini-instruct-Q4_K_M.gguf",
+    "model_size_mb": 2282.364532470703,
+    "chat_format": "phi3",
+    "tier1_score": 1.0,
+    "tier2_score": 0.6,
+    "overall_score": 0.8,
+    "total_time": 1009.2969999999041,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 1.0,
+        "tests_passed": 7,
+        "tests_total": 7,
+        "response_time": 71.93799999996554,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_iter_02_pipeline",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 44.14100000000326,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 36.48399999999674,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 53.06199999997625,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 44.78100000001723,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_01_schema_validate",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 45.125,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_01_bst",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 105.31199999997625,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_02_traversals",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 73.82799999997951,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_02_glob_match",
+        "score": 1.0,
+        "tests_passed": 15,
+        "tests_total": 15,
+        "response_time": 69.85999999998603,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t_ctx_02_transaction",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 38.92200000002049,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_02_cached_property",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 51.28100000001723,
+        "test_errors": [
+          "NameError: name 'expensive_connect' is not defined"
+        ],
+        "exec_error": "NameError: name 'expensive_connect' is not defined"
+      },
+      {
+        "test_id": "t_thread_02_future",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 83.01499999995576,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_02_roundtrip",
+        "score": 1.0,
+        "tests_passed": 15,
+        "tests_total": 15,
+        "response_time": 64.39100000000326,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_01_template",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 11,
+        "response_time": 78.54700000002049,
+        "test_errors": [
+          "ERROR: assert render(\"Hello {{name}}\", {\"name\": \"World\"}) == \"Hello World\" -> NameError: name 're' is not defined",
+          "ERROR: assert render(\"{{a}} + {{b}}\", {\"a\": \"1\", \"b\": \"2\"}) == \"1 + 2\" -> NameError: name 're' is not defined",
+          "ERROR: assert render(\"{{missing}}\", {}) == \"\" -> NameError: name 're' is not defined",
+          "ERROR: result = render(\"{% for x in items %}{{x}} {% endfor %}\", {\"items\": [\"a\", \"b\", \"c\"]}) -> NameError: name 're' is not defined",
+          "ERROR: assert \"a\" in result -> NameError: name 'result' is not defined",
+          "ERROR: assert \"b\" in result -> NameError: name 'result' is not defined",
+          "ERROR: assert \"c\" in result -> NameError: name 'result' is not defined",
+          "ERROR: result2 = render(\"Users: {% for u in users %}{{u}}, {% endfor %}done\", {\"users\": [\"Alice\", \"Bob\"]}) -> NameError: name 're' is not defined",
+          "ERROR: assert \"Alice\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert \"Bob\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert \"done\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert render(\"No vars here\", {}) == \"No vars here\" -> NameError: name 're' is not defined",
+          "ERROR: assert render(\"{% for x in items %}{{x}}{% endfor %}\", {\"items\": []}) == \"\" -> NameError: name 're' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_01_pipeline",
+        "score": 0.2,
+        "tests_passed": 1,
+        "tests_total": 5,
+        "response_time": 63.35999999998603,
+        "test_errors": [
+          "ERROR: result = p.execute({\"name\": \"alice\"}) -> RecursionError: maximum recursion depth exceeded",
+          "ERROR: assert result[\"name\"] == \"ALICE\" -> NameError: name 'result' is not defined",
+          "ERROR: assert result[\"processed\"] == True -> NameError: name 'result' is not defined",
+          "FAIL: assert log == [\"before\", \"after\"] -> ",
+          "ERROR: p2.execute({}) -> RecursionError: maximum recursion depth exceeded",
+          "FAIL: assert order == [1, 2, 3, 4] -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_02_pubsub",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 85.25,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ]
+  }
+]
