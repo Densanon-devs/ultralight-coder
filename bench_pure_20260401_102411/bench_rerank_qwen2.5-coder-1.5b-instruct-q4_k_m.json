@@ -1,0 +1,193 @@
+[
+  {
+    "model_name": "qwen2.5-coder-1.5b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+    "model_size_mb": 1065.5601196289062,
+    "chat_format": "chatml",
+    "tier1_score": 0.7407407407407408,
+    "tier2_score": 0.8571428571428571,
+    "overall_score": 0.798941798941799,
+    "total_time": 231.7970000001369,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 7,
+        "response_time": 12.10899999999674,
+        "test_errors": [
+          "ERROR: assert list(ReusableRange(5)) == [0, 1, 2, 3, 4] -> NameError: name '_RangeIterator' is not defined",
+          "ERROR: assert list(ReusableRange(2, 5)) == [2, 3, 4] -> NameError: name '_RangeIterator' is not defined",
+          "ERROR: assert list(r) == [0, 1, 2] -> NameError: name '_RangeIterator' is not defined",
+          "ERROR: assert list(r) == [0, 1, 2] -> NameError: name '_RangeIterator' is not defined",
+          "ERROR: assert list(ReusableRange(0, 10, 3)) == [0, 3, 6, 9] -> NameError: name '_RangeIterator' is not defined",
+          "ERROR: assert list(ReusableRange(0)) == [] -> NameError: name '_RangeIterator' is not defined",
+          "ERROR: assert list(ReusableRange(1, 1)) == [] -> NameError: name '_RangeIterator' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_iter_02_pipeline",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 11.063000000023749,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 4,
+        "response_time": 8.01600000000326,
+        "test_errors": [
+          "ERROR: assert t.elapsed >= 0.04 -> AttributeError: 'Timer' object has no attribute 'elapsed'",
+          "ERROR: assert t.elapsed < 1.0 -> AttributeError: 'Timer' object has no attribute 'elapsed'",
+          "ERROR: assert t2.elapsed >= 0 -> AttributeError: 'Timer' object has no attribute 'elapsed'",
+          "ERROR: assert t2.elapsed < 0.1 -> AttributeError: 'Timer' object has no attribute 'elapsed'"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 12.844000000040978,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 7.828000000037719,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_01_schema_validate",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 10.844000000040978,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_01_bst",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 28.10999999998603,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_02_traversals",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 19.60899999999674,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_02_glob_match",
+        "score": 0.6666666666666666,
+        "tests_passed": 10,
+        "tests_total": 15,
+        "response_time": 20.29699999996228,
+        "test_errors": [
+          "FAIL: assert glob_match(\"*.py\", \"test.js\") == False -> ",
+          "FAIL: assert glob_match(\"a*b\", \"aXXXb\") == True -> ",
+          "ERROR: assert glob_match(\"*\", \"anything\") == True -> IndexError: string index out of range",
+          "FAIL: assert glob_match(\"a*b*c\", \"aXbYc\") == True -> ",
+          "FAIL: assert glob_match(\"**\", \"abc\") == True -> "
+        ],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t_ctx_02_transaction",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 12.311999999976251,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_02_cached_property",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 11.297000000020489,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_02_future",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 17.28100000001723,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_02_roundtrip",
+        "score": 1.0,
+        "tests_passed": 15,
+        "tests_total": 15,
+        "response_time": 14.952999999979511,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_01_template",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 11,
+        "response_time": 20.70300000003772,
+        "test_errors": [
+          "ERROR: assert render(\"Hello {{name}}\", {\"name\": \"World\"}) == \"Hello World\" -> NameError: name 're' is not defined",
+          "ERROR: assert render(\"{{a}} + {{b}}\", {\"a\": \"1\", \"b\": \"2\"}) == \"1 + 2\" -> NameError: name 're' is not defined",
+          "ERROR: assert render(\"{{missing}}\", {}) == \"\" -> NameError: name 're' is not defined",
+          "ERROR: result = render(\"{% for x in items %}{{x}} {% endfor %}\", {\"items\": [\"a\", \"b\", \"c\"]}) -> NameError: name 're' is not defined",
+          "ERROR: assert \"a\" in result -> NameError: name 'result' is not defined",
+          "ERROR: assert \"b\" in result -> NameError: name 'result' is not defined",
+          "ERROR: assert \"c\" in result -> NameError: name 'result' is not defined",
+          "ERROR: result2 = render(\"Users: {% for u in users %}{{u}}, {% endfor %}done\", {\"users\": [\"Alice\", \"Bob\"]}) -> NameError: name 're' is not defined",
+          "ERROR: assert \"Alice\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert \"Bob\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert \"done\" in result2 -> NameError: name 'result2' is not defined",
+          "ERROR: assert render(\"No vars here\", {}) == \"No vars here\" -> NameError: name 're' is not defined",
+          "ERROR: assert render(\"{% for x in items %}{{x}}{% endfor %}\", {\"items\": []}) == \"\" -> NameError: name 're' is not defined"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_01_pipeline",
+        "score": 1.0,
+        "tests_passed": 5,
+        "tests_total": 5,
+        "response_time": 9.65600000001723,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_02_pubsub",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 14.875,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ]
+  }
+]

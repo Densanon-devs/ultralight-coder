@@ -1,0 +1,163 @@
+[
+  {
+    "model_name": "qwen2.5-coder-0.5b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+    "model_size_mb": 468.6356201171875,
+    "chat_format": "chatml",
+    "tier1_score": 1.0,
+    "tier2_score": 1.0,
+    "overall_score": 1.0,
+    "total_time": 101.92099999997299,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 1.0,
+        "tests_passed": 7,
+        "tests_total": 7,
+        "response_time": 8.797000000020489,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_iter_02_pipeline",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 3.8910000000032596,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 2.8119999999762513,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 5.030999999959022,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 4.297000000020489,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_01_schema_validate",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 5.467999999993481,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_01_bst",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 11.15700000000652,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_02_traversals",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 9.328000000037719,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_02_glob_match",
+        "score": 1.0,
+        "tests_passed": 15,
+        "tests_total": 15,
+        "response_time": 7.23399999999674,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t_ctx_02_transaction",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 2.7189999999827705,
+        "test_errors": [
+          "ERROR: with Transaction(store) as s: -> TypeError: exceptions must derive from BaseException",
+          "ERROR: with Transaction(store3) as s: -> TypeError: exceptions must derive from BaseException"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_02_cached_property",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 4.0310000000172295,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_02_future",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 6.39100000000326,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_02_roundtrip",
+        "score": 1.0,
+        "tests_passed": 15,
+        "tests_total": 15,
+        "response_time": 11.936999999976251,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_01_template",
+        "score": 1.0,
+        "tests_passed": 11,
+        "tests_total": 11,
+        "response_time": 8.46899999998277,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_01_pipeline",
+        "score": 1.0,
+        "tests_passed": 5,
+        "tests_total": 5,
+        "response_time": 4.10899999999674,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_02_pubsub",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 6.25,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ]
+  }
+]

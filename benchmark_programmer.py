@@ -817,7 +817,7 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
         """Create a programmer-targeted augmentor router."""
         any_aug = (self.use_augmentors or self.use_yaml or self.use_graph
                    or self.use_adaptive or self.use_hybrid
-                   or self.use_rerank or self.use_plan)
+                   or self.use_rerank or self.use_rerank1 or self.use_plan)
         if not any_aug:
             return None
         from engine.augmentors import AugmentorRouter
@@ -829,7 +829,9 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
                 router.init_embeddings(embedder)
         except Exception:
             pass
-        if self.use_rerank:
+        if self.use_rerank1:
+            router.use_rerank1_augmentors()
+        elif self.use_rerank:
             router.use_rerank_augmentors()
         elif self.use_plan:
             router.use_plan_augmentors()
@@ -848,6 +850,8 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
                     router.init_embeddings(embedder)
             except Exception:
                 pass
+        if self.no_failure_routing:
+            router.set_skip_failure_routing(True)
         return router
 
     def run_model(self, model_path: Path, tiers: list[int] = None,
@@ -857,7 +861,9 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
         model_size_mb = model_path.stat().st_size / (1024 * 1024)
         chat_format = detect_chat_format(str(model_path))
 
-        if self.use_rerank:
+        if self.use_rerank1:
+            mode_str = "RERANK1"
+        elif self.use_rerank:
             mode_str = "RERANK"
         elif self.use_plan:
             mode_str = "PLAN"
@@ -873,6 +879,8 @@ class ProgrammerBenchmarkRunner(StressBenchmarkRunner):
             mode_str = "AUGMENTORS"
         else:
             mode_str = "DIRECT"
+        if self.no_failure_routing:
+            mode_str += " (pure-retrieval)"
         print(f"\n{'='*70}")
         print(f"  Model: {model_name} [{mode_str}]")
         print(f"  Size: {model_size_mb:.0f} MB | Format: {chat_format}")
@@ -1081,8 +1089,12 @@ def main():
                         help="Hybrid mode: try graph first, fall back to flat on failure")
     parser.add_argument("--rerank", action="store_true",
                         help="Graph-rerank mode: flat candidates reranked by graph coherence (1-2 injected)")
+    parser.add_argument("--rerank1", action="store_true",
+                        help="Graph-rerank1 mode: rerank to single best example")
     parser.add_argument("--plan", action="store_true",
                         help="Graph-plan mode: graph identifies subpatterns, injects only 1 example")
+    parser.add_argument("--no-failure-routing", action="store_true",
+                        help="Disable FAILURE_PATTERNS bypass — pure similarity retrieval only")
     parser.add_argument("--compare", action="store_true",
                         help="Run all retrieval methods, output comparison table")
     parser.add_argument("--list-tests", action="store_true", help="List all tests and exit")
@@ -1135,17 +1147,21 @@ def main():
     all_tests = build_programmer_tests()
     test_count = 4 if args.quick else len(all_tests)
 
+    no_fr = getattr(args, 'no_failure_routing', False)
+
     if args.compare:
-        # ── 7-way comparison: DIRECT vs FLAT vs GRAPH vs RERANK vs PLAN vs ADAPTIVE vs HYBRID ──
+        # ── Comparison across retrieval methods ──
         methods = [
             ("direct",   {}),
             ("flat",     {"use_yaml": True}),
             ("graph",    {"use_graph": True}),
             ("rerank",   {"use_rerank": True}),
+            ("rerank1",  {"use_rerank1": True}),
             ("plan",     {"use_plan": True}),
-            ("adaptive", {"use_adaptive": True}),
-            ("hybrid",   {"use_hybrid": True}),
         ]
+        # Apply no-failure-routing to all methods if set
+        if no_fr:
+            methods = [(n, {**kw, "no_failure_routing": True}) for n, kw in methods]
         method_names = [m[0] for m in methods]
         print(f"\n  Programmer Pack Benchmark [COMPARE: {' vs '.join(m.upper() for m in method_names)}]")
         print(f"  Models: {len(models)} | Tests: {test_count}/model x {len(methods)} methods")
@@ -1170,7 +1186,9 @@ def main():
         print_comparison_table(comparison)
         save_comparison_results(comparison, args.output)
     else:
-        if args.rerank:
+        if args.rerank1:
+            mode_str = "RERANK1"
+        elif args.rerank:
             mode_str = "RERANK"
         elif args.plan:
             mode_str = "PLAN"
@@ -1186,6 +1204,8 @@ def main():
             mode_str = "AUGMENTORS"
         else:
             mode_str = "DIRECT"
+        if no_fr:
+            mode_str += " (pure-retrieval)"
         print(f"\n  Programmer Pack Benchmark [{mode_str}]")
         print(f"  Models: {len(models)} | Tests: {test_count}/model")
         print(f"  Domains: 8 (Iterator, Context, Descriptor, Thread, Serial, Tree, Text, Middleware)")
@@ -1201,7 +1221,9 @@ def main():
             use_adaptive=args.adaptive,
             use_hybrid=args.hybrid,
             use_rerank=args.rerank,
+            use_rerank1=args.rerank1,
             use_plan=args.plan,
+            no_failure_routing=no_fr,
         )
 
         for model_path in models:
@@ -1213,7 +1235,7 @@ def main():
 
 def print_comparison_table(comparison: dict):
     """Print comparison table across all tested retrieval methods."""
-    methods = ["direct", "flat", "graph", "rerank", "plan", "adaptive", "hybrid"]
+    methods = ["direct", "flat", "graph", "rerank", "rerank1", "plan", "adaptive", "hybrid"]
     # Detect which methods are present
     all_methods = set()
     for methods_dict in comparison.values():

@@ -1,0 +1,175 @@
+[
+  {
+    "model_name": "qwen2.5-coder-0.5b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+    "model_size_mb": 468.6356201171875,
+    "chat_format": "chatml",
+    "tier1_score": 0.9814814814814814,
+    "tier2_score": 0.6825396825396826,
+    "overall_score": 0.832010582010582,
+    "total_time": 187.98700000008103,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 1.0,
+        "tests_passed": 7,
+        "tests_total": 7,
+        "response_time": 5.547000000020489,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_iter_02_pipeline",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 7.23399999999674,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 4.26600000000326,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 6.8439999999827705,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 5.26600000000326,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_01_schema_validate",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 6.23399999999674,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_01_bst",
+        "score": 0.8333333333333334,
+        "tests_passed": 10,
+        "tests_total": 12,
+        "response_time": 23.0,
+        "test_errors": [
+          "ERROR: bst.delete(3) -> AttributeError: 'BST' object has no attribute '_delete'",
+          "FAIL: assert 3 not in bst.inorder() -> ",
+          "ERROR: bst.delete(5) -> AttributeError: 'BST' object has no attribute '_delete'",
+          "FAIL: assert 5 not in result -> ",
+          "ERROR: bst.delete(99) -> AttributeError: 'BST' object has no attribute '_delete'"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_02_traversals",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 7.297000000020489,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_02_glob_match",
+        "score": 1.0,
+        "tests_passed": 15,
+        "tests_total": 15,
+        "response_time": 7.954000000027008,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t_ctx_02_transaction",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 4.625,
+        "test_errors": [
+          "ERROR: with Transaction(store) as s: -> TypeError: exceptions must derive from BaseException",
+          "ERROR: with Transaction(store3) as s: -> TypeError: exceptions must derive from BaseException"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_02_cached_property",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 22.43800000002375,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_02_future",
+        "score": 0.7777777777777778,
+        "tests_passed": 7,
+        "tests_total": 9,
+        "response_time": 7.922000000020489,
+        "test_errors": [
+          "FAIL: try: -> Should re-raise ValueError"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_02_roundtrip",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 15,
+        "response_time": 10.73399999999674,
+        "test_errors": [
+          "SyntaxError: invalid syntax (<string>, line 49)"
+        ],
+        "exec_error": "SyntaxError: invalid syntax (<string>, line 49)"
+      },
+      {
+        "test_id": "t_text_01_template",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 11,
+        "response_time": 49.57799999997951,
+        "test_errors": [
+          "SyntaxError: '(' was never closed (<string>, line 194)"
+        ],
+        "exec_error": "SyntaxError: '(' was never closed (<string>, line 194)"
+      },
+      {
+        "test_id": "t_mw_01_pipeline",
+        "score": 1.0,
+        "tests_passed": 5,
+        "tests_total": 5,
+        "response_time": 7.032000000006519,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_02_pubsub",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 12.01600000000326,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ]
+  }
+]

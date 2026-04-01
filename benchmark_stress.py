@@ -1157,7 +1157,8 @@ class StressBenchmarkRunner:
     def __init__(self, gpu_layers: int = 99, threads: int = 8, context_length: int = 4096,
                  use_augmentors: bool = False, use_yaml: bool = False, use_graph: bool = False,
                  use_adaptive: bool = False, use_hybrid: bool = False,
-                 use_rerank: bool = False, use_plan: bool = False):
+                 use_rerank: bool = False, use_rerank1: bool = False,
+                 use_plan: bool = False, no_failure_routing: bool = False):
         self.gpu_layers = gpu_layers
         self.threads = threads
         self.context_length = context_length
@@ -1167,14 +1168,16 @@ class StressBenchmarkRunner:
         self.use_adaptive = use_adaptive
         self.use_hybrid = use_hybrid
         self.use_rerank = use_rerank
+        self.use_rerank1 = use_rerank1
         self.use_plan = use_plan
+        self.no_failure_routing = no_failure_routing
         self.all_results: list[StressModelResult] = []
 
     def _get_augmentor_router(self):
         """Create a stress-targeted augmentor router."""
         any_aug = (self.use_augmentors or self.use_yaml or self.use_graph
                    or self.use_adaptive or self.use_hybrid
-                   or self.use_rerank or self.use_plan)
+                   or self.use_rerank or self.use_rerank1 or self.use_plan)
         if not any_aug:
             return None
         from engine.augmentors import AugmentorRouter
@@ -1186,7 +1189,9 @@ class StressBenchmarkRunner:
                 router.init_embeddings(embedder)
         except Exception:
             pass
-        if self.use_rerank:
+        if self.use_rerank1:
+            router.use_rerank1_augmentors()
+        elif self.use_rerank:
             router.use_rerank_augmentors()
         elif self.use_plan:
             router.use_plan_augmentors()
@@ -1206,6 +1211,8 @@ class StressBenchmarkRunner:
             except Exception:
                 pass
         # else: use_yaml — already set up
+        if self.no_failure_routing:
+            router.set_skip_failure_routing(True)
         return router
 
     def load_model(self, model_path: Path):

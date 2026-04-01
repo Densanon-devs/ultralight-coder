@@ -144,7 +144,8 @@ class Augmentor:
         self._example_embeddings = None
         self._embedder = None
         self._graph = None  # Optional PatternGraph for graph-enhanced retrieval
-        self._retrieval_mode = "flat"  # "flat", "graph", "rerank", "plan"
+        self._retrieval_mode = "flat"  # "flat", "graph", "rerank", "plan", "rerank1"
+        self.skip_failure_routing = False  # When True, disables FAILURE_PATTERNS bypass
 
     def init_embeddings(self, embedder):
         """Pre-embed all examples for fast retrieval."""
@@ -174,13 +175,14 @@ class Augmentor:
 
         from engine.pattern_graph import graph_retrieve_examples
         k = min(top_k or self.max_examples, len(self.examples))
+        fp = None if self.skip_failure_routing else FAILURE_PATTERNS
         return graph_retrieve_examples(
             query=query,
             embedder=self._embedder,
             example_embeddings=self._example_embeddings,
             examples=self.examples,
             graph=self._graph,
-            failure_patterns=FAILURE_PATTERNS,
+            failure_patterns=fp,
             top_k=k,
         )
 
@@ -198,13 +200,14 @@ class Augmentor:
 
         from engine.pattern_graph import graph_rerank_examples
         k = min(top_k or 2, len(self.examples))  # default 2 for rerank
+        fp = None if self.skip_failure_routing else FAILURE_PATTERNS
         return graph_rerank_examples(
             query=query,
             embedder=self._embedder,
             example_embeddings=self._example_embeddings,
             examples=self.examples,
             graph=self._graph,
-            failure_patterns=FAILURE_PATTERNS,
+            failure_patterns=fp,
             top_k=k,
         )
 
@@ -220,13 +223,14 @@ class Augmentor:
             return self.retrieve_examples(query, top_k=1)
 
         from engine.pattern_graph import graph_plan_examples
+        fp = None if self.skip_failure_routing else FAILURE_PATTERNS
         return graph_plan_examples(
             query=query,
             embedder=self._embedder,
             example_embeddings=self._example_embeddings,
             examples=self.examples,
             graph=self._graph,
-            failure_patterns=FAILURE_PATTERNS,
+            failure_patterns=fp,
         )
 
     def retrieve_examples(self, query: str, top_k: Optional[int] = None,
@@ -252,10 +256,11 @@ class Augmentor:
         k = min(top_k or self.max_examples, len(self.examples))
 
         # Layer 0: Failure-aware routing — force-inject for known failure patterns
-        forced = self._check_failure_patterns(query)
-        if forced:
-            logger.debug(f"Failure-aware: force-injecting {len(forced)} examples for known patterns")
-            return forced[:k]
+        if not self.skip_failure_routing:
+            forced = self._check_failure_patterns(query)
+            if forced:
+                logger.debug(f"Failure-aware: force-injecting {len(forced)} examples for known patterns")
+                return forced[:k]
 
         query_vec = self._embedder.encode([query], normalize_embeddings=True)
 
@@ -388,7 +393,9 @@ class Augmentor:
 
     def _retrieve_for_mode(self, query: str, top_k: Optional[int] = None) -> list[SolvedExample]:
         """Dispatch retrieval based on current mode."""
-        if self._retrieval_mode == "rerank" and self._graph is not None:
+        if self._retrieval_mode == "rerank1" and self._graph is not None:
+            return self.retrieve_examples_rerank(query, top_k=1)
+        elif self._retrieval_mode == "rerank" and self._graph is not None:
             return self.retrieve_examples_rerank(query, top_k=top_k)
         elif self._retrieval_mode == "plan" and self._graph is not None:
             return self.retrieve_examples_plan(query)
@@ -2107,6 +2114,43 @@ class AugmentorRouter:
             f"{', '.join(f'{k}({len(v.examples)})' for k, v in self.augmentors.items())}"
         )
 
+    def use_rerank1_augmentors(self):
+        """Swap in graph-rerank1 augmentors (rerank to single best example)."""
+        self._tuned = False
+        self._stress = False
+        self._pack = False
+        self._yaml = False
+        self._graph_mode = False
+        self._rerank_mode = False
+        self._plan_mode = False
+        self._adaptive_mode = False
+        self._hybrid_mode = False
+        # Reuse rerank augmentors but with mode=rerank1
+        if not self._rerank_augmentors:
+            self._rerank_augmentors = self._build_mode_augmentors("rerank")
+        # Clone with rerank1 mode
+        self.augmentors = {}
+        for name, aug in self._rerank_augmentors.items():
+            clone = Augmentor(
+                name=aug.name,
+                system_context=aug.system_context,
+                examples=aug.examples,
+                verifier=aug.verifier,
+                max_examples=aug.max_examples,
+                max_retries=aug.max_retries,
+                multi_expert=aug.multi_expert,
+            )
+            clone.set_graph(aug._graph)
+            clone._retrieval_mode = "rerank1"
+            clone._example_embeddings = aug._example_embeddings
+            clone._embedder = aug._embedder
+            clone.skip_failure_routing = aug.skip_failure_routing
+            self.augmentors[name] = clone
+        logger.info(
+            f"Switched to rerank1 augmentors: "
+            f"{', '.join(f'{k}({len(v.examples)})' for k, v in self.augmentors.items())}"
+        )
+
     def use_plan_augmentors(self):
         """Swap in graph-plan augmentors (graph identifies subpatterns, injects only 1)."""
         self._tuned = False
@@ -2129,6 +2173,25 @@ class AugmentorRouter:
             f"Switched to plan augmentors: "
             f"{', '.join(f'{k}({len(v.examples)})' for k, v in self.augmentors.items())}"
         )
+
+    def set_skip_failure_routing(self, skip: bool):
+        """Toggle failure-aware routing bypass on ALL augmentor sets.
+
+        When skip=True, FAILURE_PATTERNS keyword matching is disabled and
+        all retrieval relies purely on embedding similarity. Used for
+        benchmarking to reveal true differences between retrieval strategies.
+        """
+        all_sets = [
+            self._generic_augmentors, self._tuned_augmentors,
+            self._stress_augmentors, self._pack_augmentors,
+            self._yaml_augmentors, self._graph_augmentors,
+            self._rerank_augmentors, self._plan_augmentors,
+            self.augmentors,
+        ]
+        for aug_set in all_sets:
+            for aug in aug_set.values():
+                aug.skip_failure_routing = skip
+        logger.info(f"Failure routing {'DISABLED' if skip else 'ENABLED'} on all augmentors")
 
     def reload_yaml(self, base_dir: str = ""):
         """Reload YAML examples from disk (hot-reload for development)."""

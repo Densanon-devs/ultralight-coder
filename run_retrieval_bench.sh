@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────
 # Run programmer-pack benchmarks across all retrieval modes
-# for the 4 code-specialized models. Each mode runs sequentially.
+# with failure routing DISABLED (pure similarity retrieval).
 #
 # Usage:
 #   bash run_retrieval_bench.sh          # full run (16 tests per model)
@@ -18,10 +18,10 @@ if [[ "$1" == "--quick" ]]; then
 fi
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-OUTDIR="bench_retrieval_${TIMESTAMP}"
+OUTDIR="bench_pure_${TIMESTAMP}"
 mkdir -p "$OUTDIR"
 
-# Only the 4 code-specialized models we care about
+# Only the 4 code-specialized models
 MODELS=(
     "models/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf"
     "models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
@@ -31,18 +31,19 @@ MODELS=(
 
 echo ""
 echo "=============================================="
-echo "  Retrieval Mode Benchmark Suite"
+echo "  PURE RETRIEVAL Benchmark Suite"
+echo "  (failure-aware routing DISABLED)"
 echo "  Output: $OUTDIR/"
-echo "  Modes: direct, flat, graph, rerank, plan"
+echo "  Modes: direct, flat, graph, rerank, rerank1, plan"
 echo "  Models: ${#MODELS[@]} code-specialized"
 echo "=============================================="
 echo ""
 
-# Run each mode, iterating models within
-for MODE in direct flat graph rerank plan; do
+# Run each mode with --no-failure-routing
+for MODE in direct flat graph rerank rerank1 plan; do
     echo ""
     echo "══════════════════════════════════════════"
-    echo "  MODE: ${MODE^^}"
+    echo "  MODE: ${MODE^^} (pure retrieval)"
     echo "══════════════════════════════════════════"
 
     FLAG=""
@@ -50,9 +51,15 @@ for MODE in direct flat graph rerank plan; do
         flat)     FLAG="--yaml" ;;
         graph)    FLAG="--graph" ;;
         rerank)   FLAG="--rerank" ;;
+        rerank1)  FLAG="--rerank1" ;;
         plan)     FLAG="--plan" ;;
         direct)   FLAG="" ;;
     esac
+
+    NFR_FLAG=""
+    if [[ "$MODE" != "direct" ]]; then
+        NFR_FLAG="--no-failure-routing"
+    fi
 
     for MODEL in "${MODELS[@]}"; do
         MODEL_NAME=$(basename "$MODEL" .gguf)
@@ -61,6 +68,7 @@ for MODE in direct flat graph rerank plan; do
             --model "$MODEL" \
             $QUICK_FLAG \
             $FLAG \
+            $NFR_FLAG \
             --output "$OUTDIR/bench_${MODE}_${MODEL_NAME}.json"
     done
 

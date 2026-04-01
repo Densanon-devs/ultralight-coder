@@ -1,0 +1,172 @@
+[
+  {
+    "model_name": "qwen2.5-coder-3b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+    "model_size_mb": 2007.4203491210938,
+    "chat_format": "chatml",
+    "tier1_score": 0.9037037037037037,
+    "tier2_score": 1.0,
+    "overall_score": 0.9518518518518518,
+    "total_time": 555.9519999999902,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 1.0,
+        "tests_passed": 7,
+        "tests_total": 7,
+        "response_time": 36.20299999997951,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_iter_02_pipeline",
+        "score": 0.6666666666666666,
+        "tests_passed": 4,
+        "tests_total": 6,
+        "response_time": 31.06299999996554,
+        "test_errors": [
+          "ERROR: assert Pipeline(range(100)).filter(lambda x: x % 2 == 0).map(lambda x: x * x).take(5).collect() == [0, 4, 16, 36, 64] -> UnboundLocalError: local variable 'n' referenced before assignment",
+          "ERROR: assert Pipeline(range(10)).take(3).collect() == [0, 1, 2] -> UnboundLocalError: local variable 'n' referenced before assignment"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 14.21799999999348,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 25.04700000002049,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 21.32900000002701,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_01_schema_validate",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 20.42200000002049,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_01_bst",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 50.31199999997625,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_tree_02_traversals",
+        "score": 1.0,
+        "tests_passed": 12,
+        "tests_total": 12,
+        "response_time": 38.59399999998277,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_02_glob_match",
+        "score": 0.4666666666666667,
+        "tests_passed": 7,
+        "tests_total": 15,
+        "response_time": 79.25,
+        "test_errors": [
+          "FAIL: assert glob_match(\"*.py\", \"test.py\") == True -> ",
+          "FAIL: assert glob_match(\"t?st\", \"test\") == True -> ",
+          "FAIL: assert glob_match(\"a*b\", \"aXXXb\") == True -> ",
+          "FAIL: assert glob_match(\"*\", \"anything\") == True -> ",
+          "FAIL: assert glob_match(\"*\", \"\") == True -> ",
+          "FAIL: assert glob_match(\"a*b*c\", \"aXbYc\") == True -> ",
+          "FAIL: assert glob_match(\"?\", \"a\") == True -> ",
+          "FAIL: assert glob_match(\"**\", \"abc\") == True -> "
+        ],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": [
+      {
+        "test_id": "t_ctx_02_transaction",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 18.93800000002375,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_02_cached_property",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 21.35899999999674,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_02_future",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 42.43699999997625,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_serial_02_roundtrip",
+        "score": 1.0,
+        "tests_passed": 15,
+        "tests_total": 15,
+        "response_time": 47.51500000001397,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_text_01_template",
+        "score": 1.0,
+        "tests_passed": 11,
+        "tests_total": 11,
+        "response_time": 53.78100000001723,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_01_pipeline",
+        "score": 1.0,
+        "tests_passed": 5,
+        "tests_total": 5,
+        "response_time": 20.85899999999674,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_mw_02_pubsub",
+        "score": 1.0,
+        "tests_passed": 9,
+        "tests_total": 9,
+        "response_time": 34.625,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ]
+  }
+]
