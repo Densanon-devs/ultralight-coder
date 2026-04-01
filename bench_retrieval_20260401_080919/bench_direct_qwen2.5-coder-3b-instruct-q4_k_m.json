@@ -1,0 +1,64 @@
+[
+  {
+    "model_name": "qwen2.5-coder-3b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+    "model_size_mb": 2007.4203491210938,
+    "chat_format": "chatml",
+    "tier1_score": 0.75,
+    "tier2_score": 0.0,
+    "overall_score": 0.75,
+    "total_time": 50.26600000000326,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 1.0,
+        "tests_passed": 7,
+        "tests_total": 7,
+        "response_time": 19.67200000002049,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 8.64100000000326,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 1.0,
+        "tests_passed": 8,
+        "tests_total": 8,
+        "response_time": 14.34399999998277,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 6,
+        "response_time": 7.60899999999674,
+        "test_errors": [
+          "ERROR: c = ThreadSafeCounter() -> AttributeError: can't set attribute 'value'",
+          "ERROR: assert c.value == 0 -> NameError: name 'c' is not defined",
+          "ERROR: c.increment() -> NameError: name 'c' is not defined",
+          "ERROR: assert c.value == 1 -> NameError: name 'c' is not defined",
+          "ERROR: c.increment(5) -> NameError: name 'c' is not defined",
+          "ERROR: assert c.value == 6 -> NameError: name 'c' is not defined",
+          "ERROR: c.decrement(2) -> NameError: name 'c' is not defined",
+          "ERROR: assert c.value == 4 -> NameError: name 'c' is not defined",
+          "ERROR: c2 = ThreadSafeCounter() -> AttributeError: can't set attribute 'value'",
+          "ERROR: assert c2.value == 10000 -> NameError: name 'c2' is not defined",
+          "ERROR: c3 = ThreadSafeCounter() -> AttributeError: can't set attribute 'value'",
+          "ERROR: assert c3.value == 0 -> NameError: name 'c3' is not defined"
+        ],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": []
+  }
+]

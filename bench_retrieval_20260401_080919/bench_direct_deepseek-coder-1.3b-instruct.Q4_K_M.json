@@ -1,0 +1,70 @@
+[
+  {
+    "model_name": "deepseek-coder-1.3b-instruct.Q4_K_M",
+    "model_path": "models\\deepseek-coder-1.3b-instruct.Q4_K_M.gguf",
+    "model_size_mb": 833.1133117675781,
+    "chat_format": "chatml",
+    "tier1_score": 0.39285714285714285,
+    "tier2_score": 0.0,
+    "overall_score": 0.39285714285714285,
+    "total_time": 33.32799999997951,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 0.5714285714285714,
+        "tests_passed": 4,
+        "tests_total": 7,
+        "response_time": 7.0310000000172295,
+        "test_errors": [
+          "FAIL: assert list(ReusableRange(5)) == [0, 1, 2, 3, 4] -> ",
+          "FAIL: assert list(r) == [0, 1, 2] -> ",
+          "FAIL: assert list(r) == [0, 1, 2] -> "
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 1.0,
+        "tests_passed": 4,
+        "tests_total": 4,
+        "response_time": 5.35999999998603,
+        "test_errors": [],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 8,
+        "response_time": 13.561999999976251,
+        "test_errors": [
+          "TypeError: Expected type <class 'int'>, got <class 'str'>"
+        ],
+        "exec_error": "TypeError: Expected type <class 'int'>, got <class 'str'>"
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 6,
+        "response_time": 7.375,
+        "test_errors": [
+          "ERROR: c = ThreadSafeCounter() -> AttributeError: can't set attribute 'value'",
+          "ERROR: assert c.value == 0 -> NameError: name 'c' is not defined",
+          "ERROR: c.increment() -> NameError: name 'c' is not defined",
+          "ERROR: assert c.value == 1 -> NameError: name 'c' is not defined",
+          "ERROR: c.increment(5) -> NameError: name 'c' is not defined",
+          "ERROR: assert c.value == 6 -> NameError: name 'c' is not defined",
+          "ERROR: c.decrement(2) -> NameError: name 'c' is not defined",
+          "ERROR: assert c.value == 4 -> NameError: name 'c' is not defined",
+          "ERROR: c2 = ThreadSafeCounter() -> AttributeError: can't set attribute 'value'",
+          "ERROR: assert c2.value == 10000 -> NameError: name 'c2' is not defined",
+          "ERROR: c3 = ThreadSafeCounter() -> AttributeError: can't set attribute 'value'",
+          "ERROR: assert c3.value == 0 -> NameError: name 'c3' is not defined"
+        ],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": []
+  }
+]

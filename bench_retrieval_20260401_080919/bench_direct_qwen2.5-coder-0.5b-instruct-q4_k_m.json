@@ -1,0 +1,66 @@
+[
+  {
+    "model_name": "qwen2.5-coder-0.5b-instruct-q4_k_m",
+    "model_path": "models\\qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+    "model_size_mb": 468.6356201171875,
+    "chat_format": "chatml",
+    "tier1_score": 0.3125,
+    "tier2_score": 0.0,
+    "overall_score": 0.3125,
+    "total_time": 12.311999999976251,
+    "tier1_results": [
+      {
+        "test_id": "t_iter_01_reusable_range",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 7,
+        "response_time": 3.125,
+        "test_errors": [
+          "AttributeError: 'ReusableRange' object has no attribute 'step'"
+        ],
+        "exec_error": "AttributeError: 'ReusableRange' object has no attribute 'step'"
+      },
+      {
+        "test_id": "t_ctx_01_timer",
+        "score": 0.0,
+        "tests_passed": 0,
+        "tests_total": 4,
+        "response_time": 3.4219999999622814,
+        "test_errors": [
+          "AttributeError: 'Timer' object has no attribute 'elapsed'"
+        ],
+        "exec_error": "AttributeError: 'Timer' object has no attribute 'elapsed'"
+      },
+      {
+        "test_id": "t_desc_01_typed_field",
+        "score": 0.25,
+        "tests_passed": 2,
+        "tests_total": 8,
+        "response_time": 3.7339999999967404,
+        "test_errors": [
+          "ERROR: c1.port = 8080 -> AttributeError: 'TypedField' object has no attribute 'name'",
+          "ERROR: c1.host = \"localhost\" -> AttributeError: 'TypedField' object has no attribute 'name'",
+          "ERROR: assert c1.port == 8080 -> TypeError: Expected int, got Config",
+          "ERROR: assert c1.host == \"localhost\" -> TypeError: Expected str, got Config",
+          "ERROR: c2.port = 3000 -> AttributeError: 'TypedField' object has no attribute 'name'",
+          "ERROR: c2.host = \"0.0.0.0\" -> AttributeError: 'TypedField' object has no attribute 'name'",
+          "ERROR: assert c2.port == 3000 -> TypeError: Expected int, got Config",
+          "ERROR: assert c1.port == 8080 -> TypeError: Expected int, got Config",
+          "ERROR: assert c1.port == 8080 -> TypeError: Expected int, got Config",
+          "ERROR: assert c1.host == \"localhost\" -> TypeError: Expected str, got Config"
+        ],
+        "exec_error": ""
+      },
+      {
+        "test_id": "t_thread_01_safe_counter",
+        "score": 1.0,
+        "tests_passed": 6,
+        "tests_total": 6,
+        "response_time": 2.0310000000172295,
+        "test_errors": [],
+        "exec_error": ""
+      }
+    ],
+    "tier2_results": []
+  }
+]
