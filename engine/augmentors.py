@@ -256,6 +256,50 @@ FAILURE_PATTERNS: dict[str, list[str]] = {
         "primary key", "sql index", "sql migration",
         "many-to-many", "junction table",
     ],
+    "c_basics": [
+        " in c ", " in c,", "c function", "c program",
+        "malloc", "free(", "realloc", "pointer",
+        "struct ", "typedef", "#include", "printf",
+        "linked list c", "hash map c",
+    ],
+    "java_basics": [
+        " in java", "java class", "java method",
+        "public static", "arraylist", "hashmap",
+        "java stream", "collectors.", "java record",
+        "java interface", "java generic",
+    ],
+    "java_web": [
+        "spring boot", "@restcontroller", "@getmapping",
+        "@postmapping", "@requestbody", "spring mvc",
+    ],
+    "csharp_basics": [
+        " in c#", "c# ", "csharp", ".net",
+        "linq", "async task", "httpclient",
+        "c# record", "c# interface", "c# class",
+        "c# generic", "c# async",
+    ],
+    "ruby_basics": [
+        " in ruby", "ruby method", "ruby class",
+        "attr_accessor", "attr_reader", "def ",
+        "ruby module", "mixin", "include ",
+        "enumerable", "rails", "ruby on rails",
+    ],
+    "bash_basics": [
+        "bash script", "shell script", "#!/bin/bash",
+        "bash function", "getopts", "shell function",
+        "bash command", "shell command",
+    ],
+    "kotlin_basics": [
+        " in kotlin", "kotlin function", "kotlin class",
+        "data class", "sealed class", "coroutine",
+        "suspend fun", "kotlin async", "kotlin flow",
+    ],
+    "swift_basics": [
+        " in swift", "swift function", "swift struct",
+        "swift protocol", "swift enum", "swiftui",
+        "combine", "@published", "async throws",
+        "swift async", "codable",
+    ],
 }
 
 logger = logging.getLogger(__name__)
@@ -666,6 +710,8 @@ def verify_code_gen(response: str, query: str) -> tuple[bool, str]:
     has_def = any(kw in r for kw in [
         "def ", "function ", "class ", "const ", "fn ", "func ",
         "struct ", "impl ", "trait ", "SELECT ", "CREATE ", "INSERT ",
+        "public ", "private ", "void ", "interface ", "enum ",
+        "module ", "#!/bin/bash", "fun ", "protocol ",
     ])
     has_return = "return" in r.lower() or "print" in r.lower() or "console" in r.lower()
 
@@ -673,10 +719,15 @@ def verify_code_gen(response: str, query: str) -> tuple[bool, str]:
         return False, "Response should contain code in a ```language block or a function/class definition."
 
     if has_def and not has_return:
-        # Only enforce return check for Python/JS functions, not SQL/Rust/Go
-        is_sql = any(kw in r for kw in ["SELECT ", "CREATE ", "INSERT "])
-        is_rust_go = any(kw in r for kw in ["fn ", "func ", "impl ", "struct "])
-        if not is_sql and not is_rust_go and ("def " in r or "function " in r):
+        # Only enforce return check for Python/JS functions
+        # Skip for SQL, Rust, Go, C, Bash, Ruby (implicit returns), etc.
+        is_exempt = any(kw in r for kw in [
+            "SELECT ", "CREATE ", "INSERT ",     # SQL
+            "fn ", "func ", "impl ", "struct ",  # Rust/Go
+            "void ", "#include", "printf",       # C
+            "#!/bin/bash",                       # Bash
+        ])
+        if not is_exempt and ("def " in r or "function " in r):
             return False, "Function should have a return statement or produce output."
 
     return True, ""
