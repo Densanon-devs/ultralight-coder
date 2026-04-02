@@ -194,6 +194,68 @@ FAILURE_PATTERNS: dict[str, list[str]] = {
         "to 100 digits", "to 50 digits", "to n places",
         "high precision math", "precision calculation",
     ],
+    # ── Multi-language routing ──
+    "js_basics": [
+        "javascript function", "js function", "node.js", "nodejs",
+        "array.reduce", "array.map", "array.filter",
+        "spread operator", "destructuring", "arrow function",
+        "camelcase", "debounce", "throttle",
+    ],
+    "js_async": [
+        "async/await", "promise", "fetch(", ".then(",
+        "promise.all", "promise.allsettled", "async generator",
+        "javascript async", "js async", "node async",
+    ],
+    "js_web": [
+        "express", "express.js", "express middleware",
+        "app.get(", "app.post(", "req, res",
+        "websocket", "ws://", "socket.io",
+    ],
+    "js_typescript": [
+        "typescript", "interface ", "type ", "generic",
+        "keyof", "extends keyof", "pick<", "omit<",
+        "discriminated union", "type guard",
+    ],
+    "go_basics": [
+        " in go", " in golang", "go function", "golang",
+        "go generic", "func ", "[]int", "[]string",
+        "make(map", "go struct",
+    ],
+    "go_concurrency": [
+        "goroutine", "go routine", "channel", "chan ",
+        "sync.waitgroup", "waitgroup", "sync.mutex",
+        "sync.rwmutex", "worker pool go", "fan-out",
+    ],
+    "go_web": [
+        "go http", "net/http", "http.handlefunc",
+        "go rest api", "go middleware", "go server",
+    ],
+    "rust_basics": [
+        " in rust", "rust function", "rustlang",
+        "vec<", "hashmap", "option<", "result<",
+        "iter()", ".collect()", ".map(|",
+    ],
+    "rust_ownership": [
+        "ownership", "borrowing", "borrow checker",
+        "&self", "&mut self", "lifetime", "'a",
+        "move semantics", "clone()",
+    ],
+    "rust_traits": [
+        "impl ", "trait ", "derive(", "#[derive",
+        "impl iterator", "impl display", "impl error",
+        "dyn ", "box<dyn", "rust enum",
+    ],
+    "sql_queries": [
+        "sql query", "select ", "join ", "left join",
+        "group by", "having", "window function",
+        "rank()", "row_number()", "over (",
+        "running total", "aggregate",
+    ],
+    "sql_schema": [
+        "create table", "alter table", "foreign key",
+        "primary key", "sql index", "sql migration",
+        "many-to-many", "junction table",
+    ],
 }
 
 logger = logging.getLogger(__name__)
@@ -601,14 +663,20 @@ def verify_code_gen(response: str, query: str) -> tuple[bool, str]:
     r = response.strip()
 
     has_code_block = "```" in r
-    has_def = "def " in r or "function " in r or "class " in r or "const " in r or "fn " in r
+    has_def = any(kw in r for kw in [
+        "def ", "function ", "class ", "const ", "fn ", "func ",
+        "struct ", "impl ", "trait ", "SELECT ", "CREATE ", "INSERT ",
+    ])
     has_return = "return" in r.lower() or "print" in r.lower() or "console" in r.lower()
 
     if not has_code_block and not has_def:
         return False, "Response should contain code in a ```language block or a function/class definition."
 
     if has_def and not has_return:
-        if "def " in r or "function " in r:
+        # Only enforce return check for Python/JS functions, not SQL/Rust/Go
+        is_sql = any(kw in r for kw in ["SELECT ", "CREATE ", "INSERT "])
+        is_rust_go = any(kw in r for kw in ["fn ", "func ", "impl ", "struct "])
+        if not is_sql and not is_rust_go and ("def " in r or "function " in r):
             return False, "Function should have a return statement or produce output."
 
     return True, ""
@@ -1871,12 +1939,15 @@ def build_yaml_augmentors(base_dir: str = "data/augmentor_examples") -> dict[str
     augmentors["code_gen"] = Augmentor(
         name="code_gen",
         system_context=(
-            "You are a Python expert. Write complete, correct, runnable code "
-            "in ```python blocks. Include all imports. Implement ALL requested "
-            "methods. Use the EXACT class and function names specified in the prompt. "
-            "For classes: use proper dunder methods (__iter__, __next__, "
-            "__enter__, __exit__, __get__, __set__). For decorators: set attributes "
-            "on the wrapper. For properties: use @property with _private backing."
+            "You are a coding expert. Write complete, correct, runnable code "
+            "in fenced code blocks (```language). Match the language requested by the user. "
+            "Include all imports. Implement ALL requested methods. "
+            "Use the EXACT class and function names specified in the prompt. "
+            "For Python: use proper dunder methods, decorators, @property. "
+            "For JavaScript/TypeScript: use modern ES6+, async/await, proper types. "
+            "For Go: use proper error handling, goroutines, channels. "
+            "For Rust: use proper ownership, lifetimes, traits, Result types. "
+            "For SQL: use standard SQL syntax with proper JOINs and indexing."
         ),
         examples=groups["code_gen"],
         verifier=verify_code_gen,
