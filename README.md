@@ -11,23 +11,32 @@ Everything runs on your machine. No API keys, no cloud, no data leaves your comp
 - **Web UI** with streaming responses, multi-turn conversation, code paste-and-fix
 - **Project context** -- index your codebase so the model references your actual code
 - **One-click launcher** -- `python launch.py` handles deps, GPU detection, model selection
-- **Augmentor system** -- 359 YAML examples injected via semantic similarity to guide small models
+- **Augmentor system** -- 437 YAML examples injected via semantic similarity to guide small models
 - **Offline** -- works fully offline after first setup (sentence-transformers cached locally)
 
 ## Quick Start
 
+**One-line install (Linux/macOS):**
 ```bash
-# Clone
+curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralight-coder/master/install.sh | bash
+```
+
+**One-line install (Windows PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/densanon-devs/ultralight-coder/master/install.ps1 | iex
+```
+
+**With GPU support** -- add `--gpu` (Linux/macOS) or `-GPU` (Windows):
+```bash
+curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralight-coder/master/install.sh | bash -s -- --gpu
+```
+
+**Manual install:**
+```bash
 git clone https://github.com/densanon-devs/ultralight-coder.git
 cd ultralight-coder
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Download a model (469MB default)
 python download_model.py
-
-# Launch (web UI on http://localhost:8000)
 python launch.py
 ```
 
