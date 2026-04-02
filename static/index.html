@@ -37,6 +37,12 @@
   header .status .dot.loading { background: var(--yellow); animation: pulse 1s infinite; }
   @keyframes pulse { 50% { opacity: 0.4; } }
   header .spacer { flex: 1; }
+  header button.new-chat {
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 12px; font-size: 12px; cursor: pointer;
+    font-weight: 500;
+  }
+  header button.new-chat:hover { border-color: var(--accent); color: var(--accent); }
   header select {
     background: var(--surface2); color: var(--text); border: 1px solid var(--border);
     border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer;
@@ -87,6 +93,34 @@
   .code-wrap:hover .copy-btn { opacity: 1; }
   .copy-btn:hover { color: var(--text); }
   .copy-btn.copied { color: var(--green); }
+
+  /* Code input area */
+  #code-area {
+    padding: 0 20px; background: var(--surface);
+    border-top: 1px solid var(--border); flex-shrink: 0;
+    display: none;
+  }
+  #code-area.open { display: block; padding-top: 10px; }
+  #code-input {
+    width: 100%; background: var(--code-bg); color: var(--green);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; font-size: 13px;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    resize: vertical; min-height: 60px; max-height: 300px;
+    line-height: 1.5;
+  }
+  #code-input:focus { outline: none; border-color: var(--accent); }
+  #code-input::placeholder { color: var(--dim); }
+  #code-toggle-row {
+    display: flex; align-items: center; gap: 8px; padding: 4px 0;
+  }
+  #code-toggle {
+    background: none; color: var(--dim); border: 1px solid var(--border);
+    border-radius: 6px; padding: 3px 10px; font-size: 11px;
+    cursor: pointer;
+  }
+  #code-toggle:hover { color: var(--text); border-color: var(--accent); }
+  #code-toggle.active { color: var(--accent); border-color: var(--accent); }
 
   /* Input area */
   #input-area {
@@ -149,6 +183,7 @@
     <span id="status-text">Loading...</span>
   </div>
   <div class="spacer"></div>
+  <button class="new-chat" onclick="newChat()" title="Start a new conversation">New Chat</button>
   <select id="model-select" title="Select model"></select>
 </header>
 
@@ -167,8 +202,13 @@
   </div>
 </div>
 
+<div id="code-area">
+  <textarea id="code-input" rows="4" placeholder="Paste your code here..."></textarea>
+</div>
+
 <div id="input-area">
   <div id="input-row">
+    <button id="code-toggle" onclick="toggleCode()" title="Attach code for review/debug">{ }</button>
     <textarea id="prompt" rows="1" placeholder="Ask me to write some code..."
               onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
     <button id="send" onclick="send()">Send</button>
@@ -183,6 +223,9 @@ const sendBtn = document.getElementById('send');
 const statusDot = document.getElementById('status-dot');
 const statusText = document.getElementById('status-text');
 const modelSelect = document.getElementById('model-select');
+const codeArea = document.getElementById('code-area');
+const codeInput = document.getElementById('code-input');
+const codeToggle = document.getElementById('code-toggle');
 let busy = false;
 
 // ── Status check ──
@@ -219,7 +262,36 @@ async function loadModels() {
   }
 }
 
-// ── Send message ──
+// ── New Chat ──
+async function newChat() {
+  try { await fetch('/session/reset', {method: 'POST'}); } catch {}
+  chat.innerHTML = `
+    <div id="welcome">
+      <h2>Local AI Coding Assistant</h2>
+      <p>Ask me to write, review, debug, or explain code. Everything runs on your machine.</p>
+      <div class="examples">
+        <button onclick="useExample(this)">Write a FastAPI REST endpoint</button>
+        <button onclick="useExample(this)">Create a SQLite CRUD class</button>
+        <button onclick="useExample(this)">Write pytest fixtures for a database</button>
+        <button onclick="useExample(this)">Build an async producer-consumer</button>
+        <button onclick="useExample(this)">Explain what decorators do</button>
+        <button onclick="useExample(this)">Write a CLI tool with argparse</button>
+      </div>
+    </div>`;
+  // Close code area
+  codeArea.classList.remove('open');
+  codeToggle.classList.remove('active');
+  codeInput.value = '';
+}
+
+// ── Code toggle ──
+function toggleCode() {
+  codeArea.classList.toggle('open');
+  codeToggle.classList.toggle('active');
+  if (codeArea.classList.contains('open')) codeInput.focus();
+}
+
+// ── Send message (streaming) ──
 async function send() {
   const text = prompt.value.trim();
   if (!text || busy) return;
@@ -228,26 +300,114 @@ async function send() {
   const welcome = document.getElementById('welcome');
   if (welcome) welcome.remove();
 
+  // Gather code attachment
+  const code = codeArea.classList.contains('open') ? codeInput.value.trim() : '';
+
   // User message
-  addMsg(text, 'user');
+  if (code) {
+    addMsg(text + '\n\n[code attached]', 'user');
+  } else {
+    addMsg(text, 'user');
+  }
   prompt.value = '';
   autoResize(prompt);
 
-  // Typing indicator
-  const typing = addTyping();
+  // Clear code area after sending
+  if (code) {
+    codeInput.value = '';
+    codeArea.classList.remove('open');
+    codeToggle.classList.remove('active');
+  }
+
   busy = true;
   sendBtn.disabled = true;
+  const start = performance.now();
+
+  // Try streaming first, fall back to non-streaming
+  const body = {prompt: text};
+  if (code) body.code = code;
 
   try {
-    const start = performance.now();
+    const r = await fetch('/generate/stream', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body),
+    });
+
+    if (!r.ok || !r.body) {
+      // Fallback to non-streaming
+      await sendNonStreaming(text, body, start);
+      return;
+    }
+
+    const botDiv = document.createElement('div');
+    botDiv.className = 'msg bot';
+    botDiv.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+    chat.appendChild(botDiv);
+    chat.scrollTop = chat.scrollHeight;
+
+    const reader = r.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    let firstToken = true;
+    let buffer = '';
+
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, {stream: true});
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // keep incomplete line in buffer
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const payload = line.slice(6);
+        if (payload === '[DONE]') continue;
+
+        try {
+          const {token} = JSON.parse(payload);
+          if (firstToken) {
+            botDiv.innerHTML = '';
+            firstToken = false;
+          }
+          fullText += token;
+          botDiv.innerHTML = renderMarkdown(fullText);
+          chat.scrollTop = chat.scrollHeight;
+        } catch {}
+      }
+    }
+
+    // Finalize: add copy buttons and meta
+    const elapsed = ((performance.now() - start) / 1000).toFixed(1);
+    botDiv.innerHTML = renderMarkdown(fullText);
+    addCopyButtons(botDiv);
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'meta';
+    metaDiv.textContent = `${elapsed}s total`;
+    botDiv.appendChild(metaDiv);
+    chat.scrollTop = chat.scrollHeight;
+  } catch (err) {
+    // Fallback to non-streaming
+    await sendNonStreaming(text, body, start);
+    return;
+  }
+
+  busy = false;
+  sendBtn.disabled = false;
+  prompt.focus();
+}
+
+async function sendNonStreaming(text, body, start) {
+  const typing = addTyping();
+  try {
     const r = await fetch('/generate', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({prompt: text}),
+      body: JSON.stringify(body),
     });
     const data = await r.json();
     const elapsed = ((performance.now() - start) / 1000).toFixed(1);
-
     typing.remove();
     addBotMsg(data.response, {
       time: elapsed,
@@ -258,7 +418,6 @@ async function send() {
     typing.remove();
     addMsg('Connection error. Is the server running?', 'system');
   }
-
   busy = false;
   sendBtn.disabled = false;
   prompt.focus();
@@ -278,9 +437,26 @@ function addBotMsg(text, meta) {
   const div = document.createElement('div');
   div.className = 'msg bot';
   div.innerHTML = renderMarkdown(text);
+  addCopyButtons(div);
 
-  // Add copy buttons to code blocks
+  if (meta) {
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'meta';
+    const parts = [];
+    if (meta.generation_time) parts.push(`${meta.generation_time}s generation`);
+    if (meta.modules?.length) parts.push(meta.modules.join(', '));
+    if (meta.time) parts.push(`${meta.time}s total`);
+    metaDiv.textContent = parts.join('  |  ');
+    div.appendChild(metaDiv);
+  }
+
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function addCopyButtons(div) {
   div.querySelectorAll('pre').forEach(pre => {
+    if (pre.parentNode.classList.contains('code-wrap')) return;
     const wrap = document.createElement('div');
     wrap.className = 'code-wrap';
     pre.parentNode.insertBefore(wrap, pre);
@@ -296,20 +472,6 @@ function addBotMsg(text, meta) {
     };
     wrap.appendChild(btn);
   });
-
-  if (meta) {
-    const metaDiv = document.createElement('div');
-    metaDiv.className = 'meta';
-    const parts = [];
-    if (meta.generation_time) parts.push(`${meta.generation_time}s generation`);
-    if (meta.modules?.length) parts.push(meta.modules.join(', '));
-    if (meta.time) parts.push(`${meta.time}s total`);
-    metaDiv.textContent = parts.join('  |  ');
-    div.appendChild(metaDiv);
-  }
-
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
 }
 
 function addTyping() {

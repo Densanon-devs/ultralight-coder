@@ -16,12 +16,28 @@ Usage:
 """
 
 import importlib
+import logging
 import os
 import platform
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+# Suppress noisy third-party logs before anything imports them
+for _name in ("httpx", "httpcore", "sentence_transformers", "transformers",
+              "huggingface_hub", "filelock"):
+    logging.getLogger(_name).setLevel(logging.WARNING)
+
+# Suppress llama.cpp verbose output
+os.environ.setdefault("LLAMA_LOG_LEVEL", "ERROR")
+
+# Offline mode for sentence-transformers — skip HuggingFace HEAD requests
+# on every startup. Only set if the model cache likely exists already.
+_hf_cache = Path(os.environ.get("HF_HOME", Path.home() / ".cache" / "huggingface"))
+if _hf_cache.exists():
+    os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+    os.environ.setdefault("HF_HUB_OFFLINE", "1")
 
 PROJECT_ROOT = Path(__file__).parent
 MODELS_DIR = PROJECT_ROOT / "models"

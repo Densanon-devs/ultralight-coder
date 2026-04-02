@@ -20,12 +20,28 @@ Usage:
 import argparse
 import json
 import logging
+import os
 import sys
 import time
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Suppress noisy third-party logs
+for _name in ("httpx", "httpcore", "sentence_transformers", "transformers",
+              "huggingface_hub", "filelock"):
+    logging.getLogger(_name).setLevel(logging.WARNING)
+
+# Suppress llama.cpp verbose output
+os.environ.setdefault("LLAMA_LOG_LEVEL", "ERROR")
+
+# Offline mode for sentence-transformers — skip HuggingFace HEAD requests
+# on every startup. Only set if the model cache likely exists already.
+_hf_cache = Path(os.environ.get("HF_HOME", Path.home() / ".cache" / "huggingface"))
+if _hf_cache.exists():
+    os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+    os.environ.setdefault("HF_HUB_OFFLINE", "1")
 
 logger = logging.getLogger("UCA.server")
 
@@ -74,6 +90,7 @@ def create_app():
 
     class GenerateRequest(PydanticModel):
         prompt: str
+        code: Optional[str] = None
         max_tokens: Optional[int] = None
         temperature: Optional[float] = None
 
@@ -127,6 +144,13 @@ def create_app():
             })
         return {"models": result}
 
+    @app.post("/session/reset")
+    async def session_reset():
+        """Clear conversation history to start a new chat."""
+        engine = get_engine()
+        engine.memory.short_term.clear()
+        return {"reset": True}
+
     @app.post("/generate", response_model=GenerateResponse)
     async def generate(req: GenerateRequest):
         engine = get_engine()
@@ -137,7 +161,12 @@ def create_app():
         if req.temperature:
             engine.config.base_model.temperature = req.temperature
 
-        response = engine.process(req.prompt)
+        # If code is attached, prepend it to the prompt for review/debug
+        prompt = req.prompt
+        if req.code:
+            prompt = f"Here is my code:\n```\n{req.code}\n```\n\n{req.prompt}"
+
+        response = engine.process(prompt)
         elapsed = time.monotonic() - start
 
         last_perf = engine._perf_history[-1] if engine._perf_history else {}
@@ -152,8 +181,12 @@ def create_app():
     async def generate_stream(req: GenerateRequest):
         engine = get_engine()
 
+        prompt = req.prompt
+        if req.code:
+            prompt = f"Here is my code:\n```\n{req.code}\n```\n\n{req.prompt}"
+
         async def event_stream():
-            for token in engine.process_stream(req.prompt):
+            for token in engine.process_stream(prompt):
                 data = json.dumps({"token": token})
                 yield f"data: {data}\n\n"
             yield "data: [DONE]\n\n"

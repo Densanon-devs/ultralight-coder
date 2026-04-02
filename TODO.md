@@ -1,6 +1,6 @@
 # Ultralight Code Assistant — Roadmap
 
-## Status: Core Complete, Pre-Release
+## Status: Ship-Ready, Polished
 
 **What's done:**
 - 232 YAML augmentor examples across 39 categories
@@ -8,56 +8,13 @@
 - 34 failure routing categories, 251 trigger keywords
 - 399/400 on real-world benchmark (4 sets, 100 queries each)
 - Web UI (static/index.html), one-click launcher (launch.py)
-- FastAPI server with /generate, /status, /models/available
-
----
-
-## Priority 1: Ship-Ready (must-have before handing to users)
-
-### 1.1 Multi-Turn Conversation in Web UI
-**Why:** Users expect "now add error handling to that" to work. Without this, every response starts from scratch.
-
-**What exists:** The engine has a full MemorySystem (engine/memory.py) with short-term turns (30 messages) and FAISS long-term memory. The `process()` method in main.py already stores conversation history.
-
-**What's missing:**
-- Web UI (static/index.html) sends each prompt independently — no conversation ID or history
-- Server endpoint /generate doesn't accept or track conversation context
-- Need: add `session_id` to /generate, send prior messages as context, FusionLayer already has `budget_conversation: 0.55` allocated for this
-
-**Estimated scope:** ~50 lines in server.py + ~20 lines in index.html
-
-### 1.2 Paste-and-Fix Flow (Code Review / Debug)
-**Why:** Real usage is "here's my broken code, fix it" not just "write me a function."
-
-**What exists:** code_review and debugger modules with system prompts. Router already detects review/debug keywords. AugmentorRouter has code_review and debugger augmentors.
-
-**What's missing:**
-- Web UI has no way to paste code + describe the problem
-- Server doesn't route to code_review/debugger modules based on the query
-- Need: textarea for code input in UI, pass module_hint based on query keywords, show diff-style output
-
-**Estimated scope:** ~40 lines in index.html (code input area) + ~20 lines in server.py (module routing)
-
----
-
-## Priority 2: Polish (nice-to-have before release)
-
-### 2.1 Suppress Noisy Startup Logs
-The HuggingFace HTTP requests, BertModel LOAD REPORT, and llama_context warnings clutter the console. Users don't need to see these.
-- Set httpx and sentence_transformers loggers to WARNING
-- Redirect llama.cpp verbose output
-
-### 2.2 Model Download Helper
-Users need models but there's no download script. Add a `download_model.py` or integrate into launch.py:
-- Offer Qwen 0.5B (469MB, fast) and 1.5B (1.1GB, balanced) as defaults
-- Download from HuggingFace with progress bar
-- Verify file integrity after download
-
-### 2.3 Offline Mode for Sentence-Transformers
-The embedder tries to reach HuggingFace on every startup (HEAD requests). Cache the model locally and add `TRANSFORMERS_OFFLINE=1` support so it works fully offline.
-
-### 2.4 Streaming Responses in Web UI
-The /generate/stream SSE endpoint exists in server.py. Wire it into the web UI so code appears token-by-token instead of waiting for the full response.
+- FastAPI server with /generate, /generate/stream, /session/reset, /status, /models/available
+- Multi-turn conversation (engine memory persists across requests, New Chat resets)
+- Paste-and-fix flow (code input area in UI, code field sent to /generate)
+- Streaming responses in Web UI (SSE with fallback to non-streaming)
+- Noisy startup logs suppressed (httpx, sentence_transformers, llama.cpp)
+- Offline mode for sentence-transformers (TRANSFORMERS_OFFLINE + HF_HUB_OFFLINE)
+- Model download helper (download_model.py with 8 model options)
 
 ---
 
@@ -108,3 +65,4 @@ Wrap the FastAPI server as a VS Code extension backend. Users select code, right
 | 6b: Auto mode | 2026-04-01 | Model-size-adaptive matches hand-tuned |
 | 7: Real-world 400 queries | 2026-04-01 | 399/400 (99.8%) |
 | 8: Multi-agent (branch) | 2026-04-01 | Decomposition 9/10, assembly 4/10 |
+| 9: Ship-ready polish | 2026-04-02 | Multi-turn, paste-fix, streaming, log suppression, offline mode |
