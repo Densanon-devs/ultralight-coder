@@ -1,0 +1,1341 @@
+{
+  "total": 130,
+  "passed": 115,
+  "avg_score": 0.9487179487179487,
+  "results": [
+    {
+      "query": "Write a Python function that finds all anagrams in a list of words",
+      "domain": "python",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.01,
+      "lines": 15,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Python decorator that measures execution time of a function",
+      "domain": "python",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.72,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Python class that implements a priority queue using heapq",
+      "domain": "python",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.66,
+      "lines": 14,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Python async function that fetches multiple URLs concurrently",
+      "domain": "python",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.47,
+      "lines": 15,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Python context manager for a database transaction",
+      "domain": "python",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.23,
+      "lines": 22,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Python generator that yields fibonacci numbers",
+      "domain": "python",
+      "passed": true,
+      "score": 1.0,
+      "time": 0.92,
+      "lines": 5,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Python function that validates a JSON schema",
+      "domain": "python",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.31,
+      "lines": 29,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Python dataclass with validation in __post_init__",
+      "domain": "python",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.25,
+      "lines": 34,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Python function that merges two sorted lists into one sorted list",
+      "domain": "python",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.47,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Python class that implements the observer pattern",
+      "domain": "python",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.45,
+      "lines": 22,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a JavaScript function that deep merges two objects",
+      "domain": "javascript",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.89,
+      "lines": 18,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a JavaScript async function that retries a fetch request 3 times",
+      "domain": "javascript",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.0,
+      "lines": 18,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a JavaScript class for a publish-subscribe event system",
+      "domain": "javascript",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.56,
+      "lines": 28,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a JavaScript function that flattens a deeply nested array",
+      "domain": "javascript",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.25,
+      "lines": 10,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a JavaScript Promise.all implementation from scratch",
+      "domain": "javascript",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.88,
+      "lines": 18,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a JavaScript function that converts a flat array into a tree structure",
+      "domain": "javascript",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.2,
+      "lines": 11,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a JavaScript middleware pattern for processing requests",
+      "domain": "javascript",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.17,
+      "lines": 34,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a JavaScript function that implements memoization with a cache",
+      "domain": "javascript",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.45,
+      "lines": 12,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a JavaScript class that implements a simple router with path matching",
+      "domain": "javascript",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.44,
+      "lines": 46,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a JavaScript function that validates a credit card number using Luhn algorithm",
+      "domain": "javascript",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.94,
+      "lines": 29,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a TypeScript generic function that removes duplicates from an array",
+      "domain": "typescript",
+      "passed": true,
+      "score": 1.0,
+      "time": 0.64,
+      "lines": 4,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a TypeScript interface for a REST API response with pagination",
+      "domain": "typescript",
+      "passed": true,
+      "score": 1.0,
+      "time": 0.88,
+      "lines": 7,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a TypeScript generic class for an observable value with subscribers",
+      "domain": "typescript",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.11,
+      "lines": 22,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a TypeScript discriminated union for different shape types with an area function",
+      "domain": "typescript",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.52,
+      "lines": 30,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a TypeScript generic function that creates a type-safe dictionary",
+      "domain": "typescript",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.55,
+      "lines": 10,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a TypeScript decorator that logs method calls with parameters",
+      "domain": "typescript",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.3,
+      "lines": 18,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a TypeScript utility type that makes all nested properties optional",
+      "domain": "typescript",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.53,
+      "lines": 15,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a TypeScript async function that fetches data with retry logic and timeout",
+      "domain": "typescript",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.36,
+      "lines": 18,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a TypeScript class that implements a simple dependency injection container",
+      "domain": "typescript",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.2,
+      "lines": 16,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a TypeScript generic linked list with type-safe nodes",
+      "domain": "typescript",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.39,
+      "lines": 68,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Go function that reverses a slice of any type using generics",
+      "domain": "go",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.95,
+      "lines": 18,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Go HTTP handler that accepts JSON POST requests and validates required fields",
+      "domain": "go",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.75,
+      "lines": 34,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Go goroutine-based pipeline with three stages connected by channels",
+      "domain": "go",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.67,
+      "lines": 40,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Go function that reads a CSV file and returns a slice of structs",
+      "domain": "go",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.67,
+      "lines": 45,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Go interface for a cache with Get, Set, and Delete methods",
+      "domain": "go",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.5,
+      "lines": 38,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Go function that walks a directory tree and returns all file paths matching a pattern",
+      "domain": "go",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.52,
+      "lines": 34,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Go context-aware HTTP client with timeout and cancellation",
+      "domain": "go",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.77,
+      "lines": 37,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Go struct with methods that implements the Stringer interface",
+      "domain": "go",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.8,
+      "lines": 20,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Go error type that wraps another error with additional context",
+      "domain": "go",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 3.86,
+      "lines": 29,
+      "missing": [
+        "Error()"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Go function that merges multiple sorted channels into one sorted output channel",
+      "domain": "go",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.25,
+      "lines": 33,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Rust function that counts word frequency in a string using HashMap",
+      "domain": "rust",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.42,
+      "lines": 9,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Rust struct for a linked list with push and pop methods",
+      "domain": "rust",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.06,
+      "lines": 32,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Rust enum for a binary tree with insert and contains methods",
+      "domain": "rust",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.5,
+      "lines": 38,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Rust function that reads lines from a file and returns a Vec<String>",
+      "domain": "rust",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 2.34,
+      "lines": 19,
+      "missing": [
+        "Result"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Rust trait for serialization with to_json and from_json methods",
+      "domain": "rust",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.84,
+      "lines": 44,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Rust function that filters and maps a vector using iterator chains",
+      "domain": "rust",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.52,
+      "lines": 8,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Rust struct that implements Iterator for a custom range with step",
+      "domain": "rust",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.55,
+      "lines": 27,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Rust error enum with Display and From implementations for conversion",
+      "domain": "rust",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.5,
+      "lines": 41,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Rust generic function that finds the minimum value in a slice",
+      "domain": "rust",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 1.67,
+      "lines": 13,
+      "missing": [
+        "Option"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Rust function that spawns threads to process items in parallel and collects results",
+      "domain": "rust",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.23,
+      "lines": 30,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a SQL query that finds the second highest salary in each department",
+      "domain": "sql",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.17,
+      "lines": 9,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write SQL to create a users table with email uniqueness and timestamps",
+      "domain": "sql",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.0,
+      "lines": 8,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a SQL query using a CTE to calculate running totals by month",
+      "domain": "sql",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.56,
+      "lines": 14,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a SQL query that finds customers who ordered every product in a category",
+      "domain": "sql",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.7,
+      "lines": 10,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write SQL to create a view that shows order summaries with customer names",
+      "domain": "sql",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.12,
+      "lines": 6,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a SQL query that detects gaps in a sequence of IDs",
+      "domain": "sql",
+      "passed": true,
+      "score": 1.0,
+      "time": 0.77,
+      "lines": 7,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write SQL to update prices with a 10% increase for products not sold in 30 days",
+      "domain": "sql",
+      "passed": true,
+      "score": 1.0,
+      "time": 0.77,
+      "lines": 4,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a SQL query that pivots rows into columns showing monthly sales per product",
+      "domain": "sql",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 0.99,
+      "lines": 7,
+      "missing": [
+        "CASE"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "Write SQL to delete duplicate rows keeping only the one with the lowest ID",
+      "domain": "sql",
+      "passed": true,
+      "score": 1.0,
+      "time": 0.5,
+      "lines": 6,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a SQL query with a self-join to find employees and their managers",
+      "domain": "sql",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.12,
+      "lines": 8,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C function that reverses a string in place using pointers",
+      "domain": "c",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.5,
+      "lines": 12,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C function that implements binary search on a sorted array",
+      "domain": "c",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.62,
+      "lines": 41,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C struct for a dynamic array with push and get functions",
+      "domain": "c",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.39,
+      "lines": 26,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C function that merges two sorted arrays into a new sorted array",
+      "domain": "c",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.2,
+      "lines": 27,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C function that counts the occurrences of each character in a string",
+      "domain": "c",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.22,
+      "lines": 8,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C function that reads a file line by line using fgets",
+      "domain": "c",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.41,
+      "lines": 16,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C implementation of a stack using a linked list",
+      "domain": "c",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.23,
+      "lines": 29,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C function that splits a string by a delimiter",
+      "domain": "c",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.94,
+      "lines": 22,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C function that sorts an array using quicksort",
+      "domain": "c",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.8,
+      "lines": 54,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C function that computes the factorial of a number recursively",
+      "domain": "c",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.66,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Java method that checks if a string is a palindrome",
+      "domain": "java",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.56,
+      "lines": 15,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Java class that implements a thread-safe singleton pattern",
+      "domain": "java",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.44,
+      "lines": 15,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Java method using streams to find the most frequent word in a list",
+      "domain": "java",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.86,
+      "lines": 15,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Java generic class for a bounded buffer with put and take methods",
+      "domain": "java",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 2.52,
+      "lines": 20,
+      "missing": [
+        "synchronized"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Java interface for a repository with CRUD methods and implement it",
+      "domain": "java",
+      "passed": false,
+      "score": 0.3333333333333333,
+      "time": 0.89,
+      "lines": 7,
+      "missing": [
+        "class "
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Java method that reads a file and counts word frequencies using a HashMap",
+      "domain": "java",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.16,
+      "lines": 25,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Java enum with fields, a constructor, and a lookup method",
+      "domain": "java",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.24,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Java CompletableFuture chain that fetches data, transforms it, and handles errors",
+      "domain": "java",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.05,
+      "lines": 19,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Java method that flattens a nested List of Lists into a single list",
+      "domain": "java",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.59,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Java class that implements Comparable for sorting by multiple fields",
+      "domain": "java",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.02,
+      "lines": 29,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C# method that groups a list of objects by a property using LINQ",
+      "domain": "csharp",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.75,
+      "lines": 16,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C# async method that downloads multiple files in parallel",
+      "domain": "csharp",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.45,
+      "lines": 21,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C# generic class that implements a stack with push, pop, and peek",
+      "domain": "csharp",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.39,
+      "lines": 27,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C# record with computed properties and custom equality",
+      "domain": "csharp",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.31,
+      "lines": 19,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C# extension method that converts a string to title case",
+      "domain": "csharp",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.34,
+      "lines": 24,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C# interface for a repository pattern with generic CRUD methods",
+      "domain": "csharp",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 3.47,
+      "lines": 41,
+      "missing": [
+        "Task"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C# method that parses a CSV string into a list of dictionaries",
+      "domain": "csharp",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.76,
+      "lines": 28,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C# class that implements IDisposable for managing unmanaged resources",
+      "domain": "csharp",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.91,
+      "lines": 22,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C# LINQ query that joins two lists and selects specific fields",
+      "domain": "csharp",
+      "passed": false,
+      "score": 0.3333333333333333,
+      "time": 3.23,
+      "lines": 31,
+      "missing": [
+        "join ",
+        "select "
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "Write a C# method that validates an object using custom validation attributes",
+      "domain": "csharp",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 1.58,
+      "lines": 22,
+      "missing": [
+        "Validate"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Ruby method that finds all permutations of an array",
+      "domain": "ruby",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.14,
+      "lines": 18,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Ruby class with comparable, initialize, and sorting support",
+      "domain": "ruby",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.19,
+      "lines": 12,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Ruby method that scrapes a webpage title using net/http",
+      "domain": "ruby",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.47,
+      "lines": 11,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Ruby module with class methods and instance methods mixed in",
+      "domain": "ruby",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.41,
+      "lines": 16,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Ruby method that reads a CSV file and returns an array of hashes",
+      "domain": "ruby",
+      "passed": true,
+      "score": 1.0,
+      "time": 0.59,
+      "lines": 5,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Ruby class that implements each and includes Enumerable",
+      "domain": "ruby",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.34,
+      "lines": 15,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Ruby method that converts a hash to query string parameters",
+      "domain": "ruby",
+      "passed": true,
+      "score": 1.0,
+      "time": 0.69,
+      "lines": 6,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Ruby method that retries a block up to N times on exception",
+      "domain": "ruby",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.17,
+      "lines": 10,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Ruby class for a simple HTTP API client with get and post methods",
+      "domain": "ruby",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.66,
+      "lines": 21,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Ruby method that deep merges two nested hashes",
+      "domain": "ruby",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.16,
+      "lines": 11,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a bash script that finds and deletes all files older than 30 days",
+      "domain": "bash",
+      "passed": false,
+      "score": 0.3333333333333333,
+      "time": 5.03,
+      "lines": 15,
+      "missing": [
+        "find ",
+        "-mtime"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "Write a bash function that checks if a port is open on a host",
+      "domain": "bash",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.22,
+      "lines": 6,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a bash script that monitors disk usage and sends an alert above 90%",
+      "domain": "bash",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.72,
+      "lines": 28,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a bash script that renames all .txt files in a directory to .md",
+      "domain": "bash",
+      "passed": true,
+      "score": 1.0,
+      "time": 0.83,
+      "lines": 5,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a bash function that extracts a specific field from a CSV file",
+      "domain": "bash",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.8,
+      "lines": 16,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a bash script that creates a compressed archive of changed git files",
+      "domain": "bash",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.08,
+      "lines": 8,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a bash script with proper argument parsing using getopts",
+      "domain": "bash",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.45,
+      "lines": 32,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a bash function that validates an IP address format",
+      "domain": "bash",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.03,
+      "lines": 12,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a bash script that watches a directory for new files and processes them",
+      "domain": "bash",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.28,
+      "lines": 26,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a bash script that generates a report of the top 10 largest files in a directory",
+      "domain": "bash",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.38,
+      "lines": 5,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Kotlin data class with validation in the init block",
+      "domain": "kotlin",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 2.72,
+      "lines": 12,
+      "missing": [
+        "init"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Kotlin sealed class hierarchy for API response states",
+      "domain": "kotlin",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.05,
+      "lines": 16,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Kotlin extension function on List that returns the second largest element",
+      "domain": "kotlin",
+      "passed": true,
+      "score": 1.0,
+      "time": 0.94,
+      "lines": 8,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Kotlin coroutine function that fetches data from two APIs in parallel",
+      "domain": "kotlin",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.99,
+      "lines": 14,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Kotlin function that groups a list of items by a selector and counts them",
+      "domain": "kotlin",
+      "passed": true,
+      "score": 1.0,
+      "time": 0.74,
+      "lines": 4,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Kotlin inline function with reified type parameter for JSON parsing",
+      "domain": "kotlin",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 1.14,
+      "lines": 9,
+      "missing": [
+        "reified"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Kotlin class that implements a simple LRU cache using LinkedHashMap",
+      "domain": "kotlin",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.39,
+      "lines": 23,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Kotlin function that reads a file and returns its lines, handling errors",
+      "domain": "kotlin",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.7,
+      "lines": 14,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Kotlin object that implements a thread-safe singleton with lazy initialization",
+      "domain": "kotlin",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 3.31,
+      "lines": 23,
+      "missing": [
+        "object "
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Kotlin flow that emits items with a delay between each",
+      "domain": "kotlin",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.48,
+      "lines": 12,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Swift struct with Codable conformance for JSON serialization",
+      "domain": "swift",
+      "passed": true,
+      "score": 1.0,
+      "time": 0.69,
+      "lines": 7,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Swift generic function that finds the first element matching a predicate",
+      "domain": "swift",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.05,
+      "lines": 9,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Swift enum with associated values and a computed property",
+      "domain": "swift",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.41,
+      "lines": 22,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Swift protocol for a data store with async methods",
+      "domain": "swift",
+      "passed": true,
+      "score": 1.0,
+      "time": 0.73,
+      "lines": 5,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Swift class that implements a simple observer pattern with closures",
+      "domain": "swift",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.64,
+      "lines": 41,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Swift extension on Array that adds a method to chunk into groups of N",
+      "domain": "swift",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.58,
+      "lines": 10,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Swift async function that downloads data from a URL with error handling",
+      "domain": "swift",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.75,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Swift struct that conforms to Comparable for custom sorting",
+      "domain": "swift",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.38,
+      "lines": 28,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Swift property wrapper that clamps a value between a min and max",
+      "domain": "swift",
+      "passed": false,
+      "score": 0.3333333333333333,
+      "time": 3.92,
+      "lines": 29,
+      "missing": [
+        "struct ",
+        "wrappedValue"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "Write a Swift generic stack using an array with push, pop, and peek",
+      "domain": "swift",
+      "passed": false,
+      "score": 0.3333333333333333,
+      "time": 1.86,
+      "lines": 19,
+      "missing": [
+        "struct ",
+        "mutating"
+      ],
+      "unwanted": []
+    }
+  ]
+}
