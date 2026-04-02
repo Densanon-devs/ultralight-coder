@@ -65,6 +65,6 @@ Wrap the FastAPI server as a VS Code extension backend. Users select code, right
 | 7: Real-world 400 queries | 2026-04-01 | 399/400 (99.8%) |
 | 8: Multi-agent (branch) | 2026-04-01 | Decomposition 9/10, assembly 4/10 |
 | 9: Ship-ready polish | 2026-04-02 | Multi-turn, paste-fix, streaming, log suppression, offline mode |
-| 10: Multi-language | 2026-04-02 | 12 languages, 359 examples, 99.2% benchmark, language-aware routing |
+| 10: Multi-language | 2026-04-02 | 12 languages, 437 examples, 99.2% benchmark, language-aware routing |
 | 11: Project context | 2026-04-02 | Codebase indexing + retrieval, FAISS-backed, UI integration |
 | 12: v0.1.0 ship prep | 2026-04-02 | README, LICENSE, pyproject.toml, requirements audit, .gitignore |

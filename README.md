@@ -1,6 +1,6 @@
 # Ultralight Code Assistant
 
-A local AI coding assistant powered by tiny GGUF models (0.5B-3B parameters). Uses a curated augmentor system to make small models perform like large ones -- 359 examples across 12 languages push a 469MB model to 99.2% accuracy on real-world coding queries.
+A local AI coding assistant powered by tiny GGUF models (0.5B-3B parameters). Uses a curated augmentor system to make small models perform like large ones -- 437 examples across 12 languages push a 469MB model to 99.2% accuracy on real-world coding queries.
 
 Everything runs on your machine. No API keys, no cloud, no data leaves your computer.
 
