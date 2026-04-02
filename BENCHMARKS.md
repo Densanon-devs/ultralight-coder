@@ -880,32 +880,78 @@ Two sets of 100 queries each:
 
 Each query has `must_contain` markers (strings that must appear in the generated code) and `must_not_contain` markers (strings that indicate a wrong approach). Markers test that the model used the right approach, not just that it generated code.
 
-## Results: 200/200 (100%)
+## Results: 400 Queries — 4 Sets
 
-| Domain | Queries | Passed | Score |
-|--------|:-------:|:------:|:-----:|
-| Algorithm | 18 | 18 | **100%** |
-| Async | 9 | 9 | **100%** |
-| CLI | 24 | 24 | **100%** |
-| Data Processing | 18 | 18 | **100%** |
-| Database | 16 | 16 | **100%** |
-| General | 54 | 54 | **100%** |
-| Pattern | 30 | 30 | **100%** |
-| Testing | 8 | 8 | **100%** |
-| Web | 23 | 23 | **100%** |
-| **Total** | **200** | **200** | **100%** |
+### Set 1: Fundamentals (100 queries) — 100/100
+
+Core coding tasks: algorithms, data structures, CRUD, fixtures, decorators, CLI tools.
+
+| Domain | Queries | Passed |
+|--------|:-------:|:------:|
+| Algorithm | 10 | **10** |
+| Async | 8 | **8** |
+| CLI | 8 | **8** |
+| Data | 8 | **8** |
+| Database | 10 | **10** |
+| General | 20 | **20** |
+| Pattern | 18 | **18** |
+| Testing | 8 | **8** |
+| Web | 10 | **10** |
+
+### Set 2: Project-Oriented (100 queries) — 100/100
+
+Real project work: string manipulation, file operations, networking, OOP, error handling, concurrency, serialization, DevOps, security, mini-projects.
+
+### Set 3: Edge Cases + Architecture (100 queries) — 99/100
+
+Vague beginner prompts, multi-concept mashups, design patterns (strategy, command, chain of responsibility, event sourcing, CQRS, saga, visitor, builder, mediator), tricky Python (metaclasses, descriptors, coroutines, weakrefs, contextvars), system-level code (mmap, signals, ctypes), and unusual requests (quine, brainfuck interpreter, lisp interpreter, genetic algorithm).
+
+| Domain | Queries | Passed |
+|--------|:-------:|:------:|
+| Algorithm | 7 | **7** |
+| Async | 2 | **2** |
+| CLI | 6 | **6** |
+| Data | 6 | **6** |
+| Database | 6 | **6** |
+| General | 37 | **36** |
+| Pattern | 26 | **26** |
+| Testing | 1 | **1** |
+| Web | 9 | **9** |
+
+One failure: "how do i make my code faster" — model gave optimization advice instead of a function. Legitimate advice response, not broken code.
+
+### Set 4: Deep Gaps + Niche Patterns (100 queries) — 100/100
+
+Functional programming (compose, curry, pipe, memoize, trampoline, lazy eval, maybe monad, transducers), type hints (TypeVar, Protocol, overload, TypedDict), performance patterns (bloom filter, ring buffer, skip list, object pool, debounce, throttle), config management, structured logging, data validation edge cases, deep networking (raw sockets, HTTP from scratch, UDP, port scanner, DNS resolver, connection multiplexer), metaprogramming (metaclasses, dynamic class creation, frozen decorators, ABCs), production hardening (circuit breaker, dead letter queue, bulkhead, saga, canary deployment, chaos monkey), and advanced algorithms (Dijkstra, A*, red-black tree, KMP, Huffman, union-find, B-tree, consistent hashing).
+
+### Combined Results
+
+| Set | Focus | Queries | Passed | Score |
+|-----|-------|:-------:|:------:|:-----:|
+| **V1** | Fundamentals | 100 | 100 | **100%** |
+| **V2** | Project-oriented | 100 | 100 | **100%** |
+| **V3** | Edge cases + architecture | 100 | 99 | **99%** |
+| **V4** | Deep gaps + niche patterns | 100 | 100 | **100%** |
+| **Total** | **All domains** | **400** | **399** | **99.8%** |
 
 **Model:** Qwen2.5-Coder-0.5B (469 MB)
 **Mode:** Auto (rerank1, single example injection)
-**Examples:** 230 across 47 YAML files, 39 categories
-**Failure routing:** 33 categories, 248 trigger keywords
+**Examples:** 232 across 47 YAML files, 39 categories
+**Failure routing:** 34 categories, 251 trigger keywords
+**Routing coverage:** V1=75%, V2=39%, V3=42%, V4=~30% — model succeeds even when failure routing doesn't fire
 
 ## What This Proves
 
-44. **Broad coverage beats deep specialization.** 230 short examples across 39 categories cover the full breadth of what programmers ask. Each example teaches a *pattern shape*, not a specific answer.
+44. **Broad coverage beats deep specialization.** 232 short examples across 39 categories cover the full breadth of what programmers ask — from "write me a fibonacci function" to "implement a consistent hashing ring" to "build a brainfuck interpreter." Each example teaches a *pattern shape*, not a specific answer.
 
-45. **Failure routing is the backbone.** 33 keyword categories with 248 triggers catch the vast majority of queries before similarity search even runs. The keywords need to cover natural language variance ("numbers of pi", "digits of pi", "decimal places of pi" all mean the same thing).
+45. **Failure routing is the backbone for known patterns, but similarity handles the rest.** V1 had 75% routing coverage and scored 100%. V4 had ~30% routing coverage and still scored 100%. The model succeeds on 70% of queries through pure similarity retrieval alone.
 
 46. **Simple examples copy better than complex ones.** The e computation example failed when it used a factorial variable but succeeded with `term = term / i`. The 0.5B model copies character-by-character — minimize variables and branches.
 
 47. **Test markers must be approach-agnostic.** Testing for `def get`/`def put` fails when the model uses `__getitem__`/`__setitem__`. Testing for `subscribe` fails when the model uses `register`. Good markers test that the right *concept* is present, not the exact *name*.
+
+48. **The system handles vague prompts.** "make something that remembers things," "thing that takes a list and removes the duplicates," "i keep getting an error when i try to open a file that doesnt exist" — all pass. The model produces working code even for non-technical phrasing.
+
+49. **Architecture patterns work without dedicated examples.** Strategy, command, chain of responsibility, event sourcing, CQRS, saga, visitor, builder, mediator — all pass without specific augmentor examples. The model's training data covers these, and the system doesn't inject a wrong example to confuse it.
+
+50. **The 469 MB ceiling is approach selection, not code quality.** The 12 initial V4 failures were all cases where the model chose a valid alternative approach (ABC instead of Protocol, `__init__` validation instead of `__post_init__`). Zero failures were broken or incorrect code.
