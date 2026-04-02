@@ -1,0 +1,1027 @@
+{
+  "total": 100,
+  "passed": 88,
+  "avg_score": 0.9600000000000003,
+  "results": [
+    {
+      "query": "write a compose function that chains multiple functions together",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.34,
+      "lines": 10,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a curry function that turns f(a,b,c) into f(a)(b)(c)",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.16,
+      "lines": 15,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "implement a pipe function that passes data through a series of transforms",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.72,
+      "lines": 23,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a memoize decorator using a dictionary cache",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.95,
+      "lines": 16,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a partial application function without using functools.partial",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.42,
+      "lines": 9,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function that flattens an arbitrarily nested list",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.95,
+      "lines": 14,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "implement map filter and reduce from scratch without builtins",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.99,
+      "lines": 27,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a trampoline function for tail-call optimization",
+      "domain": "general",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 8.88,
+      "lines": 14,
+      "missing": [
+        "while"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "create a lazy evaluation wrapper that delays computation until needed",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.47,
+      "lines": 23,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function that groups items by a key function like itertools.groupby",
+      "domain": "general",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 0.75,
+      "lines": 3,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "implement a maybe monad for handling None values in a chain",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.86,
+      "lines": 40,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a transducer that composes map and filter without intermediate lists",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.42,
+      "lines": 21,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a generic stack class with type hints using TypeVar",
+      "domain": "general",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 2.94,
+      "lines": 19,
+      "missing": [
+        "TypeVar"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "create a Protocol class that defines a Comparable interface",
+      "domain": "general",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 2.88,
+      "lines": 9,
+      "missing": [
+        "Protocol"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "write a function with overloaded signatures using typing.overload",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.09,
+      "lines": 34,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a TypedDict for a json api response",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.84,
+      "lines": 7,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a generic function that works with any iterable and returns a list",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.48,
+      "lines": 3,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "implement a runtime type checker decorator that validates argument types",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.86,
+      "lines": 20,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a dataclass with custom validators using __post_init__",
+      "domain": "general",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 5.36,
+      "lines": 16,
+      "missing": [
+        "__post_init__"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "write a type-safe event system using generics",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.88,
+      "lines": 35,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a Union type handler that dispatches based on the actual type",
+      "domain": "general",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 5.45,
+      "lines": 26,
+      "missing": [
+        "isinstance"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "write a recursive type hint for a tree structure like a json value",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.7,
+      "lines": 20,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a lru cache decorator that limits memory by number of entries",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.48,
+      "lines": 14,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create an object pool that reuses expensive objects instead of creating new ones",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.44,
+      "lines": 23,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a bloom filter for fast approximate set membership testing",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.3,
+      "lines": 25,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "implement a ring buffer with fixed size that overwrites old entries",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.64,
+      "lines": 33,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a debounce function that delays execution until calls stop",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.55,
+      "lines": 26,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a throttle function that limits how often a function can run",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.36,
+      "lines": 23,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a lazy property that computes once and caches the result",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.16,
+      "lines": 17,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "implement a skip list for O(log n) search in a sorted collection",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 10.62,
+      "lines": 54,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a connection pool with max size and timeout on acquire",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.41,
+      "lines": 22,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a batch accumulator that flushes when size or time threshold is hit",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 10.33,
+      "lines": 56,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a settings class that loads from environment variables with defaults",
+      "domain": "cli",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.7,
+      "lines": 28,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a config system that merges yaml file, env vars, and cli args in priority order",
+      "domain": "cli",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.03,
+      "lines": 49,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a secrets manager that reads encrypted values from a file",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.14,
+      "lines": 15,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a feature toggle system with percentage-based rollouts",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.98,
+      "lines": 39,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a dotenv file parser that loads key=value pairs into os.environ",
+      "domain": "cli",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.03,
+      "lines": 16,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a config watcher that reloads when the config file changes",
+      "domain": "cli",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.64,
+      "lines": 37,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a hierarchical config that inherits values from parent configs",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.03,
+      "lines": 60,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create an app config with validation that fails fast on missing required values",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.78,
+      "lines": 59,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a structured json logger that outputs one json object per log line",
+      "domain": "cli",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.58,
+      "lines": 23,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a metrics collector that tracks count, sum, and average",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.3,
+      "lines": 32,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function timer context manager that logs slow functions",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.74,
+      "lines": 18,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a request id middleware that adds a unique id to every request",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.83,
+      "lines": 7,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a log aggregator that groups log lines by request id",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.94,
+      "lines": 18,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a decorator that logs function entry exit and exceptions",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.69,
+      "lines": 22,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a simple alerting system that sends notifications when metrics exceed thresholds",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.58,
+      "lines": 16,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a ring buffer for keeping the last N log entries in memory",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 10.34,
+      "lines": 21,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a recursive json schema validator that handles nested objects and arrays",
+      "domain": "data",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.59,
+      "lines": 48,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a form validator with chained rules like required().min(3).max(100)",
+      "domain": "data",
+      "passed": true,
+      "score": 1.0,
+      "time": 10.55,
+      "lines": 53,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function that sanitizes html input to prevent xss",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.88,
+      "lines": 16,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a data coercion function that converts strings to appropriate python types",
+      "domain": "data",
+      "passed": true,
+      "score": 1.0,
+      "time": 11.55,
+      "lines": 53,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a diff function that shows what changed between two dicts",
+      "domain": "data",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.64,
+      "lines": 12,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a deepcompare function that handles nested dicts lists and sets",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.02,
+      "lines": 21,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a data masking function that redacts sensitive fields in nested dicts",
+      "domain": "data",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.12,
+      "lines": 20,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a schema migration function that transforms old data format to new format",
+      "domain": "data",
+      "passed": true,
+      "score": 1.0,
+      "time": 10.26,
+      "lines": 43,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a tcp chat room where multiple clients can send messages to each other",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.92,
+      "lines": 39,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a simple http proxy that forwards requests to a backend server",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.94,
+      "lines": 31,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a udp packet sender and receiver",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.91,
+      "lines": 27,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a port scanner that checks if ports are open on a host",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.98,
+      "lines": 20,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a simple dns resolver that sends udp queries",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.92,
+      "lines": 28,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write an http server from scratch using only sockets",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.92,
+      "lines": 46,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a websocket handshake handler that upgrades an http connection",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 10.12,
+      "lines": 31,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a connection multiplexer that handles multiple sockets with select",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.94,
+      "lines": 39,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a class decorator that adds comparison methods based on a key",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.38,
+      "lines": 14,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a metaclass that enforces all methods have docstrings",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 11.55,
+      "lines": 57,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function that creates a new class dynamically with given attributes",
+      "domain": "general",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 6.38,
+      "lines": 17,
+      "missing": [
+        "type("
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "build a mixin system where classes can compose behavior from multiple mixins",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 10.72,
+      "lines": 32,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a property factory that generates getters and setters with validation",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.22,
+      "lines": 26,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write an auto-repr mixin that generates __repr__ from instance attributes",
+      "domain": "general",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 2.55,
+      "lines": 3,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "implement a frozen class decorator that prevents attribute modification after init",
+      "domain": "general",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 3.55,
+      "lines": 10,
+      "missing": [
+        "__setattr__"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "create an abstract base class with abstract methods and a register mechanism",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 10.69,
+      "lines": 61,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a graceful shutdown handler that finishes in-flight requests before stopping",
+      "domain": "cli",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 9.3,
+      "lines": 28,
+      "missing": [
+        "signal"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "create a health check that verifies database connectivity and disk space",
+      "domain": "cli",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.72,
+      "lines": 32,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write an exponential backoff with jitter for retrying failed operations",
+      "domain": "pattern",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 3.94,
+      "lines": 23,
+      "missing": [
+        "random"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "build a bulkhead pattern that limits concurrent access to a resource",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 10.05,
+      "lines": 45,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a dead letter queue for messages that fail processing",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.89,
+      "lines": 23,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a request deduplication system using idempotency keys",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.42,
+      "lines": 18,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a token bucket rate limiter with configurable rate and burst",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.69,
+      "lines": 30,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a canary deployment checker that compares error rates",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.34,
+      "lines": 19,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a distributed lock using a file-based mechanism",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 10.08,
+      "lines": 36,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a worker pool with configurable concurrency and error handling",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.98,
+      "lines": 58,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a lease-based resource manager with automatic expiry",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.22,
+      "lines": 52,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a chaos monkey function that randomly kills processes for testing resilience",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.38,
+      "lines": 30,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "implement dijkstra's shortest path algorithm",
+      "domain": "algorithm",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 8.05,
+      "lines": 28,
+      "missing": [
+        "dist"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "write an a-star pathfinding algorithm on a 2d grid",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.33,
+      "lines": 37,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a red-black tree with insert and rebalance",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 11.11,
+      "lines": 59,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "implement knuth-morris-pratt string matching algorithm",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.42,
+      "lines": 22,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a huffman encoding and decoding system",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.41,
+      "lines": 59,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a disjoint set (union-find) with path compression",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.28,
+      "lines": 21,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "implement a b-tree with insert and search operations",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 11.17,
+      "lines": 60,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a consistent hashing ring for distributed systems",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.3,
+      "lines": 45,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a python debugger that hooks into sys.settrace",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.62,
+      "lines": 16,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a sandboxed exec that limits what code can do",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.22,
+      "lines": 20,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a simple bytecode interpreter for a stack-based language",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.47,
+      "lines": 73,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a task dependency resolver using topological sort",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.98,
+      "lines": 34,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a finite automaton that matches a simple pattern",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.05,
+      "lines": 17,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write an incremental parser that processes data as it arrives in chunks",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.97,
+      "lines": 32,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a promise/future implementation with then and catch",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.03,
+      "lines": 26,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a reactive stream with map filter and subscribe operators",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 10.33,
+      "lines": 50,
+      "missing": [],
+      "unwanted": []
+    }
+  ]
+}

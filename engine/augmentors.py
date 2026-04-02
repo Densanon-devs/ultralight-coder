@@ -90,6 +90,8 @@ FAILURE_PATTERNS: dict[str, list[str]] = {
         "async def", "async for", "async with", "async generator",
         "async context manager", "__aenter__", "__aexit__",
         "async iterator", "__aiter__", "__anext__",
+        "yield and send", "coroutine send", "generator send",
+        "contextvars", "contextvar", "context variable",
     ],
     "async_concurrency": [
         "asyncio.gather", "asyncio.semaphore", "semaphore",
