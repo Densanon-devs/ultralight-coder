@@ -103,6 +103,9 @@ def main():
     from engine.config import Config
 
     cfg = Config(args.config)
+    # Apply --model override
+    if args.model:
+        cfg.base_model.path = args.model
     model = BaseModel(cfg.base_model)
     model.load()
     print(f"Model loaded in {time.time() - start:.1f}s")

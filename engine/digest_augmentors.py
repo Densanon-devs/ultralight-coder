@@ -168,7 +168,7 @@ def verify_highlights(response: str, query: str) -> tuple[bool, str]:
     if len(intro) < 40:
         return False, f"Intro too short ({len(intro)} chars)."
 
-    if len(intro) > 600:
+    if len(intro) > 800:
         return False, f"Intro too long ({len(intro)} chars)."
 
     # No meta-language

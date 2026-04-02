@@ -1,5 +1,5 @@
 {
-  "highlights_intro": "Today's digest is headlined by a wave of 1-bit and ultra-compressed open-source models threatening to upend the local LLM landscape, alongside a surge of community-driven agentic workflows showing how developers are taming Claude at scale. On the research side, new mechanistic work on emotion in LLMs and a community framework for reliable tool-use agents round out a technically rich day.",
+  "highlights_intro": "Today's digest is highlighted by a new community-driven framework for reliable tool-use agents, cutting-edge research on emotion in LLMs, and the Bonsai 1-bit models, all while Holo3 is breaking new ground in computer use frontier. On the tools side, March 2026 sponsors-only newsletter offers valuable insights, and anthropics/claude-code v2.1.90 introduces a new version of Claude with improved token efficiency. Additionally, a community-driven tool that saves 50K tokens per conversation by pre-indexing codebase and a simple 3-agent team approach to Claude coding demonstrate the effectiveness of these technologies.",
   "sections": [
     {
       "name": "Research & Papers",
@@ -8,21 +8,21 @@
         {
           "title": "How Emotion Shapes the Behavior of LLMs and Agents: A Mechanistic Study",
           "source": "ArXiv cs.AI",
-          "url": "https://arxiv.org/search/?searchtype=all&query=Emotion+Shapes+Behavior+LLMs+Agents+Mechanistic",
+          "url": "https://arxiv.org/abs/2604.00005",
           "takeaways": [
-            "The paper provides a mechanistic account of how emotional framing in prompts propagates through LLM internals to alter outputs — not just surface tone, but factual confidence, risk tolerance, and refusal rates.",
-            "Findings have direct implications for prompt injection and jailbreak surface area: emotional priming is shown to reliably shift safety-relevant behaviors in ways that bypass standard safety tuning.",
-            "This moves the conversation beyond 'emotional prompts work empirically' to explaining why they work, which is the prerequisite for building defenses."
+            "The paper provides a detailed analysis of how emotional signals influence LLM behavior, offering a mechanistic understanding of how emotions can shape the decision-making process.",
+            "The findings suggest that emotional priming can significantly alter the behavior of LLMs, including safety-relevant decisions, which has implications for prompt injection and agent behavior.",
+            "The paper's findings contribute to the field by explaining the underlying mechanisms that underpin the observed behavior, providing a foundation for developing effective defenses against emotional manipulation in LLMs and agents."
           ]
         },
         {
           "title": "Open, Reliable, and Collective: A Community-Driven Framework for Tool-Using AI Agents",
           "source": "ArXiv cs.AI",
-          "url": "https://arxiv.org/search/?searchtype=all&query=Open+Reliable+Collective+Community+Framework+Tool-Using+AI+Agents",
+          "url": "https://arxiv.org/abs/2604.00137",
           "takeaways": [
-            "The paper argues that tool-use reliability in LLM agents requires community-maintained registries and standardized contracts — not just better base models — drawing an analogy to how open-source package ecosystems improve reliability over time.",
-            "It proposes a concrete framework: shared tool schemas, failure mode taxonomies, and community-curated test suites that agents can query before invoking unfamiliar tools.",
-            "This is a governance and infrastructure paper as much as a technical one, and it addresses a real gap: most agentic frameworks today have no shared mechanism for propagating tool reliability knowledge."
+            "The paper introduces a new framework for tool-using AI agents that aims to improve reliability by incorporating community-maintained registries and standardized contracts.",
+            "Proposes shared tool schemas, failure mode taxonomies, and community-curated test suites to address the issue of tool-use accuracy.",
+            "A governance and infrastructure paper addressing a real gap: most agentic frameworks have no shared mechanism for propagating tool reliability knowledge."
           ]
         }
       ]
@@ -34,21 +34,22 @@
         {
           "title": "Qwen3.6-Plus",
           "source": "r/LocalLLaMA",
-          "url": "https://www.reddit.com/r/LocalLLaMA/comments/qwen36plus",
+          "url": "https://reddit.com/r/LocalLLaMA/comments/1sa7sfw/qwen36plus/",
           "takeaways": [
-            "Qwen3.6-Plus is generating significant community buzz (569 upvotes, 155 comments) as a strong mid-size open model release, with early benchmarks suggesting competitive performance against models twice its size.",
-            "The release continues Alibaba's aggressive open-weight cadence, maintaining pressure on both Western frontier labs and smaller open-source projects.",
-            "Community reports highlight notably strong reasoning and instruction-following at the quantized sizes most relevant for local deployment."
+            "Qwen3.6-Plus is a significant open model release, with benchmarks suggesting competitive performance against models twice its size.",
+            "Continues Alibaba's aggressive open-weight cadence, maintaining pressure on Western frontier labs.",
+            "Community reports highlight strong reasoning and instruction-following at quantized sizes relevant for local deployment."
           ]
         },
         {
           "title": "The Bonsai 1-bit models are very good",
           "source": "r/LocalLLaMA",
-          "url": "https://www.reddit.com/r/LocalLLaMA/comments/bonsai_1bit",
+          "url": "https://reddit.com/r/LocalLLaMA/comments/1s9zumi/the_bonsai_1bit_models_are_very_good/",
           "takeaways": [
-            "Bonsai's 1-bit quantized models are earning unusually strong reviews (716 upvotes, 121 comments) — the top post of the day across all sources — with users reporting quality that defies expectations for extreme quantization.",
-            "1-bit models represent a potential step-change for edge and on-device deployment: if quality holds at production workloads, the VRAM and memory bandwidth requirements drop dramatically.",
-            "Combined with the ongoing TurboQuant thread, this suggests 2026's local LLM story may be less about parameter counts and more about compression breakthroughs."
+            "Tim from AnythingLLM tested PrismML Bonsai 1-bit models and received 716 upvotes with 121 comments, indicating strong interest and positive feedback.",
+            "The Bonsai 1-bit models are a significant improvement over traditional models in terms of size and memory requirements, making them more suitable for edge deployment.",
+            "The combination of Bonsai 1-bit models with TurboQuant could potentially revolutionize the local LLM story by reducing the need for large parameter counts and focusing on compression breakthroughs.",
+            "The article suggests that the Bonsai 1-bit models represent a step-change in the local LLM story, with the potential for significant improvements in performance and efficiency."
           ]
         }
       ]
@@ -60,21 +61,21 @@
         {
           "title": "Holo3: Breaking the Computer Use Frontier",
           "source": "Hugging Face Blog",
-          "url": "https://huggingface.co/blog/holo3-computer-use",
+          "url": "https://huggingface.co/blog/Hcompany/holo3",
           "takeaways": [
-            "Holo3 pushes the state of the art in computer use AI — models that can directly control a desktop UI — reporting meaningful gains over prior benchmarks on real-world task completion.",
-            "The system demonstrates improved robustness on multi-step tasks involving dynamic UIs, which has been a persistent failure mode for earlier computer use approaches.",
-            "As computer use matures from demo to deployable, Holo3 is a reference point for what the frontier looks like heading into mid-2026."
+            "Pushes state of art in computer use AI — models directly controlling desktop UI — with gains over prior benchmarks.",
+            "Improved robustness on multi-step tasks with dynamic UIs, a persistent failure mode in earlier approaches.",
+            "As computer use matures from demo to deployable, Holo3 is the frontier reference point heading into mid-2026."
           ]
         },
         {
           "title": "March 2026 sponsors-only newsletter",
           "source": "Simon Willison",
-          "url": "https://simonwillison.net",
+          "url": "https://simonwillison.net/2026/Apr/2/march-newsletter/#atom-everything",
           "takeaways": [
-            "Willison's monthly deep-dive covers agentic engineering patterns that have proved durable in production, MoE streaming optimizations that reduce latency for mixture-of-experts inference, and a curated roundup of notable model releases from March.",
-            "The agentic patterns section is particularly actionable — covering orchestration failure modes and retry strategies that aren't well-documented elsewhere.",
-            "Worth the subscription for anyone building on top of LLM APIs: this is practitioner-grade synthesis, not pundit commentary."
+            "Monthly newsletter covering agentic engineering patterns, MoE streaming optimizations, and curated model releases from March.",
+            "Agentic patterns section is particularly actionable — covering orchestration failure modes and retry strategies.",
+            "Practitioner-grade synthesis, not pundit commentary."
           ]
         },
         {
@@ -82,9 +83,10 @@
           "source": "Anthropic GitHub",
           "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.90",
           "takeaways": [
-            "v2.1.90 ships the /powerup feature, adding a new interaction mode to Claude Code that the community has been anticipating — early descriptions suggest it enables richer multi-step task delegation within a single session.",
-            "This is a meaningful release for Claude Code users, not a routine patch — /powerup represents a workflow-level capability addition.",
-            "The rapid v2.1.x cadence signals continued active development; teams running Claude Code in CI or automated pipelines should track the changelog closely."
+            "New `/powerup` feature allows users to learn Claude Code features with interactive demos.",
+            "Added `CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE` env var to keep the marketplace cache when `git pull` fails.",
+            "Added `.husky` to protect the repository from common issues.",
+            "Rapid v2.1.x cadence signals continued active development."
           ]
         }
       ]
@@ -96,21 +98,21 @@
         {
           "title": "I built a tool that saves ~50K tokens per Claude Code conversation by pre-indexing your codebase",
           "source": "r/ClaudeAI",
-          "url": "https://www.reddit.com/r/ClaudeAI/comments/codebase_preindex_tool",
+          "url": "https://reddit.com/r/ClaudeAI/comments/1sa2jbz/i_built_a_tool_that_saves_50k_tokens_per_claude/",
           "takeaways": [
-            "The tool pre-indexes a codebase into a compact summary format that Claude can consume at conversation start, replacing the expensive per-session file exploration that typically burns the first 30-50K tokens of context.",
-            "At 331 upvotes and 90 comments, this is clearly solving a real pain point — context window burn from codebase onboarding is one of the most common complaints from Claude Code power users.",
-            "The approach is model-agnostic in principle; the post includes enough implementation detail to adapt it beyond Claude Code to other agentic coding setups."
+            "Pre-indexes codebase into compact summary, replacing expensive per-session file exploration.",
+            "331 upvotes — clearly solving a real pain point, context window burn from codebase onboarding.",
+            "Approach is model-agnostic; post includes enough detail to adapt beyond Claude Code."
           ]
         },
         {
-          "title": "I replaced chaotic solo Claude coding with a simple 3-agent team (Architect + Builder + Reviewer)",
+          "title": "I replaced chaotic solo Claude coding with a simple 3-agent team (Architect + Builder + Reviewer) — it's stupidly effective and token-efficient",
           "source": "r/ClaudeAI",
-          "url": "https://www.reddit.com/r/ClaudeAI/comments/3agent_team_workflow",
+          "url": "https://reddit.com/r/ClaudeAI/comments/1sa7ju4/i_replaced_chaotic_solo_claude_coding_with_a/",
           "takeaways": [
-            "The author describes a practical Architect + Builder + Reviewer pattern where each agent has a scoped system prompt and clear handoff criteria — a concrete implementation of multi-agent coding that goes beyond vague 'use multiple agents' advice.",
-            "Key finding: the Reviewer agent catches a disproportionate share of bugs and spec deviations that the Builder systematically misses, suggesting role specialization yields real quality gains over a single generalist agent.",
-            "With 236 upvotes and 67 comments, this workflow is resonating widely — the post is worth reading for the specific prompt structures and coordination mechanics, not just the high-level idea."
+            "Practical Architect+Builder+Reviewer pattern with scoped system prompts and clear handoff criteria.",
+            "Key finding: Reviewer catches disproportionate share of bugs the Builder misses — role specialization yields real gains.",
+            "236 upvotes, resonating widely — worth reading for prompt structures and coordination mechanics."
           ]
         }
       ]
