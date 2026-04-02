@@ -43,6 +43,33 @@ if ([int]$pyMajor -lt 3 -or ([int]$pyMajor -eq 3 -and [int]$pyMinor -lt 10)) {
     Write-Host "  Error: Python 3.10+ required (you have $pyVersion)" -ForegroundColor Red
     exit 1
 }
+
+# Check for Python 3.13+ (no pre-built llama-cpp-python wheels yet)
+if ([int]$pyMajor -eq 3 -and [int]$pyMinor -ge 13) {
+    Write-Host "  Warning: Python $pyVersion detected." -ForegroundColor Yellow
+    Write-Host "  Pre-built llama-cpp-python wheels are only available for Python 3.10-3.12."
+    Write-Host "  With 3.13+, it will compile from source (~15-20 min, needs C++ Build Tools)."
+    Write-Host ""
+    # Try to find 3.10-3.12 via py launcher
+    $foundPy = $null
+    foreach ($v in @("3.12", "3.11", "3.10")) {
+        try {
+            $test = & py "-$v" -c "print('ok')" 2>$null
+            if ($test -eq "ok") { $foundPy = "py -$v"; break }
+        } catch {}
+    }
+    if ($foundPy) {
+        Write-Host "  Found Python $v via py launcher - using that instead." -ForegroundColor Green
+        $py = "py"
+        # Rewrite py to use the version flag
+        $pyVersionFlag = "-$v"
+        $pyVersion = $v
+    } else {
+        Write-Host "  To avoid the long build, install Python 3.12: https://python.org/downloads/"
+        Write-Host "  Continuing with $pyVersion (will compile from source)..."
+    }
+    Write-Host ""
+}
 Write-Host "  Python $pyVersion OK" -ForegroundColor Green
 
 # Clone

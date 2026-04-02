@@ -73,7 +73,10 @@ def check_python():
     if v.major < 3 or (v.major == 3 and v.minor < 10):
         print(red(f"  Python 3.10+ required (you have {v.major}.{v.minor})"))
         sys.exit(1)
-    print(f"  Python {v.major}.{v.minor}.{v.micro} {green('OK')}")
+    if v.major == 3 and v.minor >= 13:
+        print(f"  Python {v.major}.{v.minor}.{v.micro} {yellow('(3.13+ — pre-built wheels may not be available)')}")
+    else:
+        print(f"  Python {v.major}.{v.minor}.{v.micro} {green('OK')}")
 
 
 def check_dependency(name, pip_name=None, required=True):

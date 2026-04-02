@@ -47,6 +47,31 @@ if [ "$PY_MAJOR" -lt 3 ] || ([ "$PY_MAJOR" -eq 3 ] && [ "$PY_MINOR" -lt 10 ]); t
     echo "  Error: Python 3.10+ required (you have $PY_VERSION)"
     exit 1
 fi
+
+# Check for Python 3.13+ (no pre-built llama-cpp-python wheels yet)
+if [ "$PY_MAJOR" -eq 3 ] && [ "$PY_MINOR" -ge 13 ]; then
+    echo -e "  ${BOLD}Warning:${RESET} Python $PY_VERSION detected."
+    echo -e "  Pre-built llama-cpp-python wheels are only available for Python 3.10-3.12."
+    echo -e "  With 3.13+, it will compile from source (~15-20 min, needs C++ compiler)."
+    echo ""
+    # Try to find a 3.10-3.12 installation
+    FOUND_PY=""
+    for v in 3.12 3.11 3.10; do
+        if command -v "python$v" &>/dev/null; then
+            FOUND_PY="python$v"
+            break
+        fi
+    done
+    if [ -n "$FOUND_PY" ]; then
+        echo -e "  Found ${GREEN}$FOUND_PY${RESET} — using that instead."
+        PY="$FOUND_PY"
+        PY_VERSION=$($PY -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+    else
+        echo "  To avoid the long build, install Python 3.12: https://python.org/downloads/"
+        echo -e "  Continuing with $PY_VERSION (will compile from source)..."
+    fi
+    echo ""
+fi
 echo -e "  Python $PY_VERSION ${GREEN}OK${RESET}"
 
 # Clone
