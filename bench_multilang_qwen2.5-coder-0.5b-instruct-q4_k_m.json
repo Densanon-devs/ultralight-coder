@@ -1,14 +1,14 @@
 {
   "total": 130,
-  "passed": 124,
-  "avg_score": 0.982051282051282,
+  "passed": 129,
+  "avg_score": 0.9974358974358973,
   "results": [
     {
       "query": "Write a Python function that finds all anagrams in a list of words",
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 4.91,
+      "time": 4.45,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -18,7 +18,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 2.78,
+      "time": 2.48,
       "lines": 13,
       "missing": [],
       "unwanted": []
@@ -28,7 +28,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 2.69,
+      "time": 2.62,
       "lines": 14,
       "missing": [],
       "unwanted": []
@@ -38,7 +38,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 4.5,
+      "time": 4.09,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -48,7 +48,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 4.14,
+      "time": 3.95,
       "lines": 22,
       "missing": [],
       "unwanted": []
@@ -58,7 +58,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 0.92,
+      "time": 0.89,
       "lines": 5,
       "missing": [],
       "unwanted": []
@@ -68,7 +68,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 8.33,
+      "time": 7.64,
       "lines": 29,
       "missing": [],
       "unwanted": []
@@ -76,13 +76,11 @@
     {
       "query": "Write a Python dataclass with validation in __post_init__",
       "domain": "python",
-      "passed": false,
-      "score": 0.6666666666666666,
-      "time": 3.84,
-      "lines": 21,
-      "missing": [
-        "__post_init__"
-      ],
+      "passed": true,
+      "score": 1.0,
+      "time": 3.05,
+      "lines": 19,
+      "missing": [],
       "unwanted": []
     },
     {
@@ -90,7 +88,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 2.19,
+      "time": 2.25,
       "lines": 13,
       "missing": [],
       "unwanted": []
@@ -100,7 +98,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 4.11,
+      "time": 4.22,
       "lines": 22,
       "missing": [],
       "unwanted": []
@@ -110,7 +108,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 2.59,
+      "time": 2.62,
       "lines": 18,
       "missing": [],
       "unwanted": []
@@ -120,7 +118,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 1.89,
+      "time": 1.84,
       "lines": 18,
       "missing": [],
       "unwanted": []
@@ -130,7 +128,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 4.98,
+      "time": 4.94,
       "lines": 28,
       "missing": [],
       "unwanted": []
@@ -140,7 +138,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 1.06,
+      "time": 1.09,
       "lines": 10,
       "missing": [],
       "unwanted": []
@@ -150,7 +148,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 1.64,
+      "time": 1.67,
       "lines": 18,
       "missing": [],
       "unwanted": []
@@ -160,7 +158,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 1.09,
+      "time": 1.12,
       "lines": 11,
       "missing": [],
       "unwanted": []
@@ -170,8 +168,8 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 4.67,
-      "lines": 34,
+      "time": 1.34,
+      "lines": 9,
       "missing": [],
       "unwanted": []
     },
@@ -180,7 +178,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 1.28,
+      "time": 1.36,
       "lines": 12,
       "missing": [],
       "unwanted": []
@@ -190,7 +188,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 6.67,
+      "time": 6.77,
       "lines": 46,
       "missing": [],
       "unwanted": []
@@ -200,7 +198,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 4.53,
+      "time": 4.56,
       "lines": 29,
       "missing": [],
       "unwanted": []
@@ -210,7 +208,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 0.56,
+      "time": 0.66,
       "lines": 4,
       "missing": [],
       "unwanted": []
@@ -220,7 +218,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 0.8,
+      "time": 0.86,
       "lines": 7,
       "missing": [],
       "unwanted": []
@@ -230,7 +228,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 2.77,
+      "time": 2.86,
       "lines": 22,
       "missing": [],
       "unwanted": []
@@ -240,7 +238,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 4.92,
+      "time": 5.56,
       "lines": 30,
       "missing": [],
       "unwanted": []
@@ -250,7 +248,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 1.36,
+      "time": 1.75,
       "lines": 10,
       "missing": [],
       "unwanted": []
@@ -260,7 +258,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 2.88,
+      "time": 3.23,
       "lines": 18,
       "missing": [],
       "unwanted": []
@@ -270,7 +268,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 5.05,
+      "time": 5.48,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -280,7 +278,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 2.94,
+      "time": 3.19,
       "lines": 18,
       "missing": [],
       "unwanted": []
@@ -290,7 +288,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 2.09,
+      "time": 2.23,
       "lines": 16,
       "missing": [],
       "unwanted": []
@@ -300,7 +298,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 6.88,
+      "time": 7.64,
       "lines": 68,
       "missing": [],
       "unwanted": []
@@ -310,7 +308,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 2.73,
+      "time": 2.92,
       "lines": 18,
       "missing": [],
       "unwanted": []
@@ -320,7 +318,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 3.27,
+      "time": 3.69,
       "lines": 34,
       "missing": [],
       "unwanted": []
@@ -330,7 +328,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 4.24,
+      "time": 4.72,
       "lines": 40,
       "missing": [],
       "unwanted": []
@@ -340,7 +338,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 4.24,
+      "time": 4.67,
       "lines": 45,
       "missing": [],
       "unwanted": []
@@ -350,8 +348,8 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 4.08,
-      "lines": 38,
+      "time": 4.2,
+      "lines": 35,
       "missing": [],
       "unwanted": []
     },
@@ -360,7 +358,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 3.28,
+      "time": 3.58,
       "lines": 34,
       "missing": [],
       "unwanted": []
@@ -370,8 +368,8 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 3.7,
-      "lines": 37,
+      "time": 5.24,
+      "lines": 41,
       "missing": [],
       "unwanted": []
     },
@@ -380,21 +378,19 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 1.84,
-      "lines": 20,
+      "time": 0.95,
+      "lines": 9,
       "missing": [],
       "unwanted": []
     },
     {
       "query": "Write a Go error type that wraps another error with additional context",
       "domain": "go",
-      "passed": false,
-      "score": 0.6666666666666666,
-      "time": 3.78,
-      "lines": 29,
-      "missing": [
-        "Error()"
-      ],
+      "passed": true,
+      "score": 1.0,
+      "time": 2.36,
+      "lines": 21,
+      "missing": [],
       "unwanted": []
     },
     {
@@ -402,7 +398,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 3.14,
+      "time": 3.42,
       "lines": 33,
       "missing": [],
       "unwanted": []
@@ -412,7 +408,7 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 1.42,
+      "time": 1.55,
       "lines": 9,
       "missing": [],
       "unwanted": []
@@ -422,8 +418,8 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 6.14,
-      "lines": 32,
+      "time": 7.06,
+      "lines": 42,
       "missing": [],
       "unwanted": []
     },
@@ -432,7 +428,7 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 4.78,
+      "time": 4.94,
       "lines": 38,
       "missing": [],
       "unwanted": []
@@ -442,7 +438,7 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 1.34,
+      "time": 1.47,
       "lines": 8,
       "missing": [],
       "unwanted": []
@@ -452,7 +448,7 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 6.77,
+      "time": 7.39,
       "lines": 44,
       "missing": [],
       "unwanted": []
@@ -462,7 +458,7 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 1.48,
+      "time": 1.56,
       "lines": 8,
       "missing": [],
       "unwanted": []
@@ -482,21 +478,19 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 5.42,
-      "lines": 41,
+      "time": 2.7,
+      "lines": 21,
       "missing": [],
       "unwanted": []
     },
     {
       "query": "Write a Rust generic function that finds the minimum value in a slice",
       "domain": "rust",
-      "passed": false,
-      "score": 0.6666666666666666,
-      "time": 1.64,
+      "passed": true,
+      "score": 1.0,
+      "time": 1.53,
       "lines": 13,
-      "missing": [
-        "Option"
-      ],
+      "missing": [],
       "unwanted": []
     },
     {
@@ -504,8 +498,8 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 3.19,
-      "lines": 30,
+      "time": 4.08,
+      "lines": 34,
       "missing": [],
       "unwanted": []
     },
@@ -514,7 +508,7 @@
       "domain": "sql",
       "passed": true,
       "score": 1.0,
-      "time": 1.2,
+      "time": 1.17,
       "lines": 9,
       "missing": [],
       "unwanted": []
@@ -524,7 +518,7 @@
       "domain": "sql",
       "passed": true,
       "score": 1.0,
-      "time": 0.95,
+      "time": 0.97,
       "lines": 8,
       "missing": [],
       "unwanted": []
@@ -534,7 +528,7 @@
       "domain": "sql",
       "passed": true,
       "score": 1.0,
-      "time": 1.58,
+      "time": 1.59,
       "lines": 14,
       "missing": [],
       "unwanted": []
@@ -544,7 +538,7 @@
       "domain": "sql",
       "passed": true,
       "score": 1.0,
-      "time": 1.69,
+      "time": 1.77,
       "lines": 10,
       "missing": [],
       "unwanted": []
@@ -554,7 +548,7 @@
       "domain": "sql",
       "passed": true,
       "score": 1.0,
-      "time": 1.16,
+      "time": 1.14,
       "lines": 6,
       "missing": [],
       "unwanted": []
@@ -564,7 +558,7 @@
       "domain": "sql",
       "passed": true,
       "score": 1.0,
-      "time": 0.77,
+      "time": 0.78,
       "lines": 7,
       "missing": [],
       "unwanted": []
@@ -584,7 +578,7 @@
       "domain": "sql",
       "passed": false,
       "score": 0.6666666666666666,
-      "time": 1.01,
+      "time": 0.98,
       "lines": 7,
       "missing": [
         "CASE"
@@ -596,7 +590,7 @@
       "domain": "sql",
       "passed": true,
       "score": 1.0,
-      "time": 0.52,
+      "time": 0.48,
       "lines": 6,
       "missing": [],
       "unwanted": []
@@ -606,7 +600,7 @@
       "domain": "sql",
       "passed": true,
       "score": 1.0,
-      "time": 1.12,
+      "time": 1.14,
       "lines": 8,
       "missing": [],
       "unwanted": []
@@ -616,7 +610,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 1.47,
+      "time": 1.45,
       "lines": 12,
       "missing": [],
       "unwanted": []
@@ -626,7 +620,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 5.69,
+      "time": 5.7,
       "lines": 41,
       "missing": [],
       "unwanted": []
@@ -636,7 +630,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 3.41,
+      "time": 3.33,
       "lines": 26,
       "missing": [],
       "unwanted": []
@@ -646,7 +640,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 4.09,
+      "time": 4.25,
       "lines": 27,
       "missing": [],
       "unwanted": []
@@ -656,7 +650,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 1.23,
+      "time": 1.22,
       "lines": 8,
       "missing": [],
       "unwanted": []
@@ -666,7 +660,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 2.33,
+      "time": 2.34,
       "lines": 16,
       "missing": [],
       "unwanted": []
@@ -676,7 +670,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 3.19,
+      "time": 3.3,
       "lines": 29,
       "missing": [],
       "unwanted": []
@@ -686,7 +680,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 2.88,
+      "time": 2.94,
       "lines": 22,
       "missing": [],
       "unwanted": []
@@ -696,7 +690,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 7.73,
+      "time": 7.81,
       "lines": 54,
       "missing": [],
       "unwanted": []
@@ -706,7 +700,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 1.61,
+      "time": 1.64,
       "lines": 13,
       "missing": [],
       "unwanted": []
@@ -716,7 +710,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 1.47,
+      "time": 1.49,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -726,7 +720,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 1.64,
+      "time": 1.53,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -736,7 +730,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 1.83,
+      "time": 1.84,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -746,7 +740,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 3.53,
+      "time": 3.62,
       "lines": 27,
       "missing": [],
       "unwanted": []
@@ -756,7 +750,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 3.81,
+      "time": 3.8,
       "lines": 23,
       "missing": [],
       "unwanted": []
@@ -766,7 +760,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 3.0,
+      "time": 3.12,
       "lines": 25,
       "missing": [],
       "unwanted": []
@@ -786,7 +780,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 6.72,
+      "time": 6.88,
       "lines": 19,
       "missing": [],
       "unwanted": []
@@ -796,7 +790,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 1.5,
+      "time": 1.55,
       "lines": 13,
       "missing": [],
       "unwanted": []
@@ -806,7 +800,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 3.05,
+      "time": 3.22,
       "lines": 29,
       "missing": [],
       "unwanted": []
@@ -816,7 +810,7 @@
       "domain": "csharp",
       "passed": true,
       "score": 1.0,
-      "time": 1.8,
+      "time": 1.89,
       "lines": 16,
       "missing": [],
       "unwanted": []
@@ -826,7 +820,7 @@
       "domain": "csharp",
       "passed": true,
       "score": 1.0,
-      "time": 2.44,
+      "time": 2.5,
       "lines": 21,
       "missing": [],
       "unwanted": []
@@ -836,7 +830,7 @@
       "domain": "csharp",
       "passed": true,
       "score": 1.0,
-      "time": 3.48,
+      "time": 3.45,
       "lines": 27,
       "missing": [],
       "unwanted": []
@@ -856,7 +850,7 @@
       "domain": "csharp",
       "passed": true,
       "score": 1.0,
-      "time": 2.34,
+      "time": 2.38,
       "lines": 24,
       "missing": [],
       "unwanted": []
@@ -866,7 +860,7 @@
       "domain": "csharp",
       "passed": true,
       "score": 1.0,
-      "time": 1.09,
+      "time": 1.12,
       "lines": 9,
       "missing": [],
       "unwanted": []
@@ -876,7 +870,7 @@
       "domain": "csharp",
       "passed": true,
       "score": 1.0,
-      "time": 3.83,
+      "time": 4.02,
       "lines": 28,
       "missing": [],
       "unwanted": []
@@ -886,7 +880,7 @@
       "domain": "csharp",
       "passed": true,
       "score": 1.0,
-      "time": 1.92,
+      "time": 2.08,
       "lines": 22,
       "missing": [],
       "unwanted": []
@@ -896,7 +890,7 @@
       "domain": "csharp",
       "passed": true,
       "score": 1.0,
-      "time": 2.05,
+      "time": 2.14,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -926,7 +920,7 @@
       "domain": "ruby",
       "passed": true,
       "score": 1.0,
-      "time": 1.14,
+      "time": 1.08,
       "lines": 12,
       "missing": [],
       "unwanted": []
@@ -936,7 +930,7 @@
       "domain": "ruby",
       "passed": true,
       "score": 1.0,
-      "time": 1.47,
+      "time": 1.45,
       "lines": 11,
       "missing": [],
       "unwanted": []
@@ -946,7 +940,7 @@
       "domain": "ruby",
       "passed": true,
       "score": 1.0,
-      "time": 1.41,
+      "time": 1.42,
       "lines": 16,
       "missing": [],
       "unwanted": []
@@ -966,7 +960,7 @@
       "domain": "ruby",
       "passed": true,
       "score": 1.0,
-      "time": 1.33,
+      "time": 1.34,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -986,7 +980,7 @@
       "domain": "ruby",
       "passed": true,
       "score": 1.0,
-      "time": 1.17,
+      "time": 1.14,
       "lines": 10,
       "missing": [],
       "unwanted": []
@@ -996,7 +990,7 @@
       "domain": "ruby",
       "passed": true,
       "score": 1.0,
-      "time": 2.61,
+      "time": 2.62,
       "lines": 21,
       "missing": [],
       "unwanted": []
@@ -1006,7 +1000,7 @@
       "domain": "ruby",
       "passed": true,
       "score": 1.0,
-      "time": 1.16,
+      "time": 1.17,
       "lines": 11,
       "missing": [],
       "unwanted": []
@@ -1016,7 +1010,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 4.91,
+      "time": 4.89,
       "lines": 6,
       "missing": [],
       "unwanted": []
@@ -1026,7 +1020,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 9.11,
+      "time": 9.16,
       "lines": 6,
       "missing": [],
       "unwanted": []
@@ -1036,7 +1030,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 7.88,
+      "time": 7.75,
       "lines": 28,
       "missing": [],
       "unwanted": []
@@ -1046,7 +1040,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 0.92,
+      "time": 0.86,
       "lines": 5,
       "missing": [],
       "unwanted": []
@@ -1056,7 +1050,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 6.88,
+      "time": 6.98,
       "lines": 16,
       "missing": [],
       "unwanted": []
@@ -1066,7 +1060,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 3.2,
+      "time": 3.14,
       "lines": 8,
       "missing": [],
       "unwanted": []
@@ -1076,7 +1070,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 8.5,
+      "time": 8.58,
       "lines": 32,
       "missing": [],
       "unwanted": []
@@ -1086,7 +1080,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 8.34,
+      "time": 8.16,
       "lines": 12,
       "missing": [],
       "unwanted": []
@@ -1096,7 +1090,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 6.42,
+      "time": 6.36,
       "lines": 26,
       "missing": [],
       "unwanted": []
@@ -1106,7 +1100,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 2.5,
+      "time": 2.42,
       "lines": 5,
       "missing": [],
       "unwanted": []
@@ -1116,7 +1110,7 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 1.64,
+      "time": 1.61,
       "lines": 8,
       "missing": [],
       "unwanted": []
@@ -1126,7 +1120,7 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 6.16,
+      "time": 6.12,
       "lines": 16,
       "missing": [],
       "unwanted": []
@@ -1136,7 +1130,7 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 0.98,
+      "time": 0.97,
       "lines": 8,
       "missing": [],
       "unwanted": []
@@ -1146,7 +1140,7 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 2.03,
+      "time": 2.0,
       "lines": 14,
       "missing": [],
       "unwanted": []
@@ -1164,13 +1158,11 @@
     {
       "query": "Write a Kotlin inline function with reified type parameter for JSON parsing",
       "domain": "kotlin",
-      "passed": false,
-      "score": 0.6666666666666666,
-      "time": 1.17,
-      "lines": 9,
-      "missing": [
-        "reified"
-      ],
+      "passed": true,
+      "score": 1.0,
+      "time": 0.83,
+      "lines": 6,
+      "missing": [],
       "unwanted": []
     },
     {
@@ -1178,8 +1170,8 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 1.62,
-      "lines": 13,
+      "time": 1.33,
+      "lines": 10,
       "missing": [],
       "unwanted": []
     },
@@ -1188,7 +1180,7 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 1.73,
+      "time": 1.72,
       "lines": 14,
       "missing": [],
       "unwanted": []
@@ -1198,7 +1190,7 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 1.53,
+      "time": 1.47,
       "lines": 12,
       "missing": [],
       "unwanted": []
@@ -1208,7 +1200,7 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 1.5,
+      "time": 1.48,
       "lines": 12,
       "missing": [],
       "unwanted": []
@@ -1218,7 +1210,7 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 0.7,
+      "time": 0.69,
       "lines": 7,
       "missing": [],
       "unwanted": []
@@ -1228,7 +1220,7 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 1.09,
+      "time": 1.14,
       "lines": 9,
       "missing": [],
       "unwanted": []
@@ -1238,7 +1230,7 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 2.44,
+      "time": 2.45,
       "lines": 22,
       "missing": [],
       "unwanted": []
@@ -1248,7 +1240,7 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 0.77,
+      "time": 0.74,
       "lines": 5,
       "missing": [],
       "unwanted": []
@@ -1258,7 +1250,7 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 5.8,
+      "time": 5.72,
       "lines": 41,
       "missing": [],
       "unwanted": []
@@ -1268,8 +1260,8 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 2.72,
-      "lines": 10,
+      "time": 1.64,
+      "lines": 18,
       "missing": [],
       "unwanted": []
     },
@@ -1288,7 +1280,7 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 1.53,
+      "time": 1.5,
       "lines": 10,
       "missing": [],
       "unwanted": []
@@ -1298,7 +1290,7 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 2.06,
+      "time": 2.0,
       "lines": 16,
       "missing": [],
       "unwanted": []
@@ -1306,14 +1298,11 @@
     {
       "query": "Write a Swift generic stack using an array with push, pop, and peek",
       "domain": "swift",
-      "passed": false,
-      "score": 0.3333333333333333,
-      "time": 1.88,
-      "lines": 19,
-      "missing": [
-        "struct ",
-        "mutating"
-      ],
+      "passed": true,
+      "score": 1.0,
+      "time": 1.7,
+      "lines": 15,
+      "missing": [],
       "unwanted": []
     }
   ]
