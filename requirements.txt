@@ -23,3 +23,6 @@ scikit-learn>=1.3.0
 
 # Model download
 huggingface-hub>=0.20.0
+
+# Desktop app (optional — falls back to browser if not installed)
+pywebview>=4.0

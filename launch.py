@@ -248,8 +248,45 @@ def update_config_model(model_path):
         print(f"  Config updated: {dim(rel_path)}")
 
 
+def start_desktop(port):
+    """Start the desktop app (native window). Falls back to browser if pywebview not installed."""
+    os.chdir(str(PROJECT_ROOT))
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+    try:
+        importlib.import_module("webview")
+        has_webview = True
+    except ImportError:
+        has_webview = False
+
+    if has_webview:
+        print()
+        print(bold("  Starting desktop app..."))
+        print(dim("  Close the window to stop"))
+        print()
+        from desktop import start_server, wait_for_server
+        import webview
+        import threading
+
+        server_thread = threading.Thread(target=start_server, args=(port,), daemon=True)
+        server_thread.start()
+        if not wait_for_server(port):
+            print(red("  Server failed to start."))
+            return
+        window = webview.create_window(
+            "Ultralight Code Assistant",
+            f"http://127.0.0.1:{port}",
+            width=1100, height=750, min_size=(800, 500),
+        )
+        webview.start()
+    else:
+        print(dim("  pywebview not installed — opening in browser"))
+        print(dim("  Install for desktop mode: pip install pywebview"))
+        start_web(port, "127.0.0.1")
+
+
 def start_web(port, host):
-    """Start the web UI server."""
+    """Start the web UI server (browser mode)."""
     print()
     print(bold("  Starting web UI..."))
     print(f"  Open in browser: {green(f'http://{host}:{port}')}")
@@ -288,7 +325,8 @@ def start_cli():
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Ultralight Code Assistant Launcher")
-    parser.add_argument("--cli", action="store_true", help="Start in terminal mode instead of web UI")
+    parser.add_argument("--cli", action="store_true", help="Start in terminal mode")
+    parser.add_argument("--browser", action="store_true", help="Force browser mode (skip desktop window)")
     parser.add_argument("--port", type=int, default=8000, help="Web UI port (default: 8000)")
     parser.add_argument("--host", default="127.0.0.1", help="Host to bind to")
     args = parser.parse_args()
@@ -312,13 +350,16 @@ def main():
     size_mb = selected.stat().st_size / (1024 * 1024)
     mode = "rerank (2 examples)" if size_mb >= 1500 else "rerank1 (1 example)"
     print(f"  Augmentor mode: {green(mode)}")
-    print(f"  Examples: {green('230 across 39 categories')}")
+    print(f"  Examples: {green('437 across 12 languages')}")
 
     # Step 5: Start
     if args.cli:
         start_cli()
-    else:
+    elif args.browser:
         start_web(args.port, args.host)
+    else:
+        # Default: try desktop window, fall back to browser
+        start_desktop(args.port)
 
 
 if __name__ == "__main__":
