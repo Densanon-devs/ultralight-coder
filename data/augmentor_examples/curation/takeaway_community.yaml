@@ -1,0 +1,102 @@
+domain: curation
+category: curation_takeaway_community
+examples:
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "saves ~50K tokens per Claude Code conversation by pre-indexing codebase"
+      Source: r/ClaudeAI
+      Summary: "Every Claude Code conversation starts with 10-20 tool calls exploring your codebase, burning 30-50K tokens. This tool pre-indexes your codebase into a compact summary. 331 upvotes, 90 comments."
+    solution: |
+      {"takeaways": ["Pre-indexes codebase into compact summary, replacing expensive per-session file exploration.", "331 upvotes — clearly solving a real pain point, context window burn from codebase onboarding.", "Approach is model-agnostic; post includes enough detail to adapt beyond Claude Code."]}
+    tags: [curation, takeaway, community]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "3-agent team (Architect+Builder+Reviewer) — stupidly effective"
+      Source: r/ClaudeAI
+      Summary: "After reading papers on agentic workflows, settled on structured Three Man Team. 236 upvotes, 67 comments."
+    solution: |
+      {"takeaways": ["Practical Architect+Builder+Reviewer pattern with scoped system prompts and clear handoff criteria.", "Key finding: Reviewer catches disproportionate share of bugs the Builder misses — role specialization yields real gains.", "236 upvotes, resonating widely — worth reading for prompt structures and coordination mechanics."]}
+    tags: [curation, takeaway, community]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "gig workers training humanoid robots at home"
+      Source: HN/MIT Tech Review
+      Summary: "A growing remote gig labor market is generating teleoperation data for humanoid robot training. Workers are often unaware of how their movement data is used downstream."
+    solution: |
+      {"takeaways": ["Growing remote gig labor market generating teleoperation data for humanoid training — workers often unaware of downstream use.", "MIT Tech Review surfaces consent and compensation questions: workers earn little while movements shape robots.", "Connects to debates about data supply chains and value capture from skilled human movement."]}
+    tags: [curation, takeaway, community]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Robot Umpires Have Arrived — Making Baseball Players Shrink"
+      Source: HN/WSJ
+      Summary: "MLB's automated ball-strike system is measurably changing player behavior at the plate, with batters adjusting stance and swing patterns in response to the system's consistent strike zone."
+    solution: |
+      {"takeaways": ["MLB's automated ball-strike system measurably changing player behavior: batters shrinking strike zones.", "System's consistency exposes how much human umpires varied — batters had exploited that variance.", "High-visibility case study of AI displacing skilled human judgment with immediate measurable effects."]}
+    tags: [curation, takeaway, community]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Atombite: Building Takeout Packing Robot Harder Than You Think"
+      Source: HN
+      Summary: "In 1997 Deep Blue beat Kasparov. In 2026, a $100K arm still can't pack a paper bag. Startup documents the surprising difficulty of automated food packing."
+    solution: |
+      {"takeaways": ["Irregular containers, sauce smear, and unpredictable geometry defeat naive pick-and-place approaches.", "Details perception pipeline failures and difficulty of consistent seal quality at production speed.", "Valuable counterweight to kitchen robotics hype — gap between demo and deployment remains substantial."]}
+    tags: [curation, takeaway, community]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Limit Break mentorship for under-represented groups returns 2026"
+      Source: GamesIndustry.biz
+      Summary: "Limit Break returns for 2026 with structured mentorship matching industry professionals with under-represented candidates in the games industry."
+    solution: |
+      {"takeaways": ["Structured mentorship matching industry professionals with under-represented candidates, back for 2026.", "Notably practical — mentees paired with working developers at real studios, not generic career advice.", "Studios should know about this as a resource and mentoring opportunity."]}
+    tags: [curation, takeaway, community]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Show HN: I built a self-hosted alternative to Notion with real-time collaboration"
+      Source: Hacker News
+      Summary: "Solo developer releases open-source, self-hosted Notion alternative with CRDT-based real-time collaboration, offline support, and SQLite backend. 487 points, 203 comments."
+    solution: |
+      {"takeaways": ["CRDT-based real-time collaboration with SQLite backend — a technically ambitious combination that HN responded to strongly.", "Self-hosted and offline-first addresses the two biggest complaints about Notion from privacy-conscious teams.", "487 points suggests strong demand; comment thread likely contains deployment reports and feature requests worth monitoring."]}
+    tags: [curation, takeaway, community]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "r/MachineLearning weekly: community consensus on best practices for fine-tuning small LLMs"
+      Source: r/MachineLearning
+      Summary: "Weekly discussion thread consolidating community experience on fine-tuning models under 3B parameters. Top advice covers LoRA rank selection, dataset quality over quantity, and evaluation pitfalls. 412 upvotes."
+    solution: |
+      {"takeaways": ["Community converging on LoRA rank 16-32 as the sweet spot for sub-3B models — higher ranks show diminishing returns.", "Dataset quality over quantity is the repeated theme: 5K high-quality examples consistently outperform 50K noisy ones.", "412 upvotes on a practical thread — this is crowdsourced tribal knowledge that complements published papers."]}
+    tags: [curation, takeaway, community]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Announcing Bevy 0.16 — ECS game engine hits major milestone"
+      Source: Discord/Bevy Community
+      Summary: "Bevy 0.16 released with new renderer, asset pipeline overhaul, and first-class mobile support. Community announcement highlights 400+ contributors and growing ecosystem of third-party plugins."
+    solution: |
+      {"takeaways": ["Bevy 0.16 ships a new renderer and asset pipeline overhaul — the largest release in the project's history.", "First-class mobile support closes a critical gap that kept Bevy limited to desktop and web targets.", "400+ contributors and growing plugin ecosystem signal Bevy is crossing from experimental to production-viable for indie teams."]}
+    tags: [curation, takeaway, community]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Open-source voice cloning tool hits 10K GitHub stars in a week"
+      Source: Hacker News
+      Summary: "A new open-source voice cloning tool reached 10K GitHub stars within a week of release. Runs locally, requires only 10 seconds of reference audio, and produces near-real-time output on consumer GPUs. Significant discussion about misuse potential."
+    solution: |
+      {"takeaways": ["10-second reference audio and consumer GPU inference lower the barrier to voice cloning dramatically.", "10K stars in a week reflects both genuine excitement and concern — the comment thread is split between use cases and abuse vectors.", "Expect platform policy responses: this tool makes voice-based authentication and content provenance harder to trust."]}
+    tags: [curation, takeaway, community]
+    difficulty: medium

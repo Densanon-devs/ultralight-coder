@@ -1,0 +1,9 @@
+# Grammar for article takeaway generation (Pass 2)
+# Forces: {"takeaways": ["...", "...", "..."]}
+
+root     ::= "{" ws "\"takeaways\"" ws ":" ws "[" ws string ("," ws string){1,3} ws "]" ws "}"
+string   ::= "\"" chars "\""
+chars    ::= char+
+char     ::= [^"\\] | "\\" escape
+escape   ::= ["\\nrt/]
+ws       ::= [ \t\n]*

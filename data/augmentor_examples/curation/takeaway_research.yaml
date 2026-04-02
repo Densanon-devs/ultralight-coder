@@ -1,0 +1,122 @@
+domain: curation
+category: curation_takeaway_research
+examples:
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "How Emotion Shapes the Behavior of LLMs and Agents: A Mechanistic Study"
+      Source: ArXiv cs.AI
+      Summary: "Emotion plays an important role in human cognition. We investigate whether emotional signals can shape LLM behavior. Existing emotion-aware studies mainly treat emo..."
+    solution: |
+      {"takeaways": ["The paper provides a mechanistic account of how emotional framing in prompts propagates through LLM internals to alter outputs — not just surface tone, but factual confidence, risk tolerance, and refusal rates.", "Findings have direct implications for prompt injection and jailbreak surface area: emotional priming is shown to reliably shift safety-relevant behaviors.", "This moves beyond 'emotional prompts work empirically' to explaining why they work, the prerequisite for building defenses."]}
+    tags: [curation, takeaway, research]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Open, Reliable, and Collective: A Community-Driven Framework for Tool-Using AI Agents"
+      Source: ArXiv cs.AI
+      Summary: "Tool-integrated LLMs can retrieve, compute, and take real-world actions via external tools, but reliability remains a key bottleneck. We argue failures stem from both tool-use accuracy and intrinsic tool accuracy..."
+    solution: |
+      {"takeaways": ["The paper argues that tool-use reliability requires community-maintained registries and standardized contracts — not just better base models.", "Proposes shared tool schemas, failure mode taxonomies, and community-curated test suites.", "A governance and infrastructure paper addressing a real gap: most agentic frameworks have no shared mechanism for propagating tool reliability knowledge."]}
+    tags: [curation, takeaway, research]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Generalizable Dense Reward for Long-Horizon Robotic Tasks"
+      Source: ArXiv cs.RO
+      Summary: "Existing robotic foundation policies are trained via large-scale imitation learning. They struggle with long-horizon tasks due to distribution shift and error accumulation..."
+    solution: |
+      {"takeaways": ["Proposes a reward-shaping framework that generalizes across diverse long-horizon manipulation tasks without task-specific tuning.", "Dense reward signals guide policy learning through intermediate steps, attacking the sparse-reward bottleneck.", "Results show meaningful gains over RL baselines on multi-step benchmarks without manual reward engineering."]}
+    tags: [curation, takeaway, research]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Advancing Multi-Robot Networks via MLLM-Driven Sensing, Communication, and Computation"
+      Source: ArXiv cs.RO
+      Summary: "Imagine advanced humanoid robots, powered by multimodal LLMs, coordinating missions across industries. While individual robots show local autonomy, realistic tasks demand..."
+    solution: |
+      {"takeaways": ["Comprehensive survey mapping how multimodal LLMs are being integrated into multi-robot coordination pipelines.", "Identifies bandwidth and distributed inference as the sharpest near-term constraints for swarm deployments.", "Useful orientation for teams building collaborative systems who need to select the right MLLM architecture."]}
+    tags: [curation, takeaway, research]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "KTransformers Adds AVX2 MoE Support For CPUs Without AMX/AVX-512"
+      Source: Phoronix
+      Summary: "KTransformers 0.5.3 for efficient LLM inferencing with CPU-GPU heterogeneous computing. Now supports CPUs lacking AMX and AVX-512..."
+    solution: |
+      {"takeaways": ["KTransformers now supports AVX2-based MoE inference, bringing viable LLM performance to CPUs without AMX or AVX-512.", "AVX2 is present on virtually every x86 CPU since 2013, unlocking local inference for a massive installed base.", "Performance gap vs AMX/AVX-512 remains significant, but for smaller MoE models the tradeoff may be acceptable."]}
+    tags: [curation, takeaway, research]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "IBM Collaborating With Arm For Dual-Architecture Hardware"
+      Source: Phoronix
+      Summary: "IBM announced a strategic collaboration with Arm around new dual-architecture hardware..."
+    solution: |
+      {"takeaways": ["IBM and Arm are jointly developing hardware blending POWER architecture with Arm cores for enterprise and HPC workloads.", "Could enable POWER's strong RAS features alongside Arm's power efficiency in a single system.", "For enterprise customers, a hybrid POWER/Arm platform could simplify infrastructure."]}
+    tags: [curation, takeaway, research]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Scaling Laws for Precision in Mixture-of-Experts Models"
+      Source: ArXiv cs.LG
+      Summary: "We derive scaling laws governing how numerical precision affects MoE model quality as expert count and model size increase. Lower precision degrades routing decisions disproportionately compared to dense layers..."
+    solution: |
+      {"takeaways": ["Establishes that MoE routing layers are more sensitive to quantization than dense FFN blocks, requiring higher precision for routers even when experts are aggressively quantized.", "Provides concrete scaling formulas teams can use to predict quality loss when deploying large MoE models at reduced precision.", "Directly actionable for anyone shipping quantized MoE models — route in FP16, compute in INT4 may be the practical takeaway."]}
+    tags: [curation, takeaway, research]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "A Survey of Code Generation with Large Language Models: Challenges, Benchmarks, and Beyond"
+      Source: ArXiv cs.SE
+      Summary: "We provide a comprehensive survey of 200+ papers on LLM-based code generation, covering benchmarks (HumanEval, MBPP, SWE-bench), training strategies, evaluation metrics, and open challenges..."
+    solution: |
+      {"takeaways": ["Catalogues 200+ papers across code generation benchmarks, training methods, and evaluation — the most complete map of the field to date.", "Highlights that benchmark saturation on HumanEval/MBPP is driving the community toward harder, repo-level benchmarks like SWE-bench.", "Identifies test-time compute, long-context grounding, and multi-file editing as the three least-solved open problems."]}
+    tags: [curation, takeaway, research]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "RepoGraph: Enhancing LLM Code Completion with Repository-Level Context Graphs"
+      Source: ArXiv cs.SE
+      Summary: "We propose RepoGraph, a method that builds dependency graphs from entire repositories and injects structured context into LLM prompts for code completion. Evaluated on CrossCodeEval and RepoEval, RepoGraph improves completion accuracy by 12-18% over file-level baselines..."
+    solution: |
+      {"takeaways": ["Builds repository-level dependency graphs and injects them as structured context, yielding 12-18% accuracy gains over file-level baselines.", "Method is model-agnostic — works as a retrieval layer in front of any code LLM, including small local models.", "Code and evaluation scripts released, making it straightforward to reproduce and integrate into existing pipelines."]}
+    tags: [curation, takeaway, research]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "BioRobot: A Soft Continuum Manipulator Inspired by Elephant Trunk Musculature"
+      Source: ArXiv cs.RO
+      Summary: "We present BioRobot, a pneumatically actuated soft continuum manipulator modeled on elephant trunk muscle architecture. The robot achieves 6-DOF manipulation in constrained spaces where rigid arms cannot operate..."
+    solution: |
+      {"takeaways": ["Demonstrates a soft continuum manipulator achieving 6-DOF control in confined spaces, directly inspired by elephant trunk musculature.", "Pneumatic actuation enables compliance that rigid manipulators lack, opening applications in surgical assistance and field repair.", "Hardware design files and control software are open-sourced, lowering the replication barrier for soft robotics labs."]}
+    tags: [curation, takeaway, research]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Cross-Domain Transfer Learning for Low-Resource Sentiment Analysis in African Languages"
+      Source: ArXiv cs.CL
+      Summary: "We investigate transfer learning strategies for sentiment analysis across 12 African languages with limited labeled data. A multilingual adapter approach outperforms full fine-tuning by 8 points F1 on average..."
+    solution: |
+      {"takeaways": ["Multilingual adapters outperform full fine-tuning by 8 F1 points for low-resource African language sentiment analysis — a strong argument for parameter-efficient methods.", "Covers 12 languages, providing the broadest cross-African-language sentiment benchmark to date.", "Practical implication: teams can add a new language with a few hundred labeled examples and a lightweight adapter, no full retraining required."]}
+    tags: [curation, takeaway, research]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Emergent World Models in Maze-Solving Transformers: Evidence from Probing and Intervention"
+      Source: ArXiv cs.LG
+      Summary: "We train small transformers to solve procedurally generated mazes and probe whether they develop internal spatial representations. Linear probes recover accurate 2D maps from intermediate activations, and targeted activation editing redirects navigation..."
+    solution: |
+      {"takeaways": ["Small transformers trained on maze-solving develop recoverable 2D spatial representations in intermediate layers — genuine world models, not just pattern matching.", "Activation editing can redirect the model's navigation path, confirming the representations are causally used, not epiphenomenal.", "Adds to growing evidence that even modest-scale transformers build structured internal models when the task demands spatial reasoning."]}
+    tags: [curation, takeaway, research]
+    difficulty: medium

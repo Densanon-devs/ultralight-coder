@@ -1,0 +1,9 @@
+# Grammar for digest highlights intro (Pass 3)
+# Forces: {"highlights_intro": "..."}
+
+root     ::= "{" ws "\"highlights_intro\"" ws ":" ws string ws "}"
+string   ::= "\"" chars "\""
+chars    ::= char+
+char     ::= [^"\\] | "\\" escape
+escape   ::= ["\\nrt/]
+ws       ::= [ \t\n]*

@@ -1,0 +1,366 @@
+domain: curation
+category: curation_selection
+examples:
+  # === REAL GROUND-TRUTH EXAMPLES ===
+
+  # Example 1: AI Digest — balanced mix of research, tools, community
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: research, industry, tools, community
+      Articles:
+      0. [tools] "Holo3: Breaking the Computer Use Frontier" (HF Blog) — new multimodal agent benchmark
+      1. [tools] "March 2026 sponsors-only newsletter" (Simon Willison) — agentic patterns, MoE streaming
+      2. [tools] "datasette-llm 0.1a6" (Simon Willison) — release notes, minor
+      3. [tools] "datasette-enrichments-llm 0.2a1" (Simon Willison) — release notes, minor
+      4. [research] "How Emotion Shapes the Behavior of LLMs" (ArXiv cs.AI) — mechanistic study of emotion in LLMs
+      5. [research] "Case-Adaptive Multi-Agent Deliberation for Clinical Prediction" (ArXiv cs.AI) — multi-agent for clinical
+      6. [research] "Community-Driven Framework for Tool-Using AI Agents" (ArXiv cs.AI) — tool reliability framework
+      7. [research] "Safety-Aware Multi-Agent LLM Framework for Behavioral Health" (ArXiv cs.AI) — safety in health comms
+      8. [research] "Human-in-the-Loop Control of Objective Drift in CS Education" (ArXiv cs.AI) — LLM drift in education
+      9. [community] "3-agent team (Architect+Builder+Reviewer)" (r/ClaudeAI) — 236 upvotes, multi-agent workflow
+      10. [community] "Claude as personal assistant ADHD-friendly" (r/ClaudeAI) — 78 upvotes
+      11. [community] "saves ~50K tokens by pre-indexing codebase" (r/ClaudeAI) — 331 upvotes
+      12. [community] "/Buddy is Awesome" (r/ClaudeAI) — 63 upvotes, shallow
+      13. [community] "Qwen3.6-Plus" (r/LocalLLaMA) — 569 upvotes, model release
+      14. [community] "block fresh accounts from posting?" (r/LocalLLaMA) — 259 upvotes, meta
+      15. [community] "The Bonsai 1-bit models are very good" (r/LocalLLaMA) — 716 upvotes, top post
+      16. [community] "1-bit and TurboQuant the future?" (r/LocalLLaMA) — 64 upvotes, simulation
+      17. [community] "Omnivoice 600+ Language TTS" (r/LocalLLaMA) — 51 upvotes
+      18. [tools] "anthropics/claude-code: v2.1.90" (Anthropic GitHub) — /powerup feature
+      19. [tools] "claude-code-action: v1.0.85" (Anthropic GitHub) — minor bugfix
+    solution: |
+      {"selected": [{"index": 4, "category": "research"}, {"index": 6, "category": "research"}, {"index": 13, "category": "industry"}, {"index": 15, "category": "industry"}, {"index": 0, "category": "tools"}, {"index": 1, "category": "tools"}, {"index": 18, "category": "tools"}, {"index": 11, "category": "community"}, {"index": 9, "category": "community"}]}
+    tags: [curation, selection]
+    difficulty: medium
+
+  # Example 2: Robotics Digest — research-heavy with industry and community
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: research, industry, tools, community
+      Articles:
+      0. [industry] "Scientists Build Living Robots With Nervous Systems" (IEEE Spectrum) — biorobotics breakthrough
+      1. [industry] "MoveIt Pro 9.0 enhanced perception-to-motion" (Robot Report) — software release
+      2. [industry] "Top 10 robotics developments March 2026" (Robot Report) — roundup
+      3. [industry] "PhAIL ranks robotics foundation models on real hardware" (Robot Report) — benchmark
+      4. [research] "Generalizable Dense Reward for Long-Horizon Robotic Tasks" (ArXiv cs.RO) — reward shaping
+      5. [research] "MRReP: Mixed Reality Reference Path Editing" (ArXiv cs.RO) — path planning in MR
+      6. [research] "Multi-Robot Networks via MLLM-Driven Sensing" (ArXiv cs.RO) — multi-robot coordination
+      7. [research] "Long-Horizon Navigation via MILP-MPC" (ArXiv cs.RO) — navigation planning
+      8. [research] "Neural-Assisted in-Motion Self-Heading Alignment" (ArXiv cs.RO) — localization
+      9. [research] "Back to school: robots learn from factory workers" (Robohub) — learning from demonstration
+      10. [industry] "LocaXion Chooses Redpoint for Forklift Safety" (Robotics & Auto News) — minor partnership
+      11. [industry] "Epson and Clayton Controls form alliance" (Robotics & Auto News) — partnership
+      12. [industry] "Tekpak pick-and-place robotic cell at interpack" (Robotics & Auto News) — trade show
+      13. [industry] "Agile Robots closes acquisition of thyssenkrupp" (Robotics & Auto News) — major acquisition
+      14. [industry] "What Skills Will Truck Techs Need in the AI Era" (Robotics & Auto News) — workforce
+      15. [community] "Deploying MuJoCo on Azure Part 2" (HN) — sim deployment tutorial
+      16. [community] "Robot Umpires Have Arrived in MLB" (HN/WSJ) — cultural moment
+      17. [community] "open source rubber ducking robot" (HN) — joke project
+      18. [community] "gig workers training humanoid robots at home" (HN/MIT Tech Review) — labor implications
+      19. [community] "Atombite: Building Takeout Packing Robot Harder Than You Think" (HN) — startup deep dive
+    solution: |
+      {"selected": [{"index": 4, "category": "research"}, {"index": 6, "category": "research"}, {"index": 9, "category": "research"}, {"index": 0, "category": "industry"}, {"index": 3, "category": "industry"}, {"index": 13, "category": "industry"}, {"index": 15, "category": "tools"}, {"index": 19, "category": "tools"}, {"index": 18, "category": "community"}, {"index": 16, "category": "community"}]}
+    tags: [curation, selection]
+    difficulty: medium
+
+  # Example 3: GameDev Digest — industry-heavy, must pick diverse topics
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: industry, engines_tools, techniques, community
+      Articles:
+      0. [industry] "Coffee Stain shutters Malmo studio" (Game Developer) — 17 employees laid off
+      1. [industry] "Black Ops 7 earns $30K per negative review" (Game Developer) — monetization controversy
+      2. [industry] "Krafton/Flyquest invest $3.5M in MOBA" (Game Developer) — esports investment
+      3. [industry] "French group sues Ubisoft over The Crew" (Game Developer) — 1.3M signatures, consumer rights
+      4. [industry] "Nexon AI will liberate its workforce" (Game Developer) — AI in game production
+      5. [industry] "MechWarrior dev Piranha Games layoffs" (GamesIndustry) — studio layoffs
+      6. [industry] "Nintendo patent for summon subcharacter rejected" (GamesIndustry) — patent law
+      7. [industry] "Limit Break mentorship program returns" (GamesIndustry) — career development
+      8. [industry] "IGN Live 2026 tickets on sale" (GamesIndustry) — event promo
+      9. [industry] "Musical Woodland Fantasy RPG" (80 Level) — art showcase
+      10. [industry] "Easy Full-Body Tracking For VRChat" (80 Level) — VR tool showcase
+      11. [industry] "PlayCanvas 4D Gaussian Splats" (80 Level) — rendering tech
+      12. [industry] "Creating Arcane's Vi" (80 Level) — character art tutorial
+      13. [industry] "Automated Camera Matching Tool" (80 Level) — pipeline tool
+      14. [industry] "Radial Pie Menu For UE5" (80 Level) — UI plugin
+      15. [industry] "Autumn Forest Scene in Blender & UE5" (80 Level) — env art showcase
+      16. [industry] "3D Wood-Carved Fox in Blender" (80 Level) — modeling showcase
+      17. [industry] "Cyberpunk 2077 VR Experience" (80 Level) — VR news
+      18. [industry] "Procedural Worlds, Economy, Player Systems" (80 Level) — systems design deep dive
+      19. [engines_tools] "Godot 4.6.2" (Godot Engine) — maintenance release
+    solution: |
+      {"selected": [{"index": 3, "category": "industry"}, {"index": 1, "category": "industry"}, {"index": 0, "category": "industry"}, {"index": 4, "category": "industry"}, {"index": 6, "category": "industry"}, {"index": 19, "category": "engines_tools"}, {"index": 14, "category": "engines_tools"}, {"index": 11, "category": "engines_tools"}, {"index": 18, "category": "techniques"}, {"index": 7, "category": "community"}]}
+    tags: [curation, selection]
+    difficulty: medium
+
+  # Example 4: Computation Digest — hardware-heavy, must categorize across subfields
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: hardware, research, industry, community
+      Articles:
+      0. [hardware] "Ubuntu raises minimum RAM to 6GB" (Tom's Hardware) — OS requirements change
+      1. [hardware] "1Hz display = 43-hour battery life XPS 14" (Tom's Hardware) — display innovation
+      2. [hardware] "GameStop NVMe 2TB SSD Review" (Tom's Hardware) — product review
+      3. [hardware] "Alienware Area-51 sale $950 off" (Tom's Hardware) — deal listing
+      4. [hardware] "Newegg combo $490" (Tom's Hardware) — deal listing
+      5. [hardware] "Modders save damaged RTX 4090" (Tom's Hardware) — repair story
+      6. [hardware] "Intel buys back 49% Ireland Fab" (Tom's Hardware) — $14.2B deal
+      7. [hardware] "Nvidia pours $2B into Marvell" (Tom's Hardware) — NVLink investment
+      8. [hardware] "Global foundry market $320B record" (Tom's Hardware) — market milestone
+      9. [hardware] "Raspberry Pi 500+ costs near Mac Mini" (Tom's Hardware) — pricing concern
+      10. [hardware] "IBM Collaborating With Arm" (Phoronix) — chip architecture partnership
+      11. [hardware] "CentOS Accelerated Infrastructure for NVIDIA AI" (Phoronix) — AI infra
+      12. [hardware] "Wine Zink OpenGL-on-Vulkan by default" (Phoronix) — graphics stack
+      13. [hardware] "KTransformers AVX2 MoE Support" (Phoronix) — local AI inference
+      14. [hardware] "Libinput Lua Security Issues" (Phoronix) — security advisory
+      15. [hardware] "Steam Linux >5%, 2x macOS" (Phoronix) — gaming market shift
+      16. [hardware] "AMD GPU Driver Multi-SDMA for Linux 7.1" (Phoronix) — driver update
+      17. [hardware] "Fedora Rejects systemd env proposal" (Phoronix) — distro politics
+      18. [hardware] "NVIDIA DRM Color Pipeline API Preview" (Phoronix) — display driver
+      19. [hardware] "Cloudflare EmDash Open-Source WordPress successor" (Phoronix) — web platform
+    solution: |
+      {"selected": [{"index": 6, "category": "hardware"}, {"index": 7, "category": "hardware"}, {"index": 8, "category": "hardware"}, {"index": 1, "category": "hardware"}, {"index": 5, "category": "hardware"}, {"index": 15, "category": "hardware"}, {"index": 13, "category": "research"}, {"index": 10, "category": "research"}, {"index": 9, "category": "industry"}, {"index": 0, "category": "industry"}]}
+    tags: [curation, selection]
+    difficulty: medium
+
+  # === SYNTHETIC EXAMPLES ===
+
+  # Example 5: Robotics digest heavy on ArXiv papers
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: research, industry, tools, community
+      Articles:
+      0. [research] "Soft Actuator Design via Topology Optimization" (ArXiv cs.RO) — novel soft robot fabrication
+      1. [research] "Vision-Language Models for Zero-Shot Grasp Planning" (ArXiv cs.RO) — VLM-guided manipulation
+      2. [research] "Sim-to-Real Transfer with Domain Randomization 2.0" (ArXiv cs.RO) — improved transfer methods
+      3. [research] "Hierarchical Task Planning for Mobile Manipulators" (ArXiv cs.RO) — TAMP improvements
+      4. [research] "Robust Quadruped Locomotion on Deformable Terrain" (ArXiv cs.RO) — legged locomotion
+      5. [research] "Federated Learning for Multi-Robot SLAM" (ArXiv cs.RO) — distributed mapping
+      6. [research] "Tactile Sensing Benchmark for Dexterous Manipulation" (ArXiv cs.RO) — new benchmark
+      7. [research] "Safe Reinforcement Learning with Lyapunov Constraints" (ArXiv cs.RO) — safety guarantees
+      8. [research] "Human Intent Prediction for Collaborative Assembly" (ArXiv cs.RO) — HRI prediction
+      9. [research] "Neural Radiance Fields for Robot Navigation" (ArXiv cs.RO) — NeRF-based planning
+      10. [research] "Optimal Sensor Placement for Continuum Robots" (ArXiv cs.RO) — sensor design
+      11. [research] "Language-Conditioned Imitation Learning at Scale" (ArXiv cs.RO) — language+robotics
+      12. [research] "Deformable Object Manipulation: A Survey" (ArXiv cs.RO) — survey paper
+      13. [industry] "Boston Dynamics Atlas Now Sorts Packages" (IEEE Spectrum) — commercial deployment
+      14. [industry] "Cobot Sales Up 34% in Q1 2026" (Robot Report) — market data
+      15. [community] "My first ROS2 Humble project walkthrough" (HN) — beginner tutorial
+      16. [community] "Isaac Sim vs MuJoCo vs Gazebo benchmark" (r/robotics) — 423 upvotes, comparison
+      17. [tools] "ROS2 Jazzy Jalisco LTS released" (Open Robotics) — major release
+      18. [research] "Energy-Efficient Swarm Coordination via Graph Neural Networks" (ArXiv cs.RO) — swarm robotics
+      19. [research] "Whole-Body Control for Humanoid Loco-Manipulation" (ArXiv cs.RO) — humanoid control
+    solution: |
+      {"selected": [{"index": 1, "category": "research"}, {"index": 2, "category": "research"}, {"index": 6, "category": "research"}, {"index": 7, "category": "research"}, {"index": 11, "category": "research"}, {"index": 19, "category": "research"}, {"index": 13, "category": "industry"}, {"index": 14, "category": "industry"}, {"index": 17, "category": "tools"}, {"index": 16, "category": "community"}]}
+    tags: [curation, selection]
+    difficulty: medium
+
+  # Example 6: Gaming digest heavy on indie showcases
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: industry, engines_tools, techniques, community
+      Articles:
+      0. [industry] "Indie Dev Sells 1M Copies in 48 Hours on Steam" (Game Developer) — breakout hit
+      1. [industry] "Stylized Low-Poly Castle Environment" (80 Level) — art showcase
+      2. [industry] "Hand-Painted Texture Workflow for Mobile" (80 Level) — art tutorial
+      3. [industry] "Pixel Art Roguelike Dungeon Generator" (80 Level) — procedural showcase
+      4. [industry] "Cozy Farm Sim with Dynamic Weather" (80 Level) — game showcase
+      5. [industry] "Sci-Fi Corridor Kitbash Set for UE5" (80 Level) — asset showcase
+      6. [industry] "Watercolor Shader in Unity URP" (80 Level) — shader tutorial
+      7. [industry] "Retro FPS Level Design Breakdown" (80 Level) — design analysis
+      8. [industry] "Isometric City Builder Devlog #12" (80 Level) — devlog
+      9. [industry] "Voxel Engine from Scratch in Rust" (80 Level) — engine dev showcase
+      10. [industry] "Studio MDHR layoffs after Cuphead DLC" (GamesIndustry) — layoffs
+      11. [industry] "Steam Next Fest demos top 5000" (Game Developer) — event stats
+      12. [engines_tools] "Unity 6.1 LTS with GPU Resident Drawer" (Unity Blog) — major release
+      13. [engines_tools] "Bevy 0.16 ECS overhaul" (Bevy Engine) — Rust game engine update
+      14. [community] "How I made $200K as solo indie dev AMA" (r/gamedev) — 892 upvotes
+      15. [community] "Best free assets for prototyping?" (r/gamedev) — 45 upvotes, list thread
+      16. [industry] "Medieval Tavern Interior Blender Tutorial" (80 Level) — modeling tutorial
+      17. [industry] "Procedural Terrain with Hydraulic Erosion" (80 Level) — terrain generation
+      18. [industry] "Anime Character Rig in Maya" (80 Level) — rigging showcase
+      19. [engines_tools] "Godot GDExtension C++ template updated" (GitHub) — minor tooling
+    solution: |
+      {"selected": [{"index": 0, "category": "industry"}, {"index": 10, "category": "industry"}, {"index": 11, "category": "industry"}, {"index": 12, "category": "engines_tools"}, {"index": 13, "category": "engines_tools"}, {"index": 6, "category": "techniques"}, {"index": 17, "category": "techniques"}, {"index": 9, "category": "techniques"}, {"index": 14, "category": "community"}, {"index": 7, "category": "techniques"}]}
+    tags: [curation, selection]
+    difficulty: medium
+
+  # Example 7: Tech digest heavy on hardware news
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: hardware, software, research, community
+      Articles:
+      0. [hardware] "AMD Ryzen 9 9950X3D Review: Gaming King" (AnandTech) — CPU review
+      1. [hardware] "TSMC 2nm Begins Risk Production" (Tom's Hardware) — fab milestone
+      2. [hardware] "DDR6 Spec Finalized at 12800 MT/s" (Tom's Hardware) — memory standard
+      3. [hardware] "RTX 5090 Supply Issues Continue" (Tom's Hardware) — GPU availability
+      4. [hardware] "Qualcomm X Elite Gen 2 Benchmarks Leak" (Tom's Hardware) — ARM laptop chip
+      5. [hardware] "Samsung 990 EVO Plus 4TB Review" (Tom's Hardware) — SSD review
+      6. [hardware] "Best Budget Monitors Under $200" (Tom's Hardware) — buying guide
+      7. [hardware] "Apple M5 Ultra Tape-Out Confirmed" (Bloomberg) — chip development
+      8. [hardware] "Framework Laptop 16 AMD 9070 XT eGPU Module" (Framework) — modular hardware
+      9. [hardware] "Intel Panther Lake Samples Shipping" (Tom's Hardware) — next-gen CPU
+      10. [hardware] "Micron HBM4 Production Begins Q3" (Tom's Hardware) — memory for AI
+      11. [hardware] "Best Gaming Headsets 2026" (Tom's Hardware) — buying guide
+      12. [hardware] "Corsair 6500X Case Review" (Tom's Hardware) — case review
+      13. [software] "Linux 7.0-rc1 Released with Major Scheduler Changes" (Phoronix) — kernel milestone
+      14. [software] "Mesa 26.0 Vulkan 1.4 Support" (Phoronix) — graphics driver
+      15. [hardware] "Power Consumption: RTX 5070 vs 4070 Super" (Tom's Hardware) — comparison
+      16. [community] "Built a $500 LLM inference box with used parts" (r/LocalLLaMA) — 1.2K upvotes
+      17. [community] "Why I switched from Mac to Framework" (HN) — 387 upvotes
+      18. [hardware] "Raspberry Pi AI HAT+ Review" (Tom's Hardware) — SBC AI accessory
+      19. [hardware] "Newegg Spring Sale Roundup" (Tom's Hardware) — deals listing
+    solution: |
+      {"selected": [{"index": 1, "category": "hardware"}, {"index": 2, "category": "hardware"}, {"index": 7, "category": "hardware"}, {"index": 4, "category": "hardware"}, {"index": 10, "category": "hardware"}, {"index": 8, "category": "hardware"}, {"index": 13, "category": "software"}, {"index": 14, "category": "software"}, {"index": 16, "category": "community"}, {"index": 17, "category": "community"}]}
+    tags: [curation, selection]
+    difficulty: medium
+
+  # Example 8: AI digest heavy on community posts
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: research, industry, tools, community
+      Articles:
+      0. [community] "Claude 4.5 Opus first impressions megathread" (r/ClaudeAI) — 2.1K upvotes, comprehensive
+      1. [community] "GPT-5 vs Claude 4.5 blind comparison" (r/ChatGPT) — 1.8K upvotes, head-to-head
+      2. [community] "My AI coding setup saved 20 hours this week" (r/ClaudeAI) — 445 upvotes
+      3. [community] "Open source alternative to Cursor that's actually good" (r/LocalLLaMA) — 678 upvotes
+      4. [community] "Llama 4 Scout is underwhelming" (r/LocalLLaMA) — 534 upvotes, model critique
+      5. [community] "Built a RAG pipeline that actually works" (r/LangChain) — 312 upvotes
+      6. [community] "Why I quit my job to build AI tools" (r/SideProject) — 89 upvotes, personal story
+      7. [community] "Best practices for prompt caching" (r/ClaudeAI) — 267 upvotes
+      8. [community] "Ollama vs LM Studio vs llama.cpp benchmark" (r/LocalLLaMA) — 891 upvotes
+      9. [community] "AI art is killing freelance illustration" (r/ArtistLounge) — 1.4K upvotes, debate
+      10. [community] "Fine-tuning Qwen2.5 on custom data tutorial" (r/LocalLLaMA) — 203 upvotes
+      11. [community] "Claude keeps refusing my code request" (r/ClaudeAI) — 56 upvotes, complaint
+      12. [research] "Scaling Laws for Mixture-of-Experts Architectures" (ArXiv cs.LG) — foundational
+      13. [research] "Constitutional AI 2.0: Self-Improving Alignment" (ArXiv cs.AI) — alignment research
+      14. [tools] "LiteLLM 2.0: Unified API for 200+ models" (GitHub) — major release
+      15. [industry] "Google DeepMind restructures research teams" (The Information) — org changes
+      16. [community] "MCP servers are a game changer for workflows" (r/ClaudeAI) — 398 upvotes
+      17. [community] "Running 70B models on a Mac Studio" (r/LocalLLaMA) — 723 upvotes
+      18. [tools] "Anthropic releases prompt caching API" (Anthropic Blog) — feature launch
+      19. [community] "AI replaced my junior devs hot take" (r/ExperiencedDevs) — 67 upvotes, venting
+    solution: |
+      {"selected": [{"index": 12, "category": "research"}, {"index": 13, "category": "research"}, {"index": 15, "category": "industry"}, {"index": 14, "category": "tools"}, {"index": 18, "category": "tools"}, {"index": 0, "category": "community"}, {"index": 1, "category": "community"}, {"index": 8, "category": "community"}, {"index": 3, "category": "community"}, {"index": 17, "category": "community"}]}
+    tags: [curation, selection]
+    difficulty: medium
+
+  # Example 9: Synthetic — Cybersecurity digest balanced mix
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: research, industry, tools, community
+      Articles:
+      0. [industry] "CrowdStrike Acquires Adaptive Shield for $300M" (SecurityWeek) — SSPM acquisition
+      1. [industry] "Palo Alto Networks Q1 Revenue Up 26%" (SecurityWeek) — earnings
+      2. [research] "LLM-Powered Fuzzing Finds 47 Zero-Days in OSS" (ArXiv cs.CR) — automated vuln discovery
+      3. [research] "Post-Quantum TLS Handshake Performance Analysis" (ArXiv cs.CR) — PQC migration study
+      4. [research] "Side-Channel Attacks on Apple M-Series via GPU Shared Memory" (ArXiv cs.CR) — hardware vuln
+      5. [tools] "Nuclei v4.0: Complete Rewrite in Go" (ProjectDiscovery) — scanner overhaul
+      6. [tools] "Semgrep Adds AI-Powered Taint Analysis" (Semgrep Blog) — SAST upgrade
+      7. [tools] "Wireshark 5.0 with HTTP/3 Decryption" (Wireshark) — protocol analysis
+      8. [community] "Reverse engineering TikTok's new obfuscation" (HN) — 1.1K upvotes
+      9. [community] "I found an RCE in a major CDN AMA" (r/netsec) — 567 upvotes
+      10. [industry] "CISA Warns of Actively Exploited Ivanti Flaw" (BleepingComputer) — active threat
+      11. [industry] "EU Cyber Resilience Act Enforcement Begins" (SecurityWeek) — regulation
+      12. [community] "Best OSCP prep resources 2026?" (r/netsec) — 89 upvotes, list thread
+      13. [research] "Formal Verification of Smart Contract Bridges" (ArXiv cs.CR) — blockchain security
+      14. [industry] "LastPass Breach Follow-Up: $150M Crypto Stolen" (KrebsOnSecurity) — incident update
+      15. [tools] "Burp Suite 2026.3: AI-Assisted Scan Profiles" (PortSwigger) — pentest tool
+      16. [community] "CTF writeup: Exploiting a Rust unsafe block" (HN) — 234 upvotes
+      17. [industry] "Microsoft Patch Tuesday fixes 4 zero-days" (BleepingComputer) — routine
+      18. [research] "Adversarial Attacks on Code LLMs via Poisoned Repos" (ArXiv cs.CR) — supply chain risk
+      19. [community] "Is cybersecurity still a good career?" (r/cybersecurity) — 34 upvotes, generic
+    solution: |
+      {"selected": [{"index": 2, "category": "research"}, {"index": 4, "category": "research"}, {"index": 18, "category": "research"}, {"index": 3, "category": "research"}, {"index": 0, "category": "industry"}, {"index": 10, "category": "industry"}, {"index": 14, "category": "industry"}, {"index": 5, "category": "tools"}, {"index": 6, "category": "tools"}, {"index": 8, "category": "community"}]}
+    tags: [curation, selection]
+    difficulty: medium
+
+  # Example 10: Synthetic — Data Engineering digest
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: research, industry, tools, community
+      Articles:
+      0. [tools] "Apache Spark 4.0 GA with Photon Engine Open-Sourced" (Databricks) — major release
+      1. [tools] "DuckDB 1.2: Window Functions 10x Faster" (DuckDB Blog) — performance release
+      2. [tools] "dbt Core 2.0 with Built-in Column Lineage" (dbt Labs) — lineage feature
+      3. [industry] "Snowflake Acquires Neeva Search Team" (TechCrunch) — AI search acquisition
+      4. [industry] "Databricks Valued at $62B in New Round" (Bloomberg) — funding
+      5. [research] "Learned Indexes for Time-Series Data at Scale" (VLDB 2026) — index optimization
+      6. [research] "Approximate Query Processing with Error Guarantees" (ArXiv cs.DB) — query optimization
+      7. [community] "We migrated 50TB from Redshift to Snowflake in a weekend" (HN) — 678 upvotes
+      8. [community] "Unpopular opinion: Parquet is overused" (r/dataengineering) — 445 upvotes, debate
+      9. [tools] "Polars 1.0 Stable Release" (Polars Blog) — DataFrame library milestone
+      10. [community] "Data engineer salary thread 2026" (r/dataengineering) — 312 upvotes
+      11. [tools] "Airbyte v2: Connector Builder with AI" (Airbyte Blog) — integration tool
+      12. [industry] "Google BigQuery adds built-in ML pipelines" (Google Cloud) — platform feature
+      13. [community] "Best resources for learning Kafka?" (r/dataengineering) — 67 upvotes, beginner
+      14. [industry] "AWS Redshift Serverless Price Cut 40%" (AWS) — pricing change
+      15. [tools] "Great Expectations 1.0: Data Contracts" (GX Blog) — data quality
+      16. [research] "Streaming SQL Semantics: A Formal Framework" (ArXiv cs.DB) — stream processing theory
+      17. [community] "Built a real-time pipeline with Flink for $0 on k8s" (HN) — 234 upvotes
+      18. [industry] "Confluent partners with OpenAI for event-driven AI" (Confluent) — partnership
+      19. [tools] "SQLMesh: Open-Source dbt Alternative Hits 1.0" (GitHub) — new tool
+    solution: |
+      {"selected": [{"index": 0, "category": "tools"}, {"index": 1, "category": "tools"}, {"index": 2, "category": "tools"}, {"index": 9, "category": "tools"}, {"index": 5, "category": "research"}, {"index": 6, "category": "research"}, {"index": 3, "category": "industry"}, {"index": 4, "category": "industry"}, {"index": 7, "category": "community"}, {"index": 8, "category": "community"}]}
+    tags: [curation, selection]
+    difficulty: medium
+
+  # Example 11: Synthetic — DevOps/Cloud digest
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: research, industry, tools, community
+      Articles:
+      0. [tools] "Kubernetes 1.32: Sidecar Containers GA" (K8s Blog) — major feature graduation
+      1. [tools] "Terraform 2.0 Preview: Native Drift Detection" (HashiCorp) — IaC evolution
+      2. [tools] "Argo CD 3.0 with Multi-Cluster GitOps" (Argo Project) — deployment tool
+      3. [industry] "HashiCorp Acquisition by IBM Closes" (TechCrunch) — major acquisition
+      4. [industry] "AWS re:Invent Keynote Highlights" (AWS) — event recap
+      5. [tools] "Pulumi AI: Generate IaC from Natural Language" (Pulumi Blog) — AI-powered IaC
+      6. [community] "We run 10K pods on a single cluster AMA" (r/kubernetes) — 567 upvotes
+      7. [community] "Docker Desktop alternatives comparison" (HN) — 891 upvotes
+      8. [community] "Is Kubernetes worth it for small teams?" (r/devops) — 123 upvotes, evergreen debate
+      9. [tools] "Grafana 12 with AI-Powered Alert Correlation" (Grafana Labs) — observability
+      10. [industry] "CloudFlare Workers AI Now Supports 50 Models" (Cloudflare) — platform expansion
+      11. [research] "Predictive Autoscaling via Transformer Models" (ArXiv cs.DC) — ML for ops
+      12. [research] "Formal Verification of Helm Charts" (ArXiv cs.SE) — config safety
+      13. [tools] "Cilium 1.16: Full Service Mesh Without Sidecars" (Isovalent) — networking
+      14. [community] "Migrating from Jenkins to GitHub Actions: lessons" (HN) — 345 upvotes
+      15. [industry] "GCP Reduces Egress Fees by 30%" (Google Cloud) — pricing
+      16. [tools] "Nix 3.0 with Flakes Stabilized" (NixOS) — package management milestone
+      17. [community] "My homelab Prometheus setup monitors 200 services" (r/selfhosted) — 78 upvotes
+      18. [industry] "Datadog Revenue Crosses $3B ARR" (Datadog) — earnings
+      19. [tools] "OpenTofu 1.9: Full Feature Parity with Terraform" (OpenTofu) — fork milestone
+    solution: |
+      {"selected": [{"index": 0, "category": "tools"}, {"index": 1, "category": "tools"}, {"index": 13, "category": "tools"}, {"index": 16, "category": "tools"}, {"index": 19, "category": "tools"}, {"index": 3, "category": "industry"}, {"index": 11, "category": "research"}, {"index": 12, "category": "research"}, {"index": 7, "category": "community"}, {"index": 6, "category": "community"}]}
+    tags: [curation, selection]
+    difficulty: medium
+
+  # Example 12: Synthetic — ML/NLP digest balanced
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: research, industry, tools, community
+      Articles:
+      0. [research] "Mamba-3: Linear-Time Sequence Modeling at 405B Scale" (ArXiv cs.LG) — architecture breakthrough
+      1. [research] "Test-Time Training Improves In-Context Learning 3x" (ArXiv cs.CL) — inference technique
+      2. [research] "Constitutional Classifiers Reduce Jailbreaks by 95%" (ArXiv cs.AI) — safety method
+      3. [research] "Sparse Upcycling: Turning Dense Models into MoE" (ArXiv cs.LG) — efficiency method
+      4. [research] "Multilingual Evaluation of Reasoning in 47 Languages" (ArXiv cs.CL) — benchmark
+      5. [industry] "Meta Releases Llama 4 Behemoth 2T Open Weights" (Meta AI) — open model release
+      6. [industry] "OpenAI Enterprise Revenue Hits $5B ARR" (The Information) — business milestone
+      7. [industry] "Cohere Raises $500M for Enterprise RAG" (TechCrunch) — funding
+      8. [tools] "vLLM 0.8: Continuous Batching 2x Throughput" (vLLM Blog) — serving optimization
+      9. [tools] "LangGraph 0.5: Human-in-the-Loop Agents" (LangChain Blog) — agent framework
+      10. [tools] "Instructor 2.0: Structured Output for Any Model" (GitHub) — extraction library
+      11. [community] "Quantization comparison: GGUF vs AWQ vs GPTQ" (r/LocalLLaMA) — 934 upvotes
+      12. [community] "I trained a 7B model on my domain data for $50" (r/LocalLLaMA) — 567 upvotes
+      13. [community] "Best embedding model for production RAG?" (r/LangChain) — 123 upvotes
+      14. [research] "Attention Sink Phenomenon in Long-Context Models" (ArXiv cs.CL) — context handling
+      15. [industry] "Anthropic Partners with Palantir for Government AI" (Reuters) — defense contract
+      16. [community] "Open-source voice assistant that runs locally" (HN) — 1.2K upvotes
+      17. [research] "Data Contamination in LLM Benchmarks: A Systematic Study" (ArXiv cs.CL) — benchmark validity
+      18. [tools] "Weights & Biases Adds Automatic Experiment Comparison" (W&B Blog) — MLOps feature
+      19. [community] "Why I switched from PyTorch to JAX" (HN) — 234 upvotes
+    solution: |
+      {"selected": [{"index": 0, "category": "research"}, {"index": 1, "category": "research"}, {"index": 2, "category": "research"}, {"index": 3, "category": "research"}, {"index": 5, "category": "industry"}, {"index": 6, "category": "industry"}, {"index": 15, "category": "industry"}, {"index": 8, "category": "tools"}, {"index": 11, "category": "community"}, {"index": 16, "category": "community"}]}
+    tags: [curation, selection]
+    difficulty: medium

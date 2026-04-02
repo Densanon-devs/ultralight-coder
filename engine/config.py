@@ -131,6 +131,30 @@ class MicroAdapterConfig:
 
 
 @dataclass
+class ProjectContextConfig:
+    enabled: bool = False
+    storage_dir: str = "data/project_index"
+    top_k: int = 5
+    similarity_threshold: float = 0.35
+    max_chunk_lines: int = 40                   # Max lines per chunk
+    overlap_lines: int = 5                      # Overlap between chunks
+    file_extensions: list[str] = field(default_factory=lambda: [
+        ".py", ".js", ".ts", ".jsx", ".tsx",
+        ".go", ".rs", ".c", ".h", ".cpp",
+        ".java", ".cs", ".rb", ".kt", ".swift",
+        ".sql", ".sh", ".bash",
+        ".yaml", ".yml", ".json", ".toml",
+        ".md", ".txt",
+    ])
+    ignore_patterns: list[str] = field(default_factory=lambda: [
+        "__pycache__", "node_modules", ".git", ".venv", "venv",
+        "dist", "build", ".egg-info", ".tox", ".mypy_cache",
+        "*.pyc", "*.min.js", "*.min.css",
+    ])
+    max_file_size_kb: int = 500                 # Skip files larger than this
+
+
+@dataclass
 class MemoryConfig:
     enabled: bool = True
     short_term: ShortTermMemoryConfig = field(default_factory=ShortTermMemoryConfig)
@@ -193,6 +217,7 @@ class Config:
         self.pipeline = PipelineConfig()
         self.kv_cache = KVCacheConfig()
         self.micro_adapters = MicroAdapterConfig()
+        self.project_context = ProjectContextConfig()
 
         if self.config_path.exists():
             self._load()
@@ -364,6 +389,21 @@ class Config:
                 min_cluster_size=ma.get("min_cluster_size", self.micro_adapters.min_cluster_size),
                 max_adapters=ma.get("max_adapters", self.micro_adapters.max_adapters),
                 regenerate_interval=ma.get("regenerate_interval", self.micro_adapters.regenerate_interval),
+            )
+
+        # Project Context
+        if "project_context" in raw:
+            pc = raw["project_context"]
+            self.project_context = ProjectContextConfig(
+                enabled=pc.get("enabled", self.project_context.enabled),
+                storage_dir=self._resolve_path(pc.get("storage_dir", self.project_context.storage_dir)),
+                top_k=pc.get("top_k", self.project_context.top_k),
+                similarity_threshold=pc.get("similarity_threshold", self.project_context.similarity_threshold),
+                max_chunk_lines=pc.get("max_chunk_lines", self.project_context.max_chunk_lines),
+                overlap_lines=pc.get("overlap_lines", self.project_context.overlap_lines),
+                file_extensions=pc.get("file_extensions", self.project_context.file_extensions),
+                ignore_patterns=pc.get("ignore_patterns", self.project_context.ignore_patterns),
+                max_file_size_kb=pc.get("max_file_size_kb", self.project_context.max_file_size_kb),
             )
 
         logger.info(f"Configuration loaded from {self.config_path}")

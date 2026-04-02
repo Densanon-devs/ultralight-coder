@@ -1,0 +1,82 @@
+domain: curation
+category: curation_takeaway_general
+examples:
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Acme Corp launches DataPilot — AI-powered data pipeline builder"
+      Source: TechCrunch
+      Summary: "Acme Corp released DataPilot, a no-code tool that uses LLMs to generate and optimize data pipelines from natural language descriptions. Supports major cloud warehouses and claims 10x faster setup than manual configuration."
+    solution: |
+      {"takeaways": ["DataPilot generates data pipelines from natural language, targeting the setup time bottleneck that slows analytics teams.", "10x speed claim needs validation, but the approach — LLMs generating pipeline configs — is sound and increasingly common.", "Supports major cloud warehouses out of the box, reducing integration friction for enterprise adoption."]}
+    tags: [curation, takeaway, general]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Efficient Batch Normalization Alternatives for Vision Transformers"
+      Source: ArXiv cs.CV
+      Summary: "We propose LayerScale++, an alternative to batch normalization for vision transformers that eliminates batch-size dependency while improving training stability. Evaluated on ImageNet-1K and COCO, the method matches or exceeds BatchNorm performance with 15% less memory."
+    solution: |
+      {"takeaways": ["LayerScale++ removes batch-size dependency from normalization, solving a practical pain point for teams training ViTs on limited hardware.", "15% memory reduction with matched performance — a straightforward win for resource-constrained training runs.", "Method is a drop-in replacement, meaning adoption requires minimal code changes to existing ViT architectures."]}
+    tags: [curation, takeaway, general]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Is prompt engineering dead? 500-comment thread reaches surprising consensus"
+      Source: r/artificial
+      Summary: "Massive discussion thread debating whether prompt engineering is still a meaningful skill as models improve. Despite the provocative title, top comments converge on a nuanced view: basic prompting is commoditized but system-level prompt design remains critical."
+    solution: |
+      {"takeaways": ["Community consensus: simple prompt tricks are commoditized, but system prompt architecture and multi-turn orchestration remain high-value skills.", "500-comment thread with surprising agreement — rare for a topic that usually generates heat without light.", "The distinction between 'prompting a chatbot' and 'designing prompt pipelines for production' is now widely understood."]}
+    tags: [curation, takeaway, general]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Building a real-time fraud detection system with streaming SQL"
+      Source: InfoQ
+      Summary: "Step-by-step tutorial on building a real-time fraud detection pipeline using streaming SQL engines. Covers window functions, pattern matching, and integration with ML scoring services. Includes benchmarks showing sub-100ms detection latency."
+    solution: |
+      {"takeaways": ["Demonstrates sub-100ms fraud detection using streaming SQL window functions — fast enough for real-time transaction blocking.", "Key insight: pattern matching in the SQL layer catches 80% of known fraud patterns before expensive ML scoring is needed.", "Practical tutorial with benchmarks, not just architecture diagrams — teams can use this as a starting point for implementation."]}
+    tags: [curation, takeaway, general]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "SoftBank acquires Graphcore for $1.3B to build AI inference chips"
+      Source: Financial Times
+      Summary: "SoftBank acquired UK chip startup Graphcore for $1.3B, pivoting the company from training accelerators to inference-focused silicon. The deal follows Graphcore's struggles to compete with Nvidia in the training market."
+    solution: |
+      {"takeaways": ["SoftBank paying $1.3B for Graphcore and pivoting it to inference — a bet that inference demand will outstrip training demand.", "Graphcore's IPU architecture was well-regarded technically but failed commercially against Nvidia's training ecosystem lock-in.", "Strategic context: SoftBank is assembling an AI hardware portfolio (Arm, Graphcore) to reduce dependency on Nvidia."]}
+    tags: [curation, takeaway, general]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Polars 1.0: DataFrame library declares stable API"
+      Source: GitHub Polars
+      Summary: "Polars reaches 1.0 with a stable API guarantee. The Rust-based DataFrame library now supports lazy evaluation, streaming large-than-memory datasets, and a plugin system for custom expressions. Migration guide from 0.x included."
+    solution: |
+      {"takeaways": ["Polars 1.0 declares API stability — a significant milestone that removes the primary adoption blocker for production use.", "Streaming support for larger-than-memory datasets positions Polars as a pandas replacement for data engineering, not just analysis.", "Plugin system for custom expressions opens the door for domain-specific extensions without forking the core."]}
+    tags: [curation, takeaway, general]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "The hidden costs of microservices: a 5-year retrospective"
+      Source: Staff Engineer Blog
+      Summary: "A senior engineer reflects on five years of microservices migration at a mid-size company. Documents unexpected costs including distributed tracing overhead, schema evolution across services, and team cognitive load. Concludes that a modular monolith would have served better."
+    solution: |
+      {"takeaways": ["Five-year retrospective concluding a modular monolith would have been better — rare honest post-mortem from inside a microservices migration.", "Identifies distributed tracing overhead, cross-service schema evolution, and cognitive load as the three highest hidden costs.", "Valuable signal for teams currently evaluating microservices: the costs described here are structural, not implementation mistakes."]}
+    tags: [curation, takeaway, general]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "OpenTelemetry Collector 0.100: major performance overhaul"
+      Source: CNCF Blog
+      Summary: "OpenTelemetry Collector hits version 0.100 with a rewritten pipeline engine delivering 3x throughput improvement and 40% memory reduction. New batch processor supports adaptive sizing based on back-pressure signals."
+    solution: |
+      {"takeaways": ["3x throughput and 40% memory reduction from a rewritten pipeline engine — a meaningful upgrade for teams running collectors at scale.", "Adaptive batch sizing based on back-pressure is the standout feature, reducing the need for manual tuning under variable load.", "Version 0.100 is still pre-1.0, but the performance gains make upgrading worthwhile for any team already invested in OTel."]}
+    tags: [curation, takeaway, general]
+    difficulty: medium

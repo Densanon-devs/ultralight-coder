@@ -1,0 +1,162 @@
+domain: curation
+category: curation_selection
+examples:
+  # Edge Case 1: Only 5 articles available — select all 5
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: research, industry, tools, community
+      Articles:
+      0. [research] "Efficient Fine-Tuning of Vision Transformers with LoRA" (ArXiv cs.CV) — parameter-efficient adaptation for vision models
+      1. [industry] "Google DeepMind Unveils Gemini 3.0 Ultra" (Google AI Blog) — new flagship model with 10M context window
+      2. [tools] "Ollama 0.6: Native Multi-GPU and Speculative Decoding" (Ollama Blog) — major local inference release
+      3. [community] "The real cost of running LLMs in production" (HN) — 1.4K upvotes, detailed cost breakdown
+      4. [research] "Chain-of-Thought Distillation into Sub-1B Models" (ArXiv cs.CL) — small model reasoning
+    solution: |
+      {"selected": [{"index": 0, "category": "research"}, {"index": 1, "category": "industry"}, {"index": 2, "category": "tools"}, {"index": 3, "category": "community"}, {"index": 4, "category": "research"}]}
+    tags: [curation, selection, edge_case]
+    difficulty: easy
+
+  # Edge Case 2: 15 articles all from same source — must still diversify categories
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: research, industry, tools, community
+      Articles:
+      0. [industry] "Nvidia CEO: We're Building the Factory of the Future" (Tom's Hardware) — keynote recap
+      1. [industry] "RTX 5080 Review: Not Quite Worth the Premium" (Tom's Hardware) — GPU review
+      2. [industry] "Intel Arrow Lake-S Refresh Benchmarks Leak" (Tom's Hardware) — CPU leak
+      3. [industry] "AMD RDNA 5 Architecture Deep Dive" (Tom's Hardware) — GPU architecture reveal
+      4. [industry] "Best Gaming Laptops Spring 2026" (Tom's Hardware) — buying guide
+      5. [industry] "Corsair DDR6 RAM First Look at 12000 MT/s" (Tom's Hardware) — memory preview
+      6. [industry] "Samsung 990 Pro 8TB Review" (Tom's Hardware) — SSD review
+      7. [industry] "Raspberry Pi AI Camera Module Reviewed" (Tom's Hardware) — SBC accessory
+      8. [industry] "Threadripper 9000 Workstation Benchmarks" (Tom's Hardware) — workstation CPU
+      9. [industry] "Microsoft Surface Pro 11 Review" (Tom's Hardware) — laptop review
+      10. [industry] "Global Chip Shortage Officially Over, Says SEMI" (Tom's Hardware) — supply chain milestone
+      11. [industry] "RTX 4060 Price Drops Below $250" (Tom's Hardware) — deal listing
+      12. [industry] "Framework Desktop Announced at CES" (Tom's Hardware) — modular desktop
+      13. [industry] "PCIe 6.0 Devices Expected in 2027" (Tom's Hardware) — standard roadmap
+      14. [industry] "RISC-V Laptop Passes 1000 Geekbench Single-Core" (Tom's Hardware) — architecture milestone
+    solution: |
+      {"selected": [{"index": 0, "category": "industry"}, {"index": 3, "category": "research"}, {"index": 10, "category": "industry"}, {"index": 14, "category": "research"}, {"index": 8, "category": "hardware"}, {"index": 12, "category": "industry"}, {"index": 5, "category": "hardware"}, {"index": 13, "category": "research"}, {"index": 1, "category": "hardware"}]}
+    tags: [curation, selection, edge_case]
+    difficulty: hard
+
+  # Edge Case 3: 20 articles but mostly low-quality — select fewer, only 6
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: research, industry, tools, community
+      Articles:
+      0. [community] "anyone else's Claude broken today?" (r/ClaudeAI) — 23 upvotes, outage complaint
+      1. [community] "upvote if you think AI will replace programmers" (r/programming) — 12 upvotes, bait
+      2. [tools] "awesome-ai-tools list updated" (GitHub) — repo star farming
+      3. [community] "my first chatbot doesn't work, help" (r/learnpython) — 3 upvotes, beginner help
+      4. [industry] "AI Startup Raises $2M Seed for AI-Powered To-Do App" (TechCrunch) — trivial funding
+      5. [community] "which LLM is best?" (r/artificial) — 8 upvotes, no substance
+      6. [research] "Fundamental Limits of In-Context Learning in Transformers" (ArXiv cs.LG) — theoretical bound proof
+      7. [community] "I asked ChatGPT to write my resume LOL" (r/ChatGPT) — 45 upvotes, meme
+      8. [tools] "ChatGPT wrapper library v0.0.3" (GitHub) — trivial wrapper
+      9. [industry] "OpenAI Announces GPT-5 Turbo with Native Tool Use" (OpenAI Blog) — major model release
+      10. [community] "AI is overhyped, change my mind" (r/technology) — 67 upvotes, low substance
+      11. [community] "best free API for beginners?" (r/artificial) — 15 upvotes, FAQ
+      12. [tools] "LM Studio 0.4: One-Click Model Download" (LM Studio) — minor UX update
+      13. [community] "Rant: why is every app adding AI now" (r/software) — 34 upvotes, complaint
+      14. [research] "Mechanistic Interpretability of Reward Hacking in RLHF" (ArXiv cs.AI) — alignment research
+      15. [community] "check out my AI girlfriend app" (r/SideProject) — 2 upvotes, spam
+      16. [industry] "Google Cloud Next: Vertex AI Agent Builder GA" (Google Cloud) — platform launch
+      17. [community] "Hot take: Copilot makes you a worse programmer" (r/programming) — 56 upvotes, opinion
+      18. [tools] "random npm ai utility package" (npm) — no downloads, no docs
+      19. [community] "weekly AI news recap podcast episode 47" (YouTube) — self-promotion
+    solution: |
+      {"selected": [{"index": 6, "category": "research"}, {"index": 14, "category": "research"}, {"index": 9, "category": "industry"}, {"index": 16, "category": "industry"}, {"index": 12, "category": "tools"}, {"index": 17, "category": "community"}]}
+    tags: [curation, selection, edge_case]
+    difficulty: hard
+
+  # Edge Case 4: Lots of duplicate-ish articles on same topic — pick best one per topic
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: research, industry, tools, community
+      Articles:
+      0. [industry] "Llama 4 Released: Meta's Largest Open Model" (Meta AI Blog) — official announcement, full details
+      1. [industry] "Meta Releases Llama 4" (TechCrunch) — brief news coverage
+      2. [industry] "Llama 4 is here and it's massive" (The Verge) — summary article
+      3. [community] "Llama 4 benchmarks are insane" (r/LocalLLaMA) — 2.3K upvotes, initial reactions
+      4. [community] "Llama 4 vs Claude 4 comparison" (r/LocalLLaMA) — 890 upvotes, comparison
+      5. [community] "First impressions running Llama 4 locally" (r/LocalLLaMA) — 456 upvotes, practical
+      6. [research] "Scaling Properties of the Llama 4 Architecture" (ArXiv cs.CL) — Meta's technical paper
+      7. [industry] "Google Announces Gemini 3 Pro" (Google AI Blog) — official announcement
+      8. [industry] "Google's Gemini 3 takes aim at GPT-5" (Ars Technica) — coverage
+      9. [industry] "Gemini 3 Pro benchmarks" (VentureBeat) — benchmark analysis
+      10. [research] "Rust-Based Inference Engine Outperforms C++ by 15%" (ArXiv cs.PL) — systems research
+      11. [tools] "llama.cpp Adds Llama 4 Support Same-Day" (GitHub) — tool update
+      12. [tools] "Hugging Face Transformers 5.0: Llama 4 Integration" (HF Blog) — library update
+      13. [tools] "vLLM Llama 4 Serving Benchmark" (vLLM Blog) — serving benchmark
+      14. [community] "Gemini 3 first impressions" (r/Bard) — 345 upvotes
+      15. [industry] "Anthropic Responds to Llama 4 with Claude 4.5 Pricing Cut" (Reuters) — competitive move
+      16. [community] "The open-source AI race just got real" (HN) — 1.1K upvotes, analysis thread
+      17. [research] "Mixture of Depths: Dynamic Compute Allocation" (ArXiv cs.LG) — efficiency method
+      18. [industry] "Llama 4 available on Azure and AWS immediately" (Microsoft Blog) — cloud availability
+      19. [community] "Quick thread: Llama 4 GGUF quantization results" (r/LocalLLaMA) — 234 upvotes
+    solution: |
+      {"selected": [{"index": 0, "category": "industry"}, {"index": 7, "category": "industry"}, {"index": 15, "category": "industry"}, {"index": 6, "category": "research"}, {"index": 10, "category": "research"}, {"index": 17, "category": "research"}, {"index": 11, "category": "tools"}, {"index": 3, "category": "community"}, {"index": 16, "category": "community"}]}
+    tags: [curation, selection, edge_case]
+    difficulty: hard
+
+  # Edge Case 5: Mix of long substantive summaries and tiny/empty summaries — use title quality as signal
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: research, industry, tools, community
+      Articles:
+      0. [research] "Attention Is All You Need, Again: Revisiting the Transformer for Modern Scale" (ArXiv cs.LG) — comprehensive 47-page analysis of how the original transformer architecture holds up at 1T+ parameters, with ablation studies showing which components matter most and proposing three modifications that improve training efficiency by 23%
+      1. [industry] "TSMC" (Reuters) — empty summary
+      2. [tools] "New release" (GitHub) — empty summary, vague title
+      3. [research] "Provably Safe Reinforcement Learning via Shielded Policy Optimization" (ArXiv cs.AI) — introduces a shield function that guarantees safety constraints during both training and deployment, validated on robotic manipulation tasks with zero constraint violations across 10K episodes
+      4. [industry] "Nvidia earnings" (CNBC) — empty summary
+      5. [community] "Discussion thread" (Reddit) — empty summary, vague title
+      6. [tools] "PyTorch 3.0 Compiler: From Research to Production" (PyTorch Blog) — details the new torch.compile 2.0 backend with automatic kernel fusion, 2.5x inference speedup on common architectures, backward compatibility with existing code
+      7. [industry] "Microsoft and OpenAI Renegotiate Partnership Terms" (The Information) — exclusive report detailing restructured profit-sharing agreement, OpenAI's path to for-profit status, and implications for Azure AI services
+      8. [research] "paper" (ArXiv) — empty summary, useless title
+      9. [community] "The complete guide to building production RAG systems: architecture, chunking strategies, retrieval optimization, and evaluation frameworks" (HN) — 2.1K upvotes, comprehensive write-up covering 6 months of production experience
+      10. [industry] "AI news roundup" (TechCrunch) — empty summary, generic title
+      11. [tools] "Weights & Biases Launch: Automated Hyperparameter Sweep with Bayesian Optimization and Early Stopping" (W&B Blog) — new feature combining W&B Sweeps with neural architecture search, reduces tuning time by 60% on standard benchmarks
+      12. [research] "thing" (ArXiv) — empty summary, meaningless title
+      13. [community] "I built a voice assistant that runs 100% locally on a Raspberry Pi 5 with wake word detection, Whisper STT, Llama 3B, and Piper TTS — full tutorial and code" (r/selfhosted) — 1.8K upvotes
+      14. [industry] "Samsung" (Bloomberg) — empty summary, useless title
+      15. [tools] "update" (GitHub) — empty summary, vague title
+      16. [research] "Energy-Based Models for Anomaly Detection in Autonomous Driving Sensor Fusion" (ArXiv cs.RO) — novel approach to detecting sensor failures and adversarial inputs in self-driving pipelines, reduces false negatives by 89% on nuScenes
+      17. [industry] "Apple Hires Entire Google DeepMind Robotics Team" (Bloomberg) — 30 researchers move to Apple's secretive robotics division, signaling major push into home robotics
+      18. [community] "lol" (Reddit) — empty summary, useless title
+      19. [tools] "Cursor 1.0: AI Code Editor Goes GA with Multi-File Editing" (Cursor Blog) — production release with agent mode, multi-file refactoring, and codebase-aware completions
+    solution: |
+      {"selected": [{"index": 0, "category": "research"}, {"index": 3, "category": "research"}, {"index": 16, "category": "research"}, {"index": 7, "category": "industry"}, {"index": 17, "category": "industry"}, {"index": 6, "category": "tools"}, {"index": 19, "category": "tools"}, {"index": 11, "category": "tools"}, {"index": 9, "category": "community"}, {"index": 13, "category": "community"}]}
+    tags: [curation, selection, edge_case]
+    difficulty: hard
+
+  # Edge Case 6: All articles are research papers — still select 8-10, categorize by subfield
+  - query: |
+      Select the 8-10 most important articles and assign each a category.
+      Categories: research, industry, tools, community
+      Articles:
+      0. [research] "Scaling Laws for Sparse Mixture-of-Experts" (ArXiv cs.LG) — foundational scaling study for MoE architectures
+      1. [research] "Contrastive Decoding Eliminates Hallucinations in Long-Form Generation" (ArXiv cs.CL) — hallucination reduction method
+      2. [research] "Diffusion Transformers for Video Generation at 4K Resolution" (ArXiv cs.CV) — high-res video synthesis
+      3. [research] "Provable Privacy Guarantees for Federated Fine-Tuning" (ArXiv cs.CR) — privacy in distributed training
+      4. [research] "Reward Model Ensembles Improve RLHF Stability" (ArXiv cs.AI) — alignment technique
+      5. [research] "Graph Neural Networks for Electronic Design Automation" (ArXiv cs.AR) — chip design ML
+      6. [research] "Efficient KV-Cache Compression via Quantization-Aware Training" (ArXiv cs.LG) — inference memory optimization
+      7. [research] "Multi-Agent Debate Improves Mathematical Reasoning" (ArXiv cs.AI) — multi-agent reasoning
+      8. [research] "Robustness of Vision-Language Models to Distribution Shift" (ArXiv cs.CV) — VLM evaluation
+      9. [research] "Low-Rank Adaptation Revisited: When Does LoRA Fail?" (ArXiv cs.LG) — fine-tuning analysis
+      10. [research] "Formal Verification of Neural Network Controllers for Quadrotors" (ArXiv cs.RO) — verified autonomy
+      11. [research] "Tokenization-Free Language Models via Byte-Level Transformers" (ArXiv cs.CL) — architecture innovation
+      12. [research] "Survey: LLM-Based Agents for Software Engineering" (ArXiv cs.SE) — comprehensive survey
+      13. [research] "Self-Play Fine-Tuning Without Human Annotations" (ArXiv cs.AI) — self-improvement method
+      14. [research] "Optimizing Inference on Edge Devices with Neural Architecture Search" (ArXiv cs.LG) — edge deployment
+      15. [research] "Causal Reasoning in Large Language Models: A Benchmark" (ArXiv cs.AI) — evaluation benchmark
+      16. [research] "Protein Structure Prediction with Geometric Transformers" (ArXiv q-bio.BM) — biology application
+      17. [research] "Data Mixing Laws for Pretraining" (ArXiv cs.LG) — training data composition
+      18. [research] "Watermarking Language Model Outputs Without Quality Loss" (ArXiv cs.CR) — detection method
+      19. [research] "Emergent Communication in Multi-Agent Reinforcement Learning" (ArXiv cs.MA) — emergent behavior
+    solution: |
+      {"selected": [{"index": 0, "category": "research"}, {"index": 1, "category": "research"}, {"index": 2, "category": "research"}, {"index": 6, "category": "research"}, {"index": 7, "category": "research"}, {"index": 11, "category": "research"}, {"index": 13, "category": "research"}, {"index": 16, "category": "research"}, {"index": 17, "category": "research"}, {"index": 18, "category": "research"}]}
+    tags: [curation, selection, edge_case]
+    difficulty: hard

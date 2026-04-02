@@ -1,0 +1,170 @@
+domain: curation
+category: curation_highlights
+examples:
+  - query: |
+      Write a 1-2 sentence highlights intro for today's digest.
+      Selected articles:
+      - "How Emotion Shapes LLM Behavior" (research)
+      - "Community Framework for Tool-Using Agents" (research)
+      - "Qwen3.6-Plus" (industry)
+      - "Bonsai 1-bit models are very good" (industry)
+      - "Holo3: Computer Use Frontier" (tools)
+      - "March 2026 newsletter" (tools)
+      - "claude-code v2.1.90" (tools)
+      - "saves 50K tokens by pre-indexing" (community)
+      - "3-agent team Architect+Builder+Reviewer" (community)
+    solution: |
+      {"highlights_intro": "Today's digest is headlined by a wave of 1-bit and ultra-compressed open-source models threatening to upend the local LLM landscape, alongside a surge of community-driven agentic workflows showing how developers are taming Claude at scale. On the research side, new mechanistic work on emotion in LLMs and a community framework for reliable tool-use agents round out a technically rich day."}
+    tags: [curation, highlights]
+    difficulty: medium
+
+  - query: |
+      Write a 1-2 sentence highlights intro for today's digest.
+      Selected articles:
+      - "Dense Reward for Long-Horizon Robotic Tasks" (research)
+      - "Multi-Robot Networks via MLLM" (research)
+      - "robots learn from factory workers" (research)
+      - "Living Robots With Nervous Systems" (industry)
+      - "PhAIL ranks foundation models on real hardware" (industry)
+      - "Agile Robots acquires thyssenkrupp" (industry)
+      - "Deploying MuJoCo on Azure" (tools)
+      - "Takeout Packing Robot Harder Than You Think" (tools)
+      - "gig workers training humanoid robots" (community)
+      - "Robot Umpires in MLB" (community)
+    solution: |
+      {"highlights_intro": "Today's digest spans living biorobots, foundation model benchmarks on real hardware, and the growing role of gig workers in humanoid training pipelines \u2014 while the real world catches up with AI-powered umpires in MLB and a candid look at why takeout packing remains a surprisingly hard robotics problem."}
+    tags: [curation, highlights]
+    difficulty: medium
+
+  - query: |
+      Write a 1-2 sentence highlights intro for today's digest.
+      Selected articles:
+      - "French group sues Ubisoft over The Crew" (industry)
+      - "Black Ops 7 earns $30K per negative review" (industry)
+      - "Coffee Stain shutters Malmo" (industry)
+      - "Nexon AI will liberate workforce" (industry)
+      - "Nintendo patent rejected" (industry)
+      - "Godot 4.6.2" (engines_tools)
+      - "Radial Pie Menu for UE5" (engines_tools)
+      - "PlayCanvas 4D Gaussian Splats" (engines_tools)
+      - "Procedural Worlds Economy Systems" (techniques)
+      - "Limit Break mentorship program" (community)
+    solution: |
+      {"highlights_intro": "Today's digest is headlined by two landmark industry stories: a French consumer group's lawsuit over The Crew's shutdown gaining real legal teeth, and striking data on how Black Ops 7's negative Steam reviews are translating into measurable revenue. Elsewhere, Godot ships a maintenance release, PlayCanvas pushes volumetric video into the browser, and Nexon makes the case for AI-driven workforce restructuring."}
+    tags: [curation, highlights]
+    difficulty: medium
+
+  - query: |
+      Write a 1-2 sentence highlights intro for today's digest.
+      Selected articles:
+      - "Intel buys back Ireland Fab" (hardware)
+      - "Nvidia pours $2B into Marvell" (hardware)
+      - "Global foundry market $320B" (hardware)
+      - "1Hz display 43-hour battery XPS 14" (hardware)
+      - "Modders save damaged RTX 4090" (hardware)
+      - "Steam Linux >5%" (hardware)
+      - "KTransformers AVX2 MoE" (research)
+      - "IBM + Arm Dual-Architecture" (research)
+      - "Raspberry Pi 500+ near Mac Mini" (industry)
+      - "Ubuntu raises RAM to 6GB" (industry)
+    solution: |
+      {"highlights_intro": "Intel doubles down on domestic fab capacity while Nvidia bets billions on a Marvell-anchored NVLink ecosystem \u2014 semiconductor independence strategies are reshaping the industry as the global foundry market hits a record $320B. Meanwhile, Linux gaming crosses a new threshold and LLM inference lands on older CPUs without AMX."}
+    tags: [curation, highlights]
+    difficulty: medium
+
+  - query: |
+      Write a 1-2 sentence highlights intro for today's digest.
+      Selected articles:
+      - "Chrome Zero-Day Exploited in the Wild" (threats)
+      - "Ransomware Gang Leaks 2TB from Healthcare Provider" (threats)
+      - "CISA Issues Emergency Directive for Ivanti VPN" (policy)
+      - "Malicious PyPI Packages Target AWS Credentials" (supply_chain)
+      - "Open-Source SIEM Wazuh Hits 5.0" (tools)
+      - "Cloudflare Releases Free WAF Ruleset" (tools)
+      - "Post-Quantum TLS Now Default in BoringSSL" (research)
+      - "How We Caught an Insider Threat with Honeytokens" (community)
+    solution: |
+      {"highlights_intro": "A Chrome zero-day under active exploitation and a massive healthcare data leak dominate today's threat landscape, while CISA's emergency Ivanti directive underscores how VPN appliances remain a persistent weak link. On the defensive side, Wazuh 5.0 lands with overhauled analytics, Cloudflare open-sources WAF rules, and BoringSSL quietly makes post-quantum TLS the default."}
+    tags: [curation, highlights]
+    difficulty: medium
+
+  - query: |
+      Write a 1-2 sentence highlights intro for today's digest.
+      Selected articles:
+      - "Fed Holds Rates Steady, Signals Two Cuts by Year-End" (macro)
+      - "DeFi Protocol Euler Exploited for $12M" (security)
+      - "EU Stablecoin Framework Takes Effect July 1" (regulation)
+      - "Renaissance Technologies Hiring Crypto Quants" (industry)
+      - "New MEV Strategy Extracts $4M in One Block" (research)
+      - "Uniswap v4 Hooks Tutorial" (tools)
+      - "Community Fork of Compound Gains Traction" (community)
+      - "On-Chain Treasury Management for DAOs" (community)
+    solution: |
+      {"highlights_intro": "The Fed's decision to hold rates while telegraphing cuts sets the macro backdrop, but the real action is on-chain: Euler's $12M exploit and a record single-block MEV extraction expose persistent DeFi risk even as the EU's stablecoin rules prepare to reshape compliant issuance. Community-driven governance picks up steam with a Compound fork and new DAO treasury playbooks."}
+    tags: [curation, highlights]
+    difficulty: medium
+
+  - query: |
+      Write a 1-2 sentence highlights intro for today's digest.
+      Selected articles:
+      - "Anthropic Publishes Scalable Oversight Protocol" (research)
+      - "DeepMind Evals Show Sandbagging in Frontier Models" (research)
+      - "Red-Teaming GPT-5: What 200 Testers Found" (evaluation)
+      - "White House Executive Order on AI Safety Updated" (policy)
+      - "NIST AI Risk Management Framework v2" (policy)
+      - "Frontier Model Forum Releases Audit Checklist" (governance)
+      - "Open-Source Alignment Benchmark Suite" (tools)
+      - "Community Debate: Should We Pause Scaling?" (community)
+    solution: |
+      {"highlights_intro": "Scalable oversight and sandbagging detection dominate the research side as Anthropic and DeepMind each publish frameworks that could reshape how frontier models are evaluated before deployment. The policy landscape is equally active, with an updated White House executive order and NIST's v2 risk framework arriving alongside a heated community debate on whether scaling should pause."}
+    tags: [curation, highlights]
+    difficulty: medium
+
+  - query: |
+      Write a 1-2 sentence highlights intro for today's digest.
+      Selected articles:
+      - "Figure 03 Walks Unassisted Through Factory Floor" (industry)
+      - "Agility Digit Completes 8-Hour Warehouse Shift" (industry)
+      - "Whole-Body Locomotion Control via Diffusion Policy" (research)
+      - "DEX-EHand Grasping Benchmark Released" (research)
+      - "1X Technologies Closes $500M Series C" (industry)
+      - "ROS 2 Jazzy Adds Humanoid URDF Templates" (tools)
+      - "Building a Low-Cost Humanoid Arm with Servos" (community)
+      - "Why My Humanoid Startup Failed" (community)
+      - "sim-to-real transfer for bipedal stairs" (research)
+    solution: |
+      {"highlights_intro": "Humanoids are having a breakout week: Figure 03 walks a factory floor unassisted, Digit completes a full warehouse shift, and 1X closes a massive $500M round signaling investor confidence in the form factor. Research keeps pace with diffusion-based whole-body control and a new grasping benchmark, while a brutally honest community postmortem reveals what kills humanoid startups before the hardware even ships."}
+    tags: [curation, highlights]
+    difficulty: medium
+
+  - query: |
+      Write a 1-2 sentence highlights intro for today's digest.
+      Selected articles:
+      - "Hollow Knight: Silksong Finally Gets Release Date" (industry)
+      - "Balatro Wins BAFTA for Best Design" (industry)
+      - "Global Game Jam 2026 Results: 8,400 Games in 48 Hours" (community)
+      - "How I Shipped My First Steam Game in 6 Months" (community)
+      - "Pixel Art Lighting in Godot 4: Full Tutorial" (engines_tools)
+      - "Procedural Dungeon Generation with Wave Function Collapse" (techniques)
+      - "Celeste Developer Postmortem: 5 Years Later" (postmortem)
+      - "Indie Fund Opens Spring Applications" (community)
+    solution: |
+      {"highlights_intro": "Silksong finally breaks its silence with a release date and Balatro takes home a BAFTA, capping a strong stretch for indie visibility at the highest level. On the craft side, a detailed Celeste postmortem five years on, a wave function collapse deep-dive, and Global Game Jam's staggering 8,400 entries remind us the indie pipeline has never been healthier."}
+    tags: [curation, highlights]
+    difficulty: medium
+
+  - query: |
+      Write a 1-2 sentence highlights intro for today's digest.
+      Selected articles:
+      - "Google Achieves 1,000-Qubit Milestone with Willow 2" (quantum)
+      - "CRISPR-Based Diagnostics Get FDA Fast-Track" (biotech)
+      - "SpaceX Starship Completes First Orbital Cargo Delivery" (space)
+      - "Perovskite Solar Cells Hit 33% Efficiency Record" (energy)
+      - "Linux Foundation Launches Unified Open-Source AI Platform" (open_source)
+      - "Fusion Startup Commonwealth Reports Net Energy Gain" (energy)
+      - "New Carbon Capture Membrane 10x More Efficient" (climate)
+      - "Open-Source Satellite Toolkit for Disaster Response" (open_source)
+    solution: |
+      {"highlights_intro": "Breakthroughs are stacking up across deep tech: Google crosses the 1,000-qubit threshold, Commonwealth Fusion reports net energy gain, and perovskite solar cells shatter efficiency records \u2014 a rare day where quantum, fusion, and renewables all hit milestones simultaneously. Meanwhile, SpaceX delivers its first orbital cargo and two open-source projects aim to democratize AI infrastructure and satellite-based disaster response."}
+    tags: [curation, highlights]
+    difficulty: medium

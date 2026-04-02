@@ -1,0 +1,102 @@
+domain: curation
+category: curation_takeaway_tools
+examples:
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Holo3: Breaking the Computer Use Frontier"
+      Source: HF Blog
+      Summary: "Holo3 pushes computer use AI forward with models that directly control desktop UI, achieving new state-of-the-art results on multi-step desktop automation benchmarks."
+    solution: |
+      {"takeaways": ["Pushes state of art in computer use AI — models directly controlling desktop UI — with gains over prior benchmarks.", "Improved robustness on multi-step tasks with dynamic UIs, a persistent failure mode in earlier approaches.", "As computer use matures from demo to deployable, Holo3 is the frontier reference point heading into mid-2026."]}
+    tags: [curation, takeaway, tools]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "March 2026 sponsors-only newsletter"
+      Source: Simon Willison
+      Summary: "Monthly newsletter covering agentic engineering patterns, MoE streaming optimizations, and curated model releases from March 2026."
+    solution: |
+      {"takeaways": ["Covers durable agentic engineering patterns, MoE streaming optimizations, and curated model releases from March.", "Agentic patterns section is particularly actionable — covering orchestration failure modes and retry strategies.", "Practitioner-grade synthesis, not pundit commentary."]}
+    tags: [curation, takeaway, tools]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "anthropics/claude-code: v2.1.90"
+      Source: Anthropic GitHub
+      Summary: "New release of Claude Code CLI tool with /powerup feature and various improvements."
+    solution: |
+      {"takeaways": ["Ships /powerup feature — a workflow-level capability addition, not a routine patch.", "Rapid v2.1.x cadence signals continued active development.", "Teams running Claude Code in CI should track the changelog closely."]}
+    tags: [curation, takeaway, tools]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Godot 4.6.2"
+      Source: Godot Engine
+      Summary: "Maintenance release, bug fixes only."
+    solution: |
+      {"takeaways": ["Godot 4.6.2 is a stability release — no new features, purely hardening for production.", "Recommended update for teams shipping on 4.6; maintenance releases are generally low-risk.", "Continued rapid cadence reflects health of Godot's contributor ecosystem."]}
+    tags: [curation, takeaway, tools]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "PlayCanvas Can Now Load 4D Gaussian Splats"
+      Source: 80 Level
+      Summary: "PlayCanvas adds support for 4D Gaussian Splats, enabling volumetric video playback with a time dimension in browser-based 3D environments."
+    solution: |
+      {"takeaways": ["Added support for 4D Gaussian Splats — volumetric video with time dimension, enabling playback in browser-based 3D.", "Photorealistic volumetric video in a browser without plugins — opens doors for virtual production and marketing.", "Gaussian splatting continues to mature; its arrival in a WebGL engine signals the toolchain is production-ready."]}
+    tags: [curation, takeaway, tools]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Deploying MuJoCo on Azure Part 2"
+      Source: Hacker News
+      Summary: "Microsoft publishes updated guide for deploying MuJoCo physics simulation on Azure with GPU acceleration, responding to community feedback from Part 1."
+    solution: |
+      {"takeaways": ["Documents Microsoft's direct response to community feedback, with improved MuJoCo deployment on Azure.", "Covers practical GPU-accelerated physics simulation config in the cloud.", "Case study showing organized community feedback can move commercial cloud providers."]}
+    tags: [curation, takeaway, tools]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "llama.cpp GGUF format adds per-layer quantization support"
+      Source: GitHub llama.cpp
+      Summary: "New llama.cpp release introduces per-layer quantization in GGUF format, allowing different precision levels for attention, FFN, and embedding layers within a single model file."
+    solution: |
+      {"takeaways": ["Per-layer quantization lets users assign higher precision to sensitive layers (attention, embeddings) while aggressively quantizing FFN blocks.", "Practical impact: better quality-per-bit tradeoffs without maintaining multiple model files.", "GGUF's continued evolution as the dominant local inference format makes this a de facto standard change for the ecosystem."]}
+    tags: [curation, takeaway, tools]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "FastAPI 0.115: Native WebSocket streaming and background task improvements"
+      Source: GitHub FastAPI
+      Summary: "FastAPI 0.115 adds native WebSocket streaming support with backpressure handling, improved background task lifecycle management, and OpenAPI 3.1.1 schema generation."
+    solution: |
+      {"takeaways": ["Native WebSocket streaming with backpressure is the headline — previously required third-party workarounds for production use.", "Background task lifecycle improvements reduce the risk of orphaned tasks on shutdown, a common production pain point.", "Teams building real-time AI inference APIs should evaluate the WebSocket streaming path as a replacement for SSE."]}
+    tags: [curation, takeaway, tools]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Ruff 0.8: Python linter adds autofix for 50 new rules"
+      Source: Astral Blog
+      Summary: "Ruff 0.8 expands autofix coverage to 50 additional lint rules, adds preliminary type-checking integration, and improves performance on large monorepos by 20%."
+    solution: |
+      {"takeaways": ["50 new autofix rules means Ruff can now automatically resolve a larger share of lint violations — less manual cleanup.", "Preliminary type-checking integration positions Ruff as a potential replacement for both flake8 and mypy in simpler projects.", "20% performance gain on large monorepos matters for CI pipelines where lint time is a bottleneck."]}
+    tags: [curation, takeaway, tools]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Stripe API v2026-03: Breaking changes to payment intents and webhooks"
+      Source: Stripe Changelog
+      Summary: "Stripe's March 2026 API version introduces breaking changes to PaymentIntent confirmation flow and webhook event structure. Migration guide provided with 6-month deprecation window."
+    solution: |
+      {"takeaways": ["Breaking changes to PaymentIntent confirmation and webhook schemas — teams on older API versions must migrate within 6 months.", "Webhook structure changes may require updates to event parsing logic in every service consuming Stripe events.", "6-month deprecation window is generous, but teams should start migration early — payment infrastructure changes carry high blast radius."]}
+    tags: [curation, takeaway, tools]
+    difficulty: medium

@@ -1,0 +1,102 @@
+domain: curation
+category: curation_takeaway_industry
+examples:
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Qwen3.6-Plus"
+      Source: r/LocalLLaMA
+      Summary: "Blog post about new model release. 569 upvotes, 155 comments."
+    solution: |
+      {"takeaways": ["Qwen3.6-Plus generating significant buzz as a strong mid-size open model release, with benchmarks suggesting competitive performance against models twice its size.", "Continues Alibaba's aggressive open-weight cadence, maintaining pressure on Western frontier labs.", "Community reports highlight strong reasoning and instruction-following at quantized sizes relevant for local deployment."]}
+    tags: [curation, takeaway, industry]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "The Bonsai 1-bit models are very good"
+      Source: r/LocalLLaMA
+      Summary: "Tim from AnythingLLM testing PrismML Bonsai 1-bit. 716 upvotes, 121 comments."
+    solution: |
+      {"takeaways": ["Bonsai 1-bit models earning unusually strong reviews — top post of the day — with quality defying expectations for extreme quantization.", "1-bit models represent a potential step-change for edge deployment: VRAM and bandwidth requirements drop dramatically.", "Combined with TurboQuant, 2026's local LLM story may be less about parameter counts and more about compression breakthroughs."]}
+    tags: [curation, takeaway, industry]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Scientists Build Living Robots With Nervous Systems"
+      Source: IEEE Spectrum
+      Summary: "Researchers at Tufts University have constructed small bio-hybrid robots using living neural tissue integrated with synthetic scaffolds, creating machines that can sense and adapt to their environment using biological nervous systems."
+    solution: |
+      {"takeaways": ["Engineers constructing robots from biological neural components — a fundamental departure from conventional robotics.", "Living nervous systems offer adaptive, low-power sensing that electronics cannot replicate at small scales.", "Raises immediate bioethics, longevity, and maintenance questions as the technology moves beyond the lab."]}
+    tags: [curation, takeaway, industry]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "French consumer group sues Ubisoft over shutdown of The Crew"
+      Source: Game Developer
+      Summary: "Backed by Stop Killing Games, 1.3M signatures."
+    solution: |
+      {"takeaways": ["French advocacy group filed suit citing laws protecting consumers' right to use purchased software.", "Directly tied to Stop Killing Games campaign with 1.3M signatures — public pressure now has legal backing.", "Potentially the most consequential challenge yet to publishers deactivating paid games via server shutdown."]}
+    tags: [curation, takeaway, industry]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Intel buys back 49% stake in Ireland Fab"
+      Source: Tom's Hardware
+      Summary: "Intel repurchases 49% of Fab 34 from Apollo for $14.2B."
+    solution: |
+      {"takeaways": ["Intel paying $14.2B to reclaim full ownership of Fab 34 in Ireland.", "Signals commitment to IDM 2.0 strategy and ambition to compete as a foundry.", "Comes as TSMC pulls further ahead, making ownership of leading-edge fabs a strategic necessity."]}
+    tags: [curation, takeaway, industry]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Why Nvidia poured $2B into Marvell"
+      Source: Tom's Hardware
+      Summary: "NVLink Fusion partnership."
+    solution: |
+      {"takeaways": ["Nvidia's $2B investment is about locking custom ASIC designs into its NVLink interconnect ecosystem.", "Ensures Nvidia's networking stack stays central even as hyperscalers build their own AI silicon.", "Ecosystem play: trades competitive ground in chip design for interconnect layer control."]}
+    tags: [curation, takeaway, industry]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Anthropic raises $3.5B Series E at $62B valuation"
+      Source: TechCrunch
+      Summary: "Anthropic closed a $3.5B Series E round led by Lightspeed Venture Partners and Spark Capital, valuing the company at $62B. Funds will be used to scale compute infrastructure and expand enterprise offerings."
+    solution: |
+      {"takeaways": ["Anthropic's $62B valuation cements its position as the second-most-valuable AI lab behind OpenAI.", "Capital earmarked for compute and enterprise — signals the race is increasingly about infrastructure scale, not just model quality.", "Fundraise comes amid growing enterprise demand for Claude, suggesting revenue trajectory supports the valuation."]}
+    tags: [curation, takeaway, industry]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Stability AI lays off 30% of workforce, pivots to enterprise licensing"
+      Source: The Information
+      Summary: "Stability AI is cutting roughly 30% of staff and shifting focus from open-source image generation to enterprise licensing deals for its diffusion models. CEO cited unsustainable burn rate and need to reach profitability."
+    solution: |
+      {"takeaways": ["Stability AI cutting 30% of staff and pivoting from open-source to enterprise licensing — a sharp strategic reversal.", "Open-source generative AI proving difficult to monetize at scale; Stability joins a growing list of startups tightening access.", "Remaining open-source community forks will likely continue development independently, but without Stability's compute backing."]}
+    tags: [curation, takeaway, industry]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "Apple launches on-device LLM for Siri, no cloud required"
+      Source: The Verge
+      Summary: "Apple announced that iOS 20 will run a 3B parameter language model entirely on-device for Siri interactions, with no data leaving the phone. The model handles general Q&A, summarization, and app control without cloud fallback."
+    solution: |
+      {"takeaways": ["Apple shipping a 3B on-device LLM for Siri in iOS 20 — the largest consumer deployment of local inference to date.", "No cloud fallback for core tasks positions Apple as the privacy-first AI platform, a deliberate contrast with Google and Microsoft.", "Sets a floor for on-device model quality that every mobile AI competitor must now match or exceed."]}
+    tags: [curation, takeaway, industry]
+    difficulty: medium
+
+  - query: |
+      Write 2-4 takeaway bullets for this article:
+      Title: "EU AI Act enforcement begins: first fines issued to non-compliant providers"
+      Source: Reuters
+      Summary: "The European Union has issued its first enforcement actions under the AI Act, fining two companies for deploying high-risk AI systems without required conformity assessments. Fines totaled EUR 15M."
+    solution: |
+      {"takeaways": ["First EU AI Act fines signal the regulation has teeth — EUR 15M penalties for missing conformity assessments on high-risk systems.", "Companies deploying AI in the EU now face concrete compliance costs, not just theoretical risk.", "Expect a rush of AI governance hiring and third-party audit demand as enforcement broadens beyond these initial cases."]}
+    tags: [curation, takeaway, industry]
+    difficulty: medium

@@ -1,0 +1,11 @@
+# Grammar for digest article selection (Pass 1)
+# Forces: {"selected": [{"index": N, "category": "..."}, ...]}
+
+root     ::= "{" ws "\"selected\"" ws ":" ws "[" ws article ("," ws article)* ws "]" ws "}"
+article  ::= "{" ws "\"index\"" ws ":" ws integer "," ws "\"category\"" ws ":" ws string ws "}"
+integer  ::= [0-9] [0-9]?
+string   ::= "\"" chars "\""
+chars    ::= char*
+char     ::= [^"\\] | "\\" escape
+escape   ::= ["\\nrt/]
+ws       ::= [ \t\n]*
