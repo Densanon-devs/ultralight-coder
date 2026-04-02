@@ -2516,11 +2516,13 @@ class AugmentorRouter:
 
     def process(self, query: str, model, chat_format: str,
                 module_hint: Optional[str] = None,
+                extra_context: str = "",
                 gen_kwargs: Optional[dict] = None) -> Optional[AugmentorResult]:
         """Full augmentor pipeline: select -> build prompt -> generate -> verify -> retry.
 
         In adaptive mode: auto-selects flat vs graph based on query composite signal.
         In hybrid mode: tries graph first, falls back to flat on verification failure.
+        extra_context: optional project/codebase context to prepend to the user query in the prompt.
         """
         kwargs = gen_kwargs or {}
 
@@ -2544,7 +2546,9 @@ class AugmentorRouter:
         if augmentor is None:
             return None
 
-        prompt = augmentor.build_prompt(query, chat_format)
+        # Build prompt — prepend project context to user query if available
+        aug_query = f"{extra_context}\n\n{query}" if extra_context else query
+        prompt = augmentor.build_prompt(aug_query, chat_format)
         prompt_tokens = model.count_tokens(prompt)
 
         if augmentor.grammar_str:

@@ -111,6 +111,9 @@ def create_app():
         query: str
         top_k: int = 5
 
+    class ProjectIndexRequest(PydanticModel):
+        path: str
+
     @app.on_event("startup")
     async def startup():
         get_engine()
@@ -249,6 +252,26 @@ def create_app():
                 for r in results
             ],
         }
+
+    @app.post("/project/index")
+    async def project_index(req: ProjectIndexRequest):
+        """Index a project directory for context-aware code generation."""
+        engine = get_engine()
+        result = engine.project_index.index_directory(req.path)
+        return result
+
+    @app.get("/project/status")
+    async def project_status():
+        """Get project index status."""
+        engine = get_engine()
+        return engine.project_index.status()
+
+    @app.post("/project/clear")
+    async def project_clear():
+        """Clear the project index."""
+        engine = get_engine()
+        engine.project_index.clear()
+        return {"cleared": True}
 
     @app.get("/health")
     async def health():

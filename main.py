@@ -35,6 +35,7 @@ from engine.micro_adapters import MicroAdapterEngine
 from engine.tools import ToolRegistry
 from engine.augmentors import AugmentorRouter
 from engine.speculative import SpeculativeEngine
+from engine.project_context import ProjectIndex
 
 logger = logging.getLogger("UCA")
 
@@ -97,6 +98,9 @@ class UltralightCodeAssistant:
 
         # Response cache
         self.speculative = SpeculativeEngine(storage_dir="data/cache")
+
+        # Project context indexer
+        self.project_index = ProjectIndex(self.config.project_context)
 
         # Performance tracking
         self._perf_history: list[dict] = []
@@ -197,6 +201,7 @@ class UltralightCodeAssistant:
             embedder = get_embedder()
             if embedder:
                 self.augmentor_router.init_embeddings(embedder)
+                self.project_index.init_embedder(embedder)
         except Exception as e:
             logger.debug(f"Augmentor embeddings not initialized: {e}")
 
@@ -316,6 +321,12 @@ class UltralightCodeAssistant:
         tool_prompt = self.tools.get_tool_prompt()
         if tool_prompt:
             memory_context["tools"] = tool_prompt
+
+        # Project context — retrieve relevant code from indexed project
+        if self.project_index.is_indexed:
+            project_ctx = self.project_index.get_context(user_input)
+            if project_ctx:
+                memory_context["project"] = project_ctx
 
         prompt = self.fusion.assemble(
             user_input=user_input,
