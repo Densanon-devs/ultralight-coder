@@ -427,6 +427,20 @@ project_context:
 
 ## 12. Troubleshooting
 
+### Installation stuck on "Building wheel for llama-cpp-python"
+
+This means pip is compiling llama-cpp-python from C++ source, which can take 20+ minutes and requires CMake. Use pre-built wheels instead:
+
+```bash
+# CPU only
+pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+
+# NVIDIA GPU
+pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu121
+```
+
+Then continue with `pip install -r requirements.txt`. The install scripts (`install.sh` / `install.ps1`) use pre-built wheels automatically.
+
 ### "No models found"
 
 Download a model first:

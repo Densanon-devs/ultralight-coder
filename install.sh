@@ -61,16 +61,17 @@ else
     cd "$INSTALL_DIR"
 fi
 
-# Install deps
+# Install deps (use pre-built wheels to avoid 20min C++ compile)
 echo ""
 echo "  Installing dependencies..."
 if [ "$GPU" = true ]; then
-    echo -e "  ${DIM}(GPU mode — this may take a few minutes)${RESET}"
-    $PY -m pip install -r requirements.txt --quiet
+    echo -e "  ${DIM}(GPU mode — using pre-built CUDA wheels)${RESET}"
     $PY -m pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu121 --quiet --force-reinstall
 else
-    $PY -m pip install -r requirements.txt --quiet
+    echo -e "  ${DIM}(Using pre-built CPU wheels)${RESET}"
+    $PY -m pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu --quiet
 fi
+$PY -m pip install -r requirements.txt --quiet
 echo -e "  Dependencies ${GREEN}installed${RESET}"
 
 # Download model

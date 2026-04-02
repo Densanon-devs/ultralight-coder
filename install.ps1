@@ -57,16 +57,17 @@ if (Test-Path $installDir) {
     Set-Location $installDir
 }
 
-# Install deps
+# Install deps (use pre-built wheels to avoid 20min C++ compile)
 Write-Host ""
 Write-Host "  Installing dependencies..."
 if ($GPU) {
-    Write-Host "  (GPU mode - this may take a few minutes)" -ForegroundColor DarkGray
-    & $py -m pip install -r requirements.txt --quiet
+    Write-Host "  (Using pre-built CUDA wheels)" -ForegroundColor DarkGray
     & $py -m pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu121 --quiet --force-reinstall
 } else {
-    & $py -m pip install -r requirements.txt --quiet
+    Write-Host "  (Using pre-built CPU wheels)" -ForegroundColor DarkGray
+    & $py -m pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu --quiet
 }
+& $py -m pip install -r requirements.txt --quiet
 Write-Host "  Dependencies installed" -ForegroundColor Green
 
 # Download model
