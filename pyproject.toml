@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ultralight-coder"
+version = "0.1.0"
+description = "Local AI coding assistant powered by tiny GGUF models with augmentor-driven accuracy"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "densanon-devs"},
+]
+keywords = ["ai", "coding-assistant", "local-llm", "gguf", "code-generation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Code Generators",
+]
+dependencies = [
+    "llama-cpp-python>=0.2.0",
+    "faiss-cpu>=1.7.4",
+    "sentence-transformers>=2.2.0",
+    "numpy>=1.24.0",
+    "pyyaml>=6.0",
+    "rich>=13.0.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.20.0",
+    "scikit-learn>=1.3.0",
+    "huggingface-hub>=0.20.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/densanon-devs/ultralight-coder"
+Repository = "https://github.com/densanon-devs/ultralight-coder"
+Issues = "https://github.com/densanon-devs/ultralight-coder/issues"
+
+[project.scripts]
+ultralight-coder = "main:main"
+
+[tool.setuptools.packages.find]
+include = ["engine*", "modules*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.yaml", "*.yml", "*.html", "*.css", "*.js"]

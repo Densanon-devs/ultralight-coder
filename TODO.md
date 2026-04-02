@@ -1,20 +1,19 @@
 # Ultralight Code Assistant — Roadmap
 
-## Status: Ship-Ready, Polished
+## Status: v0.1.0 Release
 
 **What's done:**
-- 232 YAML augmentor examples across 39 categories
-- Auto mode (rerank1/rerank based on model size)
-- 34 failure routing categories, 251 trigger keywords
-- 399/400 on real-world benchmark (4 sets, 100 queries each)
-- Web UI (static/index.html), one-click launcher (launch.py)
-- FastAPI server with /generate, /generate/stream, /session/reset, /status, /models/available
-- Multi-turn conversation (engine memory persists across requests, New Chat resets)
-- Paste-and-fix flow (code input area in UI, code field sent to /generate)
-- Streaming responses in Web UI (SSE with fallback to non-streaming)
-- Noisy startup logs suppressed (httpx, sentence_transformers, llama.cpp)
-- Offline mode for sentence-transformers (TRANSFORMERS_OFFLINE + HF_HUB_OFFLINE)
+- 359 YAML augmentor examples across 12 languages (Python, JS/TS, Go, Rust, SQL, C, Java, C#, Ruby, Bash, Kotlin, Swift)
+- 99.2% on 130-query multi-language benchmark, 99.8% on 400-query Python benchmark
+- Auto mode with language-aware routing (rerank1 for <1.5GB, rerank for >=1.5GB)
+- 50+ failure routing categories with language detection boosting
+- Web UI with streaming, multi-turn conversation, code paste-and-fix, project indexing
+- FastAPI server with /generate, /generate/stream, /session/reset, /project/index, /project/status
+- Project context: index a codebase for context-aware code generation
+- One-click launcher (launch.py) with dep check, GPU detection, model selection
+- Noisy startup logs suppressed, offline mode for sentence-transformers
 - Model download helper (download_model.py with 8 model options)
+- README, LICENSE (MIT), pyproject.toml, clean .gitignore
 
 ---
 
@@ -66,3 +65,6 @@ Wrap the FastAPI server as a VS Code extension backend. Users select code, right
 | 7: Real-world 400 queries | 2026-04-01 | 399/400 (99.8%) |
 | 8: Multi-agent (branch) | 2026-04-01 | Decomposition 9/10, assembly 4/10 |
 | 9: Ship-ready polish | 2026-04-02 | Multi-turn, paste-fix, streaming, log suppression, offline mode |
+| 10: Multi-language | 2026-04-02 | 12 languages, 359 examples, 99.2% benchmark, language-aware routing |
+| 11: Project context | 2026-04-02 | Codebase indexing + retrieval, FAISS-backed, UI integration |
+| 12: v0.1.0 ship prep | 2026-04-02 | README, LICENSE, pyproject.toml, requirements audit, .gitignore |
