@@ -1,0 +1,102 @@
+{
+  "digest_id": "computation",
+  "digest_name": "Computation",
+  "digest_title": "Computation Morning Digest",
+  "page_description": "Daily computation news digest - hardware, research, and community highlights curated by Densanon.",
+  "h1_prefix": "Computation Morning",
+  "footer_sources": "Tom's Hardware, Ars Technica, The Register, Phoronix, IEEE Spectrum, arXiv, Hacker News, and more",
+  "output_file": "computation-digest.html",
+  "user_agent": "DensanonComputationDigest/1.0 (https://densanon.com; admin@densanon.com)",
+  "seen_db_path": "computation/seen_articles.json",
+  "sources": {
+    "rss": [
+      {
+        "name": "Tom's Hardware",
+        "url": "https://www.tomshardware.com/feeds/all",
+        "category": "hardware"
+      },
+      {
+        "name": "Ars Technica Hardware",
+        "url": "https://arstechnica.com/tag/hardware/feed/",
+        "category": "hardware"
+      },
+      {
+        "name": "Phoronix",
+        "url": "https://www.phoronix.com/rss.php",
+        "category": "hardware"
+      },
+      {
+        "name": "The Register",
+        "url": "https://www.theregister.com/headlines.atom",
+        "category": "industry"
+      },
+      {
+        "name": "Next Platform",
+        "url": "https://www.nextplatform.com/feed/",
+        "category": "industry"
+      },
+      {
+        "name": "SemiAnalysis",
+        "url": "https://semianalysis.com/feed/",
+        "category": "industry"
+      },
+      {
+        "name": "Semiconductor Engineering",
+        "url": "https://semiengineering.com/feed/",
+        "category": "industry"
+      },
+      {
+        "name": "HPCwire",
+        "url": "https://www.hpcwire.com/feed/",
+        "category": "industry"
+      },
+      {
+        "name": "SemiWiki",
+        "url": "https://semiwiki.com/feed/",
+        "category": "industry"
+      },
+      {
+        "name": "IEEE Spectrum Computing",
+        "url": "https://spectrum.ieee.org/feeds/topic/computing.rss",
+        "category": "industry"
+      },
+      {
+        "name": "ArXiv CS (Architecture + Distributed + Performance)",
+        "url": "https://rss.arxiv.org/rss/cs.AR+cs.DC+cs.PF",
+        "category": "research"
+      },
+      {
+        "name": "ScienceDaily Quantum Computing",
+        "url": "https://www.sciencedaily.com/rss/computers_math/quantum_computers.xml",
+        "category": "research"
+      },
+      {
+        "name": "The Quantum Insider",
+        "url": "https://thequantuminsider.com/feed/",
+        "category": "research"
+      },
+      {
+        "name": "Hacker News Computation",
+        "url": "https://hnrss.org/newest?q=GPU+OR+CPU+OR+quantum+OR+semiconductor+OR+TSMC+OR+NVIDIA",
+        "category": "community"
+      },
+      {
+        "name": "Reddit r/hardware",
+        "url": "https://www.reddit.com/r/hardware/.rss",
+        "category": "community"
+      }
+    ],
+    "reddit": [],
+    "github": []
+  },
+  "categories": {
+    "hardware": "Hardware & Chips",
+    "research": "Research & Papers",
+    "industry": "Industry & HPC",
+    "community": "Community Highlights"
+  },
+  "max_articles_per_source": 10,
+  "max_reddit_posts": 5,
+  "arxiv_max_per_feed": 5,
+  "digest_lookback_hours": 48
+}

@@ -1,0 +1,87 @@
+{
+  "digest_id": "robotics",
+  "digest_name": "Robotics",
+  "digest_title": "Robotics Morning Digest",
+  "page_description": "Daily robotics news digest - research, tools, and community highlights curated by Densanon.",
+  "h1_prefix": "Robotics Morning",
+  "footer_sources": "IEEE Spectrum, The Robot Report, ArXiv, TechCrunch, Robohub, Reddit, and more",
+  "output_file": "robotics-digest.html",
+  "user_agent": "DensanonRoboticsDigest/1.0 (https://densanon.com; admin@densanon.com)",
+  "seen_db_path": "robotics/seen_articles.json",
+  "sources": {
+    "rss": [
+      {
+        "name": "IEEE Spectrum Robotics",
+        "url": "https://spectrum.ieee.org/feeds/topic/robotics.rss",
+        "category": "industry"
+      },
+      {
+        "name": "The Robot Report",
+        "url": "https://www.therobotreport.com/feed/",
+        "category": "industry"
+      },
+      {
+        "name": "ArXiv cs.RO",
+        "url": "https://rss.arxiv.org/rss/cs.RO",
+        "category": "research"
+      },
+      {
+        "name": "TechCrunch Robotics",
+        "url": "https://techcrunch.com/tag/robotics/feed/",
+        "category": "industry"
+      },
+      {
+        "name": "Robohub",
+        "url": "https://robohub.org/feed/",
+        "category": "research"
+      },
+      {
+        "name": "Robotics & Automation News",
+        "url": "https://roboticsandautomationnews.com/feed/",
+        "category": "industry"
+      },
+      {
+        "name": "New Atlas Robotics",
+        "url": "https://newatlas.com/robotics/rss/",
+        "category": "industry"
+      },
+      {
+        "name": "ScienceDaily Robotics",
+        "url": "https://www.sciencedaily.com/rss/computers_math/robotics.xml",
+        "category": "research"
+      },
+      {
+        "name": "Hacker News Robotics",
+        "url": "https://hnrss.org/newest?q=robotics+OR+humanoid+OR+robot",
+        "category": "community"
+      },
+      {
+        "name": "r/robotics",
+        "url": "https://www.reddit.com/r/robotics/.rss",
+        "category": "community"
+      },
+      {
+        "name": "JPL News",
+        "url": "https://www.jpl.nasa.gov/feeds/news",
+        "category": "research"
+      },
+      {
+        "name": "ROS Discourse",
+        "url": "https://discourse.ros.org/latest.rss",
+        "category": "tools"
+      }
+    ],
+    "reddit": [],
+    "github": []
+  },
+  "categories": {
+    "research": "Research & Papers",
+    "industry": "Product & Industry",
+    "tools": "Tools & Practical",
+    "community": "Community Highlights"
+  },
+  "max_articles_per_source": 10,
+  "max_reddit_posts": 5,
+  "arxiv_max_per_feed": 5,
+  "digest_lookback_hours": 48
+}

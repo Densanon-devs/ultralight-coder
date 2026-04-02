@@ -1,0 +1,74 @@
+{
+  "digest_id": "ai",
+  "digest_name": "AI",
+  "digest_title": "AI Morning Digest",
+  "page_description": "Daily AI news digest - research, tools, and community highlights curated by Densanon.",
+  "h1_prefix": "AI Morning",
+  "footer_sources": "Anthropic, ArXiv, Hugging Face, Simon Willison, Reddit, and GitHub",
+  "output_file": "ai-digest.html",
+  "user_agent": "DensanonAIDigest/1.0 (https://densanon.com; admin@densanon.com)",
+  "seen_db_path": "ai/seen_articles.json",
+  "sources": {
+    "rss": [
+      {
+        "name": "Anthropic Research",
+        "url": "https://www.anthropic.com/research/rss.xml",
+        "category": "research"
+      },
+      {
+        "name": "Anthropic News",
+        "url": "https://www.anthropic.com/news/rss.xml",
+        "category": "industry"
+      },
+      {
+        "name": "Hugging Face Blog",
+        "url": "https://huggingface.co/blog/feed.xml",
+        "category": "tools"
+      },
+      {
+        "name": "Simon Willison",
+        "url": "https://simonwillison.net/atom/everything/",
+        "category": "tools"
+      },
+      {
+        "name": "ArXiv cs.AI",
+        "url": "https://rss.arxiv.org/rss/cs.AI",
+        "category": "research"
+      },
+      {
+        "name": "ArXiv cs.CL",
+        "url": "https://rss.arxiv.org/rss/cs.CL",
+        "category": "research"
+      }
+    ],
+    "reddit": [
+      {
+        "name": "r/ClaudeAI",
+        "subreddit": "ClaudeAI",
+        "category": "community"
+      },
+      {
+        "name": "r/LocalLLaMA",
+        "subreddit": "LocalLLaMA",
+        "category": "community"
+      }
+    ],
+    "github": [
+      {
+        "name": "Anthropic GitHub",
+        "org": "anthropics",
+        "category": "tools"
+      }
+    ]
+  },
+  "categories": {
+    "research": "Research & Papers",
+    "industry": "Product & Industry",
+    "tools": "Tools & Practical",
+    "community": "Community Highlights"
+  },
+  "max_articles_per_source": 10,
+  "max_reddit_posts": 5,
+  "arxiv_max_per_feed": 5,
+  "digest_lookback_hours": 48
+}

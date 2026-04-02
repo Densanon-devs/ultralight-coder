@@ -1,0 +1,118 @@
+{
+  "digest_id": "gamedev",
+  "digest_name": "Game Dev",
+  "digest_title": "Game Dev Morning Digest",
+  "page_description": "Daily game development news digest - engines, tools, techniques, and community highlights curated by Densanon.",
+  "h1_prefix": "Game Dev Morning",
+  "footer_sources": "Game Developer, GamesIndustry.biz, Unity, Godot, GDC, itch.io, Reddit, and more",
+  "output_file": "gamedev-digest.html",
+  "user_agent": "DensanonGameDevDigest/1.0 (https://densanon.com; admin@densanon.com)",
+  "seen_db_path": "gamedev/seen_articles.json",
+  "sources": {
+    "rss": [
+      {
+        "name": "Game Developer",
+        "url": "https://www.gamedeveloper.com/rss.xml",
+        "category": "industry"
+      },
+      {
+        "name": "GamesIndustry.biz",
+        "url": "https://www.gamesindustry.biz/feed",
+        "category": "industry"
+      },
+      {
+        "name": "80 Level",
+        "url": "https://80.lv/feed",
+        "category": "industry"
+      },
+      {
+        "name": "Game Dev Digest",
+        "url": "https://gamedevdigest.com/feed.xml",
+        "category": "industry"
+      },
+      {
+        "name": "Unity Blog",
+        "url": "https://unity.com/blog/rss",
+        "category": "engines_tools"
+      },
+      {
+        "name": "Godot Engine",
+        "url": "https://godotengine.org/rss.xml",
+        "category": "engines_tools"
+      },
+      {
+        "name": "Game From Scratch",
+        "url": "https://gamefromscratch.com/feed/",
+        "category": "engines_tools"
+      },
+      {
+        "name": "Catlike Coding",
+        "url": "https://catlikecoding.com/unity/tutorials/feed.atom",
+        "category": "techniques"
+      },
+      {
+        "name": "GDC YouTube",
+        "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC0JB7TSe49lg56u6qH8y_MQ",
+        "category": "techniques"
+      },
+      {
+        "name": "Game Maker's Toolkit",
+        "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCqJ-Xo29CKyLTjn6z2XwYAw",
+        "category": "techniques"
+      },
+      {
+        "name": "Sebastian Lague",
+        "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCmtyQOKKmrMVaKuRXz02jbQ",
+        "category": "techniques"
+      },
+      {
+        "name": "Brackeys",
+        "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCYbK_tjZ2OrIZFBvU6CCMiA",
+        "category": "techniques"
+      },
+      {
+        "name": "itch.io New Games",
+        "url": "https://itch.io/feed/featured.xml",
+        "category": "community"
+      },
+      {
+        "name": "itch.io Game Jams",
+        "url": "https://itch.io/jams/upcoming.xml",
+        "category": "community"
+      },
+      {
+        "name": "Hacker News Game Dev",
+        "url": "https://hnrss.org/newest?q=gamedev+OR+%22game+engine%22+OR+godot+OR+%22unreal+engine%22+OR+%22game+development%22",
+        "category": "community"
+      }
+    ],
+    "reddit": [
+      {
+        "name": "r/gamedev",
+        "subreddit": "gamedev",
+        "category": "community"
+      },
+      {
+        "name": "r/IndieDev",
+        "subreddit": "IndieDev",
+        "category": "community"
+      },
+      {
+        "name": "r/godot",
+        "subreddit": "godot",
+        "category": "community"
+      }
+    ],
+    "github": []
+  },
+  "categories": {
+    "engines_tools": "Engines & Tools",
+    "industry": "Industry & News",
+    "techniques": "Techniques & Learning",
+    "community": "Community Highlights"
+  },
+  "max_articles_per_source": 10,
+  "max_reddit_posts": 5,
+  "arxiv_max_per_feed": 5,
+  "digest_lookback_hours": 48
+}

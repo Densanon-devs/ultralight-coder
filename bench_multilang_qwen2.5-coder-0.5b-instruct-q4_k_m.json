@@ -1,14 +1,14 @@
 {
   "total": 130,
-  "passed": 115,
-  "avg_score": 0.9487179487179487,
+  "passed": 124,
+  "avg_score": 0.982051282051282,
   "results": [
     {
       "query": "Write a Python function that finds all anagrams in a list of words",
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 5.01,
+      "time": 4.91,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -18,7 +18,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 2.72,
+      "time": 2.78,
       "lines": 13,
       "missing": [],
       "unwanted": []
@@ -28,7 +28,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 2.66,
+      "time": 2.69,
       "lines": 14,
       "missing": [],
       "unwanted": []
@@ -38,7 +38,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 4.47,
+      "time": 4.5,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -48,7 +48,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 4.23,
+      "time": 4.14,
       "lines": 22,
       "missing": [],
       "unwanted": []
@@ -68,7 +68,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 8.31,
+      "time": 8.33,
       "lines": 29,
       "missing": [],
       "unwanted": []
@@ -76,11 +76,13 @@
     {
       "query": "Write a Python dataclass with validation in __post_init__",
       "domain": "python",
-      "passed": true,
-      "score": 1.0,
-      "time": 8.25,
-      "lines": 34,
-      "missing": [],
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 3.84,
+      "lines": 21,
+      "missing": [
+        "__post_init__"
+      ],
       "unwanted": []
     },
     {
@@ -88,7 +90,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 2.47,
+      "time": 2.19,
       "lines": 13,
       "missing": [],
       "unwanted": []
@@ -98,7 +100,7 @@
       "domain": "python",
       "passed": true,
       "score": 1.0,
-      "time": 4.45,
+      "time": 4.11,
       "lines": 22,
       "missing": [],
       "unwanted": []
@@ -108,7 +110,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 2.89,
+      "time": 2.59,
       "lines": 18,
       "missing": [],
       "unwanted": []
@@ -118,7 +120,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 2.0,
+      "time": 1.89,
       "lines": 18,
       "missing": [],
       "unwanted": []
@@ -128,7 +130,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 5.56,
+      "time": 4.98,
       "lines": 28,
       "missing": [],
       "unwanted": []
@@ -138,7 +140,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 1.25,
+      "time": 1.06,
       "lines": 10,
       "missing": [],
       "unwanted": []
@@ -148,7 +150,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 1.88,
+      "time": 1.64,
       "lines": 18,
       "missing": [],
       "unwanted": []
@@ -158,7 +160,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 1.2,
+      "time": 1.09,
       "lines": 11,
       "missing": [],
       "unwanted": []
@@ -168,7 +170,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 5.17,
+      "time": 4.67,
       "lines": 34,
       "missing": [],
       "unwanted": []
@@ -178,7 +180,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 1.45,
+      "time": 1.28,
       "lines": 12,
       "missing": [],
       "unwanted": []
@@ -188,7 +190,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 7.44,
+      "time": 6.67,
       "lines": 46,
       "missing": [],
       "unwanted": []
@@ -198,7 +200,7 @@
       "domain": "javascript",
       "passed": true,
       "score": 1.0,
-      "time": 4.94,
+      "time": 4.53,
       "lines": 29,
       "missing": [],
       "unwanted": []
@@ -208,7 +210,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 0.64,
+      "time": 0.56,
       "lines": 4,
       "missing": [],
       "unwanted": []
@@ -218,7 +220,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 0.88,
+      "time": 0.8,
       "lines": 7,
       "missing": [],
       "unwanted": []
@@ -228,7 +230,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 3.11,
+      "time": 2.77,
       "lines": 22,
       "missing": [],
       "unwanted": []
@@ -238,7 +240,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 5.52,
+      "time": 4.92,
       "lines": 30,
       "missing": [],
       "unwanted": []
@@ -248,7 +250,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 1.55,
+      "time": 1.36,
       "lines": 10,
       "missing": [],
       "unwanted": []
@@ -258,7 +260,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 3.3,
+      "time": 2.88,
       "lines": 18,
       "missing": [],
       "unwanted": []
@@ -268,7 +270,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 5.53,
+      "time": 5.05,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -278,7 +280,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 3.36,
+      "time": 2.94,
       "lines": 18,
       "missing": [],
       "unwanted": []
@@ -288,7 +290,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 2.2,
+      "time": 2.09,
       "lines": 16,
       "missing": [],
       "unwanted": []
@@ -298,7 +300,7 @@
       "domain": "typescript",
       "passed": true,
       "score": 1.0,
-      "time": 7.39,
+      "time": 6.88,
       "lines": 68,
       "missing": [],
       "unwanted": []
@@ -308,7 +310,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 2.95,
+      "time": 2.73,
       "lines": 18,
       "missing": [],
       "unwanted": []
@@ -318,7 +320,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 3.75,
+      "time": 3.27,
       "lines": 34,
       "missing": [],
       "unwanted": []
@@ -328,7 +330,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 4.67,
+      "time": 4.24,
       "lines": 40,
       "missing": [],
       "unwanted": []
@@ -338,7 +340,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 4.67,
+      "time": 4.24,
       "lines": 45,
       "missing": [],
       "unwanted": []
@@ -348,7 +350,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 4.5,
+      "time": 4.08,
       "lines": 38,
       "missing": [],
       "unwanted": []
@@ -358,7 +360,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 3.52,
+      "time": 3.28,
       "lines": 34,
       "missing": [],
       "unwanted": []
@@ -368,7 +370,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 3.77,
+      "time": 3.7,
       "lines": 37,
       "missing": [],
       "unwanted": []
@@ -378,7 +380,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 1.8,
+      "time": 1.84,
       "lines": 20,
       "missing": [],
       "unwanted": []
@@ -388,7 +390,7 @@
       "domain": "go",
       "passed": false,
       "score": 0.6666666666666666,
-      "time": 3.86,
+      "time": 3.78,
       "lines": 29,
       "missing": [
         "Error()"
@@ -400,7 +402,7 @@
       "domain": "go",
       "passed": true,
       "score": 1.0,
-      "time": 3.25,
+      "time": 3.14,
       "lines": 33,
       "missing": [],
       "unwanted": []
@@ -420,7 +422,7 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 6.06,
+      "time": 6.14,
       "lines": 32,
       "missing": [],
       "unwanted": []
@@ -430,7 +432,7 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 4.5,
+      "time": 4.78,
       "lines": 38,
       "missing": [],
       "unwanted": []
@@ -438,13 +440,11 @@
     {
       "query": "Write a Rust function that reads lines from a file and returns a Vec<String>",
       "domain": "rust",
-      "passed": false,
-      "score": 0.6666666666666666,
-      "time": 2.34,
-      "lines": 19,
-      "missing": [
-        "Result"
-      ],
+      "passed": true,
+      "score": 1.0,
+      "time": 1.34,
+      "lines": 8,
+      "missing": [],
       "unwanted": []
     },
     {
@@ -452,7 +452,7 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 6.84,
+      "time": 6.77,
       "lines": 44,
       "missing": [],
       "unwanted": []
@@ -462,7 +462,7 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 1.52,
+      "time": 1.48,
       "lines": 8,
       "missing": [],
       "unwanted": []
@@ -472,7 +472,7 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 4.55,
+      "time": 4.34,
       "lines": 27,
       "missing": [],
       "unwanted": []
@@ -482,7 +482,7 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 5.5,
+      "time": 5.42,
       "lines": 41,
       "missing": [],
       "unwanted": []
@@ -492,7 +492,7 @@
       "domain": "rust",
       "passed": false,
       "score": 0.6666666666666666,
-      "time": 1.67,
+      "time": 1.64,
       "lines": 13,
       "missing": [
         "Option"
@@ -504,7 +504,7 @@
       "domain": "rust",
       "passed": true,
       "score": 1.0,
-      "time": 3.23,
+      "time": 3.19,
       "lines": 30,
       "missing": [],
       "unwanted": []
@@ -514,7 +514,7 @@
       "domain": "sql",
       "passed": true,
       "score": 1.0,
-      "time": 1.17,
+      "time": 1.2,
       "lines": 9,
       "missing": [],
       "unwanted": []
@@ -524,7 +524,7 @@
       "domain": "sql",
       "passed": true,
       "score": 1.0,
-      "time": 1.0,
+      "time": 0.95,
       "lines": 8,
       "missing": [],
       "unwanted": []
@@ -534,7 +534,7 @@
       "domain": "sql",
       "passed": true,
       "score": 1.0,
-      "time": 1.56,
+      "time": 1.58,
       "lines": 14,
       "missing": [],
       "unwanted": []
@@ -544,7 +544,7 @@
       "domain": "sql",
       "passed": true,
       "score": 1.0,
-      "time": 1.7,
+      "time": 1.69,
       "lines": 10,
       "missing": [],
       "unwanted": []
@@ -554,7 +554,7 @@
       "domain": "sql",
       "passed": true,
       "score": 1.0,
-      "time": 1.12,
+      "time": 1.16,
       "lines": 6,
       "missing": [],
       "unwanted": []
@@ -584,7 +584,7 @@
       "domain": "sql",
       "passed": false,
       "score": 0.6666666666666666,
-      "time": 0.99,
+      "time": 1.01,
       "lines": 7,
       "missing": [
         "CASE"
@@ -596,7 +596,7 @@
       "domain": "sql",
       "passed": true,
       "score": 1.0,
-      "time": 0.5,
+      "time": 0.52,
       "lines": 6,
       "missing": [],
       "unwanted": []
@@ -616,7 +616,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 1.5,
+      "time": 1.47,
       "lines": 12,
       "missing": [],
       "unwanted": []
@@ -626,7 +626,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 5.62,
+      "time": 5.69,
       "lines": 41,
       "missing": [],
       "unwanted": []
@@ -636,7 +636,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 3.39,
+      "time": 3.41,
       "lines": 26,
       "missing": [],
       "unwanted": []
@@ -646,7 +646,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 4.2,
+      "time": 4.09,
       "lines": 27,
       "missing": [],
       "unwanted": []
@@ -656,7 +656,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 1.22,
+      "time": 1.23,
       "lines": 8,
       "missing": [],
       "unwanted": []
@@ -666,7 +666,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 2.41,
+      "time": 2.33,
       "lines": 16,
       "missing": [],
       "unwanted": []
@@ -676,7 +676,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 3.23,
+      "time": 3.19,
       "lines": 29,
       "missing": [],
       "unwanted": []
@@ -686,7 +686,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 2.94,
+      "time": 2.88,
       "lines": 22,
       "missing": [],
       "unwanted": []
@@ -696,7 +696,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 7.8,
+      "time": 7.73,
       "lines": 54,
       "missing": [],
       "unwanted": []
@@ -706,7 +706,7 @@
       "domain": "c",
       "passed": true,
       "score": 1.0,
-      "time": 1.66,
+      "time": 1.61,
       "lines": 13,
       "missing": [],
       "unwanted": []
@@ -716,7 +716,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 1.56,
+      "time": 1.47,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -726,7 +726,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 1.44,
+      "time": 1.64,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -736,7 +736,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 1.86,
+      "time": 1.83,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -744,25 +744,21 @@
     {
       "query": "Write a Java generic class for a bounded buffer with put and take methods",
       "domain": "java",
-      "passed": false,
-      "score": 0.6666666666666666,
-      "time": 2.52,
-      "lines": 20,
-      "missing": [
-        "synchronized"
-      ],
+      "passed": true,
+      "score": 1.0,
+      "time": 3.53,
+      "lines": 27,
+      "missing": [],
       "unwanted": []
     },
     {
       "query": "Write a Java interface for a repository with CRUD methods and implement it",
       "domain": "java",
-      "passed": false,
-      "score": 0.3333333333333333,
-      "time": 0.89,
-      "lines": 7,
-      "missing": [
-        "class "
-      ],
+      "passed": true,
+      "score": 1.0,
+      "time": 3.81,
+      "lines": 23,
+      "missing": [],
       "unwanted": []
     },
     {
@@ -770,7 +766,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 3.16,
+      "time": 3.0,
       "lines": 25,
       "missing": [],
       "unwanted": []
@@ -780,7 +776,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 1.24,
+      "time": 1.22,
       "lines": 13,
       "missing": [],
       "unwanted": []
@@ -790,7 +786,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 7.05,
+      "time": 6.72,
       "lines": 19,
       "missing": [],
       "unwanted": []
@@ -800,7 +796,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 1.59,
+      "time": 1.5,
       "lines": 13,
       "missing": [],
       "unwanted": []
@@ -810,7 +806,7 @@
       "domain": "java",
       "passed": true,
       "score": 1.0,
-      "time": 3.02,
+      "time": 3.05,
       "lines": 29,
       "missing": [],
       "unwanted": []
@@ -820,7 +816,7 @@
       "domain": "csharp",
       "passed": true,
       "score": 1.0,
-      "time": 1.75,
+      "time": 1.8,
       "lines": 16,
       "missing": [],
       "unwanted": []
@@ -830,7 +826,7 @@
       "domain": "csharp",
       "passed": true,
       "score": 1.0,
-      "time": 2.45,
+      "time": 2.44,
       "lines": 21,
       "missing": [],
       "unwanted": []
@@ -840,7 +836,7 @@
       "domain": "csharp",
       "passed": true,
       "score": 1.0,
-      "time": 3.39,
+      "time": 3.48,
       "lines": 27,
       "missing": [],
       "unwanted": []
@@ -850,8 +846,8 @@
       "domain": "csharp",
       "passed": true,
       "score": 1.0,
-      "time": 2.31,
-      "lines": 19,
+      "time": 1.61,
+      "lines": 13,
       "missing": [],
       "unwanted": []
     },
@@ -868,13 +864,11 @@
     {
       "query": "Write a C# interface for a repository pattern with generic CRUD methods",
       "domain": "csharp",
-      "passed": false,
-      "score": 0.6666666666666666,
-      "time": 3.47,
-      "lines": 41,
-      "missing": [
-        "Task"
-      ],
+      "passed": true,
+      "score": 1.0,
+      "time": 1.09,
+      "lines": 9,
+      "missing": [],
       "unwanted": []
     },
     {
@@ -882,7 +876,7 @@
       "domain": "csharp",
       "passed": true,
       "score": 1.0,
-      "time": 3.76,
+      "time": 3.83,
       "lines": 28,
       "missing": [],
       "unwanted": []
@@ -892,7 +886,7 @@
       "domain": "csharp",
       "passed": true,
       "score": 1.0,
-      "time": 1.91,
+      "time": 1.92,
       "lines": 22,
       "missing": [],
       "unwanted": []
@@ -900,26 +894,21 @@
     {
       "query": "Write a C# LINQ query that joins two lists and selects specific fields",
       "domain": "csharp",
-      "passed": false,
-      "score": 0.3333333333333333,
-      "time": 3.23,
-      "lines": 31,
-      "missing": [
-        "join ",
-        "select "
-      ],
+      "passed": true,
+      "score": 1.0,
+      "time": 2.05,
+      "lines": 15,
+      "missing": [],
       "unwanted": []
     },
     {
       "query": "Write a C# method that validates an object using custom validation attributes",
       "domain": "csharp",
-      "passed": false,
-      "score": 0.6666666666666666,
-      "time": 1.58,
-      "lines": 22,
-      "missing": [
-        "Validate"
-      ],
+      "passed": true,
+      "score": 1.0,
+      "time": 3.56,
+      "lines": 32,
+      "missing": [],
       "unwanted": []
     },
     {
@@ -927,7 +916,7 @@
       "domain": "ruby",
       "passed": true,
       "score": 1.0,
-      "time": 2.14,
+      "time": 2.12,
       "lines": 18,
       "missing": [],
       "unwanted": []
@@ -937,7 +926,7 @@
       "domain": "ruby",
       "passed": true,
       "score": 1.0,
-      "time": 1.19,
+      "time": 1.14,
       "lines": 12,
       "missing": [],
       "unwanted": []
@@ -967,7 +956,7 @@
       "domain": "ruby",
       "passed": true,
       "score": 1.0,
-      "time": 0.59,
+      "time": 0.61,
       "lines": 5,
       "missing": [],
       "unwanted": []
@@ -977,7 +966,7 @@
       "domain": "ruby",
       "passed": true,
       "score": 1.0,
-      "time": 1.34,
+      "time": 1.33,
       "lines": 15,
       "missing": [],
       "unwanted": []
@@ -987,7 +976,7 @@
       "domain": "ruby",
       "passed": true,
       "score": 1.0,
-      "time": 0.69,
+      "time": 0.7,
       "lines": 6,
       "missing": [],
       "unwanted": []
@@ -1007,7 +996,7 @@
       "domain": "ruby",
       "passed": true,
       "score": 1.0,
-      "time": 2.66,
+      "time": 2.61,
       "lines": 21,
       "missing": [],
       "unwanted": []
@@ -1025,14 +1014,11 @@
     {
       "query": "Write a bash script that finds and deletes all files older than 30 days",
       "domain": "bash",
-      "passed": false,
-      "score": 0.3333333333333333,
-      "time": 5.03,
-      "lines": 15,
-      "missing": [
-        "find ",
-        "-mtime"
-      ],
+      "passed": true,
+      "score": 1.0,
+      "time": 4.91,
+      "lines": 6,
+      "missing": [],
       "unwanted": []
     },
     {
@@ -1040,7 +1026,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 9.22,
+      "time": 9.11,
       "lines": 6,
       "missing": [],
       "unwanted": []
@@ -1050,7 +1036,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 7.72,
+      "time": 7.88,
       "lines": 28,
       "missing": [],
       "unwanted": []
@@ -1060,7 +1046,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 0.83,
+      "time": 0.92,
       "lines": 5,
       "missing": [],
       "unwanted": []
@@ -1070,7 +1056,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 6.8,
+      "time": 6.88,
       "lines": 16,
       "missing": [],
       "unwanted": []
@@ -1080,7 +1066,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 3.08,
+      "time": 3.2,
       "lines": 8,
       "missing": [],
       "unwanted": []
@@ -1090,7 +1076,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 8.45,
+      "time": 8.5,
       "lines": 32,
       "missing": [],
       "unwanted": []
@@ -1100,7 +1086,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 8.03,
+      "time": 8.34,
       "lines": 12,
       "missing": [],
       "unwanted": []
@@ -1110,7 +1096,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 6.28,
+      "time": 6.42,
       "lines": 26,
       "missing": [],
       "unwanted": []
@@ -1120,7 +1106,7 @@
       "domain": "bash",
       "passed": true,
       "score": 1.0,
-      "time": 2.38,
+      "time": 2.5,
       "lines": 5,
       "missing": [],
       "unwanted": []
@@ -1128,13 +1114,11 @@
     {
       "query": "Write a Kotlin data class with validation in the init block",
       "domain": "kotlin",
-      "passed": false,
-      "score": 0.6666666666666666,
-      "time": 2.72,
-      "lines": 12,
-      "missing": [
-        "init"
-      ],
+      "passed": true,
+      "score": 1.0,
+      "time": 1.64,
+      "lines": 8,
+      "missing": [],
       "unwanted": []
     },
     {
@@ -1142,7 +1126,7 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 6.05,
+      "time": 6.16,
       "lines": 16,
       "missing": [],
       "unwanted": []
@@ -1152,7 +1136,7 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 0.94,
+      "time": 0.98,
       "lines": 8,
       "missing": [],
       "unwanted": []
@@ -1162,7 +1146,7 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 1.99,
+      "time": 2.03,
       "lines": 14,
       "missing": [],
       "unwanted": []
@@ -1172,7 +1156,7 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 0.74,
+      "time": 0.75,
       "lines": 4,
       "missing": [],
       "unwanted": []
@@ -1182,7 +1166,7 @@
       "domain": "kotlin",
       "passed": false,
       "score": 0.6666666666666666,
-      "time": 1.14,
+      "time": 1.17,
       "lines": 9,
       "missing": [
         "reified"
@@ -1194,8 +1178,8 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 2.39,
-      "lines": 23,
+      "time": 1.62,
+      "lines": 13,
       "missing": [],
       "unwanted": []
     },
@@ -1204,7 +1188,7 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 1.7,
+      "time": 1.73,
       "lines": 14,
       "missing": [],
       "unwanted": []
@@ -1212,13 +1196,11 @@
     {
       "query": "Write a Kotlin object that implements a thread-safe singleton with lazy initialization",
       "domain": "kotlin",
-      "passed": false,
-      "score": 0.6666666666666666,
-      "time": 3.31,
-      "lines": 23,
-      "missing": [
-        "object "
-      ],
+      "passed": true,
+      "score": 1.0,
+      "time": 1.53,
+      "lines": 12,
+      "missing": [],
       "unwanted": []
     },
     {
@@ -1226,7 +1208,7 @@
       "domain": "kotlin",
       "passed": true,
       "score": 1.0,
-      "time": 1.48,
+      "time": 1.5,
       "lines": 12,
       "missing": [],
       "unwanted": []
@@ -1236,7 +1218,7 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 0.69,
+      "time": 0.7,
       "lines": 7,
       "missing": [],
       "unwanted": []
@@ -1246,7 +1228,7 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 1.05,
+      "time": 1.09,
       "lines": 9,
       "missing": [],
       "unwanted": []
@@ -1256,7 +1238,7 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 2.41,
+      "time": 2.44,
       "lines": 22,
       "missing": [],
       "unwanted": []
@@ -1266,7 +1248,7 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 0.73,
+      "time": 0.77,
       "lines": 5,
       "missing": [],
       "unwanted": []
@@ -1276,7 +1258,7 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 5.64,
+      "time": 5.8,
       "lines": 41,
       "missing": [],
       "unwanted": []
@@ -1286,7 +1268,7 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 2.58,
+      "time": 2.72,
       "lines": 10,
       "missing": [],
       "unwanted": []
@@ -1296,7 +1278,7 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 1.75,
+      "time": 1.72,
       "lines": 13,
       "missing": [],
       "unwanted": []
@@ -1306,22 +1288,19 @@
       "domain": "swift",
       "passed": true,
       "score": 1.0,
-      "time": 3.38,
-      "lines": 28,
+      "time": 1.53,
+      "lines": 10,
       "missing": [],
       "unwanted": []
     },
     {
       "query": "Write a Swift property wrapper that clamps a value between a min and max",
       "domain": "swift",
-      "passed": false,
-      "score": 0.3333333333333333,
-      "time": 3.92,
-      "lines": 29,
-      "missing": [
-        "struct ",
-        "wrappedValue"
-      ],
+      "passed": true,
+      "score": 1.0,
+      "time": 2.06,
+      "lines": 16,
+      "missing": [],
       "unwanted": []
     },
     {
@@ -1329,7 +1308,7 @@
       "domain": "swift",
       "passed": false,
       "score": 0.3333333333333333,
-      "time": 1.86,
+      "time": 1.88,
       "lines": 19,
       "missing": [
         "struct ",
