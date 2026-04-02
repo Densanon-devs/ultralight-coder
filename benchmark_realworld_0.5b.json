@@ -1,0 +1,1020 @@
+{
+  "total": 100,
+  "passed": 94,
+  "avg_score": 0.9808333333333334,
+  "results": [
+    {
+      "query": "write me a fibonacci function",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.69,
+      "lines": 9,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "i need code to sort a list of numbers without using the built-in sort",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.59,
+      "lines": 9,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "can you make a binary search function?",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.86,
+      "lines": 11,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a calculator that shows pi to n decimal places",
+      "domain": "algorithm",
+      "passed": false,
+      "score": 0.75,
+      "time": 5.84,
+      "lines": 7,
+      "missing": [
+        "getcontext"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "compute e to 50 decimal places",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.92,
+      "lines": 9,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function to check if a number is prime",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.34,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "give me code to reverse a linked list",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.91,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "how do I find all permutations of a string?",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.02,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function that computes square root of 2 to 100 digits",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.38,
+      "lines": 5,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "implement merge sort in python",
+      "domain": "algorithm",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.14,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build an LRU cache class with get and put",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.77,
+      "lines": 18,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "make a stack class with push pop and peek",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.7,
+      "lines": 17,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a binary search tree with insert and search",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 10.48,
+      "lines": 63,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a queue using two stacks",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.2,
+      "lines": 24,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "implement a trie data structure for word lookup",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.5,
+      "lines": 65,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a hash map from scratch without using dict",
+      "domain": "pattern",
+      "passed": false,
+      "score": 0.5,
+      "time": 7.77,
+      "lines": 17,
+      "missing": [
+        "def get",
+        "def put"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "make a min heap class with push and pop",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.47,
+      "lines": 45,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a graph class with add_edge and bfs",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.0,
+      "lines": 29,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a fastapi endpoint that accepts json and returns a response",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.41,
+      "lines": 12,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a REST API with get post and delete routes",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.61,
+      "lines": 24,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "how do I add authentication middleware to my api?",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.95,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a pydantic model for validating user registration",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.98,
+      "lines": 10,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a simple http server that serves json",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.08,
+      "lines": 18,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "make an endpoint that uploads a file",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.89,
+      "lines": 19,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write middleware that logs how long each request takes",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.61,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a rate limiter for my api endpoints",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.64,
+      "lines": 43,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "how do I handle CORS in a python web server?",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.23,
+      "lines": 14,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write an api endpoint with query parameters and path params",
+      "domain": "web",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.0,
+      "lines": 42,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a sqlite database class with create read update delete",
+      "domain": "database",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.72,
+      "lines": 28,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "how do I connect to a sqlite database and run a query?",
+      "domain": "database",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.17,
+      "lines": 37,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a function that inserts multiple rows into sqlite",
+      "domain": "database",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.8,
+      "lines": 25,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a context manager for database connections that auto commits",
+      "domain": "database",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.58,
+      "lines": 14,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a simple migration system for sqlite",
+      "domain": "database",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.66,
+      "lines": 36,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a repository pattern class for managing users in a database",
+      "domain": "database",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.92,
+      "lines": 40,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "how to do parameterized queries to prevent sql injection?",
+      "domain": "database",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.77,
+      "lines": 34,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a connection pool for sqlite",
+      "domain": "database",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.44,
+      "lines": 16,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write code to export a sqlite table to csv",
+      "domain": "database",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.75,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a key-value store backed by sqlite",
+      "domain": "database",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.95,
+      "lines": 37,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write an async function that fetches multiple urls concurrently",
+      "domain": "async",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.16,
+      "lines": 12,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create an async producer consumer with a queue",
+      "domain": "async",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.22,
+      "lines": 20,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "how do I run multiple async tasks at the same time?",
+      "domain": "async",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.0,
+      "lines": 12,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write an async rate limiter using semaphore",
+      "domain": "async",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.98,
+      "lines": 15,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build an async context manager for timing operations",
+      "domain": "async",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.41,
+      "lines": 17,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "make a worker pool that processes items from an async queue",
+      "domain": "async",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.78,
+      "lines": 42,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write an async generator that yields numbers with a delay",
+      "domain": "async",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.2,
+      "lines": 9,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "how to use asyncio.wait with a timeout?",
+      "domain": "async",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.11,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a pytest fixture that sets up a temporary database",
+      "domain": "testing",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.47,
+      "lines": 17,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "how do I mock an api call in my tests?",
+      "domain": "testing",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.48,
+      "lines": 19,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write parametrized tests for a function with multiple inputs",
+      "domain": "testing",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.17,
+      "lines": 40,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a test factory for generating user objects",
+      "domain": "testing",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.33,
+      "lines": 35,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "how to mock file reading in a unit test?",
+      "domain": "testing",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.97,
+      "lines": 15,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write tests for a calculator class with add subtract multiply",
+      "domain": "testing",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.91,
+      "lines": 57,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a custom assertion helper for checking api responses",
+      "domain": "testing",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.41,
+      "lines": 20,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "how do I test async functions with pytest?",
+      "domain": "testing",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.2,
+      "lines": 7,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a cli tool with subcommands using argparse",
+      "domain": "cli",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.42,
+      "lines": 29,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a python script with proper logging setup",
+      "domain": "cli",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.62,
+      "lines": 21,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "how do I run a shell command and capture the output?",
+      "domain": "cli",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.23,
+      "lines": 19,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a script that watches a directory for new files",
+      "domain": "cli",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.94,
+      "lines": 24,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a progress bar for a long running task",
+      "domain": "cli",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.41,
+      "lines": 12,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "make a config file loader that reads yaml or json",
+      "domain": "cli",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.67,
+      "lines": 29,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a script that processes command line arguments",
+      "domain": "cli",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.58,
+      "lines": 23,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a rotating log file system",
+      "domain": "cli",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.28,
+      "lines": 17,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function to read a csv file into a list of dicts",
+      "domain": "data",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.02,
+      "lines": 4,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a data pipeline with map filter and reduce",
+      "domain": "data",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.72,
+      "lines": 21,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "flatten a nested dictionary to dot notation keys",
+      "domain": "data",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.25,
+      "lines": 9,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a json schema validator",
+      "domain": "data",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.92,
+      "lines": 32,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a function to process a large file line by line",
+      "domain": "data",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.39,
+      "lines": 12,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write code to merge two sorted lists",
+      "domain": "data",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.38,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a dataclass config loader from a json file",
+      "domain": "data",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.78,
+      "lines": 32,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function that groups a list of dicts by a key",
+      "domain": "data",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.3,
+      "lines": 8,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a decorator that retries a function 3 times on failure",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.27,
+      "lines": 11,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a state machine class with transitions",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.01,
+      "lines": 36,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build an event emitter with on emit and off methods",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 4.55,
+      "lines": 22,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a singleton pattern in python",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.02,
+      "lines": 16,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create an iterator class that generates fibonacci numbers",
+      "domain": "pattern",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 1.48,
+      "lines": 8,
+      "missing": [
+        "__next__"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "write a context manager for temporarily changing a directory",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.39,
+      "lines": 14,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "implement the observer pattern in python",
+      "domain": "pattern",
+      "passed": false,
+      "score": 0.75,
+      "time": 9.77,
+      "lines": 28,
+      "missing": [
+        "subscribe"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "build a simple template engine that replaces {{variables}}",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.97,
+      "lines": 39,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a middleware chain that processes requests in order",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.94,
+      "lines": 17,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a rate limiter using the token bucket algorithm",
+      "domain": "pattern",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.56,
+      "lines": 30,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function that validates an email address",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.47,
+      "lines": 4,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a password hasher with salt",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.3,
+      "lines": 16,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function to convert between celsius and fahrenheit",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.28,
+      "lines": 18,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a simple calculator that handles + - * /",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 10.06,
+      "lines": 48,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write code to download a file from a url",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.91,
+      "lines": 17,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a function that generates a random password",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.24,
+      "lines": 8,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a class that represents a playing card deck with shuffle and deal",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 6.11,
+      "lines": 30,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a simple todo list class with add remove and list methods",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 5.3,
+      "lines": 22,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function to find duplicate files in a directory",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.31,
+      "lines": 22,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a countdown timer that prints remaining time",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 2.62,
+      "lines": 13,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function to prettify json with indentation",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 0.67,
+      "lines": 3,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "make a class that reads and writes ini config files",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.58,
+      "lines": 25,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function to chunk a list into groups of n",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 1.2,
+      "lines": 4,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a simple encryption function using xor",
+      "domain": "general",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "time": 6.81,
+      "lines": 20,
+      "missing": [
+        "xor"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "write a url shortener using a hash",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.91,
+      "lines": 39,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a class that manages a shopping cart",
+      "domain": "general",
+      "passed": false,
+      "score": 0.75,
+      "time": 8.94,
+      "lines": 40,
+      "missing": [
+        "total"
+      ],
+      "unwanted": []
+    },
+    {
+      "query": "write a function that converts markdown headers to html",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 7.47,
+      "lines": 18,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "create a simple spell checker using edit distance",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 9.64,
+      "lines": 27,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "write a function to parse a cron expression",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 8.7,
+      "lines": 35,
+      "missing": [],
+      "unwanted": []
+    },
+    {
+      "query": "build a retry decorator with exponential backoff",
+      "domain": "general",
+      "passed": true,
+      "score": 1.0,
+      "time": 3.73,
+      "lines": 21,
+      "missing": [],
+      "unwanted": []
+    }
+  ]
+}
