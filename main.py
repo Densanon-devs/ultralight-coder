@@ -237,11 +237,18 @@ class UltralightCodeAssistant:
         # Augmentor system
         if not self.dry_run and self._augmentors_enabled and routing.selected_modules:
             module_hint = routing.selected_modules[0]
+
+            # Inject project context into augmentor prompt
+            extra_ctx = ""
+            if self.project_index.is_indexed:
+                extra_ctx = self.project_index.get_context(user_input, top_k=3)
+
             augmentor_result = self.augmentor_router.process(
                 query=user_input,
                 model=self.base_model,
                 chat_format=self.config.fusion.chat_format,
                 module_hint=module_hint,
+                extra_context=extra_ctx,
                 gen_kwargs={"max_tokens": self.config.base_model.max_tokens,
                             "temperature": self.config.base_model.temperature},
             )
