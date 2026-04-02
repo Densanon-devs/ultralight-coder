@@ -1,0 +1,125 @@
+{
+  "highlights_intro": "Today's digest is headlined by two landmark industry stories: a French consumer group's lawsuit over The Crew's shutdown gaining real legal teeth, and striking data on how Black Ops 7's negative Steam reviews are translating into measurable revenue. Elsewhere, Godot ships a maintenance release, PlayCanvas pushes volumetric video into the browser, and Nexon makes the case for AI-driven workforce restructuring.",
+  "sections": [
+    {
+      "name": "Industry & News",
+      "articles": [
+        {
+          "title": "French consumer group sues Ubisoft over shutdown of The Crew",
+          "source": "Game Developer",
+          "url": "https://www.gamedeveloper.com/business/french-consumer-group-sues-ubisoft-over-shutdown-of-the-crew",
+          "takeaways": [
+            "A French consumer advocacy group has filed suit against Ubisoft over the total shutdown of The Crew, citing laws protecting consumers' right to continue using purchased software.",
+            "The case is directly tied to the Stop Killing Games campaign, which has collected over 1.3 million signatures — a level of public pressure that now has legal backing in at least one EU jurisdiction.",
+            "This is potentially the most consequential legal challenge yet to publishers' practice of fully deactivating paid games via server shutdown, with implications for the entire live-service industry."
+          ]
+        },
+        {
+          "title": "Call of Duty: Black Ops 7 appears to earn an estimated $30,000 on Steam per negative review",
+          "source": "Game Developer",
+          "url": "https://www.gamedeveloper.com/business/call-of-duty-black-ops-7-appears-to-earn-an-estimated-30-000-on-steam-per-negative-review",
+          "takeaways": [
+            "Analysis suggests Black Ops 7 is generating roughly $30,000 in Steam revenue for every negative review it receives — a striking illustration of how review-bombing correlates inversely with sales velocity while the absolute numbers still skew enormous.",
+            "The data point reframes how to read review scores for mega-franchises: a 'Mixed' rating on a Call of Duty title means something very different commercially than the same rating on an indie game.",
+            "For smaller studios watching this, the takeaway is that brand inertia absorbs review punishment in ways that simply don't apply outside the top tier of established IPs."
+          ]
+        },
+        {
+          "title": "Goat Simulator maker Coffee Stain shutters Malmo studio",
+          "source": "Game Developer",
+          "url": "https://www.gamedeveloper.com/business/goat-simulator-maker-coffee-stain-shutters-malmo-studio",
+          "takeaways": [
+            "Coffee Stain has closed its Malmo location, affecting 17 employees — a smaller-scale closure but notable given the studio's profile as the publisher behind Goat Simulator and Satisfactory.",
+            "The closure continues a pattern of mid-tier publishers consolidating satellite offices even when their flagship titles are performing well.",
+            "17 experienced developers hitting the market is worth watching for studios actively hiring in the Nordics."
+          ]
+        },
+        {
+          "title": "'More time innovating; less time writing code:' Arc Raiders publisher Nexon believes AI will liberate its workforce",
+          "source": "Game Developer",
+          "url": "https://www.gamedeveloper.com/business/more-time-innovating-less-time-writing-code-arc-raiders-publisher-nexon-believes-ai-will-liberate-its-workforce",
+          "takeaways": [
+            "Nexon has publicly framed AI adoption as workforce liberation rather than reduction, positioning automation as a creativity multiplier — a narrative that is becoming standard corporate language around AI-driven headcount decisions.",
+            "The statement comes alongside reports of project cancellations, which complicates the 'liberation' framing and raises questions about whether AI is expanding capacity or justifying cuts.",
+            "Worth tracking as a bellwether: Nexon is one of the larger publishers to put this stance on the record, and how their workforce evolves over the next 12-18 months will either validate or undermine the argument."
+          ]
+        },
+        {
+          "title": "US Patent Office rejects Nintendo's 'summon subcharacter and let it fight' patent",
+          "source": "GamesIndustry.biz",
+          "url": "https://www.gamesindustry.biz/us-patent-office-rejects-nintendos-summon-subcharacter-and-let-it-fight-patent",
+          "takeaways": [
+            "The US Patent Office has rejected Nintendo's attempt to patent a mechanic broadly covering summoning a companion character to fight on the player's behalf — a move that would have had wide chilling effects on the genre.",
+            "The rejection signals that the USPTO is applying meaningful prior art scrutiny to broad gameplay mechanic patents, which is a modest but meaningful win for the indie developer community.",
+            "Nintendo's aggressive patent strategy in recent years has been a source of concern; this outcome doesn't stop the behavior but does show the system can push back."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Engines & Tools",
+      "articles": [
+        {
+          "title": "Maintenance release: Godot 4.6.2",
+          "source": "Godot Engine",
+          "url": "https://godotengine.org/article/maintenance-release-godot-4-6-2/",
+          "takeaways": [
+            "Godot 4.6.2 is out as a stability and bug-fix maintenance release — no new features, purely hardening the 4.6 branch for production use.",
+            "Recommended update for any team currently shipping on 4.6; maintenance releases in Godot's cadence are generally low-risk drops with targeted regression fixes.",
+            "The continued rapid cadence of Godot maintenance releases reflects the health of its contributor ecosystem and is a meaningful differentiator vs. slower-moving commercial engines."
+          ]
+        },
+        {
+          "title": "Streamline Your Workflow With Radial Pie Menu For UE5",
+          "source": "80 Level",
+          "url": "https://80.lv/articles/streamline-your-workflow-with-radial-pie-menu-for-ue5/",
+          "takeaways": [
+            "A new UE5 plugin brings a radial pie menu to the editor, allowing teams to bind frequently used actions, assets, or tool shortcuts to a context-sensitive wheel — reducing reliance on deep menu hierarchies.",
+            "This kind of UX improvement is particularly impactful for artists and level designers doing high-repetition tasks; the context-sensitivity means the same shortcut gesture can surface different options depending on what's selected.",
+            "Worth evaluating for any UE5 team doing heavy editor work — small workflow friction reductions compound significantly across a full production."
+          ]
+        },
+        {
+          "title": "PlayCanvas Can Now Load Gracia's 4D Gaussian Splats",
+          "source": "80 Level",
+          "url": "https://80.lv/articles/playcanvas-can-now-load-gracia-s-4d-gaussian-splats/",
+          "takeaways": [
+            "PlayCanvas has added support for Gracia's 4D Gaussian Splats — essentially volumetric video captured with Gaussian splatting that includes a time dimension, enabling playback of real-world motion in browser-based 3D.",
+            "This is a technically significant milestone: photorealistic volumetric video in a browser without plugins, which opens doors for web-based virtual production previsualization, interactive experiences, and marketing content.",
+            "Gaussian splatting continues to move fast as a production-ready format; its arrival in a WebGL engine is a strong signal that the toolchain is maturing beyond research demos."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Techniques & Learning",
+      "articles": [
+        {
+          "title": "Building For the Stars: Procedural Worlds, Economy, and Player Systems",
+          "source": "80 Level",
+          "url": "https://80.lv/articles/building-for-the-stars-procedural-worlds-economy-and-player-systems/",
+          "takeaways": [
+            "A deep-dive into designing procedural world generation alongside interconnected economy and player progression systems in UE5, covering how these systems must be co-designed to avoid exploits and dead-end states.",
+            "The article addresses one of the hardest problems in open-world design: ensuring that procedurally generated content feels authored rather than random, particularly when player-driven economies can expose unintended equilibria.",
+            "Practically useful for any team building systemic or sandbox games — the design patterns discussed around seeding, weighting, and feedback loops are transferable across engines."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Community Highlights",
+      "articles": [
+        {
+          "title": "Limit Break's mentorship program for under-represented groups returns for 2026",
+          "source": "GamesIndustry.biz",
+          "url": "https://www.gamesindustry.biz/limit-breaks-mentorship-program-for-under-represented-groups-returns-for-2026",
+          "takeaways": [
+            "Limit Break's structured mentorship program, pairing industry professionals with candidates from under-represented backgrounds, is back for its 2026 cohort and accepting applications.",
+            "The program is notably practical — mentees are matched with working developers at real studios rather than receiving generic career advice, making it one of the more substantive initiatives in this space.",
+            "Studios looking to build diverse pipelines should be aware of this as both a resource to point candidates toward and a potential avenue to get involved as mentors."
+          ]
+        }
+      ]
+    }
+  ]
+}

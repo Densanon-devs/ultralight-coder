@@ -1,0 +1,187 @@
+{
+  "fetched_at": "2026-04-02T13:53:43.539027+00:00",
+  "article_count": 20,
+  "total_new": 84,
+  "articles": [
+    {
+      "title": "Ubuntu Linux raises minimum system memory requirements by 50% — requirements bumped to 6GB of RAM, previously raised from 1GB to 4GB in 2018",
+      "url": "https://www.tomshardware.com/software/operating-systems/ubunto-linux-raises-minimum-system-requirements-to-6gb-of-ram-it-was-previously-raised-from-1gb-to-4gb-in-2018",
+      "summary": "The release notes for Ubuntu 26.04 LTS show that Canonical has quietly raised the minimum RAM requirement for its popular Linux-based operating system by 50%.",
+      "source_name": "Tom's Hardware",
+      "category": "hardware",
+      "published": "2026-04-02T13:15:23+00:00",
+      "fetched_at": "2026-04-02T13:53:21.969882+00:00"
+    },
+    {
+      "title": "1Hz laptop display reportedly helps deliver outstanding 43-hour battery life on the XPS 14 during web browser use — beats the M5 MacBook Air by more than 28 hours in the same test",
+      "url": "https://www.tomshardware.com/laptops/1hz-laptop-display-reportedly-helps-deliver-outstanding-43-hour-battery-life-on-the-xps-14-during-web-browser-use-beats-the-m5-macbook-air-by-more-than-28-hours-in-the-same-test",
+      "summary": "The Dell XPS 14 achieved battery life that's nearly three times as long as the M5 MacBook Air thanks to its 120Hz VRR display that can go as low as 1Hz.",
+      "source_name": "Tom's Hardware",
+      "category": "hardware",
+      "published": "2026-04-02T12:54:28+00:00",
+      "fetched_at": "2026-04-02T13:53:21.969882+00:00"
+    },
+    {
+      "title": "GameStop NVMe SSD 2TB SSD Review: A surprisingly capable budget drive for the PS5",
+      "url": "https://www.tomshardware.com/pc-components/ssds/gamestop-nvme-ssd-2tb-ssd-review",
+      "summary": "The GameStop NVMe SSD is a decent gamer-oriented drive with good performance and a nice heatsink at a reasonable price. SMI and Samsung hardware come together for a compelling package.",
+      "source_name": "Tom's Hardware",
+      "category": "hardware",
+      "published": "2026-04-02T12:00:00+00:00",
+      "fetched_at": "2026-04-02T13:53:21.969882+00:00"
+    },
+    {
+      "title": "Save a massive $950 on this epic Alienware Area-51 gaming PC with an RTX 5090 and 9950X3D — grab this liquid-cooled 4K gaming powerhouse with 32GB DDR5 and a 2TB SSD for just $5,299 while you can",
+      "url": "https://www.tomshardware.com/desktops/gaming-pcs/save-a-massive-usd950-on-this-epic-alienware-area-51-gaming-pc-with-an-rtx-5090-and-9950x3d-grab-this-liquid-cooled-4k-gaming-powerhouse-with-32gb-ddr5-and-a-2tb-ssd-for-just-usd5-299-while-you-can",
+      "summary": "Grab this Alienware Area-51 gaming PC with performance that few can rival. It's on sale with a huge $950 discount right now, shipping with an RTX 5090, AMD Ryzen 9 9950X3D, 32GB of RAM, and a 2TB SSD, all for only $5,299.99",
+      "source_name": "Tom's Hardware",
+      "category": "hardware",
+      "published": "2026-04-02T11:56:31+00:00",
+      "fetched_at": "2026-04-02T13:53:21.969882+00:00"
+    },
+    {
+      "title": "Amazing $490 Newegg combo includes an AMD Ryzen 5 9600X CPU, 16GB of G.Skill DDR5-6000 RAM, MSI Pro B850-S motherboard, and 240mm MSI MAG Coreliquid A13 AIO CPU cooler — all for under $500",
+      "url": "https://www.tomshardware.com/pc-components/amazing-usd490-newegg-combo-includes-an-amd-ryzen-5-9600x-cpu-16gb-of-g-skill-ddr5-6000-ram-msi-pro-b850-s-motherboard-and-240mm-msi-mag-coreliquid-a13-aio-cpu-cooler-all-for-under-usd500",
+      "summary": "Grab the core components of a new AM5 PC build for under $500. Newegg combo bundle includes a CPU, motherboard, RAM, and AIO CPU cooler.",
+      "source_name": "Tom's Hardware",
+      "category": "hardware",
+      "published": "2026-04-02T11:02:27+00:00",
+      "fetched_at": "2026-04-02T13:53:21.969882+00:00"
+    },
+    {
+      "title": "Modders use jumper wires and a custom BIOS to save a damaged RTX 4090 from the trash — resurrected Nvidia gaming GPU loses 4GB of VRAM to overcome terminal PCB sagging",
+      "url": "https://www.tomshardware.com/pc-components/gpus/modders-use-jumper-wires-and-a-custom-bios-to-save-a-damaged-rtx-4090-from-the-trash-resurrected-nvidia-gaming-gpu-loses-4gb-of-vram-to-overcome-terminal-pcb-sagging",
+      "summary": "A YouTuber resurrects a damaged RTX 4090 with a bent PCB, using a custom BIOS to disable one of its memory channels, reducing its VRAM to 20GB but stabilizing it in the process.",
+      "source_name": "Tom's Hardware",
+      "category": "hardware",
+      "published": "2026-04-02T11:00:00+00:00",
+      "fetched_at": "2026-04-02T13:53:21.969882+00:00"
+    },
+    {
+      "title": "Intel buys back 49% stake in Ireland Fab Joint Venture — takes full control over Fab 34",
+      "url": "https://www.tomshardware.com/tech-industry/semiconductors/intel-buys-back-49-percent-stake-in-ireland-fab-jv-gains-full-control-over-fab-34",
+      "summary": "In a mutually beneficial deal, Intel repurchases 49% of Fab 34 from Apollo for $14.2 billion, reducing pressure on its margins, but paying a hefty $3 billion premium to the financial company.",
+      "source_name": "Tom's Hardware",
+      "category": "hardware",
+      "published": "2026-04-02T10:40:00+00:00",
+      "fetched_at": "2026-04-02T13:53:21.970882+00:00"
+    },
+    {
+      "title": "Why Nvidia just poured $2 billion into AI ASIC competitor Marvell — NVLink Fusion turns into soft ecosystem lock-in",
+      "url": "https://www.tomshardware.com/tech-industry/nvidia-invests-2-billion-in-marvell-whose-biggest-clients-are-trying-to-replace-nvidia-chips",
+      "summary": "Nvidia has announced that it has invested $2 billion in Marvell and entered a partnership through NVLink Fusion.",
+      "source_name": "Tom's Hardware",
+      "category": "hardware",
+      "published": "2026-04-02T10:30:00+00:00",
+      "fetched_at": "2026-04-02T13:53:21.970882+00:00"
+    },
+    {
+      "title": "Global semiconductor foundry market hit a record $320 billion in 2025 as TSMC pulled further ahead",
+      "url": "https://www.tomshardware.com/tech-industry/global-semiconductor-foundry-market-hit-a-record-320-billion-in-2025",
+      "summary": "The global semiconductor foundry market generated a record $320 billion in revenue in 2025, growing 16% year-over-year, according to Counterpoint Research's Foundry Market Supply Tracker.",
+      "source_name": "Tom's Hardware",
+      "category": "hardware",
+      "published": "2026-04-02T10:20:00+00:00",
+      "fetched_at": "2026-04-02T13:53:21.970882+00:00"
+    },
+    {
+      "title": "Raspberry Pi flagship 500+ model now costs almost as much as a Mac Mini — firm Pi launches 3GB model to fight increasing DRAM prices",
+      "url": "https://www.tomshardware.com/raspberry-pi/raspberry-pi-launches-3gb-model-to-fight-increasing-dram-prices-flagship-500-model-now-costs-almost-as-much-as-a-mac-mini",
+      "summary": "Raspberry Pi prices for various models have increased yet again, with the flagship 500+ 16GB model increasing by nearly 50% thanks to the DRAM shortage.",
+      "source_name": "Tom's Hardware",
+      "category": "hardware",
+      "published": "2026-04-02T10:00:00+00:00",
+      "fetched_at": "2026-04-02T13:53:21.970882+00:00"
+    },
+    {
+      "title": "IBM Collaborating With Arm For Dual-Architecture Hardware",
+      "url": "https://www.phoronix.com/news/IBM-Dual-Architecture-Hardware",
+      "summary": "IBM announced today a strategic collaboration with Arm around new dual-architecture hardware...",
+      "source_name": "Phoronix",
+      "category": "hardware",
+      "published": "2026-04-02T12:30:00+00:00",
+      "fetched_at": "2026-04-02T13:53:22.920124+00:00"
+    },
+    {
+      "title": "CentOS Launches Accelerated Infrastructure Enablement For Driving NVIDIA AI Factories",
+      "url": "https://www.phoronix.com/news/CentOS-AIE-SIG-NVIDIA-AI",
+      "summary": "The CentOS project has established the Accelerated Infrastructure Enablement \"AIE\" special interest group with a focus on providing a \"fast lane\" for \"in-flight\" patches. This CentOS AIE SIG is particularly focused on carrying the code needed for enabling NVIDIA AI factories...",
+      "source_name": "Phoronix",
+      "category": "hardware",
+      "published": "2026-04-02T12:25:31+00:00",
+      "fetched_at": "2026-04-02T13:53:22.920124+00:00"
+    },
+    {
+      "title": "Proposed Wine Code Uses Zink For OpenGL-On-Vulkan By Default",
+      "url": "https://www.phoronix.com/news/Wine-MR-Zink-By-Default",
+      "summary": "A CodeWeavers engineer opened a merge request yesterday for Wine to use Mesa's Zink OpenGL-on-Vulkan driver by default. This would build Zink as a Windows Portable Executable (PE) for allowing OpenGL to go straight to the Vulkan API with the host Vulkan drivers...",
+      "source_name": "Phoronix",
+      "category": "hardware",
+      "published": "2026-04-02T10:13:00+00:00",
+      "fetched_at": "2026-04-02T13:53:22.920124+00:00"
+    },
+    {
+      "title": "KTransformers Adds AVX2 MoE Support For Viable Performance On CPUs Without AMX/AVX-512",
+      "url": "https://www.phoronix.com/news/KTransformers-0.5.3",
+      "summary": "KTransformers 0.5.3 released today for this framework for efficient inferencing and fine-tuning of large language models (LLMs) with a focus on CPU-GPU heterogeneous computing. With this release, KTransformers 0.5.3 is now more applicable for CPUs lacking Advanced Matrix Extensions (AMX) and AVX-512...",
+      "source_name": "Phoronix",
+      "category": "hardware",
+      "published": "2026-04-02T10:01:56+00:00",
+      "fetched_at": "2026-04-02T13:53:22.920124+00:00"
+    },
+    {
+      "title": "Libinput Hit By Worrying Security Issues With Its Lua Plug-In System",
+      "url": "https://www.phoronix.com/news/Libinput-Lua-Security-Issues",
+      "summary": "Libinput devised a Lua-based plug-in system for modifying devices/events. The Lua plug-in support was introduced last year with libinput 1.30 but unfortunately some security issues have now come to light with the implementation...",
+      "source_name": "Phoronix",
+      "category": "hardware",
+      "published": "2026-04-02T04:00:00+00:00",
+      "fetched_at": "2026-04-02T13:53:22.920124+00:00"
+    },
+    {
+      "title": "Steam On Linux Use Skyrocketed In March - More Than Double The macOS Gaming Marketshare",
+      "url": "https://www.phoronix.com/news/Steam-On-Linux-Tops-5p",
+      "summary": "If Valve's latest Steam Survey monthly figures are accurate, Steam on Linux enjoyed a very wild month of March. Steam on Linux is now above the 5% threshold and more than twice the size of the Steam on macOS marketshare...",
+      "source_name": "Phoronix",
+      "category": "hardware",
+      "published": "2026-04-02T00:44:05+00:00",
+      "fetched_at": "2026-04-02T13:53:22.920124+00:00"
+    },
+    {
+      "title": "AMD GPU Driver Sees DC Idle Manager & Multi-SDMA Engine Optimization For Linux 7.1",
+      "url": "https://www.phoronix.com/news/AMDGPU-Linux-7.1-Multi-SDMA",
+      "summary": "With Linux 7.0-rc6 having released on Sunday, we are hitting the point of the cut-off of new feature material being allowed into the Direct Rendering Manager's DRM-Next tree of queuing new graphics/display/accelerator feature code ahead of the upcoming Linux 7.1 merge window. As presumably the last ...",
+      "source_name": "Phoronix",
+      "category": "hardware",
+      "published": "2026-04-02T00:31:00+00:00",
+      "fetched_at": "2026-04-02T13:53:22.920124+00:00"
+    },
+    {
+      "title": "Fedora Rejects Proposal To Use systemd For Managing Per-User Environment Variables",
+      "url": "https://www.phoronix.com/news/Fedora-Rejects-systemd-Feature",
+      "summary": "The Fedora Engineering and Steering Committee \"FESCo\" this week rejected a change proposal for Fedora 45 that would use systemd's environment generator functionality for managing per-user environment variables...",
+      "source_name": "Phoronix",
+      "category": "hardware",
+      "published": "2026-04-01T20:24:26+00:00",
+      "fetched_at": "2026-04-02T13:53:22.920124+00:00"
+    },
+    {
+      "title": "NVIDIA Provides Preview Driver With DRM Color Pipeline API Support",
+      "url": "https://www.phoronix.com/news/NVIDIA-Preview-DRM-Color-Pipe",
+      "summary": "Following the DRM Color Pipeline API making it into the Linux 6.19 kernel, NVIDIA today released a preview Linux driver with their support for the DRM per-plane color pipeline API that will benefit the broader Linux/Wayland desktop HDR ambitions...",
+      "source_name": "Phoronix",
+      "category": "hardware",
+      "published": "2026-04-01T19:56:22+00:00",
+      "fetched_at": "2026-04-02T13:53:22.920124+00:00"
+    },
+    {
+      "title": "Cloudflare Announces EmDash As Open-Source \"Spiritual Successor\" To WordPress",
+      "url": "https://www.phoronix.com/news/Cloudflare-EmDash",
+      "summary": "Cloudflare continues to be full of open-source surprises. Today Cloudflare announced EmDash as an open-source \"spiritual successor\" to WordPress with an emphasis on better security...",
+      "source_name": "Phoronix",
+      "category": "hardware",
+      "published": "2026-04-01T16:32:40+00:00",
+      "fetched_at": "2026-04-02T13:53:22.920124+00:00"
+    }
+  ]
+}

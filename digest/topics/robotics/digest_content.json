@@ -1,0 +1,125 @@
+{
+  "highlights_intro": "Today's digest spans living biorobots, foundation model benchmarks on real hardware, and the growing role of gig workers in humanoid training pipelines — while the real world catches up with AI-powered umpires in MLB and a candid look at why takeout packing remains a surprisingly hard robotics problem.",
+  "sections": [
+    {
+      "name": "Research & Papers",
+      "articles": [
+        {
+          "title": "Generalizable Dense Reward for Long-Horizon Robotic Tasks",
+          "source": "ArXiv cs.RO",
+          "url": "https://arxiv.org/search/?searchtype=all&query=Generalizable+Dense+Reward+Long-Horizon+Robotic",
+          "takeaways": [
+            "Proposes a reward-shaping framework that generalizes across diverse long-horizon manipulation tasks without task-specific tuning.",
+            "Dense reward signals guide policy learning through intermediate steps, directly attacking the sparse-reward bottleneck that stalls complex task chaining.",
+            "Results show meaningful gains over RL baselines on multi-step benchmarks without requiring manual reward engineering per task."
+          ]
+        },
+        {
+          "title": "Advancing Multi-Robot Networks via MLLM-Driven Sensing, Communication, and Computation",
+          "source": "ArXiv cs.RO",
+          "url": "https://arxiv.org/search/?searchtype=all&query=MLLM+Multi-Robot+Networks+Sensing+Communication+Computation",
+          "takeaways": [
+            "Comprehensive survey mapping how multimodal LLMs are being integrated into multi-robot coordination pipelines across sensing, comms, and compute layers.",
+            "Identifies bandwidth and distributed inference as the two sharpest near-term constraints for real-world swarm deployments.",
+            "Useful orientation for teams building collaborative or swarm systems who need to select the right MLLM architecture for their bottleneck."
+          ]
+        },
+        {
+          "title": "Back to school: robots learn from factory workers",
+          "source": "Robohub",
+          "url": "https://robohub.org",
+          "takeaways": [
+            "RoboTwin startup is deploying learn-by-demonstration directly on real factory floors, capturing worker motions rather than relying on synthetic data.",
+            "The approach sidesteps the sim-to-real gap by grounding training in authentic human task execution in the target environment.",
+            "Early results suggest faster task acquisition and better generalization to production variability compared to purely simulated training regimes."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Product & Industry",
+      "articles": [
+        {
+          "title": "Scientists Build Living Robots With Nervous Systems",
+          "source": "IEEE Spectrum",
+          "url": "https://spectrum.ieee.org",
+          "takeaways": [
+            "Engineers are constructing robots from biological neural and structural components rather than mimicking life in silicon — a fundamental departure from conventional robotics.",
+            "Living nervous systems offer adaptive, low-power sensing and actuation that conventional electronics cannot replicate at small scales.",
+            "The work raises immediate questions about bioethics, longevity, and maintenance that the field will need to confront as the technology moves beyond the lab."
+          ]
+        },
+        {
+          "title": "PhAIL ranks top robotics foundation models on real hardware",
+          "source": "The Robot Report",
+          "url": "https://www.therobotreport.com",
+          "takeaways": [
+            "PhAIL is a new benchmark that evaluates robotics foundation models on physical hardware rather than simulation, closing a major evaluation credibility gap.",
+            "Rankings reveal significant divergence between sim performance and real-world capability across leading models — the leaderboard reshuffles substantially.",
+            "Gives practitioners a principled basis for model selection when deploying foundation models to production robot systems."
+          ]
+        },
+        {
+          "title": "Agile Robots closes acquisition of thyssenkrupp Automation Engineering",
+          "source": "Robotics & Automation News",
+          "url": "https://roboticsandautomationnews.com",
+          "takeaways": [
+            "Agile Robots gains deep industrial automation engineering expertise and an established customer base through the thyssenkrupp unit acquisition.",
+            "The deal accelerates Agile's push into AI-powered industrial robotics at the moment humanoid and mobile manipulation are converging with factory automation.",
+            "Consolidation signal: well-capitalized AI-robotics firms are absorbing legacy automation engineering shops to compress time-to-market on industrial deployments."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tools & Practical",
+      "articles": [
+        {
+          "title": "Deploying DeepMind's MuJoCo on Azure, Part 2: Microsoft Heard Us",
+          "source": "Hacker News",
+          "url": "https://news.ycombinator.com",
+          "takeaways": [
+            "Part 2 documents Microsoft's direct response to community feedback, resulting in meaningfully improved MuJoCo deployment support on Azure cloud infrastructure.",
+            "Covers practical configuration for GPU-accelerated physics simulation in the cloud — directly useful for teams without on-prem hardware.",
+            "A useful case study showing that organized community feedback can move commercial cloud providers on developer tooling decisions."
+          ]
+        },
+        {
+          "title": "Atombite.ai Deep Dive: Building a Takeout Packing Robot Is Harder Than You Think",
+          "source": "Hacker News",
+          "url": "https://news.ycombinator.com",
+          "takeaways": [
+            "Candid engineering post-mortem: irregular containers, sauce smear, and unpredictable item geometry defeat naive pick-and-place approaches in food packing.",
+            "The team details perception pipeline failures and the surprising difficulty of achieving consistent seal quality across bag types at production speed.",
+            "Valuable ground-truth counterweight to kitchen robotics hype — the gap between a clean demo and reliable deployment remains substantial."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Community Highlights",
+      "articles": [
+        {
+          "title": "The gig workers who are training humanoid robots at home",
+          "source": "Hacker News / MIT Technology Review",
+          "url": "https://news.ycombinator.com",
+          "takeaways": [
+            "A growing remote gig labor market is generating teleoperation and demonstration data for humanoid robot training — often with workers unaware of how the data is used downstream.",
+            "MIT Tech Review surfaces consent and compensation questions: workers earn little while their physical motions directly shape the behaviors of next-generation robots.",
+            "Connects to broader debates about data supply chains and who captures value when skilled human movement is converted into training sets."
+          ]
+        },
+        {
+          "title": "Robot Umpires Have Arrived — and They're Making Baseball Players Shrink",
+          "source": "Hacker News / WSJ",
+          "url": "https://news.ycombinator.com",
+          "takeaways": [
+            "MLB's automated ball-strike system is live and measurably changing player behavior: batters are shrinking their strike zones in response to the umpire's precision and consistency.",
+            "The system's consistency exposes how much human umpires historically varied — and how batters had learned to exploit that variance to their advantage.",
+            "A high-visibility public case study of AI displacing a skilled human judgment role in a competitive, high-stakes environment with immediate measurable effects."
+          ]
+        }
+      ]
+    }
+  ]
+}

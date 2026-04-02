@@ -1,0 +1,120 @@
+{
+  "highlights_intro": "Intel doubles down on domestic fab capacity while Nvidia bets billions on a Marvell-anchored NVLink ecosystem — semiconductor independence strategies are reshaping the industry as the global foundry market hits a record $320B. Meanwhile, Linux gaming crosses a new threshold and LLM inference lands on older CPUs without AMX.",
+  "sections": [
+    {
+      "name": "Hardware & Chips",
+      "articles": [
+        {
+          "title": "Intel buys back 49% stake in Ireland Fab Joint Venture",
+          "source": "Tom's Hardware",
+          "url": "https://www.tomshardware.com/",
+          "takeaways": [
+            "Intel is paying $14.2B to reclaim full ownership of Fab 34 in Leixlip, Ireland — the joint venture it had partially sold to Apollo to shore up its balance sheet.",
+            "Regaining full control signals Intel's commitment to its IDM 2.0 strategy and its ambition to compete as a foundry, not just a chip designer.",
+            "The move comes as TSMC pulls further ahead in process leadership, making Intel's ownership of its own leading-edge fabs a strategic necessity rather than a luxury."
+          ]
+        },
+        {
+          "title": "Why Nvidia just poured $2 billion into AI ASIC competitor Marvell",
+          "source": "Tom's Hardware",
+          "url": "https://www.tomshardware.com/",
+          "takeaways": [
+            "Nvidia's $2B investment in Marvell is primarily about NVLink Fusion — locking custom ASIC designs from hyperscalers into Nvidia's interconnect ecosystem rather than competing fabrics.",
+            "By making Marvell a preferred NVLink Fusion partner, Nvidia ensures its networking stack remains central even as Google, Amazon, and Microsoft build their own AI silicon.",
+            "This is an ecosystem play: Nvidia trades some competitive ground in chip design for a stronger stranglehold on the interconnect layer that ties AI clusters together."
+          ]
+        },
+        {
+          "title": "Global semiconductor foundry market hit a record $320 billion in 2025",
+          "source": "Tom's Hardware",
+          "url": "https://www.tomshardware.com/",
+          "takeaways": [
+            "The global foundry market reached $320B in 2025, driven primarily by AI accelerator demand — a new all-time high that underscores how central chip manufacturing has become to the global economy.",
+            "TSMC widened its lead over Samsung and SMIC, with its share of advanced-node revenue growing disproportionately as AI customers cluster at 3nm and below.",
+            "The record sets a high baseline for 2026, with continued AI capex from hyperscalers expected to sustain demand even as consumer electronics remains soft."
+          ]
+        },
+        {
+          "title": "1Hz laptop display reportedly helps deliver outstanding 43-hour battery life on the XPS 14",
+          "source": "Tom's Hardware",
+          "url": "https://www.tomshardware.com/",
+          "takeaways": [
+            "Dell's XPS 14 reportedly achieved 43-hour battery life in testing — beating the M5 MacBook Air by roughly 28 hours — with a 1Hz panel refresh rate as a key contributing factor.",
+            "Ultra-low-refresh-rate displays are emerging as a serious battery lever on x86 laptops, a technique Apple pioneered on iPhone and now spreading to the PC ecosystem.",
+            "If validated broadly, 1Hz idle refresh rates could become a standard feature on productivity-class Windows laptops competing on battery longevity against Apple Silicon."
+          ]
+        },
+        {
+          "title": "Modders use jumper wires and a custom BIOS to save a damaged RTX 4090 from the trash",
+          "source": "Tom's Hardware",
+          "url": "https://www.tomshardware.com/",
+          "takeaways": [
+            "A team of modders recovered a dead RTX 4090 by bridging damaged PCB traces with jumper wires and flashing a patched BIOS — restoring a $1,500+ card that would otherwise be e-waste.",
+            "The repair required detailed knowledge of the AD102 GPU's power delivery and initialization sequence, showcasing the depth of community-driven hardware reverse engineering.",
+            "With high-end GPU prices elevated, repair techniques like this have practical value — and the documentation produced by the modding community benefits future repair attempts."
+          ]
+        },
+        {
+          "title": "Steam On Linux Use Skyrocketed In March - More Than Double The macOS Gaming Marketshare",
+          "source": "Phoronix",
+          "url": "https://www.phoronix.com/",
+          "takeaways": [
+            "Linux's share of Steam gaming sessions surpassed 5% in March 2026, more than double macOS's share — a milestone that reflects years of Proton compatibility improvements.",
+            "The spike is partially attributed to Steam Deck adoption and growing interest in gaming-oriented Linux distros like Bazzite and ChimeraOS.",
+            "Crossing 5% puts Linux on the radar for game developers and anti-cheat vendors, potentially accelerating native Linux support and kernel-level anti-cheat compatibility work."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Research & Papers",
+      "articles": [
+        {
+          "title": "KTransformers Adds AVX2 MoE Support For Viable Performance On CPUs Without AMX/AVX-512",
+          "source": "Phoronix",
+          "url": "https://www.phoronix.com/",
+          "takeaways": [
+            "KTransformers now supports AVX2-based Mixture-of-Experts inference, bringing viable LLM performance to CPUs that lack AMX or AVX-512 — broadening the range of hardware that can run large models locally.",
+            "AVX2 is present on virtually every x86 CPU shipped since 2013, meaning this unlocks local inference for a massive installed base of older workstations and consumer desktops.",
+            "The performance gap vs. AMX/AVX-512 remains significant, but for smaller MoE models the tradeoff may be acceptable for users who cannot afford or access newer hardware."
+          ]
+        },
+        {
+          "title": "IBM Collaborating With Arm For Dual-Architecture Hardware",
+          "source": "Phoronix",
+          "url": "https://www.phoronix.com/",
+          "takeaways": [
+            "IBM and Arm are jointly developing hardware that blends IBM's POWER architecture with Arm cores — a dual-architecture approach aimed at enterprise and HPC workloads.",
+            "The collaboration could enable POWER's strong RAS (reliability, availability, serviceability) features alongside Arm's power efficiency and ecosystem breadth in a single system.",
+            "For enterprise customers running mixed workloads, a hybrid POWER/Arm platform could simplify infrastructure by consolidating what today requires separate server families."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Industry & HPC",
+      "articles": [
+        {
+          "title": "Raspberry Pi flagship 500+ model now costs almost as much as a Mac Mini",
+          "source": "Tom's Hardware",
+          "url": "https://www.tomshardware.com/",
+          "takeaways": [
+            "Ongoing DRAM shortages are pushing Raspberry Pi's top-tier models toward Mac Mini pricing territory, eroding the budget single-board-computer value proposition that made the platform iconic.",
+            "The Pi 500+ targets the desktop replacement segment, but at near-Mac-Mini prices it competes against Apple Silicon's dramatically superior performance-per-dollar.",
+            "For embedded and IoT use cases, the price creep is accelerating evaluation of alternatives like Milk-V, Orange Pi, and RISC-V boards that aren't as exposed to LPDDR cost spikes."
+          ]
+        },
+        {
+          "title": "Ubuntu Linux raises minimum system memory requirements by 50%",
+          "source": "Tom's Hardware",
+          "url": "https://www.tomshardware.com/",
+          "takeaways": [
+            "Ubuntu 26.04 LTS now requires a minimum of 6GB RAM, up from 4GB — a 50% increase that reflects the growing memory footprint of modern desktop environments and system services.",
+            "The change affects users considering Ubuntu for older hardware revitalization, where lightweight distros (Lubuntu, Xubuntu) remain the practical choice.",
+            "Canonical's decision signals that Ubuntu is optimizing for the mainstream modern PC experience rather than legacy hardware support, a deliberate trade-off as GNOME's baseline resource demands grow."
+          ]
+        }
+      ]
+    }
+  ]
+}

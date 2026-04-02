@@ -1,0 +1,187 @@
+{
+  "fetched_at": "2026-04-02T13:54:06.252724+00:00",
+  "article_count": 20,
+  "total_new": 38,
+  "articles": [
+    {
+      "title": "Scientists Build Living Robots With Nervous Systems",
+      "url": "https://spectrum.ieee.org/neurobot-living-robot-nervous-system",
+      "summary": "Engineers have long tried to mimic life. They’ve built machine-learning algorithms modeled after the human brain , designed machines that walk like dogs or fly like insects , and taught robots to adapt, however clumsily , to the world around them. Now they are skipping imitation altogether. Instead ...",
+      "source_name": "IEEE Spectrum Robotics",
+      "category": "industry",
+      "published": "2026-04-02T13:00:01+00:00",
+      "fetched_at": "2026-04-02T13:53:52.456950+00:00"
+    },
+    {
+      "title": "PickNik Robotics gives MoveIt Pro 9.0 enhanced perception-to-motion, teleop capabilities",
+      "url": "https://www.therobotreport.com/picknik-robotics-says-moveit-pro-9-0-enhanced-perception-to-motion-teleop-capabilities/",
+      "summary": "MoveIt Pro 9.0 strengthens workflows for commercial cleaning, sanitation, and vehicle-washing robots, says PickNik. The post PickNik Robotics gives MoveIt Pro 9.0 enhanced perception-to-motion, teleop capabilities appeared first on The Robot Report .",
+      "source_name": "The Robot Report",
+      "category": "industry",
+      "published": "2026-04-02T13:00:36+00:00",
+      "fetched_at": "2026-04-02T13:53:53.002453+00:00"
+    },
+    {
+      "title": "Top 10 robotics developments of March 2026",
+      "url": "https://www.therobotreport.com/top-10-robotics-developments-march-2026/",
+      "summary": "Smart Factory & Automation World and NVIDIA GTC both brought an avalanche of new robotics and AI news in March 2026. The post Top 10 robotics developments of March 2026 appeared first on The Robot Report .",
+      "source_name": "The Robot Report",
+      "category": "industry",
+      "published": "2026-04-01T17:27:55+00:00",
+      "fetched_at": "2026-04-02T13:53:53.002453+00:00"
+    },
+    {
+      "title": "PhAIL ranks top robotics foundation models on real hardware",
+      "url": "https://www.therobotreport.com/phail-ranks-robotics-foundation-models-real-hardware/",
+      "summary": "Positronic Robotics has launched PhAIL, a benchmark evaluating physical AI models on commercial tasks using throughput and reliability metrics. The post PhAIL ranks top robotics foundation models on real hardware appeared first on The Robot Report .",
+      "source_name": "The Robot Report",
+      "category": "industry",
+      "published": "2026-04-01T15:09:53+00:00",
+      "fetched_at": "2026-04-02T13:53:53.002453+00:00"
+    },
+    {
+      "title": "Generalizable Dense Reward for Long-Horizon Robotic Tasks",
+      "url": "https://arxiv.org/abs/2604.00055",
+      "summary": "arXiv:2604.00055v1 Announce Type: new Abstract: Existing robotic foundation policies are trained primarily via large-scale imitation learning. While such models demonstrate strong capabilities, they often struggle with long-horizon tasks due to distribution shift and error accumulation. While reinfo...",
+      "source_name": "ArXiv cs.RO",
+      "category": "research",
+      "published": "2026-04-02T04:00:00+00:00",
+      "fetched_at": "2026-04-02T13:53:53.112628+00:00"
+    },
+    {
+      "title": "MRReP: Mixed Reality-based Hand-drawn Reference Path Editing Interface for Mobile Robot Navigation",
+      "url": "https://arxiv.org/abs/2604.00059",
+      "summary": "arXiv:2604.00059v1 Announce Type: new Abstract: Autonomous mobile robots operating in human-shared indoor environments often require paths that reflect human spatial intentions, such as avoiding interference with pedestrian flow or maintaining comfortable clearance. However, conventional path planne...",
+      "source_name": "ArXiv cs.RO",
+      "category": "research",
+      "published": "2026-04-02T04:00:00+00:00",
+      "fetched_at": "2026-04-02T13:53:53.112628+00:00"
+    },
+    {
+      "title": "Advancing Multi-Robot Networks via MLLM-Driven Sensing, Communication, and Computation: A Comprehensive Survey",
+      "url": "https://arxiv.org/abs/2604.00061",
+      "summary": "arXiv:2604.00061v1 Announce Type: new Abstract: Imagine advanced humanoid robots, powered by multimodal large language models (MLLMs), coordinating missions across industries like warehouse logistics, manufacturing, and safety rescue. While individual robots show local autonomy, realistic tasks dema...",
+      "source_name": "ArXiv cs.RO",
+      "category": "research",
+      "published": "2026-04-02T04:00:00+00:00",
+      "fetched_at": "2026-04-02T13:53:53.112628+00:00"
+    },
+    {
+      "title": "Long-Horizon Geometry-Aware Navigation among Polytopes via MILP-MPC and Minkowski-Based CBFs",
+      "url": "https://arxiv.org/abs/2604.00162",
+      "summary": "arXiv:2604.00162v1 Announce Type: new Abstract: Autonomous navigation in complex, non-convex environments remains challenging when robot dynamics, control limits, and exact robot geometry must all be taken into account. In this paper, we propose a hierarchical planning and control framework that bri...",
+      "source_name": "ArXiv cs.RO",
+      "category": "research",
+      "published": "2026-04-02T04:00:00+00:00",
+      "fetched_at": "2026-04-02T13:53:53.112628+00:00"
+    },
+    {
+      "title": "Neural-Assisted in-Motion Self-Heading Alignment",
+      "url": "https://arxiv.org/abs/2604.00168",
+      "summary": "arXiv:2604.00168v1 Announce Type: new Abstract: Autonomous platforms operating in the oceans require accurate navigation to successfully complete their mission. In this regard, the initial heading estimation accuracy and the time required to achieve it play a critical role. The initial heading is tr...",
+      "source_name": "ArXiv cs.RO",
+      "category": "research",
+      "published": "2026-04-02T04:00:00+00:00",
+      "fetched_at": "2026-04-02T13:53:53.113628+00:00"
+    },
+    {
+      "title": "Back to school: robots learn from factory workers",
+      "url": "https://robohub.org/back-to-school-robots-learn-from-factory-workers/",
+      "summary": "By Anthony King What if training a robot to handle dirty, dangerous work on the factory floor was as simple as showing it how? Czech startup RoboTwin is doing exactly that, helping factory workers teach robots new skills by demonstration. Instead of writing complex code, workers perform the job once...",
+      "source_name": "Robohub",
+      "category": "research",
+      "published": "2026-04-02T10:20:35+00:00",
+      "fetched_at": "2026-04-02T13:53:55.099994+00:00"
+    },
+    {
+      "title": "Why the World’s First Pure-Play RTLS Integrator, LocaXion, Chooses Redpoint When it Comes to Forklift Safety",
+      "url": "https://roboticsandautomationnews.com/2026/04/02/why-the-worlds-first-pure-play-rtls-integrator-locaxion-chooses-redpoint-when-it-comes-to-forklift-safety/100348/",
+      "summary": "A conversation between LocaXion CEO Viren Mathuria and Redpoint CEO Chunjie Duan on safety-grade RTLS, what genuine precision demands, and the architecture built for what’s coming. RTLS (Real-Time Location System) refers to wireless technology used to automatically identify, track, and manage the pr...",
+      "source_name": "Robotics & Automation News",
+      "category": "industry",
+      "published": "2026-04-02T07:42:14+00:00",
+      "fetched_at": "2026-04-02T13:53:56.329651+00:00"
+    },
+    {
+      "title": "Epson and Clayton Controls form alliance to deliver robotics solutions in the Southwest US",
+      "url": "https://roboticsandautomationnews.com/2026/04/01/epson-and-clayton-controls-form-alliance-to-deliver-robotics-solutions-in-the-southwest-us/100344/",
+      "summary": "Epson Robots has announced a strategic alliance with Clayton Controls to deliver advanced automation solutions to the Southwest US region. “Our business philosophy is to understand our customers’ unique challenges and develop automated solutions that will increase productivity with our knowledge, ex...",
+      "source_name": "Robotics & Automation News",
+      "category": "industry",
+      "published": "2026-04-01T19:53:35+00:00",
+      "fetched_at": "2026-04-02T13:53:56.329651+00:00"
+    },
+    {
+      "title": "Tekpak Automation to showcase pick-and-place robotic cell at interpack 2026",
+      "url": "https://roboticsandautomationnews.com/2026/04/01/tekpak-automation-to-showcase-pick-and-place-robotic-cell-at-interpack-2026/100341/",
+      "summary": "Tekpak Automation will demonstrate the benefits of robotics for manufacturers across the food, beverage and pharmaceutical industries at interpack 2026, with a live working demonstration of a pick-and-place cell on Stand A15/Hall 16. Tekpak is known for solving complex packaging line challenges with...",
+      "source_name": "Robotics & Automation News",
+      "category": "industry",
+      "published": "2026-04-01T19:47:36+00:00",
+      "fetched_at": "2026-04-02T13:53:56.329651+00:00"
+    },
+    {
+      "title": "Agile Robots closes acquisition of thyssenkrupp Automation Engineering",
+      "url": "https://roboticsandautomationnews.com/2026/04/01/agile-robots-closes-acquisition-of-thyssenkrupp-automation-engineering/100337/",
+      "summary": "Agile Robots, a leading provider of AI-powered robotic solutions, has successfully acquired assets of thyssenkrupp Automation Engineering in Europe and North America. Through the acquisition, the Munich-based company is strengthening its position in next-generation automation solutions and is tappin...",
+      "source_name": "Robotics & Automation News",
+      "category": "industry",
+      "published": "2026-04-01T19:42:13+00:00",
+      "fetched_at": "2026-04-02T13:53:56.329651+00:00"
+    },
+    {
+      "title": "What Skills Will Truck Techs Need in the AI Era",
+      "url": "https://roboticsandautomationnews.com/2026/04/01/what-skills-will-truck-techs-need-in-the-ai-era/100333/",
+      "summary": "A recent survey shows over 70 percent of truck techs now use AI-powered diagnostics every week, proving the shift is already here. Modern trucks rely on sensors, connected systems, and smart alerts that demand sharper digital skills. Techs who blend mechanical experience with data confidence quickly...",
+      "source_name": "Robotics & Automation News",
+      "category": "industry",
+      "published": "2026-04-01T19:25:37+00:00",
+      "fetched_at": "2026-04-02T13:53:56.329651+00:00"
+    },
+    {
+      "title": "Robotics Infra: Deploying DeepMind's MuJoCo on Azure, Part 2: Microsoft Heard Us",
+      "url": "https://www.hapticlabs.ai/blog/2026/03/31/deploying-mujoco-on-azure-ml-part-2",
+      "summary": "Article URL: https://www.hapticlabs.ai/blog/2026/03/31/deploying-mujoco-on-azure-ml-part-2 Comments URL: https://news.ycombinator.com/item?id=47605301 Points: 4 # Comments: 0",
+      "source_name": "Hacker News Robotics",
+      "category": "community",
+      "published": "2026-04-01T19:20:47+00:00",
+      "fetched_at": "2026-04-02T13:54:04.707698+00:00"
+    },
+    {
+      "title": "Robot Umpires Have Arrived–and They're Making Baseball Players Shrink",
+      "url": "https://www.wsj.com/sports/baseball/mlb-robot-umpires-abs-shrinking-65eaacf5",
+      "summary": "Article URL: https://www.wsj.com/sports/baseball/mlb-robot-umpires-abs-shrinking-65eaacf5 Comments URL: https://news.ycombinator.com/item?id=47605177 Points: 1 # Comments: 0",
+      "source_name": "Hacker News Robotics",
+      "category": "community",
+      "published": "2026-04-01T19:12:19+00:00",
+      "fetched_at": "2026-04-02T13:54:04.707698+00:00"
+    },
+    {
+      "title": "Show HN: An open source rubber ducking robot, also a joke",
+      "url": "https://duck-duck-duck.edges.ideo.com/",
+      "summary": "Article URL: https://duck-duck-duck.edges.ideo.com/ Comments URL: https://news.ycombinator.com/item?id=47603339 Points: 3 # Comments: 0",
+      "source_name": "Hacker News Robotics",
+      "category": "community",
+      "published": "2026-04-01T16:48:01+00:00",
+      "fetched_at": "2026-04-02T13:54:04.708697+00:00"
+    },
+    {
+      "title": "The gig workers who are training humanoid robots at home",
+      "url": "https://www.technologyreview.com/2026/04/01/1134863/humanoid-data-training-gig-economy-2026-breakthrough-technology/",
+      "summary": "Article URL: https://www.technologyreview.com/2026/04/01/1134863/humanoid-data-training-gig-economy-2026-breakthrough-technology/ Comments URL: https://news.ycombinator.com/item?id=47600828 Points: 2 # Comments: 0",
+      "source_name": "Hacker News Robotics",
+      "category": "community",
+      "published": "2026-04-01T13:47:56+00:00",
+      "fetched_at": "2026-04-02T13:54:04.708697+00:00"
+    },
+    {
+      "title": "Atombite.ai Deep Dive: Building a Takeout Packing Robot Is Harder Than You Think",
+      "url": "https://news.ycombinator.com/item?id=47598285",
+      "summary": "In 1997, IBM's Deep Blue beat Garry Kasparov at chess. In 2016, DeepMind's AlphaGo defeated Lee Sedol at Go. Yet, in 2026, if you ask a $100,000 robotic arm to pick up a crushed paper bag, place a hot soup container inside without spilling it, and staple a receipt to the top, it will likely fail cat...",
+      "source_name": "Hacker News Robotics",
+      "category": "community",
+      "published": "2026-04-01T08:22:35+00:00",
+      "fetched_at": "2026-04-02T13:54:04.708697+00:00"
+    }
+  ]
+}

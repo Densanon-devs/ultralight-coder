@@ -1,0 +1,205 @@
+{
+  "fetched_at": "2026-04-02T13:53:21.504359+00:00",
+  "article_count": 20,
+  "total_new": 24,
+  "articles": [
+    {
+      "title": "Holo3: Breaking the Computer Use Frontier",
+      "url": "https://huggingface.co/blog/Hcompany/holo3",
+      "summary": "",
+      "source_name": "Hugging Face Blog",
+      "category": "tools",
+      "published": "2026-04-01T16:36:15+00:00",
+      "fetched_at": "2026-04-02T13:53:16.011258+00:00"
+    },
+    {
+      "title": "March 2026 sponsors-only newsletter",
+      "url": "https://simonwillison.net/2026/Apr/2/march-newsletter/#atom-everything",
+      "summary": "I just sent the March edition of my sponsors-only monthly newsletter . If you are a sponsor (or if you start a sponsorship now) you can access it here . In this month's newsletter: More agentic engineering patterns Streaming experts with MoE models on a Mac Model releases in March Vibe porting Suppl...",
+      "source_name": "Simon Willison",
+      "category": "tools",
+      "published": "2026-04-02T05:15:04+00:00",
+      "fetched_at": "2026-04-02T13:53:16.124757+00:00"
+    },
+    {
+      "title": "datasette-llm 0.1a6",
+      "url": "https://simonwillison.net/2026/Apr/1/datasette-llm-2/#atom-everything",
+      "summary": "Release: datasette-llm 0.1a6 The same model ID no longer needs to be repeated in both the default model and allowed models lists - setting it as a default model automatically adds it to the allowed models list. #6 Improved documentation for Python API usage . Tags: llm , datasette",
+      "source_name": "Simon Willison",
+      "category": "tools",
+      "published": "2026-04-01T23:01:37+00:00",
+      "fetched_at": "2026-04-02T13:53:16.125757+00:00"
+    },
+    {
+      "title": "datasette-enrichments-llm 0.2a1",
+      "url": "https://simonwillison.net/2026/Apr/1/datasette-enrichments-llm-2/#atom-everything",
+      "summary": "Release: datasette-enrichments-llm 0.2a1 The actor who triggers an enrichment is now passed to the llm.mode(... actor=actor) method. #3 Tags: enrichments , llm , datasette",
+      "source_name": "Simon Willison",
+      "category": "tools",
+      "published": "2026-04-01T22:00:34+00:00",
+      "fetched_at": "2026-04-02T13:53:16.125757+00:00"
+    },
+    {
+      "title": "How Emotion Shapes the Behavior of LLMs and Agents: A Mechanistic Study",
+      "url": "https://arxiv.org/abs/2604.00005",
+      "summary": "arXiv:2604.00005v1 Announce Type: new Abstract: Emotion plays an important role in human cognition and performance. Motivated by this, we investigate whether analogous emotional signals can shape the behavior of large language models (LLMs) and agents. Existing emotion-aware studies mainly treat emo...",
+      "source_name": "ArXiv cs.AI",
+      "category": "research",
+      "published": "2026-04-02T04:00:00+00:00",
+      "fetched_at": "2026-04-02T13:53:16.380133+00:00"
+    },
+    {
+      "title": "One Panel Does Not Fit All: Case-Adaptive Multi-Agent Deliberation for Clinical Prediction",
+      "url": "https://arxiv.org/abs/2604.00085",
+      "summary": "arXiv:2604.00085v1 Announce Type: new Abstract: Large language models applied to clinical prediction exhibit case-level heterogeneity: simple cases yield consistent outputs, while complex cases produce divergent predictions under minor prompt changes. Existing single-agent strategies sample from one...",
+      "source_name": "ArXiv cs.AI",
+      "category": "research",
+      "published": "2026-04-02T04:00:00+00:00",
+      "fetched_at": "2026-04-02T13:53:16.380133+00:00"
+    },
+    {
+      "title": "Open, Reliable, and Collective: A Community-Driven Framework for Tool-Using AI Agents",
+      "url": "https://arxiv.org/abs/2604.00137",
+      "summary": "arXiv:2604.00137v1 Announce Type: new Abstract: Tool-integrated LLMs can retrieve, compute, and take real-world actions via external tools, but reliability remains a key bottleneck. We argue that failures stem from both tool-use accuracy (how well an agent invokes a tool) and intrinsic tool accuracy...",
+      "source_name": "ArXiv cs.AI",
+      "category": "research",
+      "published": "2026-04-02T04:00:00+00:00",
+      "fetched_at": "2026-04-02T13:53:16.380133+00:00"
+    },
+    {
+      "title": "A Safety-Aware Role-Orchestrated Multi-Agent LLM Framework for Behavioral Health Communication Simulation",
+      "url": "https://arxiv.org/abs/2604.00249",
+      "summary": "arXiv:2604.00249v1 Announce Type: new Abstract: Single-agent large language model (LLM) systems struggle to simultaneously support diverse conversational functions and maintain safety in behavioral health communication. We propose a safety-aware, role-orchestrated multi-agent LLM framework designed ...",
+      "source_name": "ArXiv cs.AI",
+      "category": "research",
+      "published": "2026-04-02T04:00:00+00:00",
+      "fetched_at": "2026-04-02T13:53:16.380133+00:00"
+    },
+    {
+      "title": "Human-in-the-Loop Control of Objective Drift in LLM-Assisted Computer Science Education",
+      "url": "https://arxiv.org/abs/2604.00281",
+      "summary": "arXiv:2604.00281v1 Announce Type: new Abstract: Large language models (LLMs) are increasingly embedded in computer science education through AI-assisted programming tools, yet such workflows often exhibit objective drift, in which locally plausible outputs diverge from stated task specifications. Ex...",
+      "source_name": "ArXiv cs.AI",
+      "category": "research",
+      "published": "2026-04-02T04:00:00+00:00",
+      "fetched_at": "2026-04-02T13:53:16.380133+00:00"
+    },
+    {
+      "title": "I replaced chaotic solo Claude coding with a simple 3-agent team (Architect + Builder + Reviewer) — it's stupidly effective and token-efficient",
+      "url": "https://reddit.com/r/ClaudeAI/comments/1sa7ju4/i_replaced_chaotic_solo_claude_coding_with_a/",
+      "summary": "To: r/ClaudeAI (and anyone using Claude Code with Cli or on the Desktop App),\n\nAfter reading a bunch of papers on agentic workflows and burning way too many tokens on solo AI coding sessions, I settled on something dead simple that actually works for me: a structured Three Man Team in the form of a ...",
+      "source_name": "r/ClaudeAI",
+      "category": "community",
+      "published": "2026-04-02T04:28:45+00:00",
+      "fetched_at": "2026-04-02T13:53:17.700380+00:00",
+      "score": 236,
+      "num_comments": 67
+    },
+    {
+      "title": "How are people using Claude as a personal assistant (Slack + Outlook + To-Do)? ADHD-friendly setup help 🙏",
+      "url": "https://reddit.com/r/ClaudeAI/comments/1sad9rb/how_are_people_using_claude_as_a_personal/",
+      "summary": "Hey all, looking for some practical advice / setups from people who’ve actually made this work.\n\nContext:\n\n* I have **pretty severe ADHD**, so I’m trying to externalise my brain as much as possible\n* I already use **Claude (Pro)** and **ChatGPT (Plus)**\n* Claude is **connected to Slack**, which is g...",
+      "source_name": "r/ClaudeAI",
+      "category": "community",
+      "published": "2026-04-02T10:08:13+00:00",
+      "fetched_at": "2026-04-02T13:53:17.700380+00:00",
+      "score": 78,
+      "num_comments": 45
+    },
+    {
+      "title": "I built a tool that saves ~50K tokens per Claude Code conversation by pre-indexing your codebase",
+      "url": "https://reddit.com/r/ClaudeAI/comments/1sa2jbz/i_built_a_tool_that_saves_50k_tokens_per_claude/",
+      "summary": "Every Claude Code conversation starts the same way — it spends 10-20 tool calls exploring your codebase. Reading files, scanning directories, checking what functions exist. This happens **every single conversation**, and on a large project it burns 30-50K tokens before any real work begins.\n\nI built...",
+      "source_name": "r/ClaudeAI",
+      "category": "community",
+      "published": "2026-04-02T00:35:43+00:00",
+      "fetched_at": "2026-04-02T13:53:17.700380+00:00",
+      "score": 331,
+      "num_comments": 90
+    },
+    {
+      "title": "/Buddy is Awesome",
+      "url": "https://reddit.com/r/ClaudeAI/comments/1sabp9j/buddy_is_awesome/",
+      "summary": "If anyone still didn’t try Claude /Buddy pet , I strongly advise you do .  ",
+      "source_name": "r/ClaudeAI",
+      "category": "community",
+      "published": "2026-04-02T08:33:25+00:00",
+      "fetched_at": "2026-04-02T13:53:17.700380+00:00",
+      "score": 63,
+      "num_comments": 18
+    },
+    {
+      "title": "Qwen3.6-Plus",
+      "url": "https://reddit.com/r/LocalLLaMA/comments/1sa7sfw/qwen36plus/",
+      "summary": "Blog post: [https://qwen.ai/blog?id=qwen3.6](https://qwen.ai/blog?id=qwen3.6)\n\nFrom Chujie Zheng on 𝕏: [https://x.com/ChujieZheng/status/2039560126047359394](https://x.com/ChujieZheng/status/2039560126047359394)",
+      "source_name": "r/LocalLLaMA",
+      "category": "community",
+      "published": "2026-04-02T04:41:38+00:00",
+      "fetched_at": "2026-04-02T13:53:18.482448+00:00",
+      "score": 569,
+      "num_comments": 155
+    },
+    {
+      "title": "Can we block fresh accounts from posting?",
+      "url": "https://reddit.com/r/LocalLLaMA/comments/1sabx6b/can_we_block_fresh_accounts_from_posting/",
+      "summary": "Flood of useless vibe coded projects is getting out of hand...",
+      "source_name": "r/LocalLLaMA",
+      "category": "community",
+      "published": "2026-04-02T08:47:17+00:00",
+      "fetched_at": "2026-04-02T13:53:18.482448+00:00",
+      "score": 259,
+      "num_comments": 61
+    },
+    {
+      "title": "The Bonsai 1-bit models are very good",
+      "url": "https://reddit.com/r/LocalLLaMA/comments/1s9zumi/the_bonsai_1bit_models_are_very_good/",
+      "summary": "Hey everyone,\n\nTim from [AnythingLLM](https://github.com/Mintplex-Labs/anything-llm/issues) and yesterday I saw the [PrismML Bonsai](https://prismml.com/news/bonsai-8b) post so i had to give it a real shot because 14x smaller models (in size and memory) would actually be a huge game changer for Loca...",
+      "source_name": "r/LocalLLaMA",
+      "category": "community",
+      "published": "2026-04-01T22:40:29+00:00",
+      "fetched_at": "2026-04-02T13:53:18.482448+00:00",
+      "score": 716,
+      "num_comments": 121
+    },
+    {
+      "title": "Is 1-bit and TurboQuant the future of OSS? A simulation for Qwen3.5 models.",
+      "url": "https://reddit.com/r/LocalLLaMA/comments/1sadadw/is_1bit_and_turboquant_the_future_of_oss_a/",
+      "summary": "Simulation what the Qwen3.5 model family would look like using 1-bit technology and TurboQuant. The table below shows the results, this would be a revolution:\n\n|Model|Parameters|Q4\\_K\\_M File (Current)|KV Cache (256K) (Current)|Hypothetical 1-bit Weights|KV Cache 256K with TurboQuant|Hypothetical To...",
+      "source_name": "r/LocalLLaMA",
+      "category": "community",
+      "published": "2026-04-02T10:09:12+00:00",
+      "fetched_at": "2026-04-02T13:53:18.482448+00:00",
+      "score": 64,
+      "num_comments": 44
+    },
+    {
+      "title": "Omnivoice - 600+ Language Open-Source TTS with Voice Cloning and Design",
+      "url": "https://reddit.com/r/LocalLLaMA/comments/1saeuv2/omnivoice_600_language_opensource_tts_with_voice/",
+      "summary": "OmniVoice is a state-of-the-art zero-shot multilingual TTS model supporting more than 600 languages. Built on a novel diffusion language model architecture, it generates high-quality speech with superior inference speed, supporting voice cloning and voice design.\n\n**Key Features**\n\n\\- **600+ Languag...",
+      "source_name": "r/LocalLLaMA",
+      "category": "community",
+      "published": "2026-04-02T11:33:25+00:00",
+      "fetched_at": "2026-04-02T13:53:18.482448+00:00",
+      "score": 51,
+      "num_comments": 16
+    },
+    {
+      "title": "anthropics/claude-code: v2.1.90",
+      "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.90",
+      "summary": "## What's changed\n\n- Added `/powerup` — interactive lessons teaching Claude Code features with animated demos\n- Added `CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE` env var to keep the existing marketplace cache when `git pull` fails, useful in offline environments\n- Added `.husky` to protected di...",
+      "source_name": "Anthropic GitHub",
+      "category": "tools",
+      "published": "2026-04-01T23:41:31+00:00",
+      "fetched_at": "2026-04-02T13:53:19.255087+00:00"
+    },
+    {
+      "title": "anthropics/claude-code-action: v1.0.85",
+      "url": "https://github.com/anthropics/claude-code-action/releases/tag/v1.0.85",
+      "summary": "## What's Changed\n* fix: fall back to repo default_branch instead of hardcoded \"main\" by @ashwin-ant in https://github.com/anthropics/claude-code-action/pull/1143\n\n\n**Full Changelog**: https://github.com/anthropics/claude-code-action/compare/v1...v1.0.85",
+      "source_name": "Anthropic GitHub",
+      "category": "tools",
+      "published": "2026-04-01T23:58:52+00:00",
+      "fetched_at": "2026-04-02T13:53:19.912638+00:00"
+    }
+  ]
+}

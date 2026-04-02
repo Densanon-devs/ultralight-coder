@@ -137,3 +137,11 @@ micro_adapters:
   regenerate_interval: 20
 npc:
   enabled: false
+digest:
+  enabled: true
+  topics_dir: digest/topics
+  grammars_dir: data/digest_grammars
+  examples_dir: data/augmentor_examples/curation
+  max_selections: 10
+  max_takeaways: 4
+  compact_summary_chars: 100
