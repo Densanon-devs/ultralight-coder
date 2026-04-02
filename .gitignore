@@ -1,8 +1,43 @@
+# Python
 __pycache__/
 *.pyc
 *.pyo
-models/*.gguf
-data/
 *.egg-info/
-.env
+*.egg
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Models (large binary files — download separately)
+models/*.gguf
+
+# Runtime data (generated at runtime)
+data/
+
+# Tuned config (machine-specific)
 tuned_config.json
+
+# Secrets
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Test artifacts
+.pytest_cache/
+htmlcov/
+.coverage
+.mypy_cache/

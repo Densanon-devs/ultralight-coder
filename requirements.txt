@@ -1,29 +1,25 @@
-# NPC Coder — Dependencies
-# Branched from Plug-in Intelligence Engine
+# Ultralight Code Assistant — Dependencies
 
 # Core inference (GGUF model loading)
 llama-cpp-python>=0.2.0
 
-# Memory + Neural classifier
+# Embeddings + semantic search
 faiss-cpu>=1.7.4
 sentence-transformers>=2.2.0
 numpy>=1.24.0
-torch>=2.0.0
 
 # Configuration
 pyyaml>=6.0
 
 # Terminal UI
 rich>=13.0.0
-prompt-toolkit>=3.0
 
-# REST API (game engine integration)
+# REST API + web UI
 fastapi>=0.100.0
 uvicorn>=0.20.0
 
-# Smart routing
+# Smart routing (neural classifier)
 scikit-learn>=1.3.0
-joblib>=1.3.0
 
 # Model download
 huggingface-hub>=0.20.0
