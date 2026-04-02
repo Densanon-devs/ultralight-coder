@@ -259,6 +259,235 @@ def build_realworld_queries() -> list[RealWorldQuery]:
     ]
 
 
+def build_realworld_queries_v2() -> list[RealWorldQuery]:
+    """100 MORE queries — project-oriented, messier phrasing, edge cases."""
+    return [
+        # ── String / Text Manipulation (10) ──
+        RealWorldQuery("write a function that counts how many times each word appears in a string", "general",
+                       must_contain=["def ", "return"], min_lines=3),
+        RealWorldQuery("strip all html tags from a string", "general",
+                       must_contain=["def ", "return"], min_lines=3),
+        RealWorldQuery("write a slug generator that converts titles to url-friendly strings", "general",
+                       must_contain=["def ", "return"], min_lines=3),
+        RealWorldQuery("how do i check if a string is a valid ip address", "general",
+                       must_contain=["def ", "return"], min_lines=3),
+        RealWorldQuery("make a function that wraps text to a max line width", "general",
+                       must_contain=["def ", "return"], min_lines=4),
+        RealWorldQuery("write a caesar cipher encrypt and decrypt", "general",
+                       must_contain=["def ", "return"], min_lines=5),
+        RealWorldQuery("build a function that converts camelCase to snake_case", "general",
+                       must_contain=["def ", "return"], min_lines=3),
+        RealWorldQuery("create a string diff function that shows what changed between two strings", "general",
+                       must_contain=["def "], min_lines=4),
+        RealWorldQuery("write a function to extract all urls from a block of text", "general",
+                       must_contain=["def ", "return"], min_lines=3),
+        RealWorldQuery("build a simple tokenizer that splits code into tokens", "general",
+                       must_contain=["def ", "return"], min_lines=5),
+
+        # ── File System / OS (10) ──
+        RealWorldQuery("write a function that recursively finds all python files in a directory", "cli",
+                       must_contain=["def ", "\.py"], min_lines=3),
+        RealWorldQuery("create a file watcher that detects when files change", "cli",
+                       must_contain=["def "], min_lines=5),
+        RealWorldQuery("write a script to rename all files in a folder to lowercase", "cli",
+                       must_contain=["os", "rename"], min_lines=4),
+        RealWorldQuery("build a function that calculates the total size of a directory", "cli",
+                       must_contain=["def ", "size"], min_lines=4),
+        RealWorldQuery("how do i create a temp file write to it and read it back", "cli",
+                       must_contain=["tempfile", "write"], min_lines=4),
+        RealWorldQuery("write a function to safely delete a file if it exists", "cli",
+                       must_contain=["def ", "os"], min_lines=3),
+        RealWorldQuery("make a zip archive of a folder", "cli",
+                       must_contain=["zip", "def "], min_lines=4),
+        RealWorldQuery("write a function that reads the last n lines of a file efficiently", "cli",
+                       must_contain=["def ", "open"], min_lines=4),
+        RealWorldQuery("create a lockfile mechanism to prevent running a script twice", "cli",
+                       must_contain=["def ", "lock"], min_lines=5),
+        RealWorldQuery("build a function that copies a directory tree with filtering", "cli",
+                       must_contain=["def ", "shutil"], min_lines=4),
+
+        # ── Networking / HTTP (10) ──
+        RealWorldQuery("write a function to download a file from a url with a progress callback", "web",
+                       must_contain=["def ", "http"], min_lines=5),
+        RealWorldQuery("make a simple http client that does get and post requests", "web",
+                       must_contain=["def ", "request"], min_lines=5),
+        RealWorldQuery("write a function that checks if a website is up or down", "web",
+                       must_contain=["def ", "http"], min_lines=4),
+        RealWorldQuery("build a simple websocket echo server", "web",
+                       must_contain=["def "], min_lines=5),
+        RealWorldQuery("create a function that parses url query parameters into a dict", "web",
+                       must_contain=["def ", "return"], min_lines=3),
+        RealWorldQuery("write a dns lookup function that returns all ip addresses for a hostname", "web",
+                       must_contain=["def ", "socket"], min_lines=3),
+        RealWorldQuery("build a retry wrapper for http requests with exponential backoff", "web",
+                       must_contain=["def ", "retry"], min_lines=6),
+        RealWorldQuery("write a function that sends a json post request with headers", "web",
+                       must_contain=["def ", "json"], min_lines=4),
+        RealWorldQuery("create a simple tcp server that echoes back whatever it receives", "web",
+                       must_contain=["socket", "bind"], min_lines=6),
+        RealWorldQuery("write an api client class with get post put delete methods", "web",
+                       must_contain=["class ", "def get"], min_lines=8),
+
+        # ── Classes / OOP (10) ──
+        RealWorldQuery("write a bank account class with deposit withdraw and transfer", "general",
+                       must_contain=["class ", "deposit", "withdraw"], min_lines=8),
+        RealWorldQuery("create a linked list class with append prepend and delete", "general",
+                       must_contain=["class ", "append"], min_lines=8),
+        RealWorldQuery("build a matrix class that supports addition and multiplication", "general",
+                       must_contain=["class ", "__add__", "__mul__"], min_lines=8),
+        RealWorldQuery("write a class that represents a deck of cards with shuffle and draw", "general",
+                       must_contain=["class ", "shuffle"], min_lines=8),
+        RealWorldQuery("make a priority queue class using a heap", "general",
+                       must_contain=["class ", "push", "pop"], min_lines=6),
+        RealWorldQuery("create a class that wraps a list and adds statistics methods like mean and median", "general",
+                       must_contain=["class ", "mean"], min_lines=6),
+        RealWorldQuery("write a money class that handles dollars and cents without floating point errors", "general",
+                       must_contain=["class ", "def "], min_lines=6),
+        RealWorldQuery("build a simple orm-style model class that maps to a dict", "general",
+                       must_contain=["class ", "def "], min_lines=6),
+        RealWorldQuery("create an immutable point class with x and y coordinates", "general",
+                       must_contain=["class ", "x", "y"], min_lines=4),
+        RealWorldQuery("write a tree node class with methods to add children and find by value", "general",
+                       must_contain=["class ", "add", "find"], min_lines=6),
+
+        # ── Error Handling / Validation (8) ──
+        RealWorldQuery("write a custom exception hierarchy for a web application", "general",
+                       must_contain=["class ", "Exception"], min_lines=5),
+        RealWorldQuery("create a function that validates a credit card number with luhn algorithm", "algorithm",
+                       must_contain=["def ", "return"], min_lines=5),
+        RealWorldQuery("write a retry function that catches specific exception types", "pattern",
+                       must_contain=["def ", "except"], min_lines=5),
+        RealWorldQuery("build an input validator that checks types ranges and required fields", "data",
+                       must_contain=["def ", "validate"], min_lines=5),
+        RealWorldQuery("write a function that gracefully handles json decode errors", "general",
+                       must_contain=["def ", "json", "except"], min_lines=4),
+        RealWorldQuery("create a context manager that suppresses and logs specific exceptions", "pattern",
+                       must_contain=["def ", "__enter__"], min_lines=5),
+        RealWorldQuery("write a function that validates a phone number format", "general",
+                       must_contain=["def ", "return"], min_lines=3),
+        RealWorldQuery("build an error collector that gathers multiple validation errors before raising", "general",
+                       must_contain=["class ", "def "], min_lines=5),
+
+        # ── Concurrency / Parallel (8) ──
+        RealWorldQuery("write a thread pool that processes a list of tasks", "pattern",
+                       must_contain=["Thread", "def "], min_lines=5),
+        RealWorldQuery("create a producer consumer pattern using threading and a queue", "pattern",
+                       must_contain=["Thread", "Queue"], min_lines=8),
+        RealWorldQuery("write a function that runs multiple functions in parallel and collects results", "pattern",
+                       must_contain=["def ", "Thread"], min_lines=5),
+        RealWorldQuery("build a simple job scheduler that runs tasks at intervals", "pattern",
+                       must_contain=["def ", "time"], min_lines=6),
+        RealWorldQuery("write a deadlock-free transfer between two bank accounts using locks", "pattern",
+                       must_contain=["Lock", "def "], min_lines=6),
+        RealWorldQuery("create a read-write lock that allows multiple readers but single writer", "pattern",
+                       must_contain=["class ", "def "], min_lines=8),
+        RealWorldQuery("write an async web scraper that fetches 10 pages concurrently", "async",
+                       must_contain=["async ", "await"], min_lines=6),
+        RealWorldQuery("build a background task runner that queues and executes functions", "pattern",
+                       must_contain=["class ", "def "], min_lines=6),
+
+        # ── Data Formats / Serialization (8) ──
+        RealWorldQuery("write a function that converts xml to a python dict", "data",
+                       must_contain=["def ", "xml"], min_lines=5),
+        RealWorldQuery("create a csv to json converter", "data",
+                       must_contain=["def ", "csv", "json"], min_lines=4),
+        RealWorldQuery("write a yaml config file parser with defaults", "data",
+                       must_contain=["def ", "yaml"], min_lines=4),
+        RealWorldQuery("build a function that pretty prints any nested data structure", "data",
+                       must_contain=["def ", "print"], min_lines=4),
+        RealWorldQuery("write a serializer that converts python objects to json including dates", "data",
+                       must_contain=["def ", "json"], min_lines=4),
+        RealWorldQuery("create a function that deep merges two dictionaries", "data",
+                       must_contain=["def ", "merge"], min_lines=5),
+        RealWorldQuery("write a function that converts a flat list of records into a tree structure", "data",
+                       must_contain=["def ", "return"], min_lines=5),
+        RealWorldQuery("build a toml parser that reads key value pairs from a string", "data",
+                       must_contain=["def ", "return"], min_lines=5),
+
+        # ── Database Advanced (6) ──
+        RealWorldQuery("write a full text search function using sqlite fts5", "database",
+                       must_contain=["sqlite3", "fts"], min_lines=5),
+        RealWorldQuery("create a caching layer that stores query results in sqlite with expiry", "database",
+                       must_contain=["sqlite3", "def "], min_lines=8),
+        RealWorldQuery("build a simple event store that saves events with timestamps in sqlite", "database",
+                       must_contain=["sqlite3", "def "], min_lines=6),
+        RealWorldQuery("write a function to backup a sqlite database to a file", "database",
+                       must_contain=["sqlite3", "backup"], min_lines=4),
+        RealWorldQuery("create an audit log table that tracks all changes to a users table", "database",
+                       must_contain=["sqlite3", "trigger"], min_lines=5),
+        RealWorldQuery("write a function that exports sqlite query results to a pandas dataframe", "database",
+                       must_contain=["sqlite3", "pandas"], min_lines=4),
+
+        # ── DevOps / Automation (6) ──
+        RealWorldQuery("write a health check function that pings a list of services", "cli",
+                       must_contain=["def ", "http"], min_lines=5),
+        RealWorldQuery("create a simple cron-like scheduler in python", "cli",
+                       must_contain=["def ", "schedule"], min_lines=6),
+        RealWorldQuery("write a script that monitors cpu and memory usage", "cli",
+                       must_contain=["def "], min_lines=4),
+        RealWorldQuery("build a deployment script that runs commands over ssh", "cli",
+                       must_contain=["def ", "subprocess"], min_lines=5),
+        RealWorldQuery("write a function that generates a requirements.txt from import statements", "cli",
+                       must_contain=["def ", "import"], min_lines=5),
+        RealWorldQuery("create a log parser that extracts error lines and counts by type", "cli",
+                       must_contain=["def ", "error"], min_lines=5),
+
+        # ── Math / Science (6) ──
+        RealWorldQuery("write a function that solves a system of linear equations", "algorithm",
+                       must_contain=["def ", "return"], min_lines=5),
+        RealWorldQuery("create a statistics class with mean median mode and standard deviation", "algorithm",
+                       must_contain=["class ", "mean"], min_lines=8),
+        RealWorldQuery("write a function that generates the collatz sequence for a number", "algorithm",
+                       must_contain=["def ", "return"], min_lines=4),
+        RealWorldQuery("build a simple neural network perceptron from scratch", "algorithm",
+                       must_contain=["class ", "def "], min_lines=8),
+        RealWorldQuery("write a function that computes the greatest common divisor of a list of numbers", "algorithm",
+                       must_contain=["def ", "gcd"], min_lines=3),
+        RealWorldQuery("create a polynomial class that supports addition and evaluation", "algorithm",
+                       must_contain=["class ", "def "], min_lines=6),
+
+        # ── Security / Crypto (4) ──
+        RealWorldQuery("write a password strength checker that scores passwords", "general",
+                       must_contain=["def ", "return"], min_lines=5),
+        RealWorldQuery("create a function that generates and verifies hmac signatures", "general",
+                       must_contain=["hmac", "def "], min_lines=4),
+        RealWorldQuery("write a jwt token encoder and decoder without external libraries", "general",
+                       must_contain=["def ", "base64"], min_lines=6),
+        RealWorldQuery("build a simple hash table with chaining for collision resolution", "general",
+                       must_contain=["class ", "def "], min_lines=8),
+
+        # ── Mini Projects (14) ──
+        RealWorldQuery("build a command line tic tac toe game", "general",
+                       must_contain=["def ", "board"], min_lines=10),
+        RealWorldQuery("write a markdown to html converter for headers paragraphs and bold", "general",
+                       must_contain=["def ", "return"], min_lines=6),
+        RealWorldQuery("create a simple chat server using sockets", "web",
+                       must_contain=["socket", "def "], min_lines=8),
+        RealWorldQuery("build a url shortener with a dictionary backend", "general",
+                       must_contain=["def ", "return"], min_lines=5),
+        RealWorldQuery("write a simple regex engine that handles . * and literal matches", "algorithm",
+                       must_contain=["def ", "match"], min_lines=6),
+        RealWorldQuery("create a task queue with priorities and worker threads", "pattern",
+                       must_contain=["class ", "Queue"], min_lines=8),
+        RealWorldQuery("build a simple version of git diff that compares two strings line by line", "general",
+                       must_contain=["def ", "diff"], min_lines=5),
+        RealWorldQuery("write a json path query function like jq", "data",
+                       must_contain=["def ", "return"], min_lines=5),
+        RealWorldQuery("create a simple pub sub message broker", "pattern",
+                       must_contain=["class ", "publish", "subscribe"], min_lines=8),
+        RealWorldQuery("build a rate limited api client that respects retry-after headers", "web",
+                       must_contain=["class ", "def "], min_lines=8),
+        RealWorldQuery("write a simple load balancer that distributes requests round robin", "web",
+                       must_contain=["class ", "def "], min_lines=5),
+        RealWorldQuery("create a plugin system that discovers and loads python modules from a directory", "pattern",
+                       must_contain=["def ", "import"], min_lines=5),
+        RealWorldQuery("build a simple key value store with get set delete and ttl expiry", "general",
+                       must_contain=["class ", "def get", "def set"], min_lines=8),
+        RealWorldQuery("write a function that generates a pdf invoice given order data", "general",
+                       must_contain=["def "], min_lines=5),
+    ]
+
+
 def extract_code(response: str) -> str:
     """Extract code from markdown code blocks."""
     if "```python" in response:
@@ -460,6 +689,9 @@ def run_benchmark(model_path: Path, queries: list[RealWorldQuery], gpu_layers: i
 def main():
     parser = argparse.ArgumentParser(description="Real-World Query Benchmark")
     parser.add_argument("--model", type=str, help="Model path")
+    parser.add_argument("--set", type=int, choices=[1, 2], default=1,
+                        help="Query set: 1=original 100, 2=project-oriented 100")
+    parser.add_argument("--both", action="store_true", help="Run both sets (200 queries)")
     parser.add_argument("--quick", action="store_true", help="Run 20 queries only")
     parser.add_argument("--check-routing", action="store_true", help="Check routing only (no model)")
     parser.add_argument("--gpu-layers", type=int, default=99)
@@ -469,7 +701,15 @@ def main():
 
     logging.basicConfig(level=logging.WARNING, format="%(message)s")
 
-    queries = build_realworld_queries()
+    if args.both:
+        queries = build_realworld_queries() + build_realworld_queries_v2()
+        print(f"  Running both sets: {len(queries)} queries")
+    elif args.set == 2:
+        queries = build_realworld_queries_v2()
+        print(f"  Set 2 (project-oriented): {len(queries)} queries")
+    else:
+        queries = build_realworld_queries()
+        print(f"  Set 1 (fundamentals): {len(queries)} queries")
 
     if args.quick:
         # Take 2 from each domain for variety
