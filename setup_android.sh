@@ -28,7 +28,6 @@ fi
 # ── Step 3: Python deps ─────────────────────────────────
 echo ""
 echo "[3/6] Installing Python packages..."
-pip install --upgrade pip
 pip install pyyaml feedparser beautifulsoup4 requests numpy
 
 echo ""
