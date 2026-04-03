@@ -1,0 +1,238 @@
+domain: resilience
+category: resilience_retry
+examples:
+  - query: |
+      Write a retry decorator with exponential backoff and configurable
+      max retries. Track the number of attempts.
+    solution: |
+      ```python
+      import functools
+      import time
+
+
+      def retry_with_backoff(max_retries=3, base_delay=1.0, exceptions=(Exception,)):
+          def decorator(func):
+              @functools.wraps(func)
+              def wrapper(*args, **kwargs):
+                  last_exc = None
+                  for attempt in range(1, max_retries + 1):
+                      try:
+                          result = func(*args, **kwargs)
+                          wrapper.attempts = attempt
+                          return result
+                      except exceptions as e:
+                          last_exc = e
+                          wrapper.attempts = attempt
+                          if attempt < max_retries:
+                              time.sleep(base_delay * (2 ** (attempt - 1)))
+                  raise last_exc
+              wrapper.attempts = 0
+              return wrapper
+          return decorator
+      ```
+
+      Key: exponential backoff doubles delay each retry. Tracks attempts on wrapper.
+      Re-raises the last exception after all retries exhausted.
+    tags: [retry, exponential-backoff, decorator, resilience]
+    difficulty: medium
+
+  - query: |
+      Write a CircuitBreaker class that opens after N consecutive failures,
+      stays open for a timeout period, then allows a test request.
+    solution: |
+      ```python
+      import time
+
+
+      class CircuitBreaker:
+          def __init__(self, failure_threshold=3, reset_timeout=10.0):
+              self.failure_threshold = failure_threshold
+              self.reset_timeout = reset_timeout
+              self._failures = 0
+              self._state = "closed"
+              self._last_failure_time = None
+
+          @property
+          def state(self):
+              if self._state == "open" and self._last_failure_time:
+                  if time.time() - self._last_failure_time >= self.reset_timeout:
+                      self._state = "half-open"
+              return self._state
+
+          def call(self, func, *args, **kwargs):
+              if self.state == "open":
+                  raise RuntimeError("Circuit breaker is open")
+              try:
+                  result = func(*args, **kwargs)
+                  self._on_success()
+                  return result
+              except Exception as e:
+                  self._on_failure()
+                  raise
+
+          def _on_success(self):
+              self._failures = 0
+              self._state = "closed"
+
+          def _on_failure(self):
+              self._failures += 1
+              self._last_failure_time = time.time()
+              if self._failures >= self.failure_threshold:
+                  self._state = "open"
+      ```
+
+      Key: three states (closed/open/half-open). Opens after threshold failures.
+      Half-open after timeout allows one test request. Success resets to closed.
+    tags: [circuit-breaker, resilience, fault-tolerance, state]
+    difficulty: hard
+
+  - query: |
+      Write a circuit_breaker decorator that wraps a function with circuit
+      breaker logic. After N consecutive failures, the decorator raises
+      CircuitOpenError without calling the function. After a reset timeout,
+      it allows one probe call. If the probe succeeds, the circuit closes.
+    solution: |
+      ```python
+      import functools
+      import time
+
+
+      class CircuitOpenError(RuntimeError):
+          pass
+
+
+      def circuit_breaker(failure_threshold=3, reset_timeout=10.0,
+                          exceptions=(Exception,)):
+          def decorator(func):
+              state = {
+                  "failures": 0,
+                  "status": "closed",
+                  "last_failure": 0.0,
+              }
+
+              @functools.wraps(func)
+              def wrapper(*args, **kwargs):
+                  if state["status"] == "open":
+                      if time.time() - state["last_failure"] >= reset_timeout:
+                          state["status"] = "half-open"
+                      else:
+                          raise CircuitOpenError(
+                              f"{func.__name__}: circuit is open"
+                          )
+                  try:
+                      result = func(*args, **kwargs)
+                      state["failures"] = 0
+                      state["status"] = "closed"
+                      return result
+                  except exceptions as e:
+                      state["failures"] += 1
+                      state["last_failure"] = time.time()
+                      if state["failures"] >= failure_threshold:
+                          state["status"] = "open"
+                      raise
+
+              wrapper.state = state
+              return wrapper
+          return decorator
+      ```
+
+      Key patterns:
+      1. Decorator version of circuit breaker — state dict lives in closure
+      2. Three states: closed (normal), open (fast-fail), half-open (probe)
+      3. On open state, checks if reset_timeout elapsed before rejecting
+      4. Any success resets to closed; failures accumulate until threshold
+      5. Exposes wrapper.state for inspection/testing
+    tags: [circuit-breaker, decorator, resilience, fault-tolerance]
+    difficulty: hard
+
+  - query: |
+      Write a timeout decorator that raises TimeoutError if the decorated
+      function takes longer than the specified seconds. Use threading for
+      cross-platform compatibility. The decorator should clean up properly.
+    solution: |
+      ```python
+      import functools
+      import threading
+
+
+      def timeout(seconds):
+          def decorator(func):
+              @functools.wraps(func)
+              def wrapper(*args, **kwargs):
+                  result = [None]
+                  exception = [None]
+
+                  def target():
+                      try:
+                          result[0] = func(*args, **kwargs)
+                      except Exception as e:
+                          exception[0] = e
+
+                  thread = threading.Thread(target=target, daemon=True)
+                  thread.start()
+                  thread.join(timeout=seconds)
+
+                  if thread.is_alive():
+                      raise TimeoutError(
+                          f"{func.__name__} timed out after {seconds}s"
+                      )
+                  if exception[0] is not None:
+                      raise exception[0]
+                  return result[0]
+
+              return wrapper
+          return decorator
+      ```
+
+      Key patterns:
+      1. Runs function in a daemon thread to enable timeout on any platform
+      2. thread.join(timeout=seconds) blocks for at most the given duration
+      3. If thread is still alive after join, it timed out — raise TimeoutError
+      4. Exceptions from the target thread are captured and re-raised in the caller
+      5. daemon=True ensures thread won't prevent program exit
+    tags: [timeout, decorator, threading, resilience]
+    difficulty: medium
+
+  - query: |
+      Write a fallback decorator that catches exceptions from the primary
+      function and calls a fallback function instead. Support multiple
+      fallbacks tried in order. If all fail, raise the last exception.
+    solution: |
+      ```python
+      import functools
+
+
+      def with_fallback(*fallbacks, exceptions=(Exception,)):
+          def decorator(func):
+              @functools.wraps(func)
+              def wrapper(*args, **kwargs):
+                  try:
+                      return func(*args, **kwargs)
+                  except exceptions:
+                      pass
+                  last_exc = None
+                  for fb in fallbacks:
+                      try:
+                          return fb(*args, **kwargs)
+                      except exceptions as e:
+                          last_exc = e
+                  if last_exc is not None:
+                      raise last_exc
+                  raise RuntimeError(
+                      f"All fallbacks failed for {func.__name__}"
+                  )
+
+              wrapper.primary = func
+              wrapper.fallbacks = fallbacks
+              return wrapper
+          return decorator
+      ```
+
+      Key patterns:
+      1. Primary function is tried first; on failure, fallbacks are tried in order
+      2. First successful result (primary or fallback) is returned immediately
+      3. Only catches specified exception types — unexpected errors propagate
+      4. If all fallbacks fail, the last exception is re-raised
+      5. Exposes wrapper.primary and wrapper.fallbacks for introspection
+    tags: [fallback, decorator, resilience, graceful-degradation]
+    difficulty: medium

@@ -1,0 +1,340 @@
+domain: algorithm
+category: algorithm
+examples:
+  - query: |
+      Write a Python function called `fibonacci(n)` that returns the nth Fibonacci number. fibonacci(0)=0, fibonacci(1)=1.
+    solution: |
+      ```python
+      def fibonacci(n: int) -> int:
+          if n <= 0:
+              return 0
+          if n == 1:
+              return 1
+          a, b = 0, 1
+          for _ in range(2, n + 1):
+              a, b = b, a + b
+          return b
+      ```
+    tags: [fibonacci, dynamic-programming, math]
+    difficulty: easy
+
+  - query: |
+      Write a Python function called `roman_to_int(s)` that converts a Roman numeral string to an integer. Handle subtractive cases like IV=4, IX=9.
+    solution: |
+      ```python
+      def roman_to_int(s: str) -> int:
+          values = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
+          result = 0
+          for i in range(len(s)):
+              if i + 1 < len(s) and values[s[i]] < values[s[i + 1]]:
+                  result -= values[s[i]]
+              else:
+                  result += values[s[i]]
+          return result
+      ```
+    tags: [roman-numerals, string, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `max_subarray(nums)` that returns the largest sum of a contiguous subarray using Kadane's algorithm.
+    solution: |
+      ```python
+      def max_subarray(nums: list[int]) -> int:
+          max_sum = nums[0]
+          current = nums[0]
+          for num in nums[1:]:
+              current = max(num, current + num)
+              max_sum = max(max_sum, current)
+          return max_sum
+      ```
+    tags: [kadane, subarray, dynamic-programming]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `matrix_multiply(a, b)` that multiplies two matrices. Raise ValueError if dimensions don't match.
+    solution: |
+      ```python
+      def matrix_multiply(a: list[list], b: list[list]) -> list[list]:
+          if not a or not b or len(a[0]) != len(b):
+              raise ValueError("Incompatible dimensions")
+          rows_a, cols_b, cols_a = len(a), len(b[0]), len(a[0])
+          result = [[0] * cols_b for _ in range(rows_a)]
+          for i in range(rows_a):
+              for j in range(cols_b):
+                  for k in range(cols_a):
+                      result[i][j] += a[i][k] * b[k][j]
+          return result
+      ```
+    tags: [matrix, linear-algebra, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `sieve_of_eratosthenes(n)` that returns a list of all prime numbers up to n (inclusive).
+    solution: |
+      ```python
+      def sieve_of_eratosthenes(n: int) -> list[int]:
+          if n < 2:
+              return []
+          is_prime = [True] * (n + 1)
+          is_prime[0] = is_prime[1] = False
+          for i in range(2, int(n**0.5) + 1):
+              if is_prime[i]:
+                  for j in range(i * i, n + 1, i):
+                      is_prime[j] = False
+          return [i for i in range(2, n + 1) if is_prime[i]]
+      ```
+
+      Key patterns: Start marking composites from i*i (smaller multiples already marked). Boolean sieve array gives O(n log log n) time, O(n) space.
+    tags: [prime, sieve, number-theory, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `matrix_multiply(a, b)` that multiplies two 2D matrices represented as lists of lists. Validate dimensions and return the product matrix.
+    solution: |
+      ```python
+      def matrix_multiply(a: list[list[float]], b: list[list[float]]) -> list[list[float]]:
+          if not a or not b:
+              raise ValueError("Empty matrix")
+          cols_a = len(a[0])
+          rows_b = len(b)
+          if cols_a != rows_b:
+              raise ValueError(f"Incompatible dimensions: {cols_a} cols vs {rows_b} rows")
+          rows_a = len(a)
+          cols_b = len(b[0])
+          result = [[0.0] * cols_b for _ in range(rows_a)]
+          for i in range(rows_a):
+              for k in range(cols_a):
+                  if a[i][k] == 0:
+                      continue
+                  for j in range(cols_b):
+                      result[i][j] += a[i][k] * b[k][j]
+              result[i] = [round(v, 10) for v in result[i]]
+          return result
+      ```
+
+      Key patterns: Loop order i-k-j improves cache locality. Skip zero entries in a for sparse matrices. Round to avoid floating point drift.
+    tags: [matrix, multiplication, linear-algebra, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `permutations(items)` that yields all permutations of a list using backtracking. Do not use itertools.
+    solution: |
+      ```python
+      def permutations(items: list) -> list[list]:
+          result: list[list] = []
+
+          def backtrack(path: list, remaining: list) -> None:
+              if not remaining:
+                  result.append(path[:])
+                  return
+              for i in range(len(remaining)):
+                  path.append(remaining[i])
+                  backtrack(path, remaining[:i] + remaining[i + 1:])
+                  path.pop()
+
+          backtrack([], items)
+          return result
+      ```
+
+      Key patterns: Backtracking with explicit path and remaining list. path.pop() undoes the choice after recursion. Produces n! permutations.
+    tags: [permutations, backtracking, recursion, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `power_set(items)` that returns all subsets of a list, including the empty set and the full set.
+    solution: |
+      ```python
+      def power_set(items: list) -> list[list]:
+          result: list[list] = [[]]
+          for item in items:
+              result += [subset + [item] for subset in result]
+          return result
+      ```
+
+      Key patterns: Iterative doubling -- for each new element, copy all existing subsets and append the element. Produces 2^n subsets. No recursion needed.
+    tags: [power-set, combinatorics, subsets, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `sqrt_newton(n, tolerance=1e-10)` that computes the square root of a non-negative number using Newton's method (Heron's method). Return the approximate square root.
+    solution: |
+      ```python
+      def sqrt_newton(n: float, tolerance: float = 1e-10) -> float:
+          if n < 0:
+              raise ValueError("Cannot compute square root of negative number")
+          if n == 0:
+              return 0.0
+          guess = n / 2.0
+          while True:
+              next_guess = (guess + n / guess) / 2.0
+              if abs(next_guess - guess) < tolerance:
+                  return next_guess
+              guess = next_guess
+      ```
+
+      Key patterns: Newton's method iterates x_{n+1} = (x_n + n/x_n) / 2. Converges quadratically -- number of correct digits roughly doubles each iteration. Tolerance-based stopping criterion avoids infinite loops.
+    tags: [newton-method, square-root, numerical, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `convex_hull(points)` that computes the convex hull of a set of 2D points using the Andrew's monotone chain algorithm. Return the hull vertices in counter-clockwise order.
+    solution: |
+      ```python
+      def convex_hull(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
+          points = sorted(set(points))
+          if len(points) <= 1:
+              return list(points)
+
+          def cross(o, a, b):
+              return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+          # Build lower hull
+          lower = []
+          for p in points:
+              while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+                  lower.pop()
+              lower.append(p)
+
+          # Build upper hull
+          upper = []
+          for p in reversed(points):
+              while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+                  upper.pop()
+              upper.append(p)
+
+          # Concatenation; last point of each half is omitted because it's repeated
+          return lower[:-1] + upper[:-1]
+      ```
+
+      Key patterns: Andrew's monotone chain sorts points lexicographically, then builds lower and upper hulls separately using a cross-product turn test. Cross product > 0 means left turn (keep), <= 0 means right turn or collinear (pop). O(n log n) time due to sort.
+    tags: [convex-hull, geometry, monotone-chain, algorithm]
+    difficulty: hard
+
+  - query: |
+      Write a Python function called `topological_sort(graph)` that performs a topological sort on a directed acyclic graph (DAG) represented as an adjacency list. Raise ValueError if the graph has a cycle.
+    solution: |
+      ```python
+      def topological_sort(graph: dict[str, list[str]]) -> list[str]:
+          # Compute in-degrees
+          in_degree: dict[str, int] = {}
+          for node in graph:
+              in_degree.setdefault(node, 0)
+              for neighbor in graph[node]:
+                  in_degree[neighbor] = in_degree.get(neighbor, 0) + 1
+
+          # Start with nodes that have no incoming edges
+          from collections import deque
+          queue = deque([node for node in in_degree if in_degree[node] == 0])
+          result: list[str] = []
+
+          while queue:
+              node = queue.popleft()
+              result.append(node)
+              for neighbor in graph.get(node, []):
+                  in_degree[neighbor] -= 1
+                  if in_degree[neighbor] == 0:
+                      queue.append(neighbor)
+
+          if len(result) != len(in_degree):
+              raise ValueError("Graph contains a cycle")
+          return result
+      ```
+
+      Key patterns: Kahn's algorithm uses in-degree counting and BFS. Nodes with in-degree 0 are added to queue. When a node is processed, its neighbors' in-degrees are decremented. If not all nodes are visited, a cycle exists. O(V + E) time.
+    tags: [topological-sort, graph, dag, kahn, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `horner_eval(coefficients, x)` that evaluates a polynomial at a given point x using Horner's method. The coefficients list is ordered from highest degree to lowest (e.g., [3, 2, 1] represents 3x^2 + 2x + 1).
+    solution: |
+      ```python
+      def horner_eval(coefficients: list[float], x: float) -> float:
+          if not coefficients:
+              return 0.0
+          result = coefficients[0]
+          for coeff in coefficients[1:]:
+              result = result * x + coeff
+          return result
+      ```
+
+      Key patterns: Horner's method rewrites a_n*x^n + ... + a_0 as (...((a_n*x + a_{n-1})*x + a_{n-2})*x + ...) + a_0. Uses only n multiplications and n additions instead of the naive approach's O(n^2) multiplications. Numerically more stable than computing each power separately.
+    tags: [horner, polynomial, evaluation, numerical, algorithm]
+    difficulty: easy
+
+  - query: |
+      Write a Python function that computes pi to n decimal places with arbitrary precision. Return the result as a string.
+    solution: |
+      ```python
+      from decimal import Decimal, getcontext
+
+      def compute_pi(n: int) -> str:
+          getcontext().prec = n + 5
+          # Machin's formula: pi/4 = 4*arctan(1/5) - arctan(1/239)
+          pi = 4 * (4 * _arctan(Decimal(1) / 5) - _arctan(Decimal(1) / 239))
+          return str(pi)[:n + 2]  # "3." plus n digits
+
+      def _arctan(x: Decimal) -> Decimal:
+          power = x
+          result = x
+          for k in range(1, 500):
+              power *= -(x * x)
+              term = power / (2 * k + 1)
+              result += term
+              if abs(term) < Decimal(10) ** -(getcontext().prec - 2):
+                  break
+          return result
+      ```
+    tags: [pi, precision, decimal, arbitrary-precision, math]
+    difficulty: medium
+
+  - query: |
+      Write a Python function that computes Euler's number e to n decimal places with arbitrary precision. Return the result as a string.
+    solution: |
+      ```python
+      from decimal import Decimal, getcontext
+
+      def compute_e(n: int) -> str:
+          getcontext().prec = n + 5
+          e = Decimal(1)
+          term = Decimal(1)
+          for i in range(1, n + 50):
+              term = term / i
+              e = e + term
+          return str(e)[:n + 2]
+
+      # Example: compute_e(50) returns "2.71828182845904523536028747135266249775724709369995"
+      ```
+    tags: [euler, e, precision, decimal, arbitrary-precision, math]
+    difficulty: medium
+
+  - query: |
+      Write a Python function that computes the square root of 2 to n digits of precision. Return the result as a string.
+    solution: |
+      ```python
+      from decimal import Decimal, getcontext
+
+      def compute_sqrt2(n: int) -> str:
+          getcontext().prec = n + 5
+          result = Decimal(2).sqrt()
+          return str(result)[:n + 2]
+
+      # Example: compute_sqrt2(50) returns "1.41421356237309504880168872420969807856967187537694"
+      ```
+    tags: [sqrt, precision, decimal, arbitrary-precision, math]
+    difficulty: easy
+
+  - query: |
+      Write a Python function that computes the golden ratio to n digits of precision. Return the result as a string.
+    solution: |
+      ```python
+      from decimal import Decimal, getcontext
+
+      def compute_golden_ratio(n: int) -> str:
+          getcontext().prec = n + 5
+          result = (1 + Decimal(5).sqrt()) / 2
+          return str(result)[:n + 2]
+
+      # Example: compute_golden_ratio(30) returns "1.61803398874989484820458683436"
+      ```
+    tags: [golden-ratio, precision, decimal, arbitrary-precision, math]
+    difficulty: easy

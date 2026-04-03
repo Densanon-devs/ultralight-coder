@@ -1,0 +1,121 @@
+domain: javascript
+category: js_typescript
+examples:
+  - query: |
+      Write a TypeScript generic function that picks specified keys from an object.
+    solution: |
+      ```typescript
+      function pick<T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
+        const result = {} as Pick<T, K>;
+        for (const key of keys) {
+          result[key] = obj[key];
+        }
+        return result;
+      }
+      ```
+    tags: [typescript, generics, utility, pick]
+    difficulty: medium
+
+  - query: |
+      Write a TypeScript Result type and helper functions for error handling without exceptions.
+    solution: |
+      ```typescript
+      type Result<T, E = Error> =
+        | { ok: true; value: T }
+        | { ok: false; error: E };
+
+      function ok<T>(value: T): Result<T, never> {
+        return { ok: true, value };
+      }
+
+      function err<E>(error: E): Result<never, E> {
+        return { ok: false, error };
+      }
+
+      function unwrap<T>(result: Result<T>): T {
+        if (result.ok) return result.value;
+        throw result.error;
+      }
+      ```
+    tags: [typescript, result, error-handling, discriminated-union]
+    difficulty: medium
+
+  - query: |
+      Write a TypeScript generic class for a type-safe event emitter.
+    solution: |
+      ```typescript
+      type EventMap = Record<string, unknown>;
+
+      class TypedEmitter<T extends EventMap> {
+        private listeners = new Map<keyof T, Set<(data: any) => void>>();
+
+        on<K extends keyof T>(event: K, fn: (data: T[K]) => void): void {
+          if (!this.listeners.has(event)) this.listeners.set(event, new Set());
+          this.listeners.get(event)!.add(fn);
+        }
+
+        off<K extends keyof T>(event: K, fn: (data: T[K]) => void): void {
+          this.listeners.get(event)?.delete(fn);
+        }
+
+        emit<K extends keyof T>(event: K, data: T[K]): void {
+          for (const fn of this.listeners.get(event) ?? []) {
+            fn(data);
+          }
+        }
+      }
+      ```
+    tags: [typescript, generics, events, class]
+    difficulty: hard
+
+  - query: |
+      Write a TypeScript function that validates an object against a schema at runtime.
+    solution: |
+      ```typescript
+      type Schema = Record<string, "string" | "number" | "boolean">;
+
+      function validate<S extends Schema>(
+        schema: S,
+        data: unknown,
+      ): data is { [K in keyof S]: S[K] extends "string" ? string : S[K] extends "number" ? number : boolean } {
+        if (typeof data !== "object" || data === null) return false;
+        const obj = data as Record<string, unknown>;
+        for (const [key, type] of Object.entries(schema)) {
+          if (typeof obj[key] !== type) return false;
+        }
+        return true;
+      }
+      ```
+    tags: [typescript, validation, schema, type-guard]
+    difficulty: hard
+
+  - query: |
+      Write a TypeScript generic stack class with push, pop, and peek.
+    solution: |
+      ```typescript
+      class Stack<T> {
+        private items: T[] = [];
+
+        push(item: T): void {
+          this.items.push(item);
+        }
+
+        pop(): T | undefined {
+          return this.items.pop();
+        }
+
+        peek(): T | undefined {
+          return this.items[this.items.length - 1];
+        }
+
+        get size(): number {
+          return this.items.length;
+        }
+
+        isEmpty(): boolean {
+          return this.items.length === 0;
+        }
+      }
+      ```
+    tags: [typescript, generics, stack, data-structure]
+    difficulty: easy

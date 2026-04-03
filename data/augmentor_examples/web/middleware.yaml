@@ -1,0 +1,49 @@
+domain: web
+category: web_middleware
+examples:
+  - query: |
+      Write a WSGI middleware wrapper that logs how long each HTTP request takes to process.
+    solution: |
+      ```python
+      import time
+
+      def timing_middleware(app):
+          def wrapper(environ, start_response):
+              start = time.time()
+              path = environ.get("PATH_INFO", "/")
+              method = environ.get("REQUEST_METHOD", "GET")
+              response = app(environ, start_response)
+              elapsed = (time.time() - start) * 1000
+              print(f"{method} {path} took {elapsed:.1f}ms")
+              return response
+          return wrapper
+
+      # Usage: wrapped_app = timing_middleware(my_wsgi_app)
+      ```
+    tags: [middleware, wsgi, logging, performance]
+    difficulty: easy
+
+  - query: |
+      Write an authentication middleware that checks for an API key in the X-API-Key header and returns a 401 JSON response if the key is missing or invalid.
+    solution: |
+      ```python
+      import json
+
+      VALID_KEYS = {"sk-abc123", "sk-dev456"}
+
+      def auth_middleware(app):
+          def wrapper(environ, start_response):
+              key = environ.get("HTTP_X_API_KEY", "")
+              if key not in VALID_KEYS:
+                  body = json.dumps({"error": "Invalid or missing API key"})
+                  start_response("401 Unauthorized", [
+                      ("Content-Type", "application/json"),
+                  ])
+                  return [body.encode()]
+              return app(environ, start_response)
+          return wrapper
+
+      # Usage: secured_app = auth_middleware(my_wsgi_app)
+      ```
+    tags: [middleware, wsgi, authentication, api-key]
+    difficulty: easy

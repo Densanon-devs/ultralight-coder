@@ -1,0 +1,258 @@
+domain: class_design
+category: data_structure
+examples:
+  - query: |
+      Write an LRU Cache class with get, put, and capacity eviction.
+    solution: |
+      ```python
+      from collections import OrderedDict
+
+
+      class LRUCache:
+          def __init__(self, capacity):
+              self.capacity = capacity
+              self._cache = OrderedDict()
+
+          def get(self, key):
+              if key not in self._cache:
+                  return -1
+              self._cache.move_to_end(key)
+              return self._cache[key]
+
+          def put(self, key, value):
+              if key in self._cache:
+                  self._cache.move_to_end(key)
+              self._cache[key] = value
+              if len(self._cache) > self.capacity:
+                  self._cache.popitem(last=False)
+
+          def __len__(self):
+              return len(self._cache)
+      ```
+    tags: [lru-cache, OrderedDict, eviction, data-structure]
+    difficulty: medium
+
+  - query: |
+      Write an `LFUCache` class (Least Frequently Used) with get and put operations. When capacity is exceeded, evict the least frequently used key. If there is a tie, evict the least recently used among them.
+    solution: |
+      ```python
+      from collections import defaultdict, OrderedDict
+
+
+      class LFUCache:
+          def __init__(self, capacity: int) -> None:
+              self.capacity = capacity
+              self._vals: dict = {}
+              self._freq: dict[object, int] = {}
+              self._freq_buckets: dict[int, OrderedDict] = defaultdict(OrderedDict)
+              self._min_freq: int = 0
+
+          def get(self, key):
+              if key not in self._vals:
+                  return -1
+              self._touch(key)
+              return self._vals[key]
+
+          def put(self, key, value) -> None:
+              if self.capacity <= 0:
+                  return
+              if key in self._vals:
+                  self._vals[key] = value
+                  self._touch(key)
+                  return
+              if len(self._vals) >= self.capacity:
+                  bucket = self._freq_buckets[self._min_freq]
+                  evict_key, _ = bucket.popitem(last=False)
+                  del self._vals[evict_key]
+                  del self._freq[evict_key]
+              self._vals[key] = value
+              self._freq[key] = 1
+              self._freq_buckets[1][key] = None
+              self._min_freq = 1
+
+          def _touch(self, key) -> None:
+              f = self._freq[key]
+              del self._freq_buckets[f][key]
+              if not self._freq_buckets[f] and f == self._min_freq:
+                  self._min_freq += 1
+              self._freq[key] = f + 1
+              self._freq_buckets[f + 1][key] = None
+
+          def __len__(self) -> int:
+              return len(self._vals)
+      ```
+
+      Key patterns: Three data structures -- vals dict, freq counter, and freq_buckets mapping frequency to OrderedDict. _touch increments frequency and moves key to new bucket. _min_freq tracks the lowest frequency for O(1) eviction.
+    tags: [lfu-cache, OrderedDict, eviction, frequency, data-structure]
+    difficulty: hard
+
+  - query: |
+      Write a `TTLCache` class that stores key-value pairs with a time-to-live (TTL) in seconds. Expired entries are automatically removed on access. Support get, put, and cleanup methods. Accept an optional `now` parameter for deterministic testing.
+    solution: |
+      ```python
+      import time as _time
+
+
+      class TTLCache:
+          def __init__(self, capacity: int, ttl: float) -> None:
+              self.capacity = capacity
+              self.ttl = ttl
+              self._store: dict[object, tuple] = {}  # key -> (value, expire_at)
+
+          def put(self, key, value, now: float | None = None) -> None:
+              now = now if now is not None else _time.time()
+              self._evict_expired(now)
+              if key not in self._store and len(self._store) >= self.capacity:
+                  # Evict the entry closest to expiry
+                  oldest = min(self._store, key=lambda k: self._store[k][1])
+                  del self._store[oldest]
+              self._store[key] = (value, now + self.ttl)
+
+          def get(self, key, now: float | None = None):
+              now = now if now is not None else _time.time()
+              if key not in self._store:
+                  return None
+              value, expire_at = self._store[key]
+              if now >= expire_at:
+                  del self._store[key]
+                  return None
+              return value
+
+          def cleanup(self, now: float | None = None) -> int:
+              """Remove all expired entries. Returns count of removed entries."""
+              now = now if now is not None else _time.time()
+              return self._evict_expired(now)
+
+          def _evict_expired(self, now: float) -> int:
+              expired = [k for k, (_, exp) in self._store.items() if now >= exp]
+              for k in expired:
+                  del self._store[k]
+              return len(expired)
+
+          def __len__(self) -> int:
+              return len(self._store)
+
+          def __contains__(self, key) -> bool:
+              if key not in self._store:
+                  return False
+              _, expire_at = self._store[key]
+              return _time.time() < expire_at
+      ```
+
+      Key patterns: Each entry stores (value, expire_at). Lazy expiry on get -- check timestamp before returning. cleanup() for bulk removal. Optional now parameter enables deterministic testing without mocking time.
+    tags: [ttl-cache, expiry, time, testing, data-structure]
+    difficulty: medium
+
+  - query: |
+      Write a Python class called `BoundedFIFOMap` that stores key-value pairs with a fixed capacity. When the capacity is exceeded, the oldest inserted key (FIFO order) is evicted, regardless of access pattern. Support get, put, delete, and __len__.
+    solution: |
+      ```python
+      from collections import OrderedDict
+
+
+      class BoundedFIFOMap:
+          def __init__(self, capacity: int) -> None:
+              if capacity <= 0:
+                  raise ValueError("Capacity must be positive")
+              self._capacity = capacity
+              self._store: OrderedDict = OrderedDict()
+
+          def put(self, key, value) -> None:
+              if key in self._store:
+                  # Update value in place without changing insertion order
+                  self._store[key] = value
+              else:
+                  if len(self._store) >= self._capacity:
+                      # Evict oldest (first inserted)
+                      self._store.popitem(last=False)
+                  self._store[key] = value
+
+          def get(self, key, default=None):
+              # Unlike LRU, access does NOT change eviction order
+              return self._store.get(key, default)
+
+          def delete(self, key) -> None:
+              if key not in self._store:
+                  raise KeyError(key)
+              del self._store[key]
+
+          def __len__(self) -> int:
+              return len(self._store)
+
+          def __contains__(self, key) -> bool:
+              return key in self._store
+
+          @property
+          def capacity(self) -> int:
+              return self._capacity
+      ```
+
+      Key patterns: Unlike LRU, FIFO eviction ignores access frequency and recency. OrderedDict preserves insertion order; popitem(last=False) removes the oldest entry. Updates to existing keys do NOT reset their position in the eviction queue. All operations O(1).
+    tags: [fifo, bounded-map, eviction, OrderedDict, data-structure]
+    difficulty: medium
+
+  - query: |
+      Write a Python class called `WriteThroughCache` that wraps a backing store (any dict-like object). On `put`, the value is written to both the cache and the backing store. On `get`, the cache is checked first; on miss, the backing store is queried and the result is cached. Support a capacity limit with LRU eviction.
+    solution: |
+      ```python
+      from collections import OrderedDict
+
+
+      class WriteThroughCache:
+          def __init__(self, backing_store: dict, capacity: int) -> None:
+              if capacity <= 0:
+                  raise ValueError("Capacity must be positive")
+              self._store = backing_store
+              self._capacity = capacity
+              self._cache: OrderedDict = OrderedDict()
+
+          def get(self, key):
+              # Cache hit
+              if key in self._cache:
+                  self._cache.move_to_end(key)
+                  return self._cache[key]
+              # Cache miss -- check backing store
+              if key in self._store:
+                  value = self._store[key]
+                  self._cache_put(key, value)
+                  return value
+              return None
+
+          def put(self, key, value) -> None:
+              # Write-through: always write to backing store
+              self._store[key] = value
+              self._cache_put(key, value)
+
+          def delete(self, key) -> None:
+              self._cache.pop(key, None)
+              if key in self._store:
+                  del self._store[key]
+
+          def _cache_put(self, key, value) -> None:
+              if key in self._cache:
+                  self._cache.move_to_end(key)
+                  self._cache[key] = value
+              else:
+                  if len(self._cache) >= self._capacity:
+                      self._cache.popitem(last=False)
+                  self._cache[key] = value
+
+          def invalidate(self, key) -> None:
+              """Remove key from cache only, backing store keeps it."""
+              self._cache.pop(key, None)
+
+          def flush(self) -> None:
+              """Clear the cache entirely."""
+              self._cache.clear()
+
+          @property
+          def cache_size(self) -> int:
+              return len(self._cache)
+
+          def __len__(self) -> int:
+              return len(self._store)
+      ```
+
+      Key patterns: Write-through policy ensures the backing store is always up-to-date on writes. Cache miss on read triggers a fill from the backing store. LRU eviction keeps the cache bounded. invalidate() removes a single cached entry without touching the backing store, useful when external changes bypass the cache. flush() clears all cached data.
+    tags: [write-through-cache, lru, backing-store, eviction, data-structure]
+    difficulty: hard

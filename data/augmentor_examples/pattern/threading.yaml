@@ -1,0 +1,495 @@
+domain: pattern
+category: pattern_threading
+examples:
+  - query: |
+      Write a ThreadSafeCounter with Lock (increment/decrement accept
+      optional n parameter) and a Future class with Condition variable
+      for set_result, set_exception, result(timeout), and done().
+    solution: |
+      ```python
+      import threading
+
+
+      class ThreadSafeCounter:
+          def __init__(self):
+              self._value = 0
+              self._lock = threading.Lock()
+
+          def increment(self, n=1):
+              with self._lock:
+                  self._value += n
+
+          def decrement(self, n=1):
+              with self._lock:
+                  self._value -= n
+
+          @property
+          def value(self):
+              with self._lock:
+                  return self._value
+
+
+      class Future:
+          def __init__(self):
+              self._result = None
+              self._exception = None
+              self._done = False
+              self._cond = threading.Condition()
+
+          def set_result(self, value):
+              with self._cond:
+                  if self._done:
+                      raise RuntimeError('result already set')
+                  self._result = value
+                  self._done = True
+                  self._cond.notify_all()
+
+          def set_exception(self, exc):
+              with self._cond:
+                  if self._done:
+                      raise RuntimeError('result already set')
+                  self._exception = exc
+                  self._done = True
+                  self._cond.notify_all()
+
+          def result(self, timeout=None):
+              with self._cond:
+                  if not self._done:
+                      self._cond.wait(timeout=timeout)
+                  if not self._done:
+                      raise TimeoutError('result not available')
+                  if self._exception is not None:
+                      raise self._exception
+                  return self._result
+
+          def done(self):
+              with self._cond:
+                  return self._done
+      ```
+
+      Key: Lock for simple mutual exclusion, Condition for wait/notify.
+      set_result/set_exception raise RuntimeError if called twice.
+      result() re-raises stored exception. done() checks completion.
+    tags: [threading, lock, condition, future, thread-safety]
+    difficulty: hard
+
+  - query: |
+      Write a thread-safe BoundedQueue with put(item, timeout) and
+      get(timeout) using Condition variables.
+    solution: |
+      ```python
+      import threading
+      from collections import deque
+
+
+      class BoundedQueue:
+          def __init__(self, maxsize):
+              self._queue = deque()
+              self._maxsize = maxsize
+              self._lock = threading.Lock()
+              self._not_full = threading.Condition(self._lock)
+              self._not_empty = threading.Condition(self._lock)
+
+          def put(self, item, timeout=None):
+              with self._not_full:
+                  if len(self._queue) >= self._maxsize:
+                      if not self._not_full.wait(timeout=timeout):
+                          raise TimeoutError('queue full')
+                  self._queue.append(item)
+                  self._not_empty.notify()
+
+          def get(self, timeout=None):
+              with self._not_empty:
+                  if not self._queue:
+                      if not self._not_empty.wait(timeout=timeout):
+                          raise TimeoutError('queue empty')
+                  item = self._queue.popleft()
+                  self._not_full.notify()
+                  return item
+
+          def __len__(self):
+              with self._lock:
+                  return len(self._queue)
+      ```
+
+      Key: two Condition variables sharing one Lock. put waits on not_full, notifies not_empty. get does the reverse.
+    tags: [threading, condition, queue, producer-consumer, bounded]
+    difficulty: hard
+
+  - query: |
+      Write a ThreadPool class that manages a fixed number of worker
+      threads. Support submit(fn, *args, **kwargs) that returns a
+      Future, and shutdown() that waits for all tasks to complete.
+    solution: |
+      ```python
+      import threading
+      from collections import deque
+
+
+      class _Future:
+          def __init__(self):
+              self._result = None
+              self._exception = None
+              self._done = threading.Event()
+
+          def result(self, timeout=None):
+              self._done.wait(timeout=timeout)
+              if not self._done.is_set():
+                  raise TimeoutError("result not ready")
+              if self._exception is not None:
+                  raise self._exception
+              return self._result
+
+          def done(self):
+              return self._done.is_set()
+
+
+      class ThreadPool:
+          def __init__(self, num_workers):
+              self._tasks = deque()
+              self._lock = threading.Lock()
+              self._has_task = threading.Condition(self._lock)
+              self._shutdown = False
+              self._workers = []
+              for _ in range(num_workers):
+                  t = threading.Thread(target=self._worker, daemon=True)
+                  t.start()
+                  self._workers.append(t)
+
+          def _worker(self):
+              while True:
+                  with self._has_task:
+                      while not self._tasks and not self._shutdown:
+                          self._has_task.wait()
+                      if self._shutdown and not self._tasks:
+                          return
+                      fn, args, kwargs, future = self._tasks.popleft()
+                  try:
+                      result = fn(*args, **kwargs)
+                      future._result = result
+                  except Exception as e:
+                      future._exception = e
+                  finally:
+                      future._done.set()
+
+          def submit(self, fn, *args, **kwargs):
+              future = _Future()
+              with self._has_task:
+                  if self._shutdown:
+                      raise RuntimeError("pool is shut down")
+                  self._tasks.append((fn, args, kwargs, future))
+                  self._has_task.notify()
+              return future
+
+          def shutdown(self):
+              with self._has_task:
+                  self._shutdown = True
+                  self._has_task.notify_all()
+              for t in self._workers:
+                  t.join()
+      ```
+
+      Key: workers loop waiting on a Condition. submit appends to a task deque and notifies one worker. shutdown sets a flag, notifies all workers, and joins threads. Each task gets a Future with an Event for signaling completion.
+    tags: [threading, thread-pool, future, condition, worker]
+    difficulty: hard
+
+  - query: |
+      Write a ReadWriteLock that allows multiple concurrent readers
+      but exclusive writer access. Provide acquire_read(), release_read(),
+      acquire_write(), release_write(), and context manager helpers
+      read_lock() and write_lock().
+    solution: |
+      ```python
+      import threading
+      from contextlib import contextmanager
+
+
+      class ReadWriteLock:
+          def __init__(self):
+              self._lock = threading.Lock()
+              self._readers_ok = threading.Condition(self._lock)
+              self._writers_ok = threading.Condition(self._lock)
+              self._readers = 0
+              self._writer = False
+              self._waiting_writers = 0
+
+          def acquire_read(self):
+              with self._readers_ok:
+                  while self._writer or self._waiting_writers > 0:
+                      self._readers_ok.wait()
+                  self._readers += 1
+
+          def release_read(self):
+              with self._lock:
+                  self._readers -= 1
+                  if self._readers == 0:
+                      self._writers_ok.notify()
+
+          def acquire_write(self):
+              with self._writers_ok:
+                  self._waiting_writers += 1
+                  while self._writer or self._readers > 0:
+                      self._writers_ok.wait()
+                  self._waiting_writers -= 1
+                  self._writer = True
+
+          def release_write(self):
+              with self._lock:
+                  self._writer = False
+                  self._readers_ok.notify_all()
+                  self._writers_ok.notify()
+
+          @contextmanager
+          def read_lock(self):
+              self.acquire_read()
+              try:
+                  yield
+              finally:
+                  self.release_read()
+
+          @contextmanager
+          def write_lock(self):
+              self.acquire_write()
+              try:
+                  yield
+              finally:
+                  self.release_write()
+      ```
+
+      Key: readers block when a writer is active or waiting (prevents writer starvation). Writers block until no readers and no other writer. release_write notifies both reader and writer queues.
+    tags: [threading, read-write-lock, condition, concurrency, context-manager]
+    difficulty: hard
+
+  - query: |
+      Write a Barrier class that blocks N threads until all have
+      arrived, then releases them all at once. Support a reset()
+      method and an optional action callback that runs once when
+      the barrier trips.
+    solution: |
+      ```python
+      import threading
+
+
+      class Barrier:
+          def __init__(self, parties, action=None):
+              self._parties = parties
+              self._action = action
+              self._count = 0
+              self._generation = 0
+              self._cond = threading.Condition()
+
+          def wait(self, timeout=None):
+              with self._cond:
+                  gen = self._generation
+                  self._count += 1
+                  index = self._count
+
+                  if self._count == self._parties:
+                      self._count = 0
+                      self._generation += 1
+                      if self._action is not None:
+                          self._action()
+                      self._cond.notify_all()
+                      return 0
+
+                  self._cond.wait_for(
+                      lambda: self._generation != gen,
+                      timeout=timeout,
+                  )
+                  if self._generation == gen:
+                      raise TimeoutError("barrier wait timed out")
+                  return index
+
+          def reset(self):
+              with self._cond:
+                  self._count = 0
+                  self._generation += 1
+                  self._cond.notify_all()
+
+          @property
+          def parties(self):
+              return self._parties
+
+          @property
+          def n_waiting(self):
+              with self._cond:
+                  return self._count
+      ```
+
+      Key: generation counter prevents spurious wakeups from previous barrier cycles. Last thread to arrive runs the action, bumps the generation, and notifies all waiters. wait() returns the arrival index (0 for the tripping thread).
+    tags: [threading, barrier, synchronization, condition]
+    difficulty: hard
+
+  - query: |
+      Write a `WorkerPool` class with a fixed number of worker threads and a task queue. Support `submit(task)` to enqueue a callable, `results()` to collect completed results, and `shutdown()` to stop workers after all tasks finish. Workers pull tasks from a shared queue.
+    solution: |
+      ```python
+      import threading
+      from collections import deque
+
+
+      class WorkerPool:
+          def __init__(self, num_workers: int):
+              self._task_queue: deque = deque()
+              self._results: list = []
+              self._lock = threading.Lock()
+              self._has_task = threading.Condition(self._lock)
+              self._shutdown = False
+              self._workers: list[threading.Thread] = []
+              for _ in range(num_workers):
+                  t = threading.Thread(target=self._worker, daemon=True)
+                  t.start()
+                  self._workers.append(t)
+
+          def _worker(self):
+              while True:
+                  with self._has_task:
+                      while not self._task_queue and not self._shutdown:
+                          self._has_task.wait()
+                      if self._shutdown and not self._task_queue:
+                          return
+                      task = self._task_queue.popleft()
+                  try:
+                      result = task()
+                      with self._lock:
+                          self._results.append(("ok", result))
+                  except Exception as e:
+                      with self._lock:
+                          self._results.append(("error", e))
+
+          def submit(self, task: callable) -> None:
+              with self._has_task:
+                  if self._shutdown:
+                      raise RuntimeError("pool is shut down")
+                  self._task_queue.append(task)
+                  self._has_task.notify()
+
+          def results(self) -> list:
+              """Return a copy of all collected results so far."""
+              with self._lock:
+                  return list(self._results)
+
+          def pending(self) -> int:
+              with self._lock:
+                  return len(self._task_queue)
+
+          def shutdown(self, wait: bool = True) -> None:
+              with self._has_task:
+                  self._shutdown = True
+                  self._has_task.notify_all()
+              if wait:
+                  for t in self._workers:
+                      t.join()
+      ```
+
+      Key patterns: Workers loop waiting on a Condition variable. Tasks are pulled from a shared deque under lock. Results are stored as (status, value) tuples -- "ok" or "error". shutdown sets a flag and notifies all workers; with wait=True it joins all threads. submit raises RuntimeError after shutdown.
+    tags: [threading, worker-pool, task-queue, condition, producer-consumer]
+    difficulty: hard
+
+  - query: |
+      Write a `CountdownLatch` synchronization primitive. Initialize with a count. Threads call `count_down()` to decrement. Threads calling `wait(timeout)` block until the count reaches zero. Support `reset(count)` and a `count` property.
+    solution: |
+      ```python
+      import threading
+
+
+      class CountdownLatch:
+          def __init__(self, count: int):
+              if count < 0:
+                  raise ValueError("count must be non-negative")
+              self._count = count
+              self._cond = threading.Condition()
+
+          def count_down(self) -> None:
+              """Decrement the count. When it reaches zero, wake all waiters."""
+              with self._cond:
+                  if self._count <= 0:
+                      return
+                  self._count -= 1
+                  if self._count == 0:
+                      self._cond.notify_all()
+
+          def wait(self, timeout: float | None = None) -> bool:
+              """Block until count reaches zero. Returns True if latch
+              opened, False on timeout."""
+              with self._cond:
+                  if self._count == 0:
+                      return True
+                  return self._cond.wait_for(
+                      lambda: self._count == 0, timeout=timeout
+                  )
+
+          def reset(self, count: int) -> None:
+              """Reset the latch with a new count."""
+              with self._cond:
+                  self._count = count
+
+          @property
+          def count(self) -> int:
+              with self._cond:
+                  return self._count
+      ```
+
+      Key patterns: Condition variable with wait_for for predicate-based waiting. count_down notifies all waiters when count hits zero. wait returns a bool indicating whether the latch opened or timed out. Thread-safe property for inspecting current count.
+    tags: [threading, countdown-latch, synchronization, condition]
+    difficulty: medium
+
+  - query: |
+      Write a `PeriodicScheduler` class that runs registered tasks at fixed intervals using a background thread. Support `schedule(name, interval_seconds, func)`, `cancel(name)`, and `shutdown()`. Each task runs independently at its own interval.
+    solution: |
+      ```python
+      import threading
+      import time
+
+
+      class PeriodicScheduler:
+          def __init__(self):
+              self._tasks: dict[str, dict] = {}
+              self._lock = threading.Lock()
+              self._stop_event = threading.Event()
+              self._thread = threading.Thread(target=self._run, daemon=True)
+              self._thread.start()
+
+          def schedule(self, name: str, interval: float, func: callable) -> None:
+              """Register a task to run every `interval` seconds."""
+              with self._lock:
+                  self._tasks[name] = {
+                      "interval": interval,
+                      "func": func,
+                      "next_run": time.monotonic() + interval,
+                  }
+
+          def cancel(self, name: str) -> bool:
+              """Remove a scheduled task. Returns True if it existed."""
+              with self._lock:
+                  return self._tasks.pop(name, None) is not None
+
+          def _run(self) -> None:
+              while not self._stop_event.is_set():
+                  now = time.monotonic()
+                  tasks_to_run = []
+                  with self._lock:
+                      for name, task in self._tasks.items():
+                          if now >= task["next_run"]:
+                              tasks_to_run.append((name, task))
+                              task["next_run"] = now + task["interval"]
+                  for name, task in tasks_to_run:
+                      try:
+                          task["func"]()
+                      except Exception:
+                          pass  # tasks should handle their own errors
+                  self._stop_event.wait(0.05)  # poll interval
+
+          def shutdown(self) -> None:
+              self._stop_event.set()
+              self._thread.join()
+
+          @property
+          def active_tasks(self) -> list[str]:
+              with self._lock:
+                  return list(self._tasks.keys())
+      ```
+
+      Key patterns: Single background thread polls all registered tasks. Each task has its own interval and next_run timestamp based on monotonic time. Lock protects the task dict but tasks execute outside the lock. stop_event.wait(0.05) provides both sleep and shutdown responsiveness. Failed tasks don't crash the scheduler.
+    tags: [threading, scheduler, periodic, timer, background]
+    difficulty: hard

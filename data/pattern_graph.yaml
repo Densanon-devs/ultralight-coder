@@ -1,0 +1,181 @@
+# Pattern Graph — Dependency and affinity relationships between categories.
+#
+# Each node is a category from data/augmentor_examples/.
+# Edges:
+#   depends_on  — prerequisite pattern knowledge (directional, always included)
+#   related_to  — commonly co-occurring patterns (bidirectional affinity)
+#   weight      — 0.0-1.0 strength of relationship (used for traversal priority)
+#
+# v2: Expanded edges based on benchmark data. Added cross-domain links,
+#     strengthened dependencies where graph retrieval proved beneficial.
+#
+# Used by engine/pattern_graph.py for graph-enhanced example retrieval.
+
+nodes:
+  pattern_decorator:
+    description: "Decorator pattern — closures, functools.wraps, wrapper attributes"
+    depends_on: []
+    related_to:
+      - {category: pattern_context_manager, weight: 0.5}
+      - {category: resilience_retry, weight: 0.8}
+      - {category: pattern_rate_limit, weight: 0.5}
+      - {category: pattern_pipeline, weight: 0.3}
+
+  pattern_router:
+    description: "HTTP router — decorator-based registration, regex path params"
+    depends_on:
+      - {category: pattern_decorator, weight: 0.9}
+    related_to:
+      - {category: pattern_middleware, weight: 0.8}
+      - {category: pattern_rate_limit, weight: 0.6}
+      - {category: pattern_event, weight: 0.3}
+
+  pattern_parser:
+    description: "Recursive descent parser — tokenizer, expression evaluator"
+    depends_on: []
+    related_to:
+      - {category: pattern_template, weight: 0.5}
+      - {category: pattern_state_machine, weight: 0.4}
+      - {category: algorithm, weight: 0.3}
+
+  pattern_orm:
+    description: "Mini ORM — metaclass, Field descriptor, SQL generation"
+    depends_on:
+      - {category: pattern_descriptor, weight: 0.9}
+    related_to:
+      - {category: pattern_serialization, weight: 0.7}
+      - {category: data_structure, weight: 0.3}
+
+  pattern_state_machine:
+    description: "FSM — transitions, guards, history tracking"
+    depends_on: []
+    related_to:
+      - {category: pattern_event, weight: 0.6}
+      - {category: pattern_parser, weight: 0.4}
+      - {category: pattern_context_manager, weight: 0.3}
+
+  pattern_context_manager:
+    description: "Context manager — __enter__/__exit__, resource cleanup"
+    depends_on: []
+    related_to:
+      - {category: pattern_decorator, weight: 0.5}
+      - {category: pattern_threading, weight: 0.5}
+      - {category: pattern_iterator, weight: 0.3}
+
+  pattern_threading:
+    description: "Thread safety — Lock, Condition, producer-consumer"
+    depends_on:
+      - {category: pattern_context_manager, weight: 0.5}
+    related_to:
+      - {category: pattern_rate_limit, weight: 0.4}
+      - {category: data_structure, weight: 0.3}
+
+  pattern_middleware:
+    description: "Middleware pipeline — chain of responsibility, next_fn, pubsub"
+    depends_on:
+      - {category: pattern_decorator, weight: 0.6}
+    related_to:
+      - {category: pattern_router, weight: 0.8}
+      - {category: pattern_event, weight: 0.5}
+      - {category: pattern_iterator, weight: 0.3}
+
+  pattern_serialization:
+    description: "Serialize/deserialize — recursive traversal, type registry"
+    depends_on: []
+    related_to:
+      - {category: pattern_orm, weight: 0.7}
+      - {category: pattern_descriptor, weight: 0.5}
+      - {category: algorithm, weight: 0.2}
+
+  pattern_iterator:
+    description: "Iterator protocol — __iter__/__next__, lazy evaluation"
+    depends_on: []
+    related_to:
+      - {category: pattern_context_manager, weight: 0.4}
+      - {category: pattern_pipeline, weight: 0.7}
+      - {category: data_structure, weight: 0.3}
+
+  pattern_template:
+    description: "Template engine — variable substitution, for loops"
+    depends_on: []
+    related_to:
+      - {category: pattern_parser, weight: 0.5}
+      - {category: pattern_glob, weight: 0.4}
+      - {category: pattern_iterator, weight: 0.3}
+
+  pattern_descriptor:
+    description: "Descriptor protocol — __get__/__set__/__set_name__"
+    depends_on: []
+    related_to:
+      - {category: pattern_orm, weight: 0.9}
+      - {category: pattern_serialization, weight: 0.5}
+      - {category: pattern_context_manager, weight: 0.3}
+
+  pattern_event:
+    description: "Event emitter — on/off/emit/once, observer pattern"
+    depends_on: []
+    related_to:
+      - {category: pattern_middleware, weight: 0.5}
+      - {category: pattern_state_machine, weight: 0.6}
+      - {category: pattern_decorator, weight: 0.3}
+
+  pattern_rate_limit:
+    description: "Token bucket rate limiter — refill, allow, time-based"
+    depends_on: []
+    related_to:
+      - {category: pattern_decorator, weight: 0.5}
+      - {category: pattern_threading, weight: 0.4}
+      - {category: pattern_middleware, weight: 0.3}
+
+  pattern_tree:
+    description: "BST, Trie, BinaryTree — traversals, insert/delete"
+    depends_on: []
+    related_to:
+      - {category: algorithm, weight: 0.6}
+      - {category: data_structure, weight: 0.4}
+      - {category: pattern_iterator, weight: 0.2}
+
+  pattern_glob:
+    description: "Glob/wildcard pattern matching — DP, * and ? wildcards"
+    depends_on: []
+    related_to:
+      - {category: pattern_template, weight: 0.4}
+      - {category: algorithm, weight: 0.4}
+
+  pattern_pipeline:
+    description: "Lazy data pipeline — map/filter/take/collect chaining"
+    depends_on:
+      - {category: pattern_iterator, weight: 0.8}
+    related_to:
+      - {category: pattern_decorator, weight: 0.4}
+      - {category: pattern_middleware, weight: 0.3}
+
+  algorithm:
+    description: "Algorithms — fibonacci, roman numerals, kadane, binary search"
+    depends_on: []
+    related_to:
+      - {category: data_structure, weight: 0.6}
+      - {category: pattern_tree, weight: 0.6}
+      - {category: pattern_glob, weight: 0.3}
+
+  data_structure:
+    description: "Data structures — stack, LRU cache"
+    depends_on: []
+    related_to:
+      - {category: algorithm, weight: 0.6}
+      - {category: pattern_tree, weight: 0.4}
+      - {category: pattern_threading, weight: 0.3}
+
+  resilience_retry:
+    description: "Retry with backoff — decorator-based resilience"
+    depends_on:
+      - {category: pattern_decorator, weight: 0.9}
+    related_to:
+      - {category: pattern_rate_limit, weight: 0.5}
+      - {category: pattern_context_manager, weight: 0.3}
+
+  basic:
+    description: "Basic coding — string ops, file I/O, word frequency"
+    depends_on: []
+    related_to:
+      - {category: algorithm, weight: 0.2}

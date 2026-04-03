@@ -1,0 +1,94 @@
+domain: database
+category: db_crud
+examples:
+  - query: |
+      Write a SQLite CRUD class with create_table, insert, get_by_id, update,
+      and delete methods. Use parameterized queries to prevent SQL injection.
+    solution: |
+      ```python
+      import sqlite3
+
+
+      class CrudTable:
+          def __init__(self, db_path: str):
+              self.conn = sqlite3.connect(db_path)
+              self.conn.row_factory = sqlite3.Row
+
+          def create_table(self):
+              self.conn.execute(
+                  "CREATE TABLE IF NOT EXISTS users "
+                  "(id INTEGER PRIMARY KEY, name TEXT, email TEXT)"
+              )
+              self.conn.commit()
+
+          def insert(self, name: str, email: str) -> int:
+              cur = self.conn.execute(
+                  "INSERT INTO users (name, email) VALUES (?, ?)",
+                  (name, email),
+              )
+              self.conn.commit()
+              return cur.lastrowid
+
+          def get_by_id(self, user_id: int) -> dict | None:
+              row = self.conn.execute(
+                  "SELECT * FROM users WHERE id = ?", (user_id,)
+              ).fetchone()
+              return dict(row) if row else None
+
+          def update(self, user_id: int, name: str, email: str):
+              self.conn.execute(
+                  "UPDATE users SET name = ?, email = ? WHERE id = ?",
+                  (name, email, user_id),
+              )
+              self.conn.commit()
+
+          def delete(self, user_id: int):
+              self.conn.execute(
+                  "DELETE FROM users WHERE id = ?", (user_id,)
+              )
+              self.conn.commit()
+      ```
+
+      Key patterns: Parameterized queries (? placeholders) prevent SQL injection. row_factory=sqlite3.Row enables dict-like access. lastrowid returns the auto-generated primary key after insert.
+    tags: [sqlite, crud, parameterized-queries, sql-injection]
+    difficulty: easy
+
+  - query: |
+      Write functions for bulk inserting rows with executemany and fetching
+      all rows with optional filtering by a column value. Use sqlite3.
+    solution: |
+      ```python
+      import sqlite3
+
+
+      def bulk_insert(db_path: str, rows: list[tuple[str, str]]):
+          conn = sqlite3.connect(db_path)
+          conn.execute(
+              "CREATE TABLE IF NOT EXISTS products "
+              "(id INTEGER PRIMARY KEY, name TEXT, category TEXT)"
+          )
+          conn.executemany(
+              "INSERT INTO products (name, category) VALUES (?, ?)",
+              rows,
+          )
+          conn.commit()
+          conn.close()
+
+
+      def get_all(db_path: str, category: str | None = None) -> list[dict]:
+          conn = sqlite3.connect(db_path)
+          conn.row_factory = sqlite3.Row
+          if category:
+              rows = conn.execute(
+                  "SELECT * FROM products WHERE category = ?",
+                  (category,),
+              ).fetchall()
+          else:
+              rows = conn.execute("SELECT * FROM products").fetchall()
+          conn.close()
+          return [dict(r) for r in rows]
+      ```
+
+      Key patterns: executemany efficiently inserts multiple rows in one call. Optional filter parameter uses parameterized WHERE clause only when provided. row_factory + dict conversion returns clean dictionaries.
+    tags: [sqlite, bulk-insert, executemany, filtering]
+    difficulty: easy

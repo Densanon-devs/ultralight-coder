@@ -1,0 +1,133 @@
+domain: rust
+category: rust_traits
+examples:
+  - query: |
+      Write a Rust trait for a shape with an area method and implement it for Circle and Rectangle.
+    solution: |
+      ```rust
+      use std::f64::consts::PI;
+
+      trait Shape {
+          fn area(&self) -> f64;
+      }
+
+      struct Circle {
+          radius: f64,
+      }
+
+      struct Rectangle {
+          width: f64,
+          height: f64,
+      }
+
+      impl Shape for Circle {
+          fn area(&self) -> f64 {
+              PI * self.radius * self.radius
+          }
+      }
+
+      impl Shape for Rectangle {
+          fn area(&self) -> f64 {
+              self.width * self.height
+          }
+      }
+      ```
+    tags: [rust, trait, struct, impl]
+    difficulty: easy
+
+  - query: |
+      Write a Rust trait with a default method and override it for one type.
+    solution: |
+      ```rust
+      trait Greet {
+          fn name(&self) -> &str;
+
+          fn greeting(&self) -> String {
+              format!("Hello, {}!", self.name())
+          }
+      }
+
+      struct User {
+          name: String,
+      }
+
+      impl Greet for User {
+          fn name(&self) -> &str {
+              &self.name
+          }
+      }
+
+      struct Bot;
+
+      impl Greet for Bot {
+          fn name(&self) -> &str {
+              "Bot"
+          }
+
+          fn greeting(&self) -> String {
+              String::from("Beep boop!")
+          }
+      }
+      ```
+    tags: [rust, trait, default-method, override]
+    difficulty: medium
+
+  - query: |
+      Write a Rust enum for errors with Display and std::error::Error implemented.
+    solution: |
+      ```rust
+      use std::fmt;
+
+      #[derive(Debug)]
+      enum AppError {
+          NotFound(String),
+          InvalidInput(String),
+          Internal(String),
+      }
+
+      impl fmt::Display for AppError {
+          fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+              match self {
+                  AppError::NotFound(msg) => write!(f, "not found: {}", msg),
+                  AppError::InvalidInput(msg) => write!(f, "invalid input: {}", msg),
+                  AppError::Internal(msg) => write!(f, "internal error: {}", msg),
+              }
+          }
+      }
+
+      impl std::error::Error for AppError {}
+      ```
+    tags: [rust, enum, error, display, trait]
+    difficulty: medium
+
+  - query: |
+      Write a Rust generic struct that implements Iterator.
+    solution: |
+      ```rust
+      struct RangeIter {
+          current: i32,
+          end: i32,
+          step: i32,
+      }
+
+      impl RangeIter {
+          fn new(start: i32, end: i32, step: i32) -> Self {
+              RangeIter { current: start, end, step }
+          }
+      }
+
+      impl Iterator for RangeIter {
+          type Item = i32;
+
+          fn next(&mut self) -> Option<Self::Item> {
+              if self.current >= self.end {
+                  return None;
+              }
+              let val = self.current;
+              self.current += self.step;
+              Some(val)
+          }
+      }
+      ```
+    tags: [rust, iterator, trait, impl, struct]
+    difficulty: medium

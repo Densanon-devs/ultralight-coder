@@ -1,0 +1,318 @@
+domain: pattern
+category: pattern_rate_limit
+examples:
+  - query: |
+      Write a `TokenBucket` rate limiter with explicit time parameter for testing.
+    solution: |
+      ```python
+      import time as _time
+
+
+      class TokenBucket:
+          def __init__(self, rate, capacity):
+              self.rate = rate
+              self.capacity = capacity
+              self._tokens = float(capacity)
+              self._last_time = None
+
+          def _refill(self, now=None):
+              now = now if now is not None else _time.time()
+              if self._last_time is None:
+                  self._last_time = now
+                  return
+              elapsed = now - self._last_time
+              self._tokens = min(self.capacity, self._tokens + elapsed * self.rate)
+              self._last_time = now
+
+          def allow(self, tokens=1, now=None):
+              self._refill(now)
+              if self._tokens >= tokens:
+                  self._tokens -= tokens
+                  return True
+              return False
+
+          def wait_time(self, tokens=1, now=None):
+              self._refill(now)
+              if self._tokens >= tokens:
+                  return 0.0
+              needed = tokens - self._tokens
+              return needed / self.rate
+
+          def available(self, now=None):
+              self._refill(now)
+              return int(self._tokens)
+      ```
+
+      Key: `_refill` computes elapsed time and adds tokens. `allow` consumes tokens. All methods accept optional `now` for deterministic testing.
+    tags: [rate-limiter, token-bucket, time, testing]
+    difficulty: medium
+
+  - query: |
+      Write a `SlidingWindowRateLimiter` class that limits requests using a sliding time window. Track timestamps of requests and allow up to `max_requests` within the last `window_seconds`. Accept optional `now` parameter for testing.
+    solution: |
+      ```python
+      import time as _time
+      from collections import deque
+
+
+      class SlidingWindowRateLimiter:
+          def __init__(self, max_requests: int, window_seconds: float):
+              self.max_requests = max_requests
+              self.window_seconds = window_seconds
+              self._timestamps: deque[float] = deque()
+
+          def _cleanup(self, now: float) -> None:
+              cutoff = now - self.window_seconds
+              while self._timestamps and self._timestamps[0] <= cutoff:
+                  self._timestamps.popleft()
+
+          def allow(self, now: float | None = None) -> bool:
+              now = now if now is not None else _time.time()
+              self._cleanup(now)
+              if len(self._timestamps) < self.max_requests:
+                  self._timestamps.append(now)
+                  return True
+              return False
+
+          def remaining(self, now: float | None = None) -> int:
+              now = now if now is not None else _time.time()
+              self._cleanup(now)
+              return max(0, self.max_requests - len(self._timestamps))
+
+          def retry_after(self, now: float | None = None) -> float:
+              now = now if now is not None else _time.time()
+              self._cleanup(now)
+              if len(self._timestamps) < self.max_requests:
+                  return 0.0
+              oldest = self._timestamps[0]
+              return oldest + self.window_seconds - now
+      ```
+
+      Key patterns: deque stores timestamps of allowed requests. _cleanup removes expired entries from the front. Sliding window gives more accurate rate limiting than fixed windows. retry_after tells the caller how long to wait.
+    tags: [rate-limiter, sliding-window, deque, time, testing]
+    difficulty: medium
+
+  - query: |
+      Write a `LeakyBucket` rate limiter class that processes requests at a fixed rate, queuing excess requests up to a capacity limit. Accept optional `now` parameter for testing.
+    solution: |
+      ```python
+      import time as _time
+      from collections import deque
+
+
+      class LeakyBucket:
+          def __init__(self, rate: float, capacity: int):
+              self.rate = rate          # requests per second leaked
+              self.capacity = capacity  # max queued requests
+              self._queue: deque = deque()
+              self._last_leak: float | None = None
+
+          def _leak(self, now: float) -> None:
+              if self._last_leak is None:
+                  self._last_leak = now
+                  return
+              elapsed = now - self._last_leak
+              leaked = int(elapsed * self.rate)
+              if leaked > 0:
+                  for _ in range(min(leaked, len(self._queue))):
+                      self._queue.popleft()
+                  self._last_leak = now
+
+          def allow(self, now: float | None = None) -> bool:
+              """Try to add a request. Returns True if accepted, False if bucket is full."""
+              now = now if now is not None else _time.time()
+              self._leak(now)
+              if len(self._queue) < self.capacity:
+                  self._queue.append(now)
+                  return True
+              return False
+
+          def pending(self, now: float | None = None) -> int:
+              """Number of requests currently in the bucket."""
+              now = now if now is not None else _time.time()
+              self._leak(now)
+              return len(self._queue)
+
+          def drain_time(self, now: float | None = None) -> float:
+              """Time until the bucket is fully drained."""
+              now = now if now is not None else _time.time()
+              self._leak(now)
+              if not self._queue:
+                  return 0.0
+              return len(self._queue) / self.rate
+      ```
+
+      Key patterns: Requests accumulate in queue, leak out at a fixed rate. _leak calculates how many to remove based on elapsed time. Smooths bursty traffic into a constant output rate. drain_time estimates when the queue will be empty.
+    tags: [rate-limiter, leaky-bucket, queue, traffic-shaping, testing]
+    difficulty: medium
+
+  - query: |
+      Write a `FixedWindowCounter` rate limiter that divides time into fixed windows (e.g., 1-second intervals) and limits the number of requests per window. Accept optional `now` parameter for deterministic testing.
+    solution: |
+      ```python
+      import time as _time
+
+
+      class FixedWindowCounter:
+          def __init__(self, max_requests: int, window_seconds: float):
+              self.max_requests = max_requests
+              self.window_seconds = window_seconds
+              self._window_start: float = 0.0
+              self._count: int = 0
+
+          def _current_window(self, now: float) -> float:
+              """Return the start time of the window containing `now`."""
+              return now - (now % self.window_seconds)
+
+          def allow(self, now: float | None = None) -> bool:
+              now = now if now is not None else _time.time()
+              window = self._current_window(now)
+              if window != self._window_start:
+                  self._window_start = window
+                  self._count = 0
+              if self._count < self.max_requests:
+                  self._count += 1
+                  return True
+              return False
+
+          def remaining(self, now: float | None = None) -> int:
+              now = now if now is not None else _time.time()
+              window = self._current_window(now)
+              if window != self._window_start:
+                  return self.max_requests
+              return max(0, self.max_requests - self._count)
+
+          def reset_at(self, now: float | None = None) -> float:
+              """Return the timestamp when the current window resets."""
+              now = now if now is not None else _time.time()
+              window = self._current_window(now)
+              return window + self.window_seconds
+      ```
+
+      Key patterns: Time is divided into fixed windows via modular arithmetic. Counter resets when the current window changes. Simple and efficient -- O(1) per request with no stored timestamps. reset_at tells clients when they can retry.
+    tags: [rate-limiter, fixed-window, counter, time, testing]
+    difficulty: easy
+
+  - query: |
+      Write a `ConcurrentLimiter` class that limits the number of concurrent in-flight requests using a semaphore-style approach. Provide `acquire()` / `release()` methods and a context manager interface. Accept an optional `on_reject` callback. Thread-safe.
+    solution: |
+      ```python
+      import threading
+
+
+      class ConcurrentLimiter:
+          def __init__(self, max_concurrent: int, on_reject: callable = None):
+              self._max = max_concurrent
+              self._current = 0
+              self._lock = threading.Lock()
+              self._on_reject = on_reject
+
+          def acquire(self) -> bool:
+              """Try to acquire a slot. Returns True if allowed."""
+              with self._lock:
+                  if self._current < self._max:
+                      self._current += 1
+                      return True
+              if self._on_reject:
+                  self._on_reject(self._current, self._max)
+              return False
+
+          def release(self) -> None:
+              """Release a slot."""
+              with self._lock:
+                  if self._current > 0:
+                      self._current -= 1
+
+          @property
+          def active(self) -> int:
+              with self._lock:
+                  return self._current
+
+          @property
+          def available(self) -> int:
+              with self._lock:
+                  return self._max - self._current
+
+          def __enter__(self):
+              if not self.acquire():
+                  raise RuntimeError(
+                      f"Concurrent limit exceeded ({self._max})"
+                  )
+              return self
+
+          def __exit__(self, exc_type, exc_val, exc_tb):
+              self.release()
+              return False
+      ```
+
+      Key patterns: Semaphore-style counter protected by a Lock. acquire/release for manual control, context manager for scoped usage. on_reject callback for custom handling (logging, metrics). Thread-safe via Lock around counter operations.
+    tags: [rate-limiter, concurrency, semaphore, threading, context-manager]
+    difficulty: medium
+
+  - query: |
+      Write an `AdaptiveRateLimiter` that adjusts its rate limit based on response success/failure. Start with an initial rate, increase on sustained success (up to max), decrease on failure (down to min). Accept optional `now` parameter for testing.
+    solution: |
+      ```python
+      import time as _time
+
+
+      class AdaptiveRateLimiter:
+          def __init__(
+              self,
+              initial_rate: float,
+              min_rate: float,
+              max_rate: float,
+              window_seconds: float = 1.0,
+              increase_factor: float = 1.1,
+              decrease_factor: float = 0.5,
+              success_threshold: int = 10,
+          ):
+              self._rate = initial_rate
+              self._min_rate = min_rate
+              self._max_rate = max_rate
+              self._window = window_seconds
+              self._increase = increase_factor
+              self._decrease = decrease_factor
+              self._threshold = success_threshold
+              self._tokens = float(initial_rate)
+              self._last_refill: float | None = None
+              self._consecutive_ok = 0
+
+          def _refill(self, now: float) -> None:
+              if self._last_refill is None:
+                  self._last_refill = now
+                  return
+              elapsed = now - self._last_refill
+              self._tokens = min(
+                  self._rate, self._tokens + elapsed * self._rate / self._window
+              )
+              self._last_refill = now
+
+          def allow(self, now: float | None = None) -> bool:
+              now = now if now is not None else _time.time()
+              self._refill(now)
+              if self._tokens >= 1.0:
+                  self._tokens -= 1.0
+                  return True
+              return False
+
+          def report_success(self) -> None:
+              """Call after a successful request to potentially increase rate."""
+              self._consecutive_ok += 1
+              if self._consecutive_ok >= self._threshold:
+                  self._rate = min(self._max_rate, self._rate * self._increase)
+                  self._consecutive_ok = 0
+
+          def report_failure(self) -> None:
+              """Call after a failed request to decrease rate."""
+              self._consecutive_ok = 0
+              self._rate = max(self._min_rate, self._rate * self._decrease)
+
+          @property
+          def current_rate(self) -> float:
+              return self._rate
+      ```
+
+      Key patterns: Combines token bucket with adaptive feedback. report_success increments a counter; after threshold consecutive successes, the rate increases by increase_factor (capped at max). report_failure immediately halves the rate (floored at min). This mimics TCP congestion control -- slow start on errors, gradual ramp-up on success.
+    tags: [rate-limiter, adaptive, token-bucket, feedback, testing]
+    difficulty: hard

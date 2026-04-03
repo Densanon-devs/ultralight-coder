@@ -1,0 +1,84 @@
+domain: rust
+category: rust_ownership
+examples:
+  - query: |
+      Write a Rust struct with a method that borrows self immutably and one that borrows self mutably.
+    solution: |
+      ```rust
+      struct Counter {
+          count: u32,
+      }
+
+      impl Counter {
+          fn new() -> Self {
+              Counter { count: 0 }
+          }
+
+          fn get(&self) -> u32 {
+              self.count
+          }
+
+          fn increment(&mut self) {
+              self.count += 1;
+          }
+      }
+      ```
+    tags: [rust, struct, borrow, mut]
+    difficulty: easy
+
+  - query: |
+      Write a Rust struct that owns a String and implements Display.
+    solution: |
+      ```rust
+      use std::fmt;
+
+      struct Greeting {
+          name: String,
+      }
+
+      impl Greeting {
+          fn new(name: &str) -> Self {
+              Greeting { name: name.to_string() }
+          }
+      }
+
+      impl fmt::Display for Greeting {
+          fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+              write!(f, "Hello, {}!", self.name)
+          }
+      }
+      ```
+    tags: [rust, struct, display, ownership]
+    difficulty: easy
+
+  - query: |
+      Write a Rust function that takes ownership of a vector, transforms it, and returns the result.
+    solution: |
+      ```rust
+      fn double_all(nums: Vec<i32>) -> Vec<i32> {
+          nums.into_iter().map(|n| n * 2).collect()
+      }
+      ```
+    tags: [rust, ownership, into_iter, move]
+    difficulty: easy
+
+  - query: |
+      Write a Rust struct with a lifetime parameter that holds a reference to a string slice.
+    solution: |
+      ```rust
+      struct Excerpt<'a> {
+          text: &'a str,
+      }
+
+      impl<'a> Excerpt<'a> {
+          fn new(text: &'a str) -> Self {
+              Excerpt { text }
+          }
+
+          fn words(&self) -> Vec<&str> {
+              self.text.split_whitespace().collect()
+          }
+      }
+      ```
+    tags: [rust, lifetime, borrow, struct]
+    difficulty: medium

@@ -1,0 +1,72 @@
+domain: common
+category: explainer
+augmentor: explainer
+examples:
+  - query: |
+      Explain list comprehensions in Python.
+    solution: |
+      List comprehensions are a concise way to create lists:
+
+      ```python
+      # Traditional loop
+      squares = []
+      for x in range(5):
+          squares.append(x ** 2)
+
+      # List comprehension — same result
+      squares = [x ** 2 for x in range(5)]
+
+      # With filter
+      evens = [x for x in range(10) if x % 2 == 0]
+
+      # Nested
+      pairs = [(x, y) for x in range(3) for y in range(3)]
+      ```
+
+      Pattern: `[expression for item in iterable if condition]`
+    tags: [concept, list-comprehension, python-basics]
+    difficulty: easy
+
+  - query: |
+      What's the difference between a list and a tuple?
+    solution: |
+      ```python
+      # List — mutable, use for collections that change
+      items = [1, 2, 3]
+      items.append(4)        # OK
+      items[0] = 10          # OK
+
+      # Tuple — immutable, use for fixed records
+      point = (3, 4)
+      point[0] = 10          # TypeError!
+      ```
+
+      Key differences:
+      - Lists are mutable, tuples are immutable
+      - Tuples are hashable (can be dict keys), lists are not
+      - Tuples are slightly faster and use less memory
+      - Use tuples for fixed data (coordinates, DB rows), lists for collections
+    tags: [comparison, list, tuple, immutability]
+    difficulty: easy
+
+  - query: |
+      Explain what this code does:
+      result = {k: v for k, v in sorted(d.items(), key=lambda x: x[1])}
+    solution: |
+      This sorts a dictionary by its values:
+
+      ```python
+      d = {'b': 3, 'a': 1, 'c': 2}
+
+      # Step by step:
+      d.items()              # [('b', 3), ('a', 1), ('c', 2)]
+      sorted(..., key=lambda x: x[1])  # Sort by value (index 1)
+      # Result: [('a', 1), ('c', 2), ('b', 3)]
+
+      result = {k: v for k, v in sorted(d.items(), key=lambda x: x[1])}
+      # result = {'a': 1, 'c': 2, 'b': 3}
+      ```
+
+      It creates a new dict with keys ordered by their values (ascending).
+    tags: [code-walkthrough, dictionary, sorting, lambda]
+    difficulty: easy

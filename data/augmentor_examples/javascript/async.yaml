@@ -1,0 +1,103 @@
+domain: javascript
+category: js_async
+examples:
+  - query: |
+      Write a JavaScript function that fetches JSON from a URL using async/await with error handling.
+    solution: |
+      ```javascript
+      async function fetchJson(url) {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      }
+      ```
+    tags: [javascript, async, fetch, error-handling]
+    difficulty: easy
+
+  - query: |
+      Write a JavaScript function that runs multiple promises in parallel and returns all results, even if some fail.
+    solution: |
+      ```javascript
+      async function settleAll(promises) {
+        const results = await Promise.allSettled(promises);
+        return results.map((r) =>
+          r.status === "fulfilled"
+            ? { ok: true, value: r.value }
+            : { ok: false, error: r.reason }
+        );
+      }
+      ```
+    tags: [javascript, promise, allSettled, parallel]
+    difficulty: medium
+
+  - query: |
+      Write a JavaScript async function that retries a failing operation with exponential backoff.
+    solution: |
+      ```javascript
+      async function retry(fn, maxRetries = 3) {
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+          try {
+            return await fn();
+          } catch (err) {
+            if (attempt === maxRetries) throw err;
+            await new Promise((r) => setTimeout(r, 2 ** attempt * 100));
+          }
+        }
+      }
+      ```
+    tags: [javascript, async, retry, backoff]
+    difficulty: medium
+
+  - query: |
+      Write a JavaScript async generator that paginates through an API.
+    solution: |
+      ```javascript
+      async function* paginate(baseUrl) {
+        let page = 1;
+        while (true) {
+          const res = await fetch(`${baseUrl}?page=${page}`);
+          const data = await res.json();
+          if (data.results.length === 0) return;
+          yield data.results;
+          page++;
+        }
+      }
+      ```
+    tags: [javascript, async-generator, pagination, api]
+    difficulty: medium
+
+  - query: |
+      Write a JavaScript function that limits concurrent async operations to N at a time.
+    solution: |
+      ```javascript
+      async function mapWithLimit(items, limit, fn) {
+        const results = [];
+        let index = 0;
+
+        async function worker() {
+          while (index < items.length) {
+            const i = index++;
+            results[i] = await fn(items[i]);
+          }
+        }
+
+        const workers = Array.from({ length: Math.min(limit, items.length) }, worker);
+        await Promise.all(workers);
+        return results;
+      }
+      ```
+    tags: [javascript, async, concurrency, limit]
+    difficulty: hard
+
+  - query: |
+      Write a JavaScript Promise-based sleep function.
+    solution: |
+      ```javascript
+      function sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+      ```
+    tags: [javascript, promise, sleep, utility]
+    difficulty: easy

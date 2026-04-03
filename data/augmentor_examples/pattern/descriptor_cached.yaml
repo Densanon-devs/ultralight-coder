@@ -1,0 +1,37 @@
+domain: pattern
+category: pattern_descriptor
+examples:
+  - query: |
+      Write a cached_property descriptor that caches the result of a method
+      on first access and returns the cached value on subsequent accesses.
+      Support deleting the cache to force recomputation.
+    solution: |
+      ```python
+      class cached_property:
+          def __init__(self, func):
+              self.func = func
+              self.attrname = None
+              self.__doc__ = func.__doc__
+
+          def __set_name__(self, owner, name):
+              self.attrname = name
+
+          def __get__(self, obj, objtype=None):
+              if obj is None:
+                  return self
+              cache = obj.__dict__
+              val = cache.get(self.attrname)
+              if val is None:
+                  val = self.func(obj)
+                  cache[self.attrname] = val
+              return val
+
+          def __delete__(self, obj):
+              obj.__dict__.pop(self.attrname, None)  # use pop, NOT del
+      ```
+
+      Key: stores cached value in obj.__dict__[attrname]. On first access,
+      calls the function and caches. __delete__ uses dict.pop() to remove
+      the key (do NOT use del on a .get() call). __set_name__ captures name.
+    tags: [descriptor, cached-property, caching, lazy-evaluation]
+    difficulty: medium

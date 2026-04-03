@@ -1,0 +1,355 @@
+domain: pattern
+category: pattern_serialization
+examples:
+  - query: |
+      Write serialize(obj) and deserialize(data, cls) functions.
+      serialize converts object to dict with __class__ key.
+      deserialize restores object using __serialize_types__ for nested fields.
+    solution: |
+      ```python
+      def serialize(obj):
+          if isinstance(obj, (int, float, str, bool, type(None))):
+              return obj
+          if isinstance(obj, list):
+              return [serialize(x) for x in obj]
+          d = {"__class__": type(obj).__name__}
+          for k, v in obj.__dict__.items():
+              d[k] = serialize(v)
+          return d
+
+
+      def deserialize(data, cls):
+          if not isinstance(data, dict) or "__class__" not in data:
+              return data
+          obj = cls.__new__(cls)
+          types = getattr(cls, "__serialize_types__", {})
+          for k, v in data.items():
+              if k == "__class__":
+                  continue
+              if k in types:
+                  t = types[k]
+                  if isinstance(t, list):
+                      v = [deserialize(x, t[0]) for x in v]
+                  else:
+                      v = deserialize(v, t)
+              setattr(obj, k, v)
+          return obj
+      ```
+
+      Key: serialize uses obj.__dict__ and adds __class__. deserialize
+      checks __serialize_types__ for nested object types. List types
+      are [Type]. Primitives pass through unchanged.
+    tags: [serialization, recursive, nested-objects, __class__, __serialize_types__]
+    difficulty: hard
+
+  - query: |
+      Write a validate(data, schema) function that checks a dict against a
+      schema. Schema maps field names to {"type": <type>, "required": bool}.
+      Return a list of error strings.
+    solution: |
+      ```python
+      def validate(data: dict, schema: dict) -> list[str]:
+          errors = []
+          for field_name, rules in schema.items():
+              expected_type = rules["type"]
+              required = rules.get("required", False)
+              if field_name not in data:
+                  if required:
+                      errors.append(f"Missing required field: {field_name}")
+                  continue
+              value = data[field_name]
+              if not isinstance(value, expected_type):
+                  errors.append(
+                      f"Field '{field_name}': expected {expected_type.__name__}, "
+                      f"got {type(value).__name__}"
+                  )
+          return errors
+      ```
+
+      Key: iterate schema keys, check presence for required fields, check isinstance
+      for type validation. Extra fields in data are ignored (OK).
+    tags: [validation, schema, type-checking, error-reporting]
+    difficulty: medium
+
+  - query: |
+      Write a to_json(obj) function that converts dataclass instances
+      to JSON-compatible dicts, handling datetime and Enum types.
+    solution: |
+      ```python
+      from datetime import datetime, date
+      from enum import Enum
+
+
+      def to_json(obj):
+          if isinstance(obj, (str, int, float, bool, type(None))):
+              return obj
+          if isinstance(obj, Enum):
+              return obj.value
+          if isinstance(obj, (datetime, date)):
+              return obj.isoformat()
+          if isinstance(obj, (list, tuple)):
+              return [to_json(item) for item in obj]
+          if isinstance(obj, dict):
+              return {str(k): to_json(v) for k, v in obj.items()}
+          if hasattr(obj, '__dict__'):
+              return {k: to_json(v) for k, v in vars(obj).items()
+                      if not k.startswith('_')}
+          return str(obj)
+      ```
+
+      Key: handles Enum via .value, datetime via .isoformat(), objects via vars(). Skips private _fields.
+    tags: [serialization, json, datetime, enum, recursive]
+    difficulty: medium
+
+  - query: |
+      Write a to_xml(obj, root_tag) function that serializes a dict (with
+      nested dicts, lists, and primitives) into an XML string. Lists become
+      repeated child elements using the key name as the tag.
+    solution: |
+      ```python
+      def to_xml(obj, root_tag: str = "root") -> str:
+          parts = [f"<{root_tag}>"]
+          _build_xml(obj, parts)
+          parts.append(f"</{root_tag}>")
+          return "".join(parts)
+
+
+      def _build_xml(obj, parts: list):
+          if isinstance(obj, dict):
+              for key, value in obj.items():
+                  if isinstance(value, list):
+                      for item in value:
+                          parts.append(f"<{key}>")
+                          _build_xml(item, parts)
+                          parts.append(f"</{key}>")
+                  else:
+                      parts.append(f"<{key}>")
+                      _build_xml(value, parts)
+                      parts.append(f"</{key}>")
+          elif isinstance(obj, bool):
+              parts.append("true" if obj else "false")
+          elif isinstance(obj, (int, float)):
+              parts.append(str(obj))
+          elif obj is None:
+              pass  # empty element
+          else:
+              parts.append(_escape_xml(str(obj)))
+
+
+      def _escape_xml(text: str) -> str:
+          return (text
+                  .replace("&", "&amp;")
+                  .replace("<", "&lt;")
+                  .replace(">", "&gt;")
+                  .replace('"', "&quot;"))
+      ```
+
+      Key: recursive traversal builds XML string via list of parts. Lists
+      produce repeated sibling elements. Booleans serialize as lowercase
+      strings. None produces empty elements. Special chars are escaped.
+    tags: [serialization, xml, recursive, escape, nested-dicts]
+    difficulty: medium
+
+  - query: |
+      Write to_csv(rows, headers) and from_csv(text) functions. to_csv
+      converts a list of dicts to CSV text. from_csv parses CSV text back
+      to a list of dicts. Handle fields that contain commas by quoting.
+    solution: |
+      ```python
+      def to_csv(rows: list[dict], headers: list[str] | None = None) -> str:
+          if not rows:
+              return ""
+          if headers is None:
+              headers = list(rows[0].keys())
+          lines = [",".join(headers)]
+          for row in rows:
+              fields = []
+              for h in headers:
+                  val = str(row.get(h, ""))
+                  if "," in val or '"' in val or "\n" in val:
+                      val = '"' + val.replace('"', '""') + '"'
+                  fields.append(val)
+              lines.append(",".join(fields))
+          return "\n".join(lines)
+
+
+      def from_csv(text: str) -> list[dict]:
+          lines = text.strip().split("\n")
+          if not lines:
+              return []
+          headers = _parse_csv_line(lines[0])
+          result = []
+          for line in lines[1:]:
+              values = _parse_csv_line(line)
+              result.append(dict(zip(headers, values)))
+          return result
+
+
+      def _parse_csv_line(line: str) -> list[str]:
+          fields = []
+          i = 0
+          while i < len(line):
+              if line[i] == '"':
+                  i += 1
+                  parts = []
+                  while i < len(line):
+                      if line[i] == '"':
+                          if i + 1 < len(line) and line[i + 1] == '"':
+                              parts.append('"')
+                              i += 2
+                          else:
+                              i += 1  # closing quote
+                              break
+                      else:
+                          parts.append(line[i])
+                          i += 1
+                  fields.append("".join(parts))
+                  if i < len(line) and line[i] == ",":
+                      i += 1
+              else:
+                  j = line.find(",", i)
+                  if j == -1:
+                      fields.append(line[i:])
+                      break
+                  fields.append(line[i:j])
+                  i = j + 1
+          return fields
+      ```
+
+      Key: to_csv quotes fields containing commas, quotes, or newlines. Embedded
+      quotes are doubled (""). from_csv uses a stateful parser to handle quoted
+      fields correctly. Headers come from the first line.
+    tags: [serialization, csv, quoting, parser, round-trip]
+    difficulty: medium
+
+  - query: |
+      Write deep_copy(obj) that performs a deep copy by serializing to a
+      dict and deserializing back. Support dataclass instances, lists, dicts,
+      and primitives without using copy.deepcopy.
+    solution: |
+      ```python
+      from dataclasses import fields as dc_fields, is_dataclass
+
+
+      def deep_copy(obj):
+          snapshot = _to_dict(obj)
+          return _from_dict(snapshot, type(obj))
+
+
+      def _to_dict(obj):
+          if isinstance(obj, (int, float, str, bool, type(None))):
+              return obj
+          if isinstance(obj, list):
+              return [_to_dict(item) for item in obj]
+          if isinstance(obj, dict):
+              return {k: _to_dict(v) for k, v in obj.items()}
+          if is_dataclass(obj) and not isinstance(obj, type):
+              return {
+                  "__dc__": type(obj).__qualname__,
+                  **{f.name: _to_dict(getattr(obj, f.name))
+                     for f in dc_fields(obj)},
+              }
+          raise TypeError(f"Cannot serialize {type(obj)}")
+
+
+      def _from_dict(data, cls):
+          if isinstance(data, (int, float, str, bool, type(None))):
+              return data
+          if isinstance(data, list):
+              return [_from_dict(item, object) for item in data]
+          if isinstance(data, dict):
+              if "__dc__" not in data:
+                  return {k: _from_dict(v, object) for k, v in data.items()}
+              field_map = {f.name: f.type for f in dc_fields(cls)}
+              kwargs = {}
+              for k, v in data.items():
+                  if k == "__dc__":
+                      continue
+                  kwargs[k] = _from_dict(v, field_map.get(k, object))
+              return cls(**kwargs)
+          return data
+      ```
+
+      Key: serialize/deserialize round-trip creates an independent copy. Uses
+      dataclasses.fields for introspection. __dc__ marker distinguishes
+      dataclass dicts from plain dicts. No import of copy module needed.
+    tags: [deep-copy, serialization, dataclass, round-trip, introspection]
+    difficulty: hard
+
+  - query: |
+      Write a ProtobufEncoder class that encodes Python dicts into a compact
+      binary format using a schema (field number + wire type). Support varint,
+      string, and embedded message types. Include encode and decode methods.
+    solution: |
+      ```python
+      class ProtobufEncoder:
+          VARINT = 0
+          BYTES = 2
+
+          def __init__(self, schema: dict):
+              """schema: {field_name: (field_number, wire_type)}"""
+              self.schema = schema
+              self._by_number = {v[0]: (k, v[1]) for k, v in schema.items()}
+
+          def encode(self, data: dict) -> bytes:
+              buf = bytearray()
+              for name, (field_num, wire_type) in self.schema.items():
+                  if name not in data:
+                      continue
+                  tag = (field_num << 3) | wire_type
+                  self._write_varint(buf, tag)
+                  value = data[name]
+                  if wire_type == self.VARINT:
+                      self._write_varint(buf, value)
+                  elif wire_type == self.BYTES:
+                      encoded = value.encode("utf-8") if isinstance(value, str) else value
+                      self._write_varint(buf, len(encoded))
+                      buf.extend(encoded)
+              return bytes(buf)
+
+          def decode(self, raw: bytes) -> dict:
+              result = {}
+              i = 0
+              while i < len(raw):
+                  tag, i = self._read_varint(raw, i)
+                  field_num = tag >> 3
+                  wire_type = tag & 0x07
+                  name, _ = self._by_number.get(field_num, (None, None))
+                  if wire_type == self.VARINT:
+                      value, i = self._read_varint(raw, i)
+                  elif wire_type == self.BYTES:
+                      length, i = self._read_varint(raw, i)
+                      value = raw[i:i + length].decode("utf-8")
+                      i += length
+                  else:
+                      raise ValueError(f"Unknown wire type {wire_type}")
+                  if name is not None:
+                      result[name] = value
+              return result
+
+          @staticmethod
+          def _write_varint(buf: bytearray, value: int):
+              while value > 0x7F:
+                  buf.append((value & 0x7F) | 0x80)
+                  value >>= 7
+              buf.append(value & 0x7F)
+
+          @staticmethod
+          def _read_varint(data: bytes, offset: int) -> tuple[int, int]:
+              result = 0
+              shift = 0
+              while True:
+                  byte = data[offset]
+                  offset += 1
+                  result |= (byte & 0x7F) << shift
+                  if not (byte & 0x80):
+                      break
+                  shift += 7
+              return result, offset
+      ```
+
+      Key: protocol buffer-style binary encoding uses tag = (field_number << 3) | wire_type.
+      Varints use 7-bit encoding with continuation bit. Length-delimited fields
+      (strings) prefix data with byte length. Schema maps names to (number, type).
+    tags: [serialization, binary, protobuf, varint, wire-format]
+    difficulty: hard

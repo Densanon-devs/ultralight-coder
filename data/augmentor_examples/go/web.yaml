@@ -1,0 +1,134 @@
+domain: go
+category: go_web
+examples:
+  - query: |
+      Write a Go HTTP server with GET, POST, and DELETE routes for managing items using the standard library.
+    solution: |
+      ```go
+      package main
+
+      import (
+      	"encoding/json"
+      	"net/http"
+      	"sync"
+      )
+
+      type Item struct {
+      	ID   int    `json:"id"`
+      	Name string `json:"name"`
+      }
+
+      var (
+      	items  = map[int]Item{}
+      	nextID = 1
+      	mu     sync.Mutex
+      )
+
+      func main() {
+      	http.HandleFunc("/items", func(w http.ResponseWriter, r *http.Request) {
+      		switch r.Method {
+      		case http.MethodGet:
+      			mu.Lock()
+      			all := make([]Item, 0, len(items))
+      			for _, item := range items {
+      				all = append(all, item)
+      			}
+      			mu.Unlock()
+      			json.NewEncoder(w).Encode(all)
+
+      		case http.MethodPost:
+      			var item Item
+      			if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
+      				http.Error(w, err.Error(), http.StatusBadRequest)
+      				return
+      			}
+      			mu.Lock()
+      			item.ID = nextID
+      			nextID++
+      			items[item.ID] = item
+      			mu.Unlock()
+      			w.WriteHeader(http.StatusCreated)
+      			json.NewEncoder(w).Encode(item)
+
+      		default:
+      			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+      		}
+      	})
+
+      	http.ListenAndServe(":8080", nil)
+      }
+      ```
+    tags: [go, http, rest-api, crud, stdlib]
+    difficulty: medium
+
+  - query: |
+      Write Go HTTP middleware that logs the request method, path, and duration.
+    solution: |
+      ```go
+      package main
+
+      import (
+      	"log"
+      	"net/http"
+      	"time"
+      )
+
+      func loggerMiddleware(next http.Handler) http.Handler {
+      	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+      		start := time.Now()
+      		next.ServeHTTP(w, r)
+      		log.Printf("%s %s %s", r.Method, r.URL.Path, time.Since(start))
+      	})
+      }
+      ```
+    tags: [go, http, middleware, logging]
+    difficulty: easy
+
+  - query: |
+      Write a Go HTTP middleware that checks for a valid API key in the Authorization header.
+    solution: |
+      ```go
+      package main
+
+      import "net/http"
+
+      func authMiddleware(apiKey string, next http.Handler) http.Handler {
+      	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+      		if r.Header.Get("Authorization") != "Bearer "+apiKey {
+      			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+      			return
+      		}
+      		next.ServeHTTP(w, r)
+      	})
+      }
+      ```
+    tags: [go, http, middleware, auth, api-key]
+    difficulty: easy
+
+  - query: |
+      Write a Go function that makes an HTTP GET request and unmarshals the JSON response.
+    solution: |
+      ```go
+      package main
+
+      import (
+      	"encoding/json"
+      	"fmt"
+      	"net/http"
+      )
+
+      func fetchJSON(url string, target interface{}) error {
+      	resp, err := http.Get(url)
+      	if err != nil {
+      		return err
+      	}
+      	defer resp.Body.Close()
+
+      	if resp.StatusCode != http.StatusOK {
+      		return fmt.Errorf("HTTP %d", resp.StatusCode)
+      	}
+      	return json.NewDecoder(resp.Body).Decode(target)
+      }
+      ```
+    tags: [go, http, client, json]
+    difficulty: easy

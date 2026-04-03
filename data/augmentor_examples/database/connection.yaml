@@ -1,0 +1,73 @@
+domain: database
+category: db_connection
+examples:
+  - query: |
+      Write a context manager for SQLite database connections that auto-commits
+      on success and rolls back on exception.
+    solution: |
+      ```python
+      import sqlite3
+      from contextlib import contextmanager
+
+
+      @contextmanager
+      def db_connection(db_path: str):
+          conn = sqlite3.connect(db_path)
+          conn.row_factory = sqlite3.Row
+          try:
+              yield conn
+              conn.commit()
+          except Exception:
+              conn.rollback()
+              raise
+          finally:
+              conn.close()
+
+
+      # Usage:
+      # with db_connection("app.db") as conn:
+      #     conn.execute("INSERT INTO users (name) VALUES (?)", ("Alice",))
+      ```
+
+      Key patterns: contextmanager decorator creates a clean with-statement API. commit on success, rollback on exception, close always. The caller gets the connection via yield and never worries about cleanup.
+    tags: [sqlite, context-manager, transaction, connection]
+    difficulty: easy
+
+  - query: |
+      Write a simple connection pool class that manages a fixed number of
+      reusable SQLite connections using a queue.
+    solution: |
+      ```python
+      import sqlite3
+      from queue import Queue
+
+
+      class ConnectionPool:
+          def __init__(self, db_path: str, pool_size: int = 5):
+              self._pool: Queue[sqlite3.Connection] = Queue(maxsize=pool_size)
+              for _ in range(pool_size):
+                  conn = sqlite3.connect(db_path, check_same_thread=False)
+                  conn.row_factory = sqlite3.Row
+                  self._pool.put(conn)
+
+          def acquire(self) -> sqlite3.Connection:
+              return self._pool.get()
+
+          def release(self, conn: sqlite3.Connection):
+              self._pool.put(conn)
+
+          def close_all(self):
+              while not self._pool.empty():
+                  self._pool.get().close()
+
+
+      # Usage:
+      # pool = ConnectionPool("app.db", pool_size=3)
+      # conn = pool.acquire()
+      # conn.execute("SELECT 1")
+      # pool.release(conn)
+      ```
+
+      Key patterns: Queue provides thread-safe blocking acquire when pool is exhausted. check_same_thread=False allows connections to be shared across threads. Fixed pool size prevents unbounded resource usage. Always release after use.
+    tags: [sqlite, connection-pool, queue, threading]
+    difficulty: medium

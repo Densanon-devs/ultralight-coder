@@ -1,0 +1,108 @@
+domain: database
+category: db_repository
+examples:
+  - query: |
+      Write a repository pattern base class with find_all, find_by_id, save,
+      and delete methods. It should accept a table name and column definitions.
+      Use sqlite3.
+    solution: |
+      ```python
+      import sqlite3
+
+
+      class Repository:
+          def __init__(self, db_path: str, table: str, columns: list[str]):
+              self.conn = sqlite3.connect(db_path)
+              self.conn.row_factory = sqlite3.Row
+              self.table = table
+              self.columns = columns
+              cols = ", ".join(f"{c} TEXT" for c in columns)
+              self.conn.execute(
+                  f"CREATE TABLE IF NOT EXISTS {table} "
+                  f"(id INTEGER PRIMARY KEY, {cols})"
+              )
+              self.conn.commit()
+
+          def find_all(self) -> list[dict]:
+              rows = self.conn.execute(
+                  f"SELECT * FROM {self.table}"
+              ).fetchall()
+              return [dict(r) for r in rows]
+
+          def find_by_id(self, record_id: int) -> dict | None:
+              row = self.conn.execute(
+                  f"SELECT * FROM {self.table} WHERE id = ?",
+                  (record_id,),
+              ).fetchone()
+              return dict(row) if row else None
+
+          def save(self, data: dict) -> int:
+              cols = ", ".join(self.columns)
+              placeholders = ", ".join("?" for _ in self.columns)
+              values = tuple(data[c] for c in self.columns)
+              cur = self.conn.execute(
+                  f"INSERT INTO {self.table} ({cols}) VALUES ({placeholders})",
+                  values,
+              )
+              self.conn.commit()
+              return cur.lastrowid
+
+          def delete(self, record_id: int):
+              self.conn.execute(
+                  f"DELETE FROM {self.table} WHERE id = ?",
+                  (record_id,),
+              )
+              self.conn.commit()
+      ```
+
+      Key patterns: Generic base takes table name and column list so it works for any entity. Table and column names are controlled by the developer (not user input), so f-string is safe there. All value parameters still use ? placeholders.
+    tags: [sqlite, repository-pattern, generic, crud]
+    difficulty: medium
+
+  - query: |
+      Write a migration runner that reads .sql files from a directory and
+      applies them in order, tracking which migrations have been applied
+      in a migrations table. Use sqlite3 and pathlib.
+    solution: |
+      ```python
+      import sqlite3
+      from pathlib import Path
+
+
+      class MigrationRunner:
+          def __init__(self, db_path: str, migrations_dir: str):
+              self.conn = sqlite3.connect(db_path)
+              self.migrations_dir = Path(migrations_dir)
+              self.conn.execute(
+                  "CREATE TABLE IF NOT EXISTS migrations "
+                  "(name TEXT PRIMARY KEY, applied_at TIMESTAMP "
+                  "DEFAULT CURRENT_TIMESTAMP)"
+              )
+              self.conn.commit()
+
+          def get_applied(self) -> set[str]:
+              rows = self.conn.execute(
+                  "SELECT name FROM migrations"
+              ).fetchall()
+              return {r[0] for r in rows}
+
+          def run(self):
+              applied = self.get_applied()
+              files = sorted(self.migrations_dir.glob("*.sql"))
+              for f in files:
+                  if f.name not in applied:
+                      sql = f.read_text()
+                      self.conn.executescript(sql)
+                      self.conn.execute(
+                          "INSERT INTO migrations (name) VALUES (?)",
+                          (f.name,),
+                      )
+                      self.conn.commit()
+
+          def close(self):
+              self.conn.close()
+      ```
+
+      Key patterns: Migrations table tracks applied files by name. sorted() ensures files run in alphabetical order (use 001_, 002_ prefixes). executescript handles multi-statement SQL files. Idempotent -- safe to run multiple times.
+    tags: [sqlite, migrations, schema-management, pathlib]
+    difficulty: medium

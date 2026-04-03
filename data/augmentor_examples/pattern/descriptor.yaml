@@ -1,0 +1,231 @@
+domain: pattern
+category: pattern_descriptor
+examples:
+  - query: |
+      Write a descriptor class called exactly `TypedField` that validates the
+      type of values on set. TypedField(int) only allows int, TypedField(str) only
+      allows str. Use __set_name__, __get__, __set__. Store data on instance dict.
+      Usage: class Config:
+          port = TypedField(int)
+          host = TypedField(str)
+      c = Config(); c.port = 8080; c.host = "localhost"
+      Setting wrong type raises TypeError.
+    solution: |
+      ```python
+      class TypedField:
+          def __init__(self, expected_type):
+              self.expected_type = expected_type
+              self.name = None
+
+          def __set_name__(self, owner, name):
+              self.name = name
+
+          def __get__(self, obj, objtype=None):
+              if obj is None:
+                  return self
+              return obj.__dict__.get(self.name)
+
+          def __set__(self, obj, value):
+              if not isinstance(value, self.expected_type):
+                  raise TypeError(
+                      f"{self.name} must be {self.expected_type.__name__}, "
+                      f"got {type(value).__name__}"
+                  )
+              obj.__dict__[self.name] = value
+      ```
+
+      Key patterns:
+      1. __init__ stores expected_type and name=None
+      2. __set_name__ captures the attribute name from the class
+      3. __get__ returns self for class access (obj is None), otherwise reads from obj.__dict__
+      4. __set__ validates isinstance, raises TypeError, stores on obj.__dict__[self.name]
+      5. Data lives on the INSTANCE dict, not the descriptor — keeps instances independent
+    tags: [descriptor, type-validation, __set_name__, __get__, __set__]
+    difficulty: hard
+
+  - query: |
+      Write a Validated descriptor that accepts a validator function
+      and rejects invalid values with a clear error.
+    solution: |
+      ```python
+      class Validated:
+          def __init__(self, validator, message=None):
+              self.validator = validator
+              self.message = message or 'validation failed'
+              self.name = None
+
+          def __set_name__(self, owner, name):
+              self.name = name
+
+          def __get__(self, obj, objtype=None):
+              if obj is None:
+                  return self
+              return obj.__dict__.get(self.name)
+
+          def __set__(self, obj, value):
+              if not self.validator(value):
+                  raise ValueError(f"{self.name}: {self.message}")
+              obj.__dict__[self.name] = value
+      ```
+
+      Key: same storage pattern as TypedField — data lives on the instance dict. Validator is any callable returning bool.
+    tags: [descriptor, validation, __set_name__, __get__, __set__]
+    difficulty: medium
+
+  - query: |
+      Write a descriptor called `RangeField` that validates a numeric value
+      is within a min/max range (inclusive). RangeField(0, 100) only allows
+      values between 0 and 100. Use __set_name__, __get__, __set__. Store
+      data on instance dict. Raise ValueError on out-of-range assignment.
+    solution: |
+      ```python
+      class RangeField:
+          def __init__(self, min_val, max_val):
+              self.min_val = min_val
+              self.max_val = max_val
+              self.name = None
+
+          def __set_name__(self, owner, name):
+              self.name = name
+
+          def __get__(self, obj, objtype=None):
+              if obj is None:
+                  return self
+              return obj.__dict__.get(self.name)
+
+          def __set__(self, obj, value):
+              if not isinstance(value, (int, float)):
+                  raise TypeError(
+                      f"{self.name} must be numeric, got {type(value).__name__}"
+                  )
+              if value < self.min_val or value > self.max_val:
+                  raise ValueError(
+                      f"{self.name} must be between {self.min_val} and "
+                      f"{self.max_val}, got {value}"
+                  )
+              obj.__dict__[self.name] = value
+      ```
+
+      Key patterns:
+      1. __init__ stores min_val, max_val, and name=None
+      2. __set_name__ captures attribute name from class body
+      3. __get__ returns self for class-level access, otherwise reads from obj.__dict__
+      4. __set__ checks type first, then range, raises ValueError for out-of-range
+      5. Data stored on instance dict keeps instances independent
+    tags: [descriptor, range-validation, __set_name__, __get__, __set__]
+    difficulty: medium
+
+  - query: |
+      Write a descriptor called `LazyProperty` that computes a value on
+      first access using a factory function, then caches it on the instance.
+      Subsequent accesses return the cached value without recomputing.
+      Usage as a decorator:
+      class Config:
+          @LazyProperty
+          def db_connection(self):
+              return expensive_connect()
+    solution: |
+      ```python
+      class LazyProperty:
+          def __init__(self, func):
+              self.func = func
+              self.name = None
+
+          def __set_name__(self, owner, name):
+              self.name = name
+
+          def __get__(self, obj, objtype=None):
+              if obj is None:
+                  return self
+              if self.name not in obj.__dict__:
+                  obj.__dict__[self.name] = self.func(obj)
+              return obj.__dict__[self.name]
+      ```
+
+      Key patterns:
+      1. Used as a decorator — __init__ receives the method
+      2. __set_name__ captures the attribute name
+      3. __get__ checks obj.__dict__ first; only calls func(obj) on cache miss
+      4. Storing in obj.__dict__ means subsequent access bypasses the descriptor entirely (dict lookup shadows descriptor)
+      5. No __set__ needed — writing to obj.__dict__ directly is sufficient
+    tags: [descriptor, lazy, caching, decorator, __set_name__, __get__]
+    difficulty: medium
+
+  - query: |
+      Write a descriptor called `ObservableField` that calls a callback
+      whenever its value changes. The callback receives (instance, field_name,
+      old_value, new_value). Use __set_name__, __get__, __set__. Store data
+      on instance dict.
+      Usage:
+      def on_change(obj, name, old, new):
+          print(f"{name}: {old} -> {new}")
+      class Settings:
+          theme = ObservableField(on_change)
+    solution: |
+      ```python
+      class ObservableField:
+          def __init__(self, callback):
+              self.callback = callback
+              self.name = None
+
+          def __set_name__(self, owner, name):
+              self.name = name
+
+          def __get__(self, obj, objtype=None):
+              if obj is None:
+                  return self
+              return obj.__dict__.get(self.name)
+
+          def __set__(self, obj, value):
+              old_value = obj.__dict__.get(self.name)
+              obj.__dict__[self.name] = value
+              if old_value != value:
+                  self.callback(obj, self.name, old_value, value)
+      ```
+
+      Key patterns:
+      1. __init__ stores the callback function
+      2. __set__ reads old value before writing, then fires callback if value changed
+      3. Callback receives (instance, field_name, old_value, new_value) for full context
+      4. Only fires on actual changes (old != new), not redundant sets
+      5. Data on instance dict — descriptor is shared across all instances
+    tags: [descriptor, observer, callback, __set_name__, __get__, __set__]
+    difficulty: medium
+
+  - query: |
+      Write a descriptor called `ReadOnly` that allows a value to be set
+      once (in __init__ or first assignment) but raises AttributeError on
+      subsequent writes. Use __set_name__, __get__, __set__. Store data on
+      instance dict using a private key.
+    solution: |
+      ```python
+      class ReadOnly:
+          def __init__(self, default=None):
+              self.default = default
+              self.name = None
+
+          def __set_name__(self, owner, name):
+              self.name = name
+              self._storage_key = f"_readonly_{name}"
+
+          def __get__(self, obj, objtype=None):
+              if obj is None:
+                  return self
+              return obj.__dict__.get(self._storage_key, self.default)
+
+          def __set__(self, obj, value):
+              if self._storage_key in obj.__dict__:
+                  raise AttributeError(
+                      f"{self.name} is read-only and already set"
+                  )
+              obj.__dict__[self._storage_key] = value
+      ```
+
+      Key patterns:
+      1. Uses a private storage key (_readonly_{name}) so direct attribute writes don't bypass the descriptor
+      2. __set__ checks if key already exists in obj.__dict__; if so, raises AttributeError
+      3. First assignment succeeds and stores the value
+      4. Optional default returned when field has not been set yet
+      5. Immutability enforced at the descriptor level — no way to overwrite without going through __dict__ directly
+    tags: [descriptor, read-only, immutable, __set_name__, __get__, __set__]
+    difficulty: medium

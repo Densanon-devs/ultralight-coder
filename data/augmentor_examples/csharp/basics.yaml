@@ -1,0 +1,203 @@
+domain: csharp
+category: csharp_basics
+examples:
+  - query: |
+      Write a C# method that reverses a string.
+    solution: |
+      ```csharp
+      public static class StringUtils
+      {
+          public static string Reverse(string s)
+          {
+              char[] chars = s.ToCharArray();
+              Array.Reverse(chars);
+              return new string(chars);
+          }
+      }
+      ```
+    tags: [csharp, string, reverse]
+    difficulty: easy
+
+  - query: |
+      Write a C# generic class for a stack with Push, Pop, and Peek.
+    solution: |
+      ```csharp
+      public class Stack<T>
+      {
+          private readonly List<T> _items = new();
+
+          public void Push(T item) => _items.Add(item);
+
+          public T Pop()
+          {
+              if (_items.Count == 0) throw new InvalidOperationException("Stack is empty");
+              var item = _items[^1];
+              _items.RemoveAt(_items.Count - 1);
+              return item;
+          }
+
+          public T Peek()
+          {
+              if (_items.Count == 0) throw new InvalidOperationException("Stack is empty");
+              return _items[^1];
+          }
+
+          public int Count => _items.Count;
+          public bool IsEmpty => _items.Count == 0;
+      }
+      ```
+    tags: [csharp, generics, stack, data-structure]
+    difficulty: easy
+
+  - query: |
+      Write a C# LINQ query that groups a list of objects by a property and returns the count per group.
+    solution: |
+      ```csharp
+      using System.Linq;
+
+      public record Order(string Category, decimal Amount);
+
+      public static class OrderAnalytics
+      {
+          public static Dictionary<string, int> CountByCategory(List<Order> orders)
+          {
+              return orders
+                  .GroupBy(o => o.Category)
+                  .ToDictionary(g => g.Key, g => g.Count());
+          }
+      }
+      ```
+    tags: [csharp, linq, groupby, dictionary]
+    difficulty: medium
+
+  - query: |
+      Write a C# record with init-only properties and a custom ToString.
+    solution: |
+      ```csharp
+      public record Person
+      {
+          public required string Name { get; init; }
+          public required string Email { get; init; }
+          public int Age { get; init; }
+
+          public override string ToString() => $"{Name} ({Email}), age {Age}";
+      }
+      ```
+    tags: [csharp, record, init-only, required]
+    difficulty: easy
+
+  - query: |
+      Write a C# async method that fetches JSON from a URL and deserializes it.
+    solution: |
+      ```csharp
+      using System.Net.Http;
+      using System.Net.Http.Json;
+
+      public static class ApiClient
+      {
+          private static readonly HttpClient _client = new();
+
+          public static async Task<T?> FetchJsonAsync<T>(string url)
+          {
+              var response = await _client.GetAsync(url);
+              response.EnsureSuccessStatusCode();
+              return await response.Content.ReadFromJsonAsync<T>();
+          }
+      }
+      ```
+    tags: [csharp, async, httpclient, json, generics]
+    difficulty: medium
+
+  - query: |
+      Write a C# interface with a default method and implement it in two classes.
+    solution: |
+      ```csharp
+      public interface IGreeter
+      {
+          string Name { get; }
+          string Greet() => $"Hello, {Name}!";
+      }
+
+      public class UserGreeter : IGreeter
+      {
+          public string Name { get; }
+          public UserGreeter(string name) => Name = name;
+      }
+
+      public class BotGreeter : IGreeter
+      {
+          public string Name => "Bot";
+          public string Greet() => "Beep boop!";
+      }
+      ```
+    tags: [csharp, interface, default-method, polymorphism]
+    difficulty: medium
+
+  - query: |
+      Write a C# interface for an async repository with generic CRUD methods returning Task.
+    solution: |
+      ```csharp
+      public interface IRepository<T> where T : class
+      {
+          Task<T?> GetByIdAsync(int id);
+          Task<List<T>> GetAllAsync();
+          Task AddAsync(T entity);
+          Task UpdateAsync(T entity);
+          Task DeleteAsync(int id);
+      }
+      ```
+    tags: [csharp, interface, repository, async, task, generics]
+    difficulty: medium
+
+  - query: |
+      Write a C# LINQ query that joins two lists and selects combined fields.
+    solution: |
+      ```csharp
+      using System.Linq;
+
+      public record Order(int Id, int CustomerId, decimal Amount);
+      public record Customer(int Id, string Name);
+
+      public static class OrderQuery
+      {
+          public static IEnumerable<object> GetOrderSummaries(
+              List<Customer> customers, List<Order> orders)
+          {
+              var query = from c in customers
+                          join o in orders on c.Id equals o.CustomerId
+                          select new { c.Name, o.Amount, o.Id };
+              return query;
+          }
+      }
+      ```
+    tags: [csharp, linq, join, select, query-syntax]
+    difficulty: medium
+
+  - query: |
+      Write a C# class that validates an object's properties using a Validate method.
+    solution: |
+      ```csharp
+      public class Validator<T>
+      {
+          private readonly List<(string Field, Func<T, bool> Rule, string Message)> _rules = new();
+
+          public Validator<T> RuleFor(string field, Func<T, bool> rule, string message)
+          {
+              _rules.Add((field, rule, message));
+              return this;
+          }
+
+          public List<string> Validate(T obj)
+          {
+              var errors = new List<string>();
+              foreach (var (field, rule, message) in _rules)
+              {
+                  if (!rule(obj))
+                      errors.Add($"{field}: {message}");
+              }
+              return errors;
+          }
+      }
+      ```
+    tags: [csharp, validation, generics, fluent]
+    difficulty: medium

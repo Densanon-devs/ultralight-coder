@@ -1,0 +1,85 @@
+domain: data_processing
+category: data_validation
+examples:
+  - query: |
+      Write a schema validator class that takes a dict of field names mapped to
+      (type, required) tuples and validates input dicts against it. Return a list
+      of error strings.
+    solution: |
+      ```python
+      class SchemaValidator:
+          def __init__(self, schema):
+              self.schema = schema  # {"field": (type, required_bool)}
+
+          def validate(self, data):
+              errors = []
+              for field, (expected_type, required) in self.schema.items():
+                  if field not in data:
+                      if required:
+                          errors.append(f"missing required field: {field}")
+                      continue
+                  if not isinstance(data[field], expected_type):
+                      errors.append(
+                          f"{field}: expected {expected_type.__name__}, "
+                          f"got {type(data[field]).__name__}"
+                      )
+              return errors
+
+
+      if __name__ == "__main__":
+          schema = SchemaValidator({
+              "name": (str, True),
+              "age": (int, True),
+              "email": (str, False),
+          })
+          print(schema.validate({"name": "Alice", "age": 30}))        # []
+          print(schema.validate({"name": "Bob", "age": "old"}))       # type error
+          print(schema.validate({"age": 25}))                         # missing name
+      ```
+
+  - query: |
+      Write a dataclass-based configuration loader that reads a JSON file,
+      validates types match the dataclass fields, and provides defaults for
+      missing fields.
+    solution: |
+      ```python
+      import json
+      from dataclasses import dataclass, fields, MISSING
+
+
+      def load_config(cls, path):
+          with open(path) as f:
+              raw = json.load(f)
+          kwargs = {}
+          for fld in fields(cls):
+              if fld.name in raw:
+                  val = raw[fld.name]
+                  if not isinstance(val, fld.type):
+                      raise TypeError(
+                          f"{fld.name}: expected {fld.type.__name__}, got {type(val).__name__}"
+                      )
+                  kwargs[fld.name] = val
+              elif fld.default is not MISSING:
+                  kwargs[fld.name] = fld.default
+              else:
+                  raise ValueError(f"missing required field: {fld.name}")
+          return cls(**kwargs)
+
+
+      @dataclass
+      class AppConfig:
+          host: str = "localhost"
+          port: int = 8080
+          debug: bool = False
+
+
+      if __name__ == "__main__":
+          import tempfile, os
+
+          tmp = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
+          json.dump({"port": 3000}, tmp)
+          tmp.close()
+          cfg = load_config(AppConfig, tmp.name)
+          print(cfg)  # AppConfig(host='localhost', port=3000, debug=False)
+          os.unlink(tmp.name)
+      ```

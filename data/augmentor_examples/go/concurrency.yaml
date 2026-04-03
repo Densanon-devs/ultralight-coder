@@ -1,0 +1,183 @@
+domain: go
+category: go_concurrency
+examples:
+  - query: |
+      Write a Go function that runs N goroutines in parallel, collects their results, and returns them.
+    solution: |
+      ```go
+      package main
+
+      import "sync"
+
+      func parallel(tasks []func() int) []int {
+      	results := make([]int, len(tasks))
+      	var wg sync.WaitGroup
+      	for i, task := range tasks {
+      		wg.Add(1)
+      		go func(i int, t func() int) {
+      			defer wg.Done()
+      			results[i] = t()
+      		}(i, task)
+      	}
+      	wg.Wait()
+      	return results
+      }
+      ```
+    tags: [go, goroutine, waitgroup, parallel]
+    difficulty: medium
+
+  - query: |
+      Write a Go worker pool that processes jobs from a channel with N workers.
+    solution: |
+      ```go
+      package main
+
+      import "sync"
+
+      func workerPool(jobs <-chan int, numWorkers int, process func(int) int) []int {
+      	results := make(chan int, len(jobs))
+      	var wg sync.WaitGroup
+
+      	for i := 0; i < numWorkers; i++ {
+      		wg.Add(1)
+      		go func() {
+      			defer wg.Done()
+      			for job := range jobs {
+      				results <- process(job)
+      			}
+      		}()
+      	}
+
+      	go func() {
+      		wg.Wait()
+      		close(results)
+      	}()
+
+      	var out []int
+      	for r := range results {
+      		out = append(out, r)
+      	}
+      	return out
+      }
+      ```
+    tags: [go, worker-pool, channel, goroutine]
+    difficulty: medium
+
+  - query: |
+      Write a Go function that implements a fan-out, fan-in pattern using channels.
+    solution: |
+      ```go
+      package main
+
+      import "sync"
+
+      func fanOut(input <-chan int, workers int, fn func(int) int) <-chan int {
+      	out := make(chan int)
+      	var wg sync.WaitGroup
+
+      	for i := 0; i < workers; i++ {
+      		wg.Add(1)
+      		go func() {
+      			defer wg.Done()
+      			for val := range input {
+      				out <- fn(val)
+      			}
+      		}()
+      	}
+
+      	go func() {
+      		wg.Wait()
+      		close(out)
+      	}()
+
+      	return out
+      }
+      ```
+    tags: [go, fan-out, fan-in, channel, goroutine]
+    difficulty: hard
+
+  - query: |
+      Write a Go rate limiter using a ticker that allows N operations per second.
+    solution: |
+      ```go
+      package main
+
+      import "time"
+
+      type RateLimiter struct {
+      	tokens chan struct{}
+      	stop   chan struct{}
+      }
+
+      func NewRateLimiter(rps int) *RateLimiter {
+      	rl := &RateLimiter{
+      		tokens: make(chan struct{}, rps),
+      		stop:   make(chan struct{}),
+      	}
+      	go func() {
+      		ticker := time.NewTicker(time.Second / time.Duration(rps))
+      		defer ticker.Stop()
+      		for {
+      			select {
+      			case <-ticker.C:
+      				select {
+      				case rl.tokens <- struct{}{}:
+      				default:
+      				}
+      			case <-rl.stop:
+      				return
+      			}
+      		}
+      	}()
+      	return rl
+      }
+
+      func (rl *RateLimiter) Wait() {
+      	<-rl.tokens
+      }
+
+      func (rl *RateLimiter) Close() {
+      	close(rl.stop)
+      }
+      ```
+    tags: [go, rate-limiter, ticker, channel]
+    difficulty: hard
+
+  - query: |
+      Write a Go thread-safe map using sync.RWMutex.
+    solution: |
+      ```go
+      package main
+
+      import "sync"
+
+      type SafeMap[K comparable, V any] struct {
+      	mu sync.RWMutex
+      	m  map[K]V
+      }
+
+      func NewSafeMap[K comparable, V any]() *SafeMap[K, V] {
+      	return &SafeMap[K, V]{m: make(map[K]V)}
+      }
+
+      func (sm *SafeMap[K, V]) Get(key K) (V, bool) {
+      	sm.mu.RLock()
+      	defer sm.mu.RUnlock()
+      	val, ok := sm.m[key]
+      	return val, ok
+      }
+
+      func (sm *SafeMap[K, V]) Set(key K, val V) {
+      	sm.mu.Lock()
+      	defer sm.mu.Unlock()
+      	sm.m[key] = val
+      }
+
+      func (sm *SafeMap[K, V]) Delete(key K) {
+      	sm.mu.Lock()
+      	defer sm.mu.Unlock()
+      	delete(sm.m, key)
+      }
+      ```
+    tags: [go, generics, mutex, thread-safe, map]
+    difficulty: medium

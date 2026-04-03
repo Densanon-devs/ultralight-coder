@@ -1,0 +1,178 @@
+domain: c
+category: c_basics
+examples:
+  - query: |
+      Write a C function that reverses a string in place.
+    solution: |
+      ```c
+      #include <string.h>
+
+      void reverse_string(char *s) {
+          int left = 0;
+          int right = strlen(s) - 1;
+          while (left < right) {
+              char tmp = s[left];
+              s[left] = s[right];
+              s[right] = tmp;
+              left++;
+              right--;
+          }
+      }
+      ```
+    tags: [c, string, reverse, pointers]
+    difficulty: easy
+
+  - query: |
+      Write a C function that implements a dynamic array (vector) with push and get.
+    solution: |
+      ```c
+      #include <stdlib.h>
+      #include <string.h>
+
+      typedef struct {
+          int *data;
+          int size;
+          int capacity;
+      } Vec;
+
+      Vec vec_new(void) {
+          Vec v = { .data = malloc(4 * sizeof(int)), .size = 0, .capacity = 4 };
+          return v;
+      }
+
+      void vec_push(Vec *v, int val) {
+          if (v->size == v->capacity) {
+              v->capacity *= 2;
+              v->data = realloc(v->data, v->capacity * sizeof(int));
+          }
+          v->data[v->size++] = val;
+      }
+
+      int vec_get(Vec *v, int index) {
+          return v->data[index];
+      }
+
+      void vec_free(Vec *v) {
+          free(v->data);
+          v->data = NULL;
+          v->size = 0;
+          v->capacity = 0;
+      }
+      ```
+    tags: [c, dynamic-array, malloc, realloc, struct]
+    difficulty: medium
+
+  - query: |
+      Write a C function that reads a file into a dynamically allocated string.
+    solution: |
+      ```c
+      #include <stdio.h>
+      #include <stdlib.h>
+
+      char *read_file(const char *path) {
+          FILE *f = fopen(path, "rb");
+          if (!f) return NULL;
+
+          fseek(f, 0, SEEK_END);
+          long len = ftell(f);
+          fseek(f, 0, SEEK_SET);
+
+          char *buf = malloc(len + 1);
+          if (buf) {
+              fread(buf, 1, len, f);
+              buf[len] = '\0';
+          }
+          fclose(f);
+          return buf;
+      }
+      ```
+    tags: [c, file-io, malloc, fopen]
+    difficulty: easy
+
+  - query: |
+      Write a C implementation of a singly linked list with insert, find, and free.
+    solution: |
+      ```c
+      #include <stdlib.h>
+
+      typedef struct Node {
+          int value;
+          struct Node *next;
+      } Node;
+
+      Node *list_insert(Node *head, int value) {
+          Node *n = malloc(sizeof(Node));
+          n->value = value;
+          n->next = head;
+          return n;
+      }
+
+      Node *list_find(Node *head, int value) {
+          for (Node *cur = head; cur; cur = cur->next) {
+              if (cur->value == value) return cur;
+          }
+          return NULL;
+      }
+
+      void list_free(Node *head) {
+          while (head) {
+              Node *next = head->next;
+              free(head);
+              head = next;
+          }
+      }
+      ```
+    tags: [c, linked-list, malloc, struct, pointers]
+    difficulty: medium
+
+  - query: |
+      Write a C hash map that stores string keys and integer values.
+    solution: |
+      ```c
+      #include <stdlib.h>
+      #include <string.h>
+
+      #define BUCKETS 64
+
+      typedef struct Entry {
+          char *key;
+          int value;
+          struct Entry *next;
+      } Entry;
+
+      typedef struct {
+          Entry *buckets[BUCKETS];
+      } HashMap;
+
+      static unsigned hash(const char *s) {
+          unsigned h = 0;
+          while (*s) h = h * 31 + (unsigned char)*s++;
+          return h % BUCKETS;
+      }
+
+      HashMap *map_new(void) {
+          return calloc(1, sizeof(HashMap));
+      }
+
+      void map_put(HashMap *m, const char *key, int value) {
+          unsigned idx = hash(key);
+          for (Entry *e = m->buckets[idx]; e; e = e->next) {
+              if (strcmp(e->key, key) == 0) { e->value = value; return; }
+          }
+          Entry *e = malloc(sizeof(Entry));
+          e->key = strdup(key);
+          e->value = value;
+          e->next = m->buckets[idx];
+          m->buckets[idx] = e;
+      }
+
+      int map_get(HashMap *m, const char *key, int fallback) {
+          unsigned idx = hash(key);
+          for (Entry *e = m->buckets[idx]; e; e = e->next) {
+              if (strcmp(e->key, key) == 0) return e->value;
+          }
+          return fallback;
+      }
+      ```
+    tags: [c, hash-map, struct, pointers, string]
+    difficulty: hard

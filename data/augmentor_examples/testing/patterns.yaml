@@ -1,0 +1,69 @@
+domain: testing
+category: test_patterns
+examples:
+  - query: |
+      Write a test factory function that creates User objects with sensible defaults but allows overrides, then use it in a test.
+    solution: |
+      ```python
+      import unittest
+      from dataclasses import dataclass
+
+      @dataclass
+      class User:
+          name: str
+          email: str
+          age: int
+          active: bool
+
+      def make_user(**overrides):
+          defaults = dict(
+              name="Alice", email="alice@test.com",
+              age=30, active=True,
+          )
+          defaults.update(overrides)
+          return User(**defaults)
+
+      class TestUser(unittest.TestCase):
+          def test_default_user(self):
+              user = make_user()
+              self.assertEqual(user.name, "Alice")
+              self.assertTrue(user.active)
+
+          def test_inactive_user(self):
+              user = make_user(active=False, name="Bob")
+              self.assertEqual(user.name, "Bob")
+              self.assertFalse(user.active)
+
+      if __name__ == "__main__":
+          unittest.main()
+      ```
+
+  - query: |
+      Write a custom assertion helper that checks if a response dict has the expected status and a non-empty body, with a clear error message on failure.
+    solution: |
+      ```python
+      import unittest
+
+      def assert_valid_response(test, resp, expected_status):
+          test.assertEqual(
+              resp.get("status"), expected_status,
+              f"Expected status {expected_status}, got {resp.get('status')}",
+          )
+          test.assertTrue(
+              resp.get("body"),
+              "Response body must be non-empty",
+          )
+
+      class TestAPI(unittest.TestCase):
+          def test_success_response(self):
+              resp = {"status": 200, "body": "OK"}
+              assert_valid_response(self, resp, 200)
+
+          def test_missing_body_fails(self):
+              resp = {"status": 200, "body": ""}
+              with self.assertRaises(AssertionError):
+                  assert_valid_response(self, resp, 200)
+
+      if __name__ == "__main__":
+          unittest.main()
+      ```

@@ -1,0 +1,215 @@
+domain: pattern
+category: pattern_middleware
+examples:
+  - query: |
+      Write a MiddlewarePipeline class with use(fn) and execute(request).
+      Each middleware has signature fn(request, next_fn). next_fn calls the
+      next middleware. After the last middleware, return the request as-is.
+      Middleware can modify request, modify the response, or short-circuit.
+    solution: |
+      ```python
+      class MiddlewarePipeline:
+          def __init__(self):
+              self._middlewares = []
+
+          def use(self, middleware):
+              self._middlewares.append(middleware)
+              return self
+
+          def execute(self, request):
+              index = 0
+              middlewares = self._middlewares
+
+              def next_fn(req):
+                  nonlocal index
+                  i = index
+                  index += 1
+                  if i >= len(middlewares):
+                      return req
+                  return middlewares[i](req, next_fn)
+
+              return next_fn(request)
+      ```
+
+      Key: next_fn uses nonlocal index to track position. When index passes
+      the end of the list, it returns the request as the terminal response.
+      Each middleware calls next_fn(req) to continue or returns directly
+      to short-circuit (skipping remaining middleware).
+    tags: [middleware, pipeline, closure, chain-of-responsibility]
+    difficulty: medium
+
+  - query: |
+      Write a PubSub class with subscribe(pattern, callback),
+      publish(topic, data), and unsubscribe(pattern, callback).
+      Patterns use dot-separated segments. * matches one segment.
+      A single "*" alone matches all topics.
+    solution: |
+      ```python
+      class PubSub:
+          def __init__(self):
+              self._subscribers = {}
+
+          def subscribe(self, pattern, callback):
+              if pattern not in self._subscribers:
+                  self._subscribers[pattern] = []
+              self._subscribers[pattern].append(callback)
+
+          def unsubscribe(self, pattern, callback):
+              if pattern in self._subscribers:
+                  self._subscribers[pattern] = [
+                      cb for cb in self._subscribers[pattern] if cb != callback
+                  ]
+
+          def publish(self, topic, data):
+              for pattern, callbacks in self._subscribers.items():
+                  if self._matches(pattern, topic):
+                      for cb in callbacks:
+                          cb(data)
+
+          def _matches(self, pattern, topic):
+              if pattern == "*":
+                  return True
+              pat_parts = pattern.split(".")
+              top_parts = topic.split(".")
+              if len(pat_parts) != len(top_parts):
+                  return False
+              for p, t in zip(pat_parts, top_parts):
+                  if p != "*" and p != t:
+                      return False
+              return True
+      ```
+
+      Key: _matches handles three cases: "*" alone matches everything,
+      segment-level * matches any single segment, exact segments must
+      match. Callbacks receive just the data argument.
+    tags: [pubsub, pattern-matching, wildcard, event-system]
+    difficulty: medium
+
+  - query: |
+      Write a logging middleware function for a MiddlewarePipeline that
+      logs the request method and path before processing, and the
+      response status after. Include timing information.
+    solution: |
+      ```python
+      import time
+      import logging
+
+      logger = logging.getLogger(__name__)
+
+
+      def logging_middleware(request, next_fn):
+          method = request.get("method", "UNKNOWN")
+          path = request.get("path", "/")
+          logger.info(f"--> {method} {path}")
+          start = time.perf_counter()
+          response = next_fn(request)
+          elapsed = time.perf_counter() - start
+          status = response.get("status", "?") if isinstance(response, dict) else "?"
+          logger.info(f"<-- {method} {path} [{status}] {elapsed:.3f}s")
+          return response
+      ```
+
+      Key: middleware calls next_fn(request) to continue the chain and captures the response. Timing wraps the next_fn call. Follows the fn(request, next_fn) signature expected by MiddlewarePipeline.
+    tags: [middleware, logging, timing, pipeline]
+    difficulty: easy
+
+  - query: |
+      Write an auth middleware function that checks for a valid API key
+      in the request headers. If the key is missing or invalid, short-circuit
+      and return a 401 response without calling next_fn.
+    solution: |
+      ```python
+      VALID_API_KEYS = {"key-abc-123", "key-def-456"}
+
+
+      def auth_middleware(request, next_fn):
+          headers = request.get("headers", {})
+          api_key = headers.get("Authorization", "").replace("Bearer ", "")
+          if api_key not in VALID_API_KEYS:
+              return {
+                  "status": 401,
+                  "body": {"error": "unauthorized", "message": "invalid or missing API key"},
+              }
+          request["user"] = {"api_key": api_key, "authenticated": True}
+          return next_fn(request)
+      ```
+
+      Key: short-circuit pattern -- return a response dict directly instead of calling next_fn to skip all downstream middleware. Enrich the request with user info on success before passing it along.
+    tags: [middleware, authentication, authorization, short-circuit, pipeline]
+    difficulty: medium
+
+  - query: |
+      Write an error handling middleware that wraps next_fn in a
+      try/except, catches any exception, and returns a structured
+      error response with status 500 instead of letting the exception
+      propagate.
+    solution: |
+      ```python
+      import traceback
+      import logging
+
+      logger = logging.getLogger(__name__)
+
+
+      def error_handling_middleware(request, next_fn):
+          try:
+              return next_fn(request)
+          except Exception as e:
+              logger.exception(f"Unhandled error processing {request.get('path', '/')}")
+              return {
+                  "status": 500,
+                  "body": {
+                      "error": "internal_server_error",
+                      "message": str(e),
+                      "type": type(e).__name__,
+                  },
+              }
+      ```
+
+      Key: this middleware should be added early in the pipeline (via pipeline.use) so it wraps all downstream middleware and handlers. Catches exceptions from next_fn and converts them to a structured dict response.
+    tags: [middleware, error-handling, exception, pipeline, resilience]
+    difficulty: easy
+
+  - query: |
+      Write a CORS middleware that adds Cross-Origin Resource Sharing
+      headers to every response. Support configurable allowed origins,
+      methods, and headers. Handle OPTIONS preflight requests by
+      short-circuiting with a 204 response.
+    solution: |
+      ```python
+      def make_cors_middleware(
+          allowed_origins=("*",),
+          allowed_methods=("GET", "POST", "PUT", "DELETE", "OPTIONS"),
+          allowed_headers=("Content-Type", "Authorization"),
+      ):
+          def cors_middleware(request, next_fn):
+              origin = request.get("headers", {}).get("Origin", "")
+              cors_headers = {
+                  "Access-Control-Allow-Origin": (
+                      origin if origin and ("*" in allowed_origins or origin in allowed_origins)
+                      else ""
+                  ),
+                  "Access-Control-Allow-Methods": ", ".join(allowed_methods),
+                  "Access-Control-Allow-Headers": ", ".join(allowed_headers),
+              }
+
+              if request.get("method") == "OPTIONS":
+                  return {
+                      "status": 204,
+                      "headers": cors_headers,
+                      "body": None,
+                  }
+
+              response = next_fn(request)
+              if isinstance(response, dict):
+                  response_headers = response.get("headers", {})
+                  response_headers.update(cors_headers)
+                  response["headers"] = response_headers
+              return response
+
+          return cors_middleware
+      ```
+
+      Key: factory function returns a configured middleware closure. OPTIONS preflight requests short-circuit with 204. For all other requests, CORS headers are injected into the response after calling next_fn. Supports wildcard or explicit origin allowlists.
+    tags: [middleware, cors, http, factory, pipeline, preflight]
+    difficulty: medium

@@ -1,0 +1,105 @@
+domain: sql
+category: sql_queries
+examples:
+  - query: |
+      Write a SQL query that finds the top 5 customers by total order amount.
+    solution: |
+      ```sql
+      SELECT c.id, c.name, SUM(o.amount) AS total_spent
+      FROM customers c
+      JOIN orders o ON o.customer_id = c.id
+      GROUP BY c.id, c.name
+      ORDER BY total_spent DESC
+      LIMIT 5;
+      ```
+    tags: [sql, join, aggregate, group-by, order-by]
+    difficulty: easy
+
+  - query: |
+      Write a SQL query that finds all users who have not placed any orders.
+    solution: |
+      ```sql
+      SELECT u.id, u.name
+      FROM users u
+      LEFT JOIN orders o ON o.user_id = u.id
+      WHERE o.id IS NULL;
+      ```
+    tags: [sql, left-join, null-check, anti-join]
+    difficulty: easy
+
+  - query: |
+      Write a SQL query that calculates a running total of daily sales.
+    solution: |
+      ```sql
+      SELECT
+        sale_date,
+        daily_total,
+        SUM(daily_total) OVER (ORDER BY sale_date) AS running_total
+      FROM (
+        SELECT sale_date, SUM(amount) AS daily_total
+        FROM sales
+        GROUP BY sale_date
+      ) daily
+      ORDER BY sale_date;
+      ```
+    tags: [sql, window-function, running-total, aggregate]
+    difficulty: medium
+
+  - query: |
+      Write a SQL query that ranks employees by salary within each department.
+    solution: |
+      ```sql
+      SELECT
+        department,
+        name,
+        salary,
+        RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dept_rank
+      FROM employees
+      ORDER BY department, dept_rank;
+      ```
+    tags: [sql, window-function, rank, partition]
+    difficulty: medium
+
+  - query: |
+      Write a SQL query that pivots monthly sales into columns.
+    solution: |
+      ```sql
+      SELECT
+        product_id,
+        SUM(CASE WHEN EXTRACT(MONTH FROM sale_date) = 1 THEN amount ELSE 0 END) AS jan,
+        SUM(CASE WHEN EXTRACT(MONTH FROM sale_date) = 2 THEN amount ELSE 0 END) AS feb,
+        SUM(CASE WHEN EXTRACT(MONTH FROM sale_date) = 3 THEN amount ELSE 0 END) AS mar
+      FROM sales
+      WHERE EXTRACT(YEAR FROM sale_date) = 2025
+      GROUP BY product_id;
+      ```
+    tags: [sql, pivot, case-when, aggregate]
+    difficulty: hard
+
+  - query: |
+      Write a SQL query that pivots rows into columns showing totals per category using CASE.
+    solution: |
+      ```sql
+      SELECT
+        region,
+        SUM(CASE WHEN category = 'Electronics' THEN revenue ELSE 0 END) AS electronics,
+        SUM(CASE WHEN category = 'Clothing' THEN revenue ELSE 0 END) AS clothing,
+        SUM(CASE WHEN category = 'Food' THEN revenue ELSE 0 END) AS food
+      FROM sales
+      GROUP BY region
+      ORDER BY region;
+      ```
+    tags: [sql, pivot, case-when, aggregate, group-by]
+    difficulty: medium
+
+  - query: |
+      Write a SQL query that finds duplicate rows based on email.
+    solution: |
+      ```sql
+      SELECT email, COUNT(*) AS cnt
+      FROM users
+      GROUP BY email
+      HAVING COUNT(*) > 1;
+      ```
+    tags: [sql, group-by, having, duplicates]
+    difficulty: easy

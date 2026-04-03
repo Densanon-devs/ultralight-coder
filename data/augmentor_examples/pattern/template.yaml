@@ -1,0 +1,504 @@
+domain: pattern
+category: pattern_template
+examples:
+  - query: |
+      Write a render(template, context) function that handles {{var}}
+      substitution and {% for x in list %}...{% endfor %} loops.
+      Missing variables become empty string.
+    solution: |
+      ```python
+      def render(template, context):
+          result = _handle_for_loops(template, context)
+          result = _replace_vars(result, context)
+          return result
+
+
+      def _replace_vars(text, ctx):
+          while "{{" in text:
+              start = text.index("{{")
+              end = text.index("}}", start) + 2
+              var = text[start + 2:end - 2].strip()
+              text = text[:start] + str(ctx.get(var, "")) + text[end:]
+          return text
+
+
+      def _handle_for_loops(text, ctx):
+          while "{% for " in text:
+              start = text.index("{% for ")
+              tag_end = text.index("%}", start) + 2
+              tag = text[start + 2:tag_end - 2].strip()
+              parts = tag.split()
+              var_name = parts[1]
+              list_name = parts[3]
+              end_tag = "{% endfor %}"
+              body_end = text.index(end_tag, tag_end)
+              body = text[tag_end:body_end]
+              loop_result = []
+              for item in ctx.get(list_name, []):
+                  loop_ctx = dict(ctx)
+                  loop_ctx[var_name] = item
+                  rendered = _handle_for_loops(body, loop_ctx)
+                  rendered = _replace_vars(rendered, loop_ctx)
+                  loop_result.append(rendered)
+              text = text[:start] + "".join(loop_result) + text[body_end + len(end_tag):]
+          return text
+      ```
+
+      Key: no regex needed. Find {{ and }} with string.index().
+      For loops: find {% for %} tag, extract var and list names,
+      render body for each item, splice result back into text.
+    tags: [template-engine, string-processing, for-loop, variable-substitution]
+    difficulty: medium
+
+  - query: |
+      Write a simple template function that supports {{var}},
+      {{var|upper}}, and {{var|default:fallback}} filters.
+    solution: |
+      ```python
+      import re
+
+
+      def render_filtered(template, context):
+          def apply_filter(value, filt):
+              if filt == 'upper':
+                  return str(value).upper()
+              if filt == 'lower':
+                  return str(value).lower()
+              if filt == 'title':
+                  return str(value).title()
+              if filt.startswith('default:'):
+                  return value if value else filt.split(':', 1)[1]
+              return str(value)
+
+          def replacer(match):
+              expr = match.group(1).strip()
+              parts = expr.split('|')
+              name = parts[0].strip()
+              value = context.get(name, '')
+              for filt in parts[1:]:
+                  value = apply_filter(value, filt.strip())
+              return str(value)
+
+          return re.sub(r'\{\{(.+?)\}\}', replacer, template)
+      ```
+
+      Key: split on | to extract filters. Apply filters left to right. default:fallback uses the fallback if value is falsy.
+    tags: [template-engine, regex, filters, string-processing]
+    difficulty: medium
+
+  - query: |
+      Write a `render_with_filters(template, context)` function that supports {{var}}, {{var|filter}}, and chained filters like {{var|upper|truncate:10}}. Include filters: upper, lower, title, truncate:N, default:val, replace:old:new.
+    solution: |
+      ```python
+      import re
+
+
+      def render_with_filters(template: str, context: dict) -> str:
+          FILTERS = {
+              'upper': lambda v, _: str(v).upper(),
+              'lower': lambda v, _: str(v).lower(),
+              'title': lambda v, _: str(v).title(),
+              'strip': lambda v, _: str(v).strip(),
+              'length': lambda v, _: str(len(v)),
+          }
+
+          def apply_filter(value, filt_expr: str):
+              parts = filt_expr.split(':', 1)
+              name = parts[0].strip()
+              arg = parts[1].strip() if len(parts) > 1 else None
+
+              if name in FILTERS:
+                  return FILTERS[name](value, arg)
+              if name == 'truncate' and arg:
+                  n = int(arg)
+                  s = str(value)
+                  return s[:n] + '...' if len(s) > n else s
+              if name == 'default':
+                  return value if value else (arg or '')
+              if name == 'replace' and arg:
+                  old, new = arg.split(':', 1)
+                  return str(value).replace(old, new)
+              return str(value)
+
+          def replacer(match):
+              expr = match.group(1).strip()
+              parts = expr.split('|')
+              var_name = parts[0].strip()
+              value = context.get(var_name, '')
+              for filt in parts[1:]:
+                  value = apply_filter(value, filt.strip())
+              return str(value)
+
+          return re.sub(r'\{\{(.+?)\}\}', replacer, template)
+      ```
+
+      Key patterns: Filter registry maps names to lambdas. Parametric filters (truncate:N, replace:old:new) split on : for arguments. Chained filters apply left-to-right via reduce-style loop.
+    tags: [template-engine, filters, chaining, regex, string-processing]
+    difficulty: medium
+
+  - query: |
+      Write a template engine with inheritance. Support {% extends "base" %}, {% block name %}...{% endblock %} for overridable sections. Child templates override parent blocks.
+    solution: |
+      ```python
+      import re
+
+
+      class TemplateEngine:
+          def __init__(self):
+              self._templates: dict[str, str] = {}
+
+          def register(self, name: str, source: str) -> None:
+              self._templates[name] = source
+
+          def render(self, name: str, context: dict | None = None) -> str:
+              context = context or {}
+              source = self._templates[name]
+              chain = self._resolve_chain(name)
+              blocks = self._collect_blocks(chain)
+              base_source = self._templates[chain[-1]]
+              result = self._fill_blocks(base_source, blocks)
+              result = self._replace_vars(result, context)
+              return result
+
+          def _resolve_chain(self, name: str) -> list[str]:
+              """Build inheritance chain from child to root parent."""
+              chain = [name]
+              source = self._templates[name]
+              while True:
+                  match = re.search(r'\{%\s*extends\s+"(\w+)"\s*%\}', source)
+                  if not match:
+                      break
+                  parent = match.group(1)
+                  chain.append(parent)
+                  source = self._templates[parent]
+              return chain
+
+          def _collect_blocks(self, chain: list[str]) -> dict[str, str]:
+              """Collect blocks, child overrides parent."""
+              blocks: dict[str, str] = {}
+              for name in reversed(chain):
+                  source = self._templates[name]
+                  for match in re.finditer(
+                      r'\{%\s*block\s+(\w+)\s*%\}(.*?)\{%\s*endblock\s*%\}',
+                      source, re.DOTALL
+                  ):
+                      blocks[match.group(1)] = match.group(2)
+              return blocks
+
+          def _fill_blocks(self, source: str, blocks: dict[str, str]) -> str:
+              source = re.sub(r'\{%\s*extends\s+"(\w+)"\s*%\}', '', source)
+              def replacer(match):
+                  block_name = match.group(1)
+                  return blocks.get(block_name, match.group(2))
+              return re.sub(
+                  r'\{%\s*block\s+(\w+)\s*%\}(.*?)\{%\s*endblock\s*%\}',
+                  replacer, source, flags=re.DOTALL
+              )
+
+          def _replace_vars(self, text: str, ctx: dict) -> str:
+              def replacer(match):
+                  return str(ctx.get(match.group(1).strip(), ''))
+              return re.sub(r'\{\{(.+?)\}\}', replacer, text)
+      ```
+
+      Key patterns: Inheritance chain resolved by following {% extends %} directives. Blocks collected from root to leaf -- child overrides parent. Base template structure preserved, blocks filled in. Separate var substitution pass.
+    tags: [template-engine, inheritance, blocks, extends, string-processing]
+    difficulty: hard
+
+  - query: |
+      Write a `render_conditional(template, context)` function that handles {{var}} substitution and {% if var %}...{% elif var %}...{% else %}...{% endif %} conditionals. Evaluate truthiness of context values.
+    solution: |
+      ```python
+      import re
+
+
+      def render_conditional(template: str, context: dict) -> str:
+          result = _process_conditionals(template, context)
+          result = _replace_vars(result, context)
+          return result
+
+
+      def _eval_condition(expr: str, ctx: dict) -> bool:
+          expr = expr.strip()
+          if expr.startswith('not '):
+              return not _eval_condition(expr[4:], ctx)
+          if ' == ' in expr:
+              left, right = expr.split(' == ', 1)
+              left_val = ctx.get(left.strip(), '')
+              right_val = right.strip().strip('"').strip("'")
+              return str(left_val) == right_val
+          if ' != ' in expr:
+              left, right = expr.split(' != ', 1)
+              left_val = ctx.get(left.strip(), '')
+              right_val = right.strip().strip('"').strip("'")
+              return str(left_val) != right_val
+          return bool(ctx.get(expr, False))
+
+
+      def _process_conditionals(text: str, ctx: dict) -> str:
+          pattern = re.compile(
+              r'\{%\s*if\s+(.+?)\s*%\}'
+              r'(.*?)'
+              r'(?:\{%\s*elif\s+(.+?)\s*%\}(.*?))?'
+              r'(?:\{%\s*else\s*%\}(.*?))?'
+              r'\{%\s*endif\s*%\}',
+              re.DOTALL
+          )
+
+          def replacer(match):
+              if_cond = match.group(1)
+              if_body = match.group(2)
+              elif_cond = match.group(3)
+              elif_body = match.group(4) or ''
+              else_body = match.group(5) or ''
+
+              if _eval_condition(if_cond, ctx):
+                  return if_body
+              if elif_cond and _eval_condition(elif_cond, ctx):
+                  return elif_body
+              return else_body
+
+          # Process from innermost outward
+          prev = None
+          while prev != text:
+              prev = text
+              text = pattern.sub(replacer, text)
+          return text
+
+
+      def _replace_vars(text: str, ctx: dict) -> str:
+          def replacer(match):
+              return str(ctx.get(match.group(1).strip(), ''))
+          return re.sub(r'\{\{(.+?)\}\}', replacer, text)
+      ```
+
+      Key patterns: Regex matches if/elif/else/endif blocks. _eval_condition handles truthiness, not, ==, and != operators. Process repeatedly for nested conditionals. Separate var substitution pass keeps concerns clean.
+    tags: [template-engine, conditionals, if-else, string-processing]
+    difficulty: medium
+
+  - query: |
+      Write a `render_escaped(template, context)` function with auto-escaping for HTML safety. `{{var}}` auto-escapes HTML characters (&, <, >, ", '). `{{{var}}}` (triple braces) outputs raw/unescaped. Support {% for %} loops with auto-escaping in loop bodies.
+    solution: |
+      ```python
+      import re
+
+
+      _ESCAPE_MAP = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#x27;",
+      }
+
+
+      def _html_escape(value: str) -> str:
+          result = str(value)
+          for char, replacement in _ESCAPE_MAP.items():
+              result = result.replace(char, replacement)
+          return result
+
+
+      def render_escaped(template: str, context: dict) -> str:
+          result = _process_for_loops(template, context)
+          result = _substitute(result, context)
+          return result
+
+
+      def _substitute(text: str, ctx: dict) -> str:
+          # Triple braces first (raw/unescaped)
+          def raw_replacer(match):
+              var = match.group(1).strip()
+              return str(ctx.get(var, ""))
+          text = re.sub(r"\{\{\{(.+?)\}\}\}", raw_replacer, text)
+
+          # Double braces (auto-escaped)
+          def escaped_replacer(match):
+              var = match.group(1).strip()
+              return _html_escape(ctx.get(var, ""))
+          text = re.sub(r"\{\{(.+?)\}\}", escaped_replacer, text)
+          return text
+
+
+      def _process_for_loops(text: str, ctx: dict) -> str:
+          pattern = re.compile(
+              r"\{%\s*for\s+(\w+)\s+in\s+(\w+)\s*%\}(.*?)\{%\s*endfor\s*%\}",
+              re.DOTALL,
+          )
+          while pattern.search(text):
+              def replacer(match):
+                  var_name = match.group(1)
+                  list_name = match.group(2)
+                  body = match.group(3)
+                  parts = []
+                  for item in ctx.get(list_name, []):
+                      loop_ctx = dict(ctx)
+                      loop_ctx[var_name] = item
+                      rendered = _process_for_loops(body, loop_ctx)
+                      rendered = _substitute(rendered, loop_ctx)
+                      parts.append(rendered)
+                  return "".join(parts)
+              text = pattern.sub(replacer, text)
+          return text
+      ```
+
+      Key patterns: Triple braces {{{ }}} bypass escaping for trusted content. Double braces {{ }} auto-escape the 5 HTML-sensitive characters. For loops render each iteration with its own context and apply escaping inside loop bodies. Process triple braces before double to avoid double-escaping.
+    tags: [template-engine, auto-escaping, html, xss-prevention, for-loop]
+    difficulty: medium
+
+  - query: |
+      Write a template engine with `{% include "partial_name" %}` support. Register templates and partials by name. Included partials share the parent context and can themselves include other partials (with cycle detection).
+    solution: |
+      ```python
+      import re
+
+
+      class IncludeEngine:
+          def __init__(self):
+              self._templates: dict[str, str] = {}
+              self._max_depth = 10
+
+          def register(self, name: str, source: str) -> None:
+              self._templates[name] = source
+
+          def render(self, name: str, context: dict | None = None) -> str:
+              context = context or {}
+              source = self._templates[name]
+              result = self._process_includes(source, context, depth=0, seen={name})
+              result = self._process_for(result, context)
+              result = self._replace_vars(result, context)
+              return result
+
+          def _process_includes(
+              self, text: str, ctx: dict, depth: int, seen: set
+          ) -> str:
+              if depth > self._max_depth:
+                  raise RecursionError(
+                      f"Include depth exceeded {self._max_depth}"
+                  )
+              pattern = re.compile(r'\{%\s*include\s+"(\w+)"\s*%\}')
+              def replacer(match):
+                  partial_name = match.group(1)
+                  if partial_name in seen:
+                      raise RecursionError(
+                          f"Circular include detected: {partial_name}"
+                      )
+                  if partial_name not in self._templates:
+                      raise KeyError(f"Unknown partial: {partial_name}")
+                  partial = self._templates[partial_name]
+                  new_seen = seen | {partial_name}
+                  return self._process_includes(
+                      partial, ctx, depth + 1, new_seen
+                  )
+              return pattern.sub(replacer, text)
+
+          def _process_for(self, text: str, ctx: dict) -> str:
+              pattern = re.compile(
+                  r"\{%\s*for\s+(\w+)\s+in\s+(\w+)\s*%\}(.*?)\{%\s*endfor\s*%\}",
+                  re.DOTALL,
+              )
+              while pattern.search(text):
+                  def replacer(match):
+                      var = match.group(1)
+                      lst = match.group(2)
+                      body = match.group(3)
+                      parts = []
+                      for item in ctx.get(lst, []):
+                          loop_ctx = dict(ctx)
+                          loop_ctx[var] = item
+                          r = self._process_for(body, loop_ctx)
+                          r = self._replace_vars(r, loop_ctx)
+                          parts.append(r)
+                      return "".join(parts)
+                  text = pattern.sub(replacer, text)
+              return text
+
+          def _replace_vars(self, text: str, ctx: dict) -> str:
+              def replacer(match):
+                  return str(ctx.get(match.group(1).strip(), ""))
+              return re.sub(r"\{\{(.+?)\}\}", replacer, text)
+      ```
+
+      Key patterns: Includes are processed before variable substitution so partials can contain any template syntax. Cycle detection via a `seen` set prevents infinite recursion. Depth limit provides a safety net. Partials share the parent context dict, so variables from the parent scope are available in included templates.
+    tags: [template-engine, include, partial, cycle-detection, composition]
+    difficulty: hard
+
+  - query: |
+      Write a `render_whitespace(template, context)` function that supports whitespace control markers on template tags: `{%- tag %}` trims whitespace before the tag, `{% tag -%}` trims whitespace after the tag, and `{%- tag -%}` trims both. Also support `{{- var -}}` trimming on variable tags.
+    solution: |
+      ```python
+      import re
+
+
+      def render_whitespace(template: str, context: dict) -> str:
+          result = _process_tags(template, context)
+          result = _replace_vars_ws(result, context)
+          return result
+
+
+      def _process_tags(text: str, ctx: dict) -> str:
+          """Process for loops with whitespace control."""
+          pattern = re.compile(
+              r"(\s*?)\{%-?\s*for\s+(\w+)\s+in\s+(\w+)\s*-?%\}(\s*?)"
+              r"(.*?)"
+              r"(\s*?)\{%-?\s*endfor\s*-?%\}(\s*?)",
+              re.DOTALL,
+          )
+
+          def replacer(match):
+              tag_text = match.group(0)
+              # Detect trim markers
+              trim_before = "{%-" in tag_text[:tag_text.index("%}") + 2]
+              var = match.group(2)
+              lst = match.group(3)
+              body = match.group(5)
+              parts = []
+              for item in ctx.get(lst, []):
+                  loop_ctx = dict(ctx)
+                  loop_ctx[var] = item
+                  rendered = _replace_vars_ws(body, loop_ctx)
+                  parts.append(rendered)
+              result = "".join(parts)
+              if trim_before:
+                  result = result.lstrip()
+              return result
+
+          prev = None
+          while prev != text:
+              prev = text
+              text = pattern.sub(replacer, text)
+          return text
+
+
+      def _replace_vars_ws(text: str, ctx: dict) -> str:
+          """Replace variables with optional whitespace trimming."""
+          def replacer(match):
+              full = match.group(0)
+              pre_ws = match.group(1) or ""
+              trim_left = full.lstrip().startswith("{{-")
+              trim_right = full.rstrip().endswith("-}}")
+              var_name = match.group(2).strip().lstrip("-").rstrip("-").strip()
+              value = str(ctx.get(var_name, ""))
+              prefix = "" if trim_left else pre_ws
+              return prefix + value
+
+          # Match optional leading whitespace + {{- var -}}
+          result = re.sub(
+              r"(\s*?)\{\{-?\s*(.+?)\s*-?\}\}",
+              replacer,
+              text,
+          )
+
+          # Handle trailing whitespace trim: -}} followed by whitespace
+          result = re.sub(r"-\}\}\s+", "-}}", result)
+          result = result.replace("-}}", "")
+
+          # Clean up remaining markers
+          result = re.sub(r"\{\{-\s*", "{{", result)
+
+          return result
+      ```
+
+      Key patterns: Whitespace control uses - as a trim indicator adjacent to the tag delimiters. {%- trims whitespace before the tag, -%} trims after. Variable tags support the same with {{- and -}}. Regex-based processing handles the trim markers and strips surrounding whitespace accordingly.
+    tags: [template-engine, whitespace-control, trim, string-processing]
+    difficulty: hard

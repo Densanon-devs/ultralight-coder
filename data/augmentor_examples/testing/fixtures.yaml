@@ -1,0 +1,46 @@
+domain: testing
+category: test_fixtures
+examples:
+  - query: |
+      Write a pytest fixture that sets up a temporary SQLite database with a users table before each test and tears it down after.
+    solution: |
+      ```python
+      import sqlite3
+      import pytest
+
+      @pytest.fixture
+      def db_conn():
+          conn = sqlite3.connect(":memory:")
+          conn.execute(
+              "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)"
+          )
+          conn.commit()
+          yield conn
+          conn.execute("DROP TABLE users")
+          conn.close()
+
+      def test_insert_user(db_conn):
+          db_conn.execute("INSERT INTO users (name) VALUES (?)", ("Alice",))
+          db_conn.commit()
+          row = db_conn.execute("SELECT name FROM users").fetchone()
+          assert row[0] == "Alice"
+      ```
+
+  - query: |
+      Write a parametrized pytest test that checks multiple input/output pairs for an add function.
+    solution: |
+      ```python
+      import pytest
+
+      def add(a, b):
+          return a + b
+
+      @pytest.mark.parametrize("a, b, expected", [
+          (1, 2, 3),
+          (-1, 1, 0),
+          (0, 0, 0),
+          (100, -50, 50),
+      ])
+      def test_add(a, b, expected):
+          assert add(a, b) == expected
+      ```

@@ -1,0 +1,449 @@
+domain: pattern
+category: pattern_event
+examples:
+  - query: |
+      Write an `EventBus` class with on, off, emit, and once methods.
+    solution: |
+      ```python
+      class EventBus:
+          def __init__(self):
+              self._listeners = {}
+
+          def on(self, event, callback):
+              if event not in self._listeners:
+                  self._listeners[event] = []
+              self._listeners[event].append(callback)
+
+          def off(self, event, callback):
+              if event in self._listeners:
+                  self._listeners[event] = [
+                      cb for cb in self._listeners[event] if cb != callback
+                  ]
+
+          def emit(self, event, *args, **kwargs):
+              for cb in self._listeners.get(event, []):
+                  cb(*args, **kwargs)
+
+          def once(self, event, callback):
+              def wrapper(*args, **kwargs):
+                  callback(*args, **kwargs)
+                  self.off(event, wrapper)
+              self.on(event, wrapper)
+
+          def listener_count(self, event):
+              return len(self._listeners.get(event, []))
+      ```
+
+      Key: `once` wraps callback, auto-removes via `off`. `emit` calls a COPY or iterates safely. `listener_count` returns 0 for unknown events.
+    tags: [event-emitter, pub-sub, callback, observer]
+    difficulty: medium
+
+  - query: |
+      Write a TypedEventEmitter class where events are registered with
+      expected argument types. Emitting with wrong types raises TypeError.
+      Use type annotations to define the event signature.
+    solution: |
+      ```python
+      class TypedEventEmitter:
+          def __init__(self):
+              self._handlers = {}
+              self._signatures = {}
+
+          def register_event(self, event: str, *arg_types):
+              """Declare the argument types for an event."""
+              self._signatures[event] = arg_types
+              self._handlers.setdefault(event, [])
+
+          def on(self, event: str, callback):
+              if event not in self._signatures:
+                  raise ValueError(f"Unknown event: {event}")
+              self._handlers[event].append(callback)
+
+          def emit(self, event: str, *args):
+              if event not in self._signatures:
+                  raise ValueError(f"Unknown event: {event}")
+              expected = self._signatures[event]
+              if len(args) != len(expected):
+                  raise TypeError(
+                      f"{event}: expected {len(expected)} args, got {len(args)}"
+                  )
+              for i, (arg, exp_type) in enumerate(zip(args, expected)):
+                  if not isinstance(arg, exp_type):
+                      raise TypeError(
+                          f"{event} arg {i}: expected {exp_type.__name__}, "
+                          f"got {type(arg).__name__}"
+                      )
+              for handler in list(self._handlers[event]):
+                  handler(*args)
+
+          def off(self, event: str, callback):
+              if event in self._handlers:
+                  self._handlers[event] = [
+                      h for h in self._handlers[event] if h != callback
+                  ]
+      ```
+
+      Key: register_event stores expected arg types per event. emit validates
+      argument count and types via isinstance before calling handlers. Unknown
+      events raise ValueError. Handlers are iterated over a copy for safety.
+    tags: [typed-events, type-checking, event-emitter, validation]
+    difficulty: medium
+
+  - query: |
+      Write an AsyncEventBus class using asyncio. The on method registers
+      async coroutine handlers. emit is an async method that awaits all
+      handlers concurrently using asyncio.gather.
+    solution: |
+      ```python
+      import asyncio
+
+
+      class AsyncEventBus:
+          def __init__(self):
+              self._handlers = {}
+
+          def on(self, event: str, handler):
+              """Register an async handler for an event."""
+              self._handlers.setdefault(event, []).append(handler)
+
+          def off(self, event: str, handler):
+              if event in self._handlers:
+                  self._handlers[event] = [
+                      h for h in self._handlers[event] if h != handler
+                  ]
+
+          async def emit(self, event: str, *args, **kwargs):
+              """Emit event, await all handlers concurrently."""
+              handlers = self._handlers.get(event, [])
+              if not handlers:
+                  return []
+              tasks = [h(*args, **kwargs) for h in handlers]
+              return await asyncio.gather(*tasks, return_exceptions=True)
+
+          async def emit_sequential(self, event: str, *args, **kwargs):
+              """Emit event, await handlers one at a time."""
+              results = []
+              for handler in self._handlers.get(event, []):
+                  result = await handler(*args, **kwargs)
+                  results.append(result)
+              return results
+
+          def once(self, event: str, handler):
+              async def wrapper(*args, **kwargs):
+                  result = await handler(*args, **kwargs)
+                  self.off(event, wrapper)
+                  return result
+              self.on(event, wrapper)
+      ```
+
+      Key: emit uses asyncio.gather for concurrent handler execution. return_exceptions=True
+      prevents one handler failure from cancelling others. emit_sequential runs handlers
+      in order. once wraps an async handler that auto-removes itself after first call.
+    tags: [async, asyncio, event-bus, gather, concurrent]
+    difficulty: hard
+
+  - query: |
+      Write a PriorityEventBus where handlers are registered with a priority
+      (lower number = higher priority). When an event is emitted, handlers
+      run in priority order. Support stop_propagation to halt further handlers.
+    solution: |
+      ```python
+      class StopPropagation(Exception):
+          pass
+
+
+      class PriorityEventBus:
+          def __init__(self):
+              self._handlers = {}
+
+          def on(self, event: str, handler, priority: int = 100):
+              """Register handler with priority (lower = runs first)."""
+              self._handlers.setdefault(event, []).append((priority, handler))
+              self._handlers[event].sort(key=lambda x: x[0])
+
+          def off(self, event: str, handler):
+              if event in self._handlers:
+                  self._handlers[event] = [
+                      (p, h) for p, h in self._handlers[event]
+                      if h != handler
+                  ]
+
+          def emit(self, event: str, *args, **kwargs):
+              """Emit event. Handlers run in priority order.
+              Raise StopPropagation inside a handler to stop further handlers."""
+              results = []
+              for _, handler in self._handlers.get(event, []):
+                  try:
+                      result = handler(*args, **kwargs)
+                      results.append(result)
+                  except StopPropagation:
+                      break
+              return results
+
+          def handler_count(self, event: str) -> int:
+              return len(self._handlers.get(event, []))
+      ```
+
+      Key: handlers stored as (priority, handler) tuples, sorted on insertion.
+      Lower priority numbers run first. StopPropagation exception halts the
+      handler chain early, acting like event.preventDefault() in DOM events.
+    tags: [event-bus, priority, stop-propagation, sorted-handlers]
+    difficulty: medium
+
+  - query: |
+      Write a WildcardEventEmitter where listeners can subscribe to patterns
+      like "user.*" or "**" to match nested event names. Use "." as namespace
+      separator, "*" matches one segment, "**" matches any number of segments.
+    solution: |
+      ```python
+      import re
+
+
+      class WildcardEventEmitter:
+          def __init__(self):
+              self._handlers = []  # list of (pattern_str, compiled_re, callback)
+
+          def on(self, pattern: str, callback):
+              regex = self._compile_pattern(pattern)
+              self._handlers.append((pattern, regex, callback))
+
+          def off(self, pattern: str, callback):
+              self._handlers = [
+                  (p, r, cb) for p, r, cb in self._handlers
+                  if not (p == pattern and cb == callback)
+              ]
+
+          def emit(self, event: str, *args, **kwargs):
+              results = []
+              for _, regex, callback in self._handlers:
+                  if regex.fullmatch(event):
+                      results.append(callback(*args, **kwargs))
+              return results
+
+          def listeners_for(self, event: str) -> list:
+              """Return all callbacks matching this event."""
+              return [cb for _, regex, cb in self._handlers
+                      if regex.fullmatch(event)]
+
+          @staticmethod
+          def _compile_pattern(pattern: str):
+              parts = pattern.split(".")
+              regex_parts = []
+              for part in parts:
+                  if part == "**":
+                      regex_parts.append(r"[a-zA-Z0-9_.]+")
+                  elif part == "*":
+                      regex_parts.append(r"[a-zA-Z0-9_]+")
+                  else:
+                      regex_parts.append(re.escape(part))
+              return re.compile(r"\.".join(regex_parts))
+      ```
+
+      Key: patterns compile to regex once on registration. "*" matches a single
+      dot-separated segment, "**" matches one or more segments including dots.
+      emit checks all registered patterns against the event name via fullmatch.
+      listeners_for lets callers inspect which handlers would fire.
+    tags: [wildcard, event-emitter, pattern-matching, regex, namespace]
+    difficulty: hard
+
+  - query: |
+      Write a Python class called `EventStore` that implements event sourcing with an append-only log. Support `append(event_type, data)` to record events, `replay(handler)` to replay all events through a handler function, `snapshot()` to get current state by replaying, and `events_since(index)` to get events after a given position.
+    solution: |
+      ```python
+      import time as _time
+
+
+      class EventStore:
+          def __init__(self) -> None:
+              self._log: list[dict] = []
+
+          def append(self, event_type: str, data: dict | None = None) -> int:
+              """Append an event to the log. Returns the event index."""
+              event = {
+                  "index": len(self._log),
+                  "type": event_type,
+                  "data": data or {},
+                  "timestamp": _time.time(),
+              }
+              self._log.append(event)
+              return event["index"]
+
+          def replay(self, handler) -> None:
+              """Replay all events through a handler function.
+              handler(event) is called for each event in order."""
+              for event in self._log:
+                  handler(event)
+
+          def snapshot(self, reducer) -> dict:
+              """Build current state by folding all events through a reducer.
+              reducer(state, event) -> new_state."""
+              state: dict = {}
+              for event in self._log:
+                  state = reducer(state, event)
+              return state
+
+          def events_since(self, index: int) -> list[dict]:
+              """Return all events after the given index."""
+              if index < 0:
+                  return list(self._log)
+              return list(self._log[index + 1:])
+
+          def events_by_type(self, event_type: str) -> list[dict]:
+              """Return all events of a specific type."""
+              return [e for e in self._log if e["type"] == event_type]
+
+          def __len__(self) -> int:
+              return len(self._log)
+
+          @property
+          def last_event(self) -> dict | None:
+              return self._log[-1] if self._log else None
+      ```
+
+      Key patterns: Append-only log is the source of truth -- state is derived by replaying events through a reducer. Events are immutable once appended. snapshot() folds events into current state (like Redux). events_since() supports catching up from a known position. This pattern enables audit trails, temporal queries, and rebuilding state from any point.
+    tags: [event-sourcing, append-only-log, replay, reducer, cqrs]
+    difficulty: medium
+
+  - query: |
+      Write a Python class called `DebouncedEmitter` that wraps an event callback and ensures it only fires after a specified quiet period. If the event is triggered again before the quiet period expires, the timer resets. Use threading for the delay.
+    solution: |
+      ```python
+      import threading
+
+
+      class DebouncedEmitter:
+          def __init__(self, callback, delay: float) -> None:
+              """
+              callback: function to call after debounce period.
+              delay: quiet period in seconds.
+              """
+              self._callback = callback
+              self._delay = delay
+              self._timer: threading.Timer | None = None
+              self._lock = threading.Lock()
+              self._last_args: tuple = ()
+              self._last_kwargs: dict = {}
+
+          def trigger(self, *args, **kwargs) -> None:
+              """Trigger the event. Resets the debounce timer."""
+              with self._lock:
+                  # Cancel any pending timer
+                  if self._timer is not None:
+                      self._timer.cancel()
+                  self._last_args = args
+                  self._last_kwargs = kwargs
+                  self._timer = threading.Timer(self._delay, self._fire)
+                  self._timer.daemon = True
+                  self._timer.start()
+
+          def _fire(self) -> None:
+              with self._lock:
+                  args = self._last_args
+                  kwargs = self._last_kwargs
+                  self._timer = None
+              self._callback(*args, **kwargs)
+
+          def cancel(self) -> None:
+              """Cancel any pending debounced call."""
+              with self._lock:
+                  if self._timer is not None:
+                      self._timer.cancel()
+                      self._timer = None
+
+          def flush(self) -> None:
+              """Immediately fire the pending call if one exists."""
+              with self._lock:
+                  if self._timer is not None:
+                      self._timer.cancel()
+                      self._timer = None
+                      fire_now = True
+                  else:
+                      fire_now = False
+              if fire_now:
+                  self._callback(*self._last_args, **self._last_kwargs)
+
+          @property
+          def pending(self) -> bool:
+              with self._lock:
+                  return self._timer is not None
+      ```
+
+      Key patterns: Each trigger() cancels the previous timer and starts a new one. The callback only fires after the full delay passes with no new triggers. Thread lock protects timer state from concurrent access. flush() forces immediate execution. Common in UI (search-as-you-type) and rate-limiting scenarios.
+    tags: [debounce, event-emitter, threading, timer, rate-limiting]
+    difficulty: medium
+
+  - query: |
+      Write a Python class called `EventAggregator` that collects a specified number of events and then fires a batch callback with all collected events. Support a timeout so the batch fires even if the count threshold is not reached within the time window.
+    solution: |
+      ```python
+      import threading
+      import time as _time
+
+
+      class EventAggregator:
+          def __init__(self, batch_size: int, callback, timeout: float | None = None) -> None:
+              """
+              batch_size: number of events to collect before firing.
+              callback: function called with list of collected events.
+              timeout: optional max seconds to wait before firing a partial batch.
+              """
+              self._batch_size = batch_size
+              self._callback = callback
+              self._timeout = timeout
+              self._buffer: list = []
+              self._lock = threading.Lock()
+              self._timer: threading.Timer | None = None
+              self._total_batches = 0
+
+          def push(self, event) -> None:
+              """Add an event. Fires batch callback when batch_size is reached."""
+              with self._lock:
+                  self._buffer.append(event)
+                  if len(self._buffer) == 1 and self._timeout is not None:
+                      # Start timeout timer on first event in batch
+                      self._start_timer()
+                  if len(self._buffer) >= self._batch_size:
+                      self._flush_locked()
+
+          def _start_timer(self) -> None:
+              if self._timer is not None:
+                  self._timer.cancel()
+              self._timer = threading.Timer(self._timeout, self._on_timeout)
+              self._timer.daemon = True
+              self._timer.start()
+
+          def _on_timeout(self) -> None:
+              with self._lock:
+                  if self._buffer:
+                      self._flush_locked()
+
+          def _flush_locked(self) -> None:
+              """Flush buffer while holding the lock."""
+              if self._timer is not None:
+                  self._timer.cancel()
+                  self._timer = None
+              batch = list(self._buffer)
+              self._buffer.clear()
+              self._total_batches += 1
+              # Release lock before calling callback to avoid deadlocks
+              threading.Thread(target=self._callback, args=(batch,), daemon=True).start()
+
+          def flush(self) -> None:
+              """Manually flush any pending events."""
+              with self._lock:
+                  if self._buffer:
+                      self._flush_locked()
+
+          @property
+          def pending_count(self) -> int:
+              with self._lock:
+                  return len(self._buffer)
+
+          @property
+          def total_batches(self) -> int:
+              return self._total_batches
+      ```
+
+      Key patterns: Collects events into a buffer and fires the callback when batch_size is reached. Optional timeout ensures partial batches are not held indefinitely. Timer starts on first event, resets after each flush. Callback runs in a separate thread to avoid blocking push(). Thread-safe via lock. Useful for batching API calls, log aggregation, or metric collection.
+    tags: [event-aggregator, batching, threading, timeout, buffer]
+    difficulty: hard

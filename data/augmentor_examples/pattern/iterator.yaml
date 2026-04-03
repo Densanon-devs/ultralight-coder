@@ -1,0 +1,205 @@
+domain: pattern
+category: pattern_iterator
+examples:
+  - query: |
+      Write a reusable range iterator class that supports multiple
+      iterations over the same object by returning a fresh iterator from __iter__.
+    solution: |
+      ```python
+      class _RangeIterator:
+          def __init__(self, start, stop, step):
+              self._current = start
+              self._stop = stop
+              self._step = step
+
+          def __iter__(self):
+              return self
+
+          def __next__(self):
+              if self._current >= self._stop:
+                  raise StopIteration
+              val = self._current
+              self._current += self._step
+              return val
+
+
+      class ReusableRange:
+          def __init__(self, start, stop=None, step=1):
+              if stop is None:
+                  start, stop = 0, start
+              self._start = start
+              self._stop = stop
+              self._step = step
+
+          def __iter__(self):
+              return _RangeIterator(self._start, self._stop, self._step)
+
+          def __len__(self):
+              return max(0, (self._stop - self._start + self._step - 1) // self._step)
+      ```
+
+      Key: __iter__ returns a NEW _RangeIterator each time, so the container can be iterated multiple times independently.
+    tags: [iterator, protocol, reusable, __iter__, __next__]
+    difficulty: medium
+
+  - query: |
+      Write a class that iterates over chunks of a list, yielding
+      sublists of a given size. Support re-iteration.
+    solution: |
+      ```python
+      class Chunked:
+          def __init__(self, data, size):
+              self._data = list(data)
+              self._size = size
+
+          def __iter__(self):
+              for i in range(0, len(self._data), self._size):
+                  yield self._data[i:i + self._size]
+
+          def __len__(self):
+              return (len(self._data) + self._size - 1) // self._size
+      ```
+
+      Key: __iter__ is a generator function so each call produces a fresh generator object, enabling re-iteration.
+    tags: [iterator, generator, chunking, batching]
+    difficulty: easy
+
+  - query: |
+      Write a Fibonacci iterator class that yields Fibonacci numbers
+      up to a given maximum value. Support re-iteration.
+    solution: |
+      ```python
+      class Fibonacci:
+          def __init__(self, max_value):
+              self._max_value = max_value
+
+          def __iter__(self):
+              a, b = 0, 1
+              while a <= self._max_value:
+                  yield a
+                  a, b = b, a + b
+      ```
+
+      Key: __iter__ is a generator function, so each call creates a fresh generator with its own a, b state. The container itself holds no mutable iteration state, making it safely re-iterable.
+    tags: [iterator, generator, fibonacci, reusable]
+    difficulty: easy
+
+  - query: |
+      Write a SlidingWindow iterator class that yields overlapping
+      windows (as tuples) of a given size over a sequence. Support
+      re-iteration.
+    solution: |
+      ```python
+      from collections import deque
+
+
+      class SlidingWindow:
+          def __init__(self, data, size):
+              self._data = list(data)
+              self._size = size
+
+          def __iter__(self):
+              if self._size <= 0:
+                  return
+              window = deque(maxlen=self._size)
+              for item in self._data:
+                  window.append(item)
+                  if len(window) == self._size:
+                      yield tuple(window)
+
+          def __len__(self):
+              return max(0, len(self._data) - self._size + 1)
+      ```
+
+      Key: deque with maxlen automatically drops the oldest element when full, giving O(1) append per step. Yield tuple copies so the caller gets an immutable snapshot. Generator-based __iter__ enables re-iteration.
+    tags: [iterator, sliding-window, deque, generator]
+    difficulty: medium
+
+  - query: |
+      Write a FlattenNested iterator class that recursively flattens
+      arbitrarily nested iterables (lists, tuples) into a single
+      stream of non-iterable values. Strings should not be flattened.
+      Support re-iteration.
+    solution: |
+      ```python
+      class FlattenNested:
+          def __init__(self, data):
+              self._data = data
+
+          def __iter__(self):
+              yield from self._flatten(self._data)
+
+          def _flatten(self, items):
+              for item in items:
+                  if isinstance(item, (list, tuple)):
+                      yield from self._flatten(item)
+                  else:
+                      yield item
+      ```
+
+      Key: recursive generator with yield from to delegate to nested levels. Strings are excluded from flattening by only recursing into list/tuple. Each __iter__ call starts fresh recursion.
+    tags: [iterator, generator, flatten, recursion, nested]
+    difficulty: medium
+
+  - query: |
+      Write a `ZipLongest` iterator class that zips multiple iterables together, filling shorter ones with a `fillvalue` (like `itertools.zip_longest`). Support re-iteration and arbitrary number of input iterables.
+    solution: |
+      ```python
+      class ZipLongest:
+          def __init__(self, *iterables, fillvalue=None):
+              self._iterables = [list(it) for it in iterables]
+              self._fillvalue = fillvalue
+
+          def __iter__(self):
+              if not self._iterables:
+                  return
+              max_len = max(len(it) for it in self._iterables)
+              for i in range(max_len):
+                  row = tuple(
+                      it[i] if i < len(it) else self._fillvalue
+                      for it in self._iterables
+                  )
+                  yield row
+
+          def __len__(self):
+              if not self._iterables:
+                  return 0
+              return max(len(it) for it in self._iterables)
+      ```
+
+      Key patterns: Input iterables are materialized to lists for length checking and re-iteration. Iterates up to the longest iterable, substituting fillvalue for exhausted ones. Generator-based __iter__ creates a fresh iterator each time for safe re-iteration.
+    tags: [iterator, zip, fillvalue, generator, variadic]
+    difficulty: easy
+
+  - query: |
+      Write a `CycleLimited` iterator class that cycles through an iterable repeatedly, up to a maximum total number of items yielded. Support re-iteration. For example, `CycleLimited([1, 2, 3], limit=7)` yields `1, 2, 3, 1, 2, 3, 1`.
+    solution: |
+      ```python
+      class CycleLimited:
+          def __init__(self, iterable, limit: int):
+              self._data = list(iterable)
+              self._limit = limit
+
+          def __iter__(self):
+              if not self._data:
+                  return
+              count = 0
+              while count < self._limit:
+                  for item in self._data:
+                      if count >= self._limit:
+                          return
+                      yield item
+                      count += 1
+
+          def __len__(self):
+              return min(self._limit, self._limit)  # always limited
+
+          def __repr__(self):
+              return (
+                  f"CycleLimited({self._data!r}, limit={self._limit})"
+              )
+      ```
+
+      Key patterns: Materializes input for re-iteration. Nested loop: outer while repeats the cycle, inner for walks the data. count tracks total yielded and stops at limit. Generator-based __iter__ means each iteration starts with a fresh count. Empty data produces no output.
+    tags: [iterator, cycle, limit, generator, reusable]
+    difficulty: easy

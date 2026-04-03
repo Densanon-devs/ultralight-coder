@@ -1,0 +1,88 @@
+domain: common
+category: code_review
+augmentor: code_review
+examples:
+  - query: |
+      Review this:
+      def add(a, b):
+          return a + b
+    solution: |
+      The function works but could be improved:
+
+      ```python
+      def add(a: float, b: float) -> float:
+          return a + b
+      ```
+
+      Changes: Added type hints for clarity. The logic is correct and simple.
+    tags: [review, type-hints, simple]
+    difficulty: easy
+
+  - query: |
+      Review this:
+      def read_file(path):
+          f = open(path)
+          data = f.read()
+          return data
+    solution: |
+      Bug: File handle is never closed. This leaks file descriptors.
+
+      ```python
+      def read_file(path: str) -> str:
+          with open(path) as f:
+              return f.read()
+      ```
+
+      Fix: Use `with` statement to ensure the file is always closed.
+    tags: [review, resource-leak, file-handling, bug]
+    difficulty: easy
+
+  - query: |
+      Review this:
+      import os
+      def delete_file(user_input):
+          os.remove('/data/' + user_input)
+    solution: |
+      Critical: Path traversal vulnerability. User can pass `../../etc/passwd` to delete arbitrary files.
+
+      ```python
+      from pathlib import Path
+
+      def delete_file(filename: str) -> None:
+          base = Path('/data')
+          target = (base / filename).resolve()
+          if not target.is_relative_to(base):
+              raise ValueError("Invalid path")
+          target.unlink()
+      ```
+
+      Fix: Resolve the path and verify it stays within the allowed directory.
+    tags: [review, security, path-traversal, critical]
+    difficulty: medium
+
+  - query: |
+      Review this:
+      def find_duplicates(lst):
+          dupes = []
+          for i in range(len(lst)):
+              for j in range(i+1, len(lst)):
+                  if lst[i] == lst[j] and lst[i] not in dupes:
+                      dupes.append(lst[i])
+          return dupes
+    solution: |
+      Performance: O(n^3) due to nested loops + `in` check on list. Can be O(n):
+
+      ```python
+      def find_duplicates(lst: list) -> list:
+          seen: set = set()
+          dupes: set = set()
+          for item in lst:
+              if item in seen:
+                  dupes.add(item)
+              seen.add(item)
+          return list(dupes)
+      ```
+
+      Fix: Use sets for O(1) lookups. Reduces from O(n^3) to O(n).
+    tags: [review, performance, algorithm, set]
+    difficulty: medium

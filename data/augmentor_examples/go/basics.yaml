@@ -1,0 +1,158 @@
+domain: go
+category: go_basics
+examples:
+  - query: |
+      Write a Go function that reverses a string.
+    solution: |
+      ```go
+      package main
+
+      func reverseString(s string) string {
+      	runes := []rune(s)
+      	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+      		runes[i], runes[j] = runes[j], runes[i]
+      	}
+      	return string(runes)
+      }
+      ```
+    tags: [go, string, reverse, runes]
+    difficulty: easy
+
+  - query: |
+      Write a Go function that removes duplicate values from a slice of integers.
+    solution: |
+      ```go
+      package main
+
+      func removeDuplicates(nums []int) []int {
+      	seen := make(map[int]bool)
+      	result := []int{}
+      	for _, n := range nums {
+      		if !seen[n] {
+      			seen[n] = true
+      			result = append(result, n)
+      		}
+      	}
+      	return result
+      }
+      ```
+    tags: [go, slice, map, dedup]
+    difficulty: easy
+
+  - query: |
+      Write a Go function that reads a JSON file and unmarshals it into a struct.
+    solution: |
+      ```go
+      package main
+
+      import (
+      	"encoding/json"
+      	"os"
+      )
+
+      type Config struct {
+      	Host string `json:"host"`
+      	Port int    `json:"port"`
+      }
+
+      func loadConfig(path string) (Config, error) {
+      	var cfg Config
+      	data, err := os.ReadFile(path)
+      	if err != nil {
+      		return cfg, err
+      	}
+      	err = json.Unmarshal(data, &cfg)
+      	return cfg, err
+      }
+      ```
+    tags: [go, json, file-io, struct]
+    difficulty: easy
+
+  - query: |
+      Write a Go generic function that filters a slice based on a predicate.
+    solution: |
+      ```go
+      package main
+
+      func filter[T any](items []T, fn func(T) bool) []T {
+      	result := []T{}
+      	for _, item := range items {
+      		if fn(item) {
+      			result = append(result, item)
+      		}
+      	}
+      	return result
+      }
+      ```
+    tags: [go, generics, filter, slice]
+    difficulty: medium
+
+  - query: |
+      Write a Go generic function that maps a slice from one type to another.
+    solution: |
+      ```go
+      package main
+
+      func mapSlice[T any, U any](items []T, fn func(T) U) []U {
+      	result := make([]U, len(items))
+      	for i, item := range items {
+      		result[i] = fn(item)
+      	}
+      	return result
+      }
+      ```
+    tags: [go, generics, map, slice]
+    difficulty: medium
+
+  - query: |
+      Write a Go function that groups a slice of structs by a string field.
+    solution: |
+      ```go
+      package main
+
+      type Item struct {
+      	Category string
+      	Name     string
+      }
+
+      func groupBy(items []Item) map[string][]Item {
+      	groups := make(map[string][]Item)
+      	for _, item := range items {
+      		groups[item.Category] = append(groups[item.Category], item)
+      	}
+      	return groups
+      }
+      ```
+    tags: [go, map, groupby, struct]
+    difficulty: easy
+
+  - query: |
+      Write a Go custom error type that wraps another error with additional context.
+    solution: |
+      ```go
+      package main
+
+      import "fmt"
+
+      type AppError struct {
+      	Message string
+      	Cause   error
+      }
+
+      func (e *AppError) Error() string {
+      	if e.Cause != nil {
+      		return fmt.Sprintf("%s: %v", e.Message, e.Cause)
+      	}
+      	return e.Message
+      }
+
+      func (e *AppError) Unwrap() error {
+      	return e.Cause
+      }
+
+      func Wrap(err error, msg string) error {
+      	return &AppError{Message: msg, Cause: err}
+      }
+      ```
+    tags: [go, error, wrap, interface]
+    difficulty: medium

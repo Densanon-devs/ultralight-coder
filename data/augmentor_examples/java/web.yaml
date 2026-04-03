@@ -1,0 +1,69 @@
+domain: java
+category: java_web
+examples:
+  - query: |
+      Write a Spring Boot REST controller with GET, POST, and DELETE endpoints for managing items.
+    solution: |
+      ```java
+      import org.springframework.web.bind.annotation.*;
+      import java.util.*;
+      import java.util.concurrent.atomic.AtomicLong;
+
+      @RestController
+      @RequestMapping("/items")
+      public class ItemController {
+          private final Map<Long, Map<String, Object>> items = new HashMap<>();
+          private final AtomicLong nextId = new AtomicLong(1);
+
+          @GetMapping
+          public Collection<Map<String, Object>> list() {
+              return items.values();
+          }
+
+          @PostMapping
+          public Map<String, Object> create(@RequestBody Map<String, Object> item) {
+              long id = nextId.getAndIncrement();
+              item.put("id", id);
+              items.put(id, item);
+              return item;
+          }
+
+          @DeleteMapping("/{id}")
+          public Map<String, Object> delete(@PathVariable long id) {
+              items.remove(id);
+              return Map.of("deleted", id);
+          }
+      }
+      ```
+    tags: [java, spring-boot, rest-api, crud]
+    difficulty: easy
+
+  - query: |
+      Write a Java HTTP server using only the built-in com.sun.net.httpserver.
+    solution: |
+      ```java
+      import com.sun.net.httpserver.HttpServer;
+      import java.io.IOException;
+      import java.io.OutputStream;
+      import java.net.InetSocketAddress;
+
+      public class SimpleServer {
+          public static void main(String[] args) throws IOException {
+              HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+
+              server.createContext("/health", exchange -> {
+                  String response = "{\"status\": \"ok\"}";
+                  exchange.getResponseHeaders().set("Content-Type", "application/json");
+                  exchange.sendResponseHeaders(200, response.length());
+                  try (OutputStream os = exchange.getResponseBody()) {
+                      os.write(response.getBytes());
+                  }
+              });
+
+              server.start();
+              System.out.println("Server running on :8080");
+          }
+      }
+      ```
+    tags: [java, http-server, stdlib]
+    difficulty: easy

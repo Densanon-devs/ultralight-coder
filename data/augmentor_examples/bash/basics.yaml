@@ -1,0 +1,130 @@
+domain: bash
+category: bash_basics
+examples:
+  - query: |
+      Write a bash script that takes a filename argument and counts the number of lines, words, and characters.
+    solution: |
+      ```bash
+      #!/bin/bash
+      if [ -z "$1" ]; then
+          echo "Usage: $0 <file>"
+          exit 1
+      fi
+      if [ ! -f "$1" ]; then
+          echo "Error: file not found: $1"
+          exit 1
+      fi
+      lines=$(wc -l < "$1")
+      words=$(wc -w < "$1")
+      chars=$(wc -c < "$1")
+      echo "Lines: $lines"
+      echo "Words: $words"
+      echo "Chars: $chars"
+      ```
+    tags: [bash, wc, arguments, file]
+    difficulty: easy
+
+  - query: |
+      Write a bash script that finds all files larger than a given size in a directory.
+    solution: |
+      ```bash
+      #!/bin/bash
+      dir="${1:-.}"
+      size="${2:-1M}"
+      find "$dir" -type f -size +"$size" -exec ls -lh {} \; | awk '{print $5, $NF}'
+      ```
+    tags: [bash, find, file-size, awk]
+    difficulty: easy
+
+  - query: |
+      Write a bash function that retries a command up to N times with a delay between attempts.
+    solution: |
+      ```bash
+      retry() {
+          local max_attempts="${1}"
+          local delay="${2}"
+          shift 2
+          local attempt=1
+          while [ "$attempt" -le "$max_attempts" ]; do
+              if "$@"; then
+                  return 0
+              fi
+              echo "Attempt $attempt/$max_attempts failed. Retrying in ${delay}s..."
+              sleep "$delay"
+              attempt=$((attempt + 1))
+          done
+          echo "All $max_attempts attempts failed."
+          return 1
+      }
+      ```
+    tags: [bash, retry, function, loop]
+    difficulty: medium
+
+  - query: |
+      Write a bash script that monitors a log file and alerts when an error pattern appears.
+    solution: |
+      ```bash
+      #!/bin/bash
+      logfile="${1:-/var/log/app.log}"
+      pattern="${2:-ERROR}"
+      tail -F "$logfile" | while read -r line; do
+          if echo "$line" | grep -q "$pattern"; then
+              echo "[ALERT] $(date '+%H:%M:%S') $line"
+          fi
+      done
+      ```
+    tags: [bash, tail, grep, monitoring, log]
+    difficulty: easy
+
+  - query: |
+      Write a bash script that creates a backup of a directory with a timestamp.
+    solution: |
+      ```bash
+      #!/bin/bash
+      src="${1:?Usage: $0 <source_dir>}"
+      dest="${2:-./backups}"
+      timestamp=$(date +%Y%m%d_%H%M%S)
+      name=$(basename "$src")
+      mkdir -p "$dest"
+      tar -czf "$dest/${name}_${timestamp}.tar.gz" -C "$(dirname "$src")" "$name"
+      echo "Backup: $dest/${name}_${timestamp}.tar.gz"
+      ```
+    tags: [bash, backup, tar, timestamp]
+    difficulty: easy
+
+  - query: |
+      Write a bash script that parses command-line arguments with flags using getopts.
+    solution: |
+      ```bash
+      #!/bin/bash
+      verbose=0
+      output=""
+      while getopts "vo:h" opt; do
+          case "$opt" in
+              v) verbose=1 ;;
+              o) output="$OPTARG" ;;
+              h) echo "Usage: $0 [-v] [-o output] file"; exit 0 ;;
+              *) echo "Unknown option: -$opt" >&2; exit 1 ;;
+          esac
+      done
+      shift $((OPTIND - 1))
+      file="${1:?Missing file argument}"
+      [ "$verbose" -eq 1 ] && echo "Processing $file..."
+      [ -n "$output" ] && echo "Output to: $output"
+      ```
+    tags: [bash, getopts, arguments, flags]
+    difficulty: medium
+
+  - query: |
+      Write a bash script that finds and deletes all files older than N days in a directory.
+    solution: |
+      ```bash
+      #!/bin/bash
+      dir="${1:-.}"
+      days="${2:-30}"
+      echo "Deleting files older than $days days in $dir..."
+      find "$dir" -type f -mtime +"$days" -print -delete
+      echo "Done."
+      ```
+    tags: [bash, find, mtime, delete, cleanup]
+    difficulty: easy

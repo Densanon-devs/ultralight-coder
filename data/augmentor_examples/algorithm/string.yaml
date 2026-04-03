@@ -1,0 +1,252 @@
+domain: algorithm
+category: algorithm
+examples:
+  - query: |
+      Write a Caesar cipher function that shifts letters by a given amount.
+    solution: |
+      ```python
+      def caesar_cipher(text: str, shift: int) -> str:
+          result: list[str] = []
+          for ch in text:
+              if ch.isalpha():
+                  base = ord('A') if ch.isupper() else ord('a')
+                  result.append(chr((ord(ch) - base + shift) % 26 + base))
+              else:
+                  result.append(ch)
+          return ''.join(result)
+      ```
+    tags: [cipher, string, algorithm]
+    difficulty: easy
+
+  - query: |
+      Write a function to check if a string has valid parentheses.
+    solution: |
+      ```python
+      def valid_parentheses(s: str) -> bool:
+          stack: list[str] = []
+          pairs = {')': '(', ']': '[', '}': '{'}
+          for ch in s:
+              if ch in '([{':
+                  stack.append(ch)
+              elif ch in pairs:
+                  if not stack or stack[-1] != pairs[ch]:
+                      return False
+                  stack.pop()
+          return len(stack) == 0
+      ```
+    tags: [stack, parentheses, validation, algorithm]
+    difficulty: easy
+
+  - query: |
+      Write a Python function called `kmp_search(text, pattern)` that returns all starting indices where pattern occurs in text using the KMP (Knuth-Morris-Pratt) algorithm.
+    solution: |
+      ```python
+      def kmp_search(text: str, pattern: str) -> list[int]:
+          if not pattern:
+              return list(range(len(text) + 1))
+
+          # Build failure/prefix table
+          failure = [0] * len(pattern)
+          j = 0
+          for i in range(1, len(pattern)):
+              while j > 0 and pattern[i] != pattern[j]:
+                  j = failure[j - 1]
+              if pattern[i] == pattern[j]:
+                  j += 1
+              failure[i] = j
+
+          # Search
+          results: list[int] = []
+          j = 0
+          for i in range(len(text)):
+              while j > 0 and text[i] != pattern[j]:
+                  j = failure[j - 1]
+              if text[i] == pattern[j]:
+                  j += 1
+              if j == len(pattern):
+                  results.append(i - j + 1)
+                  j = failure[j - 1]
+          return results
+      ```
+
+      Key patterns: Failure table stores length of longest proper prefix that is also a suffix. On mismatch, jump back using failure table instead of restarting. O(n + m) time, no backtracking on text.
+    tags: [kmp, string-search, prefix-table, algorithm]
+    difficulty: hard
+
+  - query: |
+      Write a Python function called `longest_common_subsequence(s1, s2)` that returns the length and the actual LCS string of two input strings.
+    solution: |
+      ```python
+      def longest_common_subsequence(s1: str, s2: str) -> tuple[int, str]:
+          m, n = len(s1), len(s2)
+          dp = [[0] * (n + 1) for _ in range(m + 1)]
+
+          for i in range(1, m + 1):
+              for j in range(1, n + 1):
+                  if s1[i - 1] == s2[j - 1]:
+                      dp[i][j] = dp[i - 1][j - 1] + 1
+                  else:
+                      dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+
+          # Backtrack to find the actual subsequence
+          lcs: list[str] = []
+          i, j = m, n
+          while i > 0 and j > 0:
+              if s1[i - 1] == s2[j - 1]:
+                  lcs.append(s1[i - 1])
+                  i -= 1
+                  j -= 1
+              elif dp[i - 1][j] >= dp[i][j - 1]:
+                  i -= 1
+              else:
+                  j -= 1
+          lcs.reverse()
+          return dp[m][n], ''.join(lcs)
+      ```
+
+      Key patterns: Classic DP table where dp[i][j] = LCS length for s1[:i] and s2[:j]. Backtrack from dp[m][n] to reconstruct the sequence. O(m*n) time and space.
+    tags: [lcs, dynamic-programming, string, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `edit_distance(s1, s2)` that computes the Levenshtein edit distance between two strings (minimum insertions, deletions, substitutions to transform s1 into s2).
+    solution: |
+      ```python
+      def edit_distance(s1: str, s2: str) -> int:
+          m, n = len(s1), len(s2)
+          # Use 1D DP array for space optimization
+          prev = list(range(n + 1))
+          curr = [0] * (n + 1)
+
+          for i in range(1, m + 1):
+              curr[0] = i
+              for j in range(1, n + 1):
+                  if s1[i - 1] == s2[j - 1]:
+                      curr[j] = prev[j - 1]
+                  else:
+                      curr[j] = 1 + min(
+                          prev[j],      # delete
+                          curr[j - 1],  # insert
+                          prev[j - 1],  # substitute
+                      )
+              prev, curr = curr, prev
+          return prev[n]
+      ```
+
+      Key patterns: Space-optimized DP using two rows instead of full m*n table. Three operations: insert (left), delete (above), substitute (diagonal). O(m*n) time, O(n) space.
+    tags: [levenshtein, edit-distance, dynamic-programming, string, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `rabin_karp(text, pattern)` that returns all starting indices where pattern occurs in text using the Rabin-Karp rolling hash algorithm.
+    solution: |
+      ```python
+      def rabin_karp(text: str, pattern: str) -> list[int]:
+          if not pattern or len(pattern) > len(text):
+              return []
+
+          base = 256
+          mod = 101  # prime modulus to reduce collisions
+          n, m = len(text), len(pattern)
+          results: list[int] = []
+
+          # Compute hash of pattern and first window
+          pat_hash = 0
+          win_hash = 0
+          h = pow(base, m - 1, mod)  # base^(m-1) mod p
+
+          for i in range(m):
+              pat_hash = (pat_hash * base + ord(pattern[i])) % mod
+              win_hash = (win_hash * base + ord(text[i])) % mod
+
+          for i in range(n - m + 1):
+              if pat_hash == win_hash:
+                  # Verify character by character to avoid false positives
+                  if text[i:i + m] == pattern:
+                      results.append(i)
+              # Roll the hash: remove leading char, add trailing char
+              if i < n - m:
+                  win_hash = (win_hash * base - ord(text[i]) * h * base + ord(text[i + m])) % mod
+                  win_hash = win_hash % mod  # ensure positive
+
+          return results
+      ```
+
+      Key patterns: Rolling hash avoids recomputing the full hash each window shift. Hash collisions are resolved by character-by-character verification (spurious hits). Average O(n + m) time, O(n*m) worst case with many collisions. Choice of base and prime modulus affects collision rate.
+    tags: [rabin-karp, rolling-hash, string-search, algorithm]
+    difficulty: hard
+
+  - query: |
+      Write a Python function called `longest_palindromic_substring(s)` that returns the longest palindromic substring of s using the expand-around-center approach.
+    solution: |
+      ```python
+      def longest_palindromic_substring(s: str) -> str:
+          if len(s) < 2:
+              return s
+
+          start = 0
+          max_len = 1
+
+          def expand(left: int, right: int) -> tuple[int, int]:
+              """Expand outward while characters match. Return (start, length)."""
+              while left >= 0 and right < len(s) and s[left] == s[right]:
+                  left -= 1
+                  right += 1
+              return left + 1, right - left - 1
+
+          for i in range(len(s)):
+              # Odd-length palindromes (center is single char)
+              s1, l1 = expand(i, i)
+              if l1 > max_len:
+                  start, max_len = s1, l1
+
+              # Even-length palindromes (center is between two chars)
+              s2, l2 = expand(i, i + 1)
+              if l2 > max_len:
+                  start, max_len = s2, l2
+
+          return s[start:start + max_len]
+      ```
+
+      Key patterns: Expand around each possible center -- n single-char centers for odd-length palindromes and n-1 gap centers for even-length. Each expansion is O(n) worst case, giving O(n^2) total. Simpler than Manacher's algorithm but same practical performance for most inputs.
+    tags: [palindrome, expand-around-center, string, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write Python functions called `rle_encode(s)` and `rle_decode(s)` that perform run-length encoding and decoding. Encoding compresses "aaabbc" to "3a2b1c". Decoding reverses the process.
+    solution: |
+      ```python
+      def rle_encode(s: str) -> str:
+          if not s:
+              return ""
+          result: list[str] = []
+          count = 1
+          for i in range(1, len(s)):
+              if s[i] == s[i - 1]:
+                  count += 1
+              else:
+                  result.append(f"{count}{s[i - 1]}")
+                  count = 1
+          result.append(f"{count}{s[-1]}")
+          return "".join(result)
+
+
+      def rle_decode(s: str) -> str:
+          result: list[str] = []
+          i = 0
+          while i < len(s):
+              # Parse the number
+              num_start = i
+              while i < len(s) and s[i].isdigit():
+                  i += 1
+              count = int(s[num_start:i])
+              # Next character is the repeated char
+              if i < len(s):
+                  result.append(s[i] * count)
+                  i += 1
+          return "".join(result)
+      ```
+
+      Key patterns: Encoding groups consecutive identical characters with their count. Decoding parses count-character pairs. O(n) time for both operations. Multi-digit counts are handled by parsing digits until a non-digit is found. Lossless compression -- rle_decode(rle_encode(s)) == s for valid inputs.
+    tags: [run-length-encoding, compression, string, algorithm]
+    difficulty: easy

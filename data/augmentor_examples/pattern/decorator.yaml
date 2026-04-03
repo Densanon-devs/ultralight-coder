@@ -1,0 +1,271 @@
+domain: pattern
+category: pattern_decorator
+examples:
+  - query: |
+      Write a Python decorator called `count_calls(func)` that counts how many
+      times the decorated function is called. Store the count as `func.call_count`.
+    solution: |
+      ```python
+      import functools
+
+
+      def count_calls(func):
+          @functools.wraps(func)
+          def wrapper(*args, **kwargs):
+              wrapper.call_count += 1
+              return func(*args, **kwargs)
+          wrapper.call_count = 0
+          return wrapper
+      ```
+
+      Key: set attributes on `wrapper`, not `func`. The wrapper IS the new function object.
+    tags: [decorator, functools, function-attributes]
+    difficulty: medium
+
+  - query: |
+      Write a decorator `retry(max_retries=3, exceptions=(Exception,))` that retries a
+      function and tracks attempts in `func.attempts`.
+    solution: |
+      ```python
+      import functools
+      import time
+
+
+      def retry(max_attempts=3, exceptions=(Exception,), backoff=0):
+          def decorator(func):
+              @functools.wraps(func)
+              def wrapper(*args, **kwargs):
+                  last_exc = None
+                  for attempt in range(1, max_attempts + 1):
+                      try:
+                          result = func(*args, **kwargs)
+                          wrapper.attempts = attempt
+                          return result
+                      except exceptions as e:
+                          last_exc = e
+                          wrapper.attempts = attempt
+                          if backoff and attempt < max_attempts:
+                              time.sleep(backoff)
+                  raise last_exc
+              wrapper.attempts = 0
+              return wrapper
+          return decorator
+      ```
+
+      Key patterns: triple-nested (factory -> decorator -> wrapper), set `wrapper.attempts` attribute, re-raise last exception after all retries.
+    tags: [decorator, retry, error-handling, function-attributes]
+    difficulty: hard
+
+  - query: |
+      Write a memoize decorator that caches function results based on
+      arguments. Support a `cache_clear()` method to reset the cache and
+      a `cache_info()` method that returns hits, misses, and cache size.
+    solution: |
+      ```python
+      import functools
+
+
+      def memoize(func):
+          cache = {}
+          hits = 0
+          misses = 0
+
+          @functools.wraps(func)
+          def wrapper(*args, **kwargs):
+              nonlocal hits, misses
+              key = (args, tuple(sorted(kwargs.items())))
+              if key in cache:
+                  hits += 1
+                  return cache[key]
+              misses += 1
+              result = func(*args, **kwargs)
+              cache[key] = result
+              return result
+
+          def cache_clear():
+              nonlocal hits, misses
+              cache.clear()
+              hits = 0
+              misses = 0
+
+          def cache_info():
+              return {"hits": hits, "misses": misses, "size": len(cache)}
+
+          wrapper.cache_clear = cache_clear
+          wrapper.cache_info = cache_info
+          return wrapper
+      ```
+
+      Key: build cache key from args + sorted kwargs tuple. Attach utility methods to wrapper. Use nonlocal for mutable counters in enclosing scope.
+    tags: [decorator, memoization, caching, functools]
+    difficulty: medium
+
+  - query: |
+      Write a `timing` decorator that prints the execution time of each
+      call and stores the last elapsed time as `func.last_elapsed`.
+    solution: |
+      ```python
+      import functools
+      import time
+
+
+      def timing(func):
+          @functools.wraps(func)
+          def wrapper(*args, **kwargs):
+              start = time.perf_counter()
+              result = func(*args, **kwargs)
+              elapsed = time.perf_counter() - start
+              wrapper.last_elapsed = elapsed
+              print(f"{func.__name__} took {elapsed:.4f}s")
+              return result
+          wrapper.last_elapsed = 0.0
+          return wrapper
+      ```
+
+      Key: use time.perf_counter() for high-resolution timing. Store elapsed on wrapper so callers can inspect it programmatically after the call.
+    tags: [decorator, timing, performance, functools]
+    difficulty: easy
+
+  - query: |
+      Write a `require_auth(role)` decorator factory that checks whether
+      a `user` keyword argument has the required role before calling the
+      function. Raise PermissionError if unauthorized or ValueError if
+      no user is provided.
+    solution: |
+      ```python
+      import functools
+
+
+      def require_auth(role):
+          def decorator(func):
+              @functools.wraps(func)
+              def wrapper(*args, **kwargs):
+                  user = kwargs.get("user")
+                  if user is None:
+                      raise ValueError("user keyword argument required")
+                  user_role = getattr(user, "role", None)
+                  if user_role != role:
+                      raise PermissionError(
+                          f"requires role '{role}', user has '{user_role}'"
+                      )
+                  return func(*args, **kwargs)
+              return wrapper
+          return decorator
+      ```
+
+      Key: factory pattern (role -> decorator -> wrapper). Validate before calling the wrapped function. Use getattr with default to safely read user.role.
+    tags: [decorator, authentication, authorization, factory]
+    difficulty: medium
+
+  - query: |
+      Write a `log_calls(logger)` decorator factory that logs function
+      name, arguments, return value, and any raised exception using
+      the provided logger.
+    solution: |
+      ```python
+      import functools
+      import logging
+
+
+      def log_calls(logger=None):
+          if logger is None:
+              logger = logging.getLogger(__name__)
+
+          def decorator(func):
+              @functools.wraps(func)
+              def wrapper(*args, **kwargs):
+                  arg_str = ", ".join(
+                      [repr(a) for a in args]
+                      + [f"{k}={v!r}" for k, v in kwargs.items()]
+                  )
+                  logger.info(f"Calling {func.__name__}({arg_str})")
+                  try:
+                      result = func(*args, **kwargs)
+                      logger.info(f"{func.__name__} returned {result!r}")
+                      return result
+                  except Exception as e:
+                      logger.exception(f"{func.__name__} raised {type(e).__name__}: {e}")
+                      raise
+              return wrapper
+          return decorator
+      ```
+
+      Key: factory accepts optional logger, defaults to module logger. Use !r for safe repr formatting. Re-raise exceptions after logging so behavior is unchanged.
+    tags: [decorator, logging, debugging, factory, functools]
+    difficulty: medium
+
+  - query: |
+      Write a `rate_limit(max_calls, period)` decorator that limits how many times a function can be called within a time window. If the limit is exceeded, raise a `RuntimeError` with a message indicating how long to wait. Track call timestamps. Accept optional `now` parameter on the wrapped function for testing.
+    solution: |
+      ```python
+      import functools
+      import time as _time
+      from collections import deque
+
+
+      def rate_limit(max_calls: int, period: float):
+          """Decorator factory: allow at most max_calls within period seconds."""
+          def decorator(func):
+              timestamps: deque[float] = deque()
+
+              @functools.wraps(func)
+              def wrapper(*args, _now: float | None = None, **kwargs):
+                  now = _now if _now is not None else _time.time()
+                  # Remove expired timestamps
+                  cutoff = now - period
+                  while timestamps and timestamps[0] <= cutoff:
+                      timestamps.popleft()
+                  if len(timestamps) >= max_calls:
+                      retry_after = timestamps[0] + period - now
+                      raise RuntimeError(
+                          f"Rate limit exceeded. Retry after {retry_after:.2f}s"
+                      )
+                  timestamps.append(now)
+                  return func(*args, **kwargs)
+
+              wrapper.reset = lambda: timestamps.clear()
+              return wrapper
+          return decorator
+      ```
+
+      Key patterns: Sliding window via deque of timestamps. Expired entries are pruned on each call. If the window is full, compute retry_after from the oldest timestamp. _now parameter enables deterministic testing without mocking time. reset() method allows clearing state between tests.
+    tags: [decorator, rate-limit, sliding-window, deque, functools]
+    difficulty: medium
+
+  - query: |
+      Write a `deprecated(message, version)` decorator factory that emits a deprecation warning when the decorated function is called. Include the function name, custom message, and version in the warning. Only warn once per function (suppress repeated warnings).
+    solution: |
+      ```python
+      import functools
+      import warnings
+
+
+      def deprecated(message: str = "", version: str = ""):
+          """Mark a function as deprecated. Emits DeprecationWarning on first call."""
+          def decorator(func):
+              warned = False
+
+              @functools.wraps(func)
+              def wrapper(*args, **kwargs):
+                  nonlocal warned
+                  if not warned:
+                      parts = [f"{func.__name__} is deprecated"]
+                      if version:
+                          parts.append(f"since version {version}")
+                      if message:
+                          parts.append(f"-- {message}")
+                      warning_msg = " ".join(parts)
+                      warnings.warn(warning_msg, DeprecationWarning, stacklevel=2)
+                      warned = True
+                  return func(*args, **kwargs)
+
+              wrapper._is_deprecated = True
+              wrapper._deprecation_message = message
+              wrapper._deprecation_version = version
+              return wrapper
+          return decorator
+      ```
+
+      Key patterns: `warned` flag ensures the warning is emitted only on the first call, not every time. stacklevel=2 makes the warning point to the caller's code, not the decorator internals. Metadata attributes (_is_deprecated, etc.) allow introspection tools to discover deprecated functions programmatically.
+    tags: [decorator, deprecation, warnings, functools, factory]
+    difficulty: easy

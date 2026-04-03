@@ -1,0 +1,233 @@
+domain: java
+category: java_basics
+examples:
+  - query: |
+      Write a Java method that reverses a string.
+    solution: |
+      ```java
+      public class StringUtils {
+          public static String reverse(String s) {
+              return new StringBuilder(s).reverse().toString();
+          }
+      }
+      ```
+    tags: [java, string, reverse, stringbuilder]
+    difficulty: easy
+
+  - query: |
+      Write a Java generic class for a stack with push, pop, and peek.
+    solution: |
+      ```java
+      import java.util.ArrayList;
+      import java.util.EmptyStackException;
+      import java.util.List;
+
+      public class Stack<T> {
+          private final List<T> items = new ArrayList<>();
+
+          public void push(T item) {
+              items.add(item);
+          }
+
+          public T pop() {
+              if (isEmpty()) throw new EmptyStackException();
+              return items.remove(items.size() - 1);
+          }
+
+          public T peek() {
+              if (isEmpty()) throw new EmptyStackException();
+              return items.get(items.size() - 1);
+          }
+
+          public boolean isEmpty() {
+              return items.isEmpty();
+          }
+
+          public int size() {
+              return items.size();
+          }
+      }
+      ```
+    tags: [java, generics, stack, data-structure]
+    difficulty: easy
+
+  - query: |
+      Write a Java class that reads a JSON file using Jackson and returns a Map.
+    solution: |
+      ```java
+      import com.fasterxml.jackson.databind.ObjectMapper;
+      import java.io.File;
+      import java.io.IOException;
+      import java.util.Map;
+
+      public class JsonReader {
+          private static final ObjectMapper mapper = new ObjectMapper();
+
+          public static Map<String, Object> readJson(String path) throws IOException {
+              return mapper.readValue(new File(path), Map.class);
+          }
+      }
+      ```
+    tags: [java, json, jackson, file-io]
+    difficulty: easy
+
+  - query: |
+      Write a Java method that groups a list of strings by their first character using streams.
+    solution: |
+      ```java
+      import java.util.List;
+      import java.util.Map;
+      import java.util.stream.Collectors;
+
+      public class GroupBy {
+          public static Map<Character, List<String>> groupByFirstChar(List<String> words) {
+              return words.stream()
+                  .filter(w -> !w.isEmpty())
+                  .collect(Collectors.groupingBy(w -> w.charAt(0)));
+          }
+      }
+      ```
+    tags: [java, streams, groupby, collectors]
+    difficulty: medium
+
+  - query: |
+      Write a Java record with a builder pattern.
+    solution: |
+      ```java
+      public record User(String name, String email, int age) {
+          public static Builder builder() {
+              return new Builder();
+          }
+
+          public static class Builder {
+              private String name;
+              private String email;
+              private int age;
+
+              public Builder name(String name) { this.name = name; return this; }
+              public Builder email(String email) { this.email = email; return this; }
+              public Builder age(int age) { this.age = age; return this; }
+
+              public User build() {
+                  return new User(name, email, age);
+              }
+          }
+      }
+      ```
+    tags: [java, record, builder-pattern, design-pattern]
+    difficulty: medium
+
+  - query: |
+      Write a Java interface with a default method and implement it in two classes.
+    solution: |
+      ```java
+      public interface Greeter {
+          String name();
+
+          default String greet() {
+              return "Hello, " + name() + "!";
+          }
+      }
+
+      public class UserGreeter implements Greeter {
+          private final String userName;
+
+          public UserGreeter(String userName) {
+              this.userName = userName;
+          }
+
+          @Override
+          public String name() {
+              return userName;
+          }
+      }
+
+      public class BotGreeter implements Greeter {
+          @Override
+          public String name() {
+              return "Bot";
+          }
+
+          @Override
+          public String greet() {
+              return "Beep boop!";
+          }
+      }
+      ```
+    tags: [java, interface, default-method, polymorphism]
+    difficulty: medium
+
+  - query: |
+      Write a Java generic class for a thread-safe bounded buffer using synchronized.
+    solution: |
+      ```java
+      public class BoundedBuffer<T> {
+          private final Object[] items;
+          private int count, putIdx, takeIdx;
+
+          public BoundedBuffer(int capacity) {
+              items = new Object[capacity];
+          }
+
+          public synchronized void put(T item) throws InterruptedException {
+              while (count == items.length) wait();
+              items[putIdx] = item;
+              putIdx = (putIdx + 1) % items.length;
+              count++;
+              notifyAll();
+          }
+
+          @SuppressWarnings("unchecked")
+          public synchronized T take() throws InterruptedException {
+              while (count == 0) wait();
+              T item = (T) items[takeIdx];
+              takeIdx = (takeIdx + 1) % items.length;
+              count--;
+              notifyAll();
+              return item;
+          }
+
+          public synchronized int size() {
+              return count;
+          }
+      }
+      ```
+    tags: [java, generics, synchronized, bounded-buffer, thread-safe]
+    difficulty: hard
+
+  - query: |
+      Write a Java interface for a generic repository with CRUD methods and a simple implementation.
+    solution: |
+      ```java
+      import java.util.*;
+
+      public interface Repository<T, ID> {
+          T findById(ID id);
+          List<T> findAll();
+          void save(T entity);
+          void deleteById(ID id);
+      }
+
+      class InMemoryRepository<T, ID> implements Repository<T, ID> {
+          private final Map<ID, T> store = new HashMap<>();
+          private final java.util.function.Function<T, ID> idExtractor;
+
+          public InMemoryRepository(java.util.function.Function<T, ID> idExtractor) {
+              this.idExtractor = idExtractor;
+          }
+
+          @Override
+          public T findById(ID id) { return store.get(id); }
+
+          @Override
+          public List<T> findAll() { return new ArrayList<>(store.values()); }
+
+          @Override
+          public void save(T entity) { store.put(idExtractor.apply(entity), entity); }
+
+          @Override
+          public void deleteById(ID id) { store.remove(id); }
+      }
+      ```
+    tags: [java, interface, repository, generics, crud]
+    difficulty: medium

@@ -1,0 +1,191 @@
+domain: swift
+category: swift_basics
+examples:
+  - query: |
+      Write a Swift function that reverses a string.
+    solution: |
+      ```swift
+      func reverseString(_ s: String) -> String {
+          return String(s.reversed())
+      }
+      ```
+    tags: [swift, string, reverse]
+    difficulty: easy
+
+  - query: |
+      Write a Swift generic struct for a stack with push, pop, and peek.
+    solution: |
+      ```swift
+      struct Stack<T> {
+          private var items: [T] = []
+
+          mutating func push(_ item: T) {
+              items.append(item)
+          }
+
+          mutating func pop() -> T? {
+              return items.popLast()
+          }
+
+          func peek() -> T? {
+              return items.last
+          }
+
+          var isEmpty: Bool { items.isEmpty }
+          var count: Int { items.count }
+      }
+      ```
+    tags: [swift, generics, stack, struct]
+    difficulty: easy
+
+  - query: |
+      Write a Swift enum for a Result type with associated values and a map method.
+    solution: |
+      ```swift
+      enum Result<T, E: Error> {
+          case success(T)
+          case failure(E)
+
+          func map<U>(_ transform: (T) -> U) -> Result<U, E> {
+              switch self {
+              case .success(let value):
+                  return .success(transform(value))
+              case .failure(let error):
+                  return .failure(error)
+              }
+          }
+
+          func getOrNil() -> T? {
+              switch self {
+              case .success(let value): return value
+              case .failure: return nil
+              }
+          }
+      }
+      ```
+    tags: [swift, enum, result, generics, associated-values]
+    difficulty: medium
+
+  - query: |
+      Write a Swift protocol with a default extension method and conform two structs to it.
+    solution: |
+      ```swift
+      protocol Greetable {
+          var name: String { get }
+      }
+
+      extension Greetable {
+          func greet() -> String {
+              "Hello, \(name)!"
+          }
+      }
+
+      struct User: Greetable {
+          let name: String
+      }
+
+      struct Bot: Greetable {
+          let name = "Bot"
+
+          func greet() -> String {
+              "Beep boop!"
+          }
+      }
+      ```
+    tags: [swift, protocol, extension, default-method]
+    difficulty: medium
+
+  - query: |
+      Write a Swift async function that fetches JSON from a URL and decodes it.
+    solution: |
+      ```swift
+      import Foundation
+
+      struct ApiResponse: Decodable {
+          let id: Int
+          let name: String
+      }
+
+      func fetchJSON(from url: URL) async throws -> ApiResponse {
+          let (data, response) = try await URLSession.shared.data(from: url)
+          guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+              throw URLError(.badServerResponse)
+          }
+          return try JSONDecoder().decode(ApiResponse.self, from: data)
+      }
+      ```
+    tags: [swift, async, urlsession, json, codable]
+    difficulty: medium
+
+  - query: |
+      Write a Swift class that uses Combine to observe property changes.
+    solution: |
+      ```swift
+      import Combine
+
+      class UserViewModel: ObservableObject {
+          @Published var name: String = ""
+          @Published var isValid: Bool = false
+
+          private var cancellables = Set<AnyCancellable>()
+
+          init() {
+              $name
+                  .map { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+                  .assign(to: &$isValid)
+          }
+      }
+      ```
+    tags: [swift, combine, published, observable]
+    difficulty: medium
+
+  - query: |
+      Write a Swift property wrapper struct that clamps a value between a minimum and maximum.
+    solution: |
+      ```swift
+      @propertyWrapper
+      struct Clamped<T: Comparable> {
+          private var value: T
+          let min: T
+          let max: T
+
+          var wrappedValue: T {
+              get { value }
+              set { value = Swift.min(Swift.max(newValue, min), max) }
+          }
+
+          init(wrappedValue: T, min: T, max: T) {
+              self.min = min
+              self.max = max
+              self.value = Swift.min(Swift.max(wrappedValue, min), max)
+          }
+      }
+      ```
+    tags: [swift, property-wrapper, struct, generics, wrappedValue]
+    difficulty: medium
+
+  - query: |
+      Write a Swift generic struct for a stack with mutating push, pop, and peek methods.
+    solution: |
+      ```swift
+      struct Stack<T> {
+          private var items: [T] = []
+
+          mutating func push(_ item: T) {
+              items.append(item)
+          }
+
+          mutating func pop() -> T? {
+              return items.popLast()
+          }
+
+          func peek() -> T? {
+              return items.last
+          }
+
+          var isEmpty: Bool { items.isEmpty }
+          var count: Int { items.count }
+      }
+      ```
+    tags: [swift, struct, generics, mutating, stack]
+    difficulty: easy

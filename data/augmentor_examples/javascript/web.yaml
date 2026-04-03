@@ -1,0 +1,129 @@
+domain: javascript
+category: js_web
+examples:
+  - query: |
+      Write an Express.js REST API with GET, POST, and DELETE routes for managing items using an in-memory store.
+    solution: |
+      ```javascript
+      const express = require("express");
+      const app = express();
+      app.use(express.json());
+
+      const items = new Map();
+      let nextId = 1;
+
+      app.get("/items", (req, res) => {
+        res.json([...items.values()]);
+      });
+
+      app.post("/items", (req, res) => {
+        const item = { id: nextId++, ...req.body };
+        items.set(item.id, item);
+        res.status(201).json(item);
+      });
+
+      app.delete("/items/:id", (req, res) => {
+        const id = parseInt(req.params.id);
+        if (!items.has(id)) return res.status(404).json({ error: "Not found" });
+        items.delete(id);
+        res.json({ deleted: id });
+      });
+
+      app.listen(3000, () => console.log("Listening on :3000"));
+      ```
+    tags: [javascript, express, rest-api, crud]
+    difficulty: easy
+
+  - query: |
+      Write Express middleware that logs the request method, path, and response time.
+    solution: |
+      ```javascript
+      function requestLogger(req, res, next) {
+        const start = Date.now();
+        res.on("finish", () => {
+          const ms = Date.now() - start;
+          console.log(`${req.method} ${req.path} ${res.statusCode} ${ms}ms`);
+        });
+        next();
+      }
+      ```
+    tags: [javascript, express, middleware, logging]
+    difficulty: easy
+
+  - query: |
+      Write an Express middleware that validates a JSON body has required fields.
+    solution: |
+      ```javascript
+      function requireFields(...fields) {
+        return (req, res, next) => {
+          const missing = fields.filter((f) => !(f in req.body));
+          if (missing.length > 0) {
+            return res.status(400).json({ error: `Missing fields: ${missing.join(", ")}` });
+          }
+          next();
+        };
+      }
+      ```
+    tags: [javascript, express, middleware, validation]
+    difficulty: easy
+
+  - query: |
+      Write a simple JavaScript HTTP server using only the built-in http module.
+    solution: |
+      ```javascript
+      const http = require("http");
+
+      const server = http.createServer((req, res) => {
+        if (req.method === "GET" && req.url === "/health") {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ status: "ok" }));
+        } else {
+          res.writeHead(404);
+          res.end("Not Found");
+        }
+      });
+
+      server.listen(3000, () => console.log("Listening on :3000"));
+      ```
+    tags: [javascript, http, node, server]
+    difficulty: easy
+
+  - query: |
+      Write a JavaScript class that wraps a WebSocket connection with auto-reconnect.
+    solution: |
+      ```javascript
+      class ReconnectingSocket {
+        constructor(url, options = {}) {
+          this.url = url;
+          this.delay = options.delay || 1000;
+          this.maxDelay = options.maxDelay || 30000;
+          this.onMessage = options.onMessage || (() => {});
+          this._attempt = 0;
+          this._connect();
+        }
+
+        _connect() {
+          this.ws = new WebSocket(this.url);
+          this.ws.onopen = () => { this._attempt = 0; };
+          this.ws.onmessage = (e) => this.onMessage(JSON.parse(e.data));
+          this.ws.onclose = () => {
+            const wait = Math.min(this.delay * 2 ** this._attempt, this.maxDelay);
+            this._attempt++;
+            setTimeout(() => this._connect(), wait);
+          };
+        }
+
+        send(data) {
+          if (this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify(data));
+          }
+        }
+
+        close() {
+          this.ws.onclose = null;
+          this.ws.close();
+        }
+      }
+      ```
+    tags: [javascript, websocket, reconnect, class]
+    difficulty: medium

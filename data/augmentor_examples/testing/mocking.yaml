@@ -1,0 +1,54 @@
+domain: testing
+category: test_mocking
+examples:
+  - query: |
+      Write a test that mocks an external API call using unittest.mock.patch. The function under test calls requests.get and returns the JSON body.
+    solution: |
+      ```python
+      import unittest
+      from unittest.mock import patch, MagicMock
+
+      def fetch_user(user_id):
+          import requests
+          resp = requests.get(f"https://api.example.com/users/{user_id}")
+          return resp.json()
+
+      class TestFetchUser(unittest.TestCase):
+          @patch("requests.get")
+          def test_fetch_user(self, mock_get):
+              mock_get.return_value = MagicMock(
+                  json=lambda: {"id": 1, "name": "Alice"}
+              )
+              result = fetch_user(1)
+              mock_get.assert_called_once_with(
+                  "https://api.example.com/users/1"
+              )
+              self.assertEqual(result["name"], "Alice")
+
+      if __name__ == "__main__":
+          unittest.main()
+      ```
+
+  - query: |
+      Write a test that uses mock_open to test a function that reads a config file and returns its contents as a dict.
+    solution: |
+      ```python
+      import json
+      import unittest
+      from unittest.mock import patch, mock_open
+
+      def load_config(path):
+          with open(path, "r") as f:
+              return json.load(f)
+
+      class TestLoadConfig(unittest.TestCase):
+          def test_load_config(self):
+              fake_data = json.dumps({"debug": True, "port": 8080})
+              with patch("builtins.open", mock_open(read_data=fake_data)):
+                  config = load_config("config.json")
+              self.assertTrue(config["debug"])
+              self.assertEqual(config["port"], 8080)
+
+      if __name__ == "__main__":
+          unittest.main()
+      ```

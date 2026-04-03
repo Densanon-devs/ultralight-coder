@@ -1,0 +1,62 @@
+domain: async
+category: async_concurrency
+examples:
+  - query: |
+      Use asyncio.gather to run multiple async tasks concurrently and
+      return results in the same order as the input.
+    solution: |
+      ```python
+      import asyncio
+
+
+      async def fetch(name, delay):
+          await asyncio.sleep(delay)
+          return f"{name} done"
+
+
+      async def main():
+          results = await asyncio.gather(
+              fetch("A", 0.3),
+              fetch("B", 0.1),
+              fetch("C", 0.2),
+          )
+          print(results)
+
+
+      asyncio.run(main())
+      ```
+
+      Key: asyncio.gather runs coroutines concurrently and returns a list of results in the same order they were passed, regardless of completion order. Total time is the max delay, not the sum.
+    tags: [asyncio-gather, concurrency, parallel-tasks, asyncio]
+    difficulty: easy
+
+  - query: |
+      Write a semaphore-based rate limiter that limits the number of
+      concurrent async operations to a configurable maximum.
+    solution: |
+      ```python
+      import asyncio
+
+
+      async def limited_task(sem, task_id):
+          async with sem:
+              print(f"Task {task_id} started")
+              await asyncio.sleep(0.2)
+              print(f"Task {task_id} finished")
+              return task_id
+
+
+      async def main():
+          sem = asyncio.Semaphore(2)
+          results = await asyncio.gather(
+              *(limited_task(sem, i) for i in range(5))
+          )
+          print(f"Results: {results}")
+
+
+      asyncio.run(main())
+      ```
+
+      Key: asyncio.Semaphore limits concurrency. async with sem blocks when the limit is reached until a slot opens. Here at most 2 tasks run at once despite 5 being gathered.
+    tags: [semaphore, rate-limiter, concurrency, asyncio]
+    difficulty: medium

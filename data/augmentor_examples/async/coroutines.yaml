@@ -1,0 +1,144 @@
+domain: async
+category: async_coroutine
+examples:
+  - query: |
+      Write an async generator that yields items from a list with a
+      delay between each item. Show async def and async for usage.
+    solution: |
+      ```python
+      import asyncio
+
+
+      async def delayed_items(items, delay=0.5):
+          for item in items:
+              await asyncio.sleep(delay)
+              yield item
+
+
+      async def main():
+          results = []
+          async for value in delayed_items(["a", "b", "c"], delay=0.1):
+              results.append(value)
+          print(results)
+
+
+      asyncio.run(main())
+      ```
+
+      Key: async def with yield creates an async generator. Use async for to consume it. Each iteration awaits the sleep before yielding the next item.
+    tags: [async-generator, async-for, asyncio, coroutine]
+    difficulty: easy
+
+  - query: |
+      Write an async context manager class with __aenter__ and __aexit__
+      that measures how long the block takes using asyncio-compatible timing.
+    solution: |
+      ```python
+      import asyncio
+      import time
+
+
+      class AsyncTimer:
+          def __init__(self):
+              self.elapsed = 0.0
+              self._start = None
+
+          async def __aenter__(self):
+              self._start = time.perf_counter()
+              return self
+
+          async def __aexit__(self, exc_type, exc_val, exc_tb):
+              self.elapsed = time.perf_counter() - self._start
+              return False
+
+
+      async def main():
+          async with AsyncTimer() as timer:
+              await asyncio.sleep(0.1)
+          print(f"Elapsed: {timer.elapsed:.2f}s")
+
+
+      asyncio.run(main())
+      ```
+
+      Key: __aenter__ and __aexit__ are async methods enabling async with. Returns self so .elapsed is accessible after the block. Does not suppress exceptions.
+    tags: [async-context-manager, aenter, aexit, timer, asyncio]
+    difficulty: easy
+
+  - query: |
+      Write a coroutine-based state machine using yield and send.
+      The coroutine should accept state transitions via send() and
+      yield the current state.
+    solution: |
+      ```python
+      def state_machine(initial):
+          state = initial
+          transitions = {}
+          while True:
+              event = yield state
+              if event in transitions.get(state, {}):
+                  state = transitions[state][event]
+
+      def create_traffic_light():
+          sm = state_machine("red")
+          current = next(sm)  # prime the coroutine
+          sm.transitions = {"red": {"go": "green"}, "green": {"slow": "yellow"}, "yellow": {"stop": "red"}}
+          # Patch transitions into the coroutine's local scope doesn't work,
+          # so use a class wrapper instead:
+          return sm, current
+
+      # Better approach: class wrapping a generator
+      class StateMachine:
+          def __init__(self, initial):
+              self.state = initial
+              self.transitions = {}
+
+          def add(self, from_state, event, to_state):
+              self.transitions.setdefault(from_state, {})[event] = to_state
+
+          def send(self, event):
+              key = self.transitions.get(self.state, {})
+              if event in key:
+                  self.state = key[event]
+              return self.state
+
+      sm = StateMachine("red")
+      sm.add("red", "go", "green")
+      sm.add("green", "slow", "yellow")
+      sm.add("yellow", "stop", "red")
+      print(sm.send("go"))    # green
+      print(sm.send("slow"))  # yellow
+      print(sm.send("stop"))  # red
+      ```
+    tags: [coroutine, yield, send, state-machine, generator]
+    difficulty: hard
+
+  - query: |
+      Write a context variable that works across async tasks using
+      contextvars. Show how to set a value in one task and read it
+      in another without sharing state.
+    solution: |
+      ```python
+      import asyncio
+      import contextvars
+
+      request_id = contextvars.ContextVar('request_id', default=None)
+
+      async def process_request(rid):
+          request_id.set(rid)
+          await handle()
+
+      async def handle():
+          rid = request_id.get()
+          print(f"handling request {rid}")
+
+      async def main():
+          await asyncio.gather(
+              process_request("req-1"),
+              process_request("req-2"),
+          )
+
+      asyncio.run(main())
+      ```
+    tags: [contextvars, async, context-variable, task-local]
+    difficulty: medium

@@ -1,0 +1,192 @@
+domain: algorithm
+category: algorithm
+examples:
+  - query: |
+      Write a binary search function.
+    solution: |
+      ```python
+      def binary_search(arr: list[int], target: int) -> int:
+          lo, hi = 0, len(arr) - 1
+          while lo <= hi:
+              mid = (lo + hi) // 2
+              if arr[mid] == target:
+                  return mid
+              elif arr[mid] < target:
+                  lo = mid + 1
+              else:
+                  hi = mid - 1
+          return -1
+      ```
+    tags: [binary-search, algorithm, sorted-array]
+    difficulty: easy
+
+  - query: |
+      Write a Python function called `two_sum(nums, target)` that returns indices of two numbers that add up to target.
+    solution: |
+      ```python
+      def two_sum(nums: list[int], target: int) -> list[int]:
+          seen = {}
+          for i, num in enumerate(nums):
+              complement = target - num
+              if complement in seen:
+                  return [seen[complement], i]
+              seen[num] = i
+          return []
+      ```
+    tags: [hash-map, two-pointer, algorithm]
+    difficulty: easy
+
+  - query: |
+      Write a Python function called `dfs(graph, start)` that performs depth-first search on an adjacency-list graph and returns a list of visited nodes in DFS order.
+    solution: |
+      ```python
+      def dfs(graph: dict[str, list[str]], start: str) -> list[str]:
+          visited: list[str] = []
+          stack = [start]
+          seen: set[str] = set()
+          while stack:
+              node = stack.pop()
+              if node in seen:
+                  continue
+              seen.add(node)
+              visited.append(node)
+              for neighbor in reversed(graph.get(node, [])):
+                  if neighbor not in seen:
+                      stack.append(neighbor)
+          return visited
+      ```
+
+      Key patterns: Iterative with explicit stack avoids recursion limit. reversed() gives left-to-right visit order matching recursive DFS. seen set prevents revisiting nodes in cyclic graphs.
+    tags: [dfs, graph, traversal, stack, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `bfs(graph, start)` that performs breadth-first search on an adjacency-list graph and returns a list of visited nodes in BFS order.
+    solution: |
+      ```python
+      from collections import deque
+
+
+      def bfs(graph: dict[str, list[str]], start: str) -> list[str]:
+          visited: list[str] = []
+          queue: deque[str] = deque([start])
+          seen: set[str] = {start}
+          while queue:
+              node = queue.popleft()
+              visited.append(node)
+              for neighbor in graph.get(node, []):
+                  if neighbor not in seen:
+                      seen.add(neighbor)
+                      queue.append(neighbor)
+          return visited
+      ```
+
+      Key patterns: deque for O(1) popleft. Mark seen when enqueuing (not when dequeuing) to avoid duplicates in the queue. Guarantees shortest-path ordering in unweighted graphs.
+    tags: [bfs, graph, traversal, queue, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `astar(grid, start, goal)` that finds the shortest path on a 2D grid using A* with Manhattan distance heuristic. 0 = walkable, 1 = wall. Returns the path as a list of (row, col) tuples, or empty list if no path exists.
+    solution: |
+      ```python
+      import heapq
+
+
+      def astar(grid: list[list[int]], start: tuple[int, int], goal: tuple[int, int]) -> list[tuple[int, int]]:
+          rows, cols = len(grid), len(grid[0])
+
+          def heuristic(a: tuple[int, int], b: tuple[int, int]) -> int:
+              return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+          open_set: list[tuple[int, int, int]] = [(heuristic(start, goal), 0, start)]
+          came_from: dict[tuple[int, int], tuple[int, int]] = {}
+          g_score: dict[tuple[int, int], int] = {start: 0}
+
+          while open_set:
+              f, g, current = heapq.heappop(open_set)
+              if current == goal:
+                  path = []
+                  while current in came_from:
+                      path.append(current)
+                      current = came_from[current]
+                  path.append(start)
+                  return path[::-1]
+              if g > g_score.get(current, float('inf')):
+                  continue
+              for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                  nr, nc = current[0] + dr, current[1] + dc
+                  if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == 0:
+                      ng = g + 1
+                      if ng < g_score.get((nr, nc), float('inf')):
+                          g_score[(nr, nc)] = ng
+                          came_from[(nr, nc)] = current
+                          heapq.heappush(open_set, (ng + heuristic((nr, nc), goal), ng, (nr, nc)))
+          return []
+      ```
+
+      Key patterns: Min-heap ordered by f = g + h. Manhattan heuristic is admissible for 4-directional grids. Skip stale entries with g > g_score check. Reconstruct path by walking came_from backwards.
+    tags: [astar, pathfinding, graph, heuristic, heapq, algorithm]
+    difficulty: hard
+
+  - query: |
+      Write a Python function called `binary_search_on_answer(lo, hi, predicate)` that finds the smallest integer in [lo, hi] for which `predicate(x)` returns True. The predicate is monotonic: once it returns True, it stays True for all larger values. Return -1 if no value satisfies the predicate.
+    solution: |
+      ```python
+      def binary_search_on_answer(lo: int, hi: int, predicate) -> int:
+          result = -1
+          while lo <= hi:
+              mid = lo + (hi - lo) // 2
+              if predicate(mid):
+                  result = mid
+                  hi = mid - 1
+              else:
+                  lo = mid + 1
+          return result
+      ```
+
+      Key patterns: Binary search on answer space instead of a sorted array. Works whenever the answer domain has a monotonic property (all False then all True). Finds the boundary point in O(log(hi - lo)) predicate evaluations. Common in competitive programming for optimization problems (e.g., "what is the minimum capacity to ship packages in D days?").
+    tags: [binary-search, search-on-answer, monotonic, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `ternary_search(f, lo, hi, tolerance=1e-9)` that finds the value of x in [lo, hi] that maximizes a unimodal function f(x). A unimodal function increases then decreases (has exactly one peak).
+    solution: |
+      ```python
+      def ternary_search(f, lo: float, hi: float, tolerance: float = 1e-9) -> float:
+          while hi - lo > tolerance:
+              m1 = lo + (hi - lo) / 3
+              m2 = hi - (hi - lo) / 3
+              if f(m1) < f(m2):
+                  lo = m1
+              else:
+                  hi = m2
+          return (lo + hi) / 2
+      ```
+
+      Key patterns: Divides the interval into three parts using two probe points m1 and m2. If f(m1) < f(m2), the peak must be in [m1, hi]; otherwise in [lo, m2]. Shrinks the search space by 1/3 each iteration. O(log((hi-lo)/tolerance)) evaluations. Only works for unimodal functions.
+    tags: [ternary-search, optimization, unimodal, algorithm]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `interpolation_search(arr, target)` that searches for a target value in a sorted array of numbers using interpolation search. Return the index of the target, or -1 if not found.
+    solution: |
+      ```python
+      def interpolation_search(arr: list[int], target: int) -> int:
+          lo, hi = 0, len(arr) - 1
+          while lo <= hi and arr[lo] <= target <= arr[hi]:
+              if lo == hi:
+                  return lo if arr[lo] == target else -1
+              # Estimate position using linear interpolation
+              pos = lo + ((target - arr[lo]) * (hi - lo)) // (arr[hi] - arr[lo])
+              if arr[pos] == target:
+                  return pos
+              elif arr[pos] < target:
+                  lo = pos + 1
+              else:
+                  hi = pos - 1
+          return -1
+      ```
+
+      Key patterns: Uses linear interpolation to estimate the target's position instead of always picking the midpoint. For uniformly distributed data, achieves O(log log n) average time. Falls back to O(n) worst case for skewed distributions. The guard `arr[lo] <= target <= arr[hi]` prevents out-of-range probing.
+    tags: [interpolation-search, search, sorted-array, algorithm]
+    difficulty: medium

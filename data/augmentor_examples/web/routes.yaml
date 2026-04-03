@@ -1,0 +1,65 @@
+domain: web
+category: web_routes
+examples:
+  - query: |
+      Write a simple REST API with GET, POST, and DELETE routes for managing items using an in-memory dict store. Use FastAPI with a Pydantic model for the request body.
+    solution: |
+      ```python
+      from fastapi import FastAPI, HTTPException
+      from pydantic import BaseModel
+
+      app = FastAPI()
+      items: dict[int, dict] = {}
+      next_id = 1
+
+      class ItemCreate(BaseModel):
+          name: str
+          price: float
+
+      @app.get("/items")
+      def list_items():
+          return list(items.values())
+
+      @app.post("/items", status_code=201)
+      def create_item(item: ItemCreate):
+          global next_id
+          record = {"id": next_id, **item.model_dump()}
+          items[next_id] = record
+          next_id += 1
+          return record
+
+      @app.delete("/items/{item_id}")
+      def delete_item(item_id: int):
+          if item_id not in items:
+              raise HTTPException(status_code=404, detail="Not found")
+          del items[item_id]
+          return {"deleted": item_id}
+      ```
+    tags: [rest-api, fastapi, crud, routes]
+    difficulty: easy
+
+  - query: |
+      Write a FastAPI endpoint that extracts a user ID from the path and accepts optional query parameters for filtering: a search string and a limit with a default of 10.
+    solution: |
+      ```python
+      from fastapi import FastAPI, Query
+
+      app = FastAPI()
+      user_posts = {
+          1: [{"id": 1, "text": "hello"}, {"id": 2, "text": "world"}],
+          2: [{"id": 3, "text": "foo"}, {"id": 4, "text": "bar"}],
+      }
+
+      @app.get("/users/{user_id}/posts")
+      def get_user_posts(
+          user_id: int,
+          q: str | None = Query(default=None),
+          limit: int = Query(default=10, ge=1, le=100),
+      ):
+          posts = user_posts.get(user_id, [])
+          if q:
+              posts = [p for p in posts if q.lower() in p["text"].lower()]
+          return posts[:limit]
+      ```
+    tags: [path-params, query-params, fastapi, filtering]
+    difficulty: easy

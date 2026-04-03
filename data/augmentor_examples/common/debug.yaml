@@ -1,0 +1,94 @@
+domain: common
+category: debug
+augmentor: debugger
+examples:
+  - query: |
+      My function returns None instead of the result:
+      def process(data):
+          for item in data:
+              result = item * 2
+          return result
+    solution: |
+      Bug: If `data` is empty, `result` is never assigned, causing `NameError` (or returning the last loop value only).
+
+      ```python
+      def process(data: list) -> list:
+          return [item * 2 for item in data]
+      ```
+
+      Root cause: The function returns only the last item's result, not all of them. If you want all results, use a list comprehension.
+    tags: [debug, logic-error, loop]
+    difficulty: easy
+
+  - query: |
+      IndexError: list index out of range
+      def get_pairs(lst):
+          pairs = []
+          for i in range(len(lst)):
+              pairs.append((lst[i], lst[i+1]))
+          return pairs
+    solution: |
+      Bug: Off-by-one. When `i` is the last index, `lst[i+1]` is out of bounds.
+
+      ```python
+      def get_pairs(lst: list) -> list[tuple]:
+          return [(lst[i], lst[i + 1]) for i in range(len(lst) - 1)]
+      ```
+
+      Fix: Loop to `len(lst) - 1` to avoid accessing beyond the list end.
+    tags: [debug, off-by-one, IndexError]
+    difficulty: easy
+
+  - query: |
+      TypeError: can only concatenate str to str
+      age = 25
+      print('Age: ' + age)
+    solution: |
+      Bug: Cannot concatenate `str` and `int` directly.
+
+      ```python
+      age = 25
+      print(f'Age: {age}')
+      ```
+
+      Fix: Use f-string (or `str(age)`) to convert the int to string.
+    tags: [debug, TypeError, type-conversion]
+    difficulty: easy
+
+  - query: |
+      My dict comprehension gives wrong results:
+      counts = {}
+      for word in words:
+          counts[word] = counts[word] + 1
+    solution: |
+      Bug: `KeyError` on first occurrence of each word since key doesn't exist yet.
+
+      ```python
+      counts: dict[str, int] = {}
+      for word in words:
+          counts[word] = counts.get(word, 0) + 1
+      ```
+
+      Fix: Use `.get(word, 0)` to default to 0 for missing keys. Or use `collections.Counter(words)`.
+    tags: [debug, KeyError, dictionary]
+    difficulty: easy
+
+  - query: |
+      My function modifies the original list when I don't want it to:
+      def process(items=[]):
+          items.append('done')
+          return items
+    solution: |
+      Bug: Mutable default argument. The default `[]` is shared across all calls.
+
+      ```python
+      def process(items: list | None = None) -> list:
+          if items is None:
+              items = []
+          items.append('done')
+          return items
+      ```
+
+      Fix: Use `None` as default and create a new list inside the function.
+    tags: [debug, mutable-default, gotcha]
+    difficulty: easy

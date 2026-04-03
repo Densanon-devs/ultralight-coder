@@ -1,0 +1,568 @@
+domain: pattern
+category: pattern_state_machine
+examples:
+  - query: |
+      Write a class `TrafficLight` that cycles through states with a `history` list and guard functions.
+    solution: |
+      ```python
+      class TrafficLight:
+          def __init__(self, initial):
+              self._state = initial
+              self._history = [initial]
+              self._transitions = {}
+
+          @property
+          def state(self):
+              return self._state
+
+          @property
+          def history(self):
+              return list(self._history)
+
+          def add_transition(self, from_state, event, to_state, guard=None):
+              self._transitions[(from_state, event)] = (to_state, guard)
+
+          def trigger(self, event):
+              key = (self._state, event)
+              if key not in self._transitions:
+                  raise ValueError(f"No transition for {event} from {self._state}")
+              to_state, guard = self._transitions[key]
+              if guard is not None and not guard():
+                  raise ValueError(f"Guard blocked {event}")
+              self._state = to_state
+              self._history.append(to_state)
+              return self._state
+      ```
+
+      Key: `history` is a property returning a COPY of `_history` list. Use `_history` internally to append. Guards are optional callables.
+    tags: [state-machine, property, guard, history]
+    difficulty: hard
+
+  - query: |
+      Write a VendingMachine class using a state machine. States: idle,
+      selecting, dispensing. Events: insert_coin, select_item, dispense,
+      cancel. Track balance and selected item. Guard: can only dispense if
+      balance >= item price.
+    solution: |
+      ```python
+      class VendingMachine:
+          PRICES = {"cola": 150, "chips": 100, "candy": 75}
+
+          def __init__(self):
+              self._state = "idle"
+              self._balance = 0
+              self._selected = None
+              self._transitions = {
+                  ("idle", "insert_coin"): ("selecting", self._on_insert),
+                  ("selecting", "insert_coin"): ("selecting", self._on_insert),
+                  ("selecting", "select_item"): ("selecting", self._on_select),
+                  ("selecting", "dispense"): ("dispensing", self._on_dispense),
+                  ("selecting", "cancel"): ("idle", self._on_cancel),
+                  ("dispensing", "complete"): ("idle", self._on_complete),
+              }
+
+          @property
+          def state(self):
+              return self._state
+
+          @property
+          def balance(self):
+              return self._balance
+
+          def trigger(self, event, **kwargs):
+              key = (self._state, event)
+              if key not in self._transitions:
+                  raise ValueError(
+                      f"Invalid event '{event}' in state '{self._state}'"
+                  )
+              next_state, action = self._transitions[key]
+              result = action(**kwargs)
+              self._state = next_state
+              return result
+
+          def _on_insert(self, amount=0, **kw):
+              self._balance += amount
+              return {"balance": self._balance}
+
+          def _on_select(self, item="", **kw):
+              if item not in self.PRICES:
+                  raise ValueError(f"Unknown item: {item}")
+              self._selected = item
+              return {"selected": item, "price": self.PRICES[item]}
+
+          def _on_dispense(self, **kw):
+              if self._selected is None:
+                  raise ValueError("No item selected")
+              price = self.PRICES[self._selected]
+              if self._balance < price:
+                  raise ValueError(
+                      f"Insufficient balance: {self._balance} < {price}"
+                  )
+              self._balance -= price
+              item = self._selected
+              self._selected = None
+              return {"dispensed": item, "change": self._balance}
+
+          def _on_cancel(self, **kw):
+              refund = self._balance
+              self._balance = 0
+              self._selected = None
+              return {"refund": refund}
+
+          def _on_complete(self, **kw):
+              change = self._balance
+              self._balance = 0
+              return {"change": change}
+      ```
+
+      Key: transitions map (state, event) -> (next_state, action_fn). Actions
+      are methods that perform side effects and return result dicts. Guard logic
+      (balance check) lives inside the action. State only changes if the action
+      succeeds without raising.
+    tags: [state-machine, vending-machine, guard, transitions, action]
+    difficulty: medium
+
+  - query: |
+      Write a DocumentWorkflow class implementing a document approval FSM.
+      States: draft, review, approved, rejected, published. Support
+      on_enter/on_exit callbacks for state transitions. Track who performed
+      each transition.
+    solution: |
+      ```python
+      class DocumentWorkflow:
+          VALID_TRANSITIONS = {
+              "draft": ["review"],
+              "review": ["approved", "rejected"],
+              "approved": ["published", "draft"],
+              "rejected": ["draft"],
+              "published": [],
+          }
+
+          def __init__(self, title: str):
+              self.title = title
+              self._state = "draft"
+              self._log = []
+              self._on_enter = {}
+              self._on_exit = {}
+
+          @property
+          def state(self):
+              return self._state
+
+          @property
+          def log(self):
+              return list(self._log)
+
+          def on_enter(self, state: str, callback):
+              self._on_enter.setdefault(state, []).append(callback)
+
+          def on_exit(self, state: str, callback):
+              self._on_exit.setdefault(state, []).append(callback)
+
+          def transition(self, to_state: str, actor: str, comment: str = ""):
+              if to_state not in self.VALID_TRANSITIONS.get(self._state, []):
+                  raise ValueError(
+                      f"Cannot transition from '{self._state}' to '{to_state}'"
+                  )
+              old_state = self._state
+              # Fire on_exit callbacks
+              for cb in self._on_exit.get(old_state, []):
+                  cb(old_state, to_state, actor)
+              self._state = to_state
+              self._log.append({
+                  "from": old_state,
+                  "to": to_state,
+                  "actor": actor,
+                  "comment": comment,
+              })
+              # Fire on_enter callbacks
+              for cb in self._on_enter.get(to_state, []):
+                  cb(old_state, to_state, actor)
+              return self._state
+
+          def available_transitions(self) -> list[str]:
+              return list(self.VALID_TRANSITIONS.get(self._state, []))
+
+          def submit(self, actor: str):
+              return self.transition("review", actor)
+
+          def approve(self, actor: str, comment: str = ""):
+              return self.transition("approved", actor, comment)
+
+          def reject(self, actor: str, comment: str = ""):
+              return self.transition("rejected", actor, comment)
+
+          def publish(self, actor: str):
+              return self.transition("published", actor)
+      ```
+
+      Key: VALID_TRANSITIONS dict defines allowed state changes. on_enter/on_exit
+      hooks fire during transition. Transition log records actor and comment.
+      Convenience methods (submit, approve, etc.) delegate to transition().
+    tags: [state-machine, workflow, callbacks, audit-log, document]
+    difficulty: medium
+
+  - query: |
+      Write a ConnectionStateMachine for a network connection with states:
+      disconnected, connecting, connected, disconnecting. Support retry logic
+      with a max_retries counter. Include timeout transitions.
+    solution: |
+      ```python
+      class ConnectionStateMachine:
+          def __init__(self, max_retries: int = 3):
+              self._state = "disconnected"
+              self._max_retries = max_retries
+              self._retries = 0
+              self._error = None
+              self._transitions = {
+                  ("disconnected", "connect"): self._do_connect,
+                  ("connecting", "connected"): self._do_connected,
+                  ("connecting", "timeout"): self._do_timeout,
+                  ("connecting", "error"): self._do_error,
+                  ("connected", "disconnect"): self._do_disconnect,
+                  ("connected", "error"): self._do_error,
+                  ("disconnecting", "disconnected"): self._do_disconnected,
+                  ("disconnecting", "timeout"): self._do_force_disconnect,
+              }
+
+          @property
+          def state(self):
+              return self._state
+
+          @property
+          def retries(self):
+              return self._retries
+
+          def trigger(self, event: str) -> dict:
+              key = (self._state, event)
+              if key not in self._transitions:
+                  raise ValueError(
+                      f"No transition for '{event}' from '{self._state}'"
+                  )
+              return self._transitions[key]()
+
+          def _do_connect(self) -> dict:
+              self._state = "connecting"
+              self._retries = 0
+              self._error = None
+              return {"state": self._state}
+
+          def _do_connected(self) -> dict:
+              self._state = "connected"
+              self._retries = 0
+              return {"state": self._state}
+
+          def _do_timeout(self) -> dict:
+              self._retries += 1
+              if self._retries >= self._max_retries:
+                  self._state = "disconnected"
+                  return {"state": self._state, "reason": "max_retries_exceeded"}
+              # Stay in connecting state for retry
+              return {"state": self._state, "retry": self._retries}
+
+          def _do_error(self) -> dict:
+              self._retries += 1
+              if self._retries >= self._max_retries:
+                  self._state = "disconnected"
+                  return {"state": self._state, "reason": "max_retries_exceeded"}
+              self._state = "connecting"
+              return {"state": self._state, "retry": self._retries}
+
+          def _do_disconnect(self) -> dict:
+              self._state = "disconnecting"
+              return {"state": self._state}
+
+          def _do_disconnected(self) -> dict:
+              self._state = "disconnected"
+              self._retries = 0
+              return {"state": self._state}
+
+          def _do_force_disconnect(self) -> dict:
+              self._state = "disconnected"
+              self._retries = 0
+              return {"state": self._state, "reason": "forced"}
+      ```
+
+      Key: transition handlers manage retry counting internally. Timeout in
+      connecting state retries up to max_retries, then falls back to disconnected.
+      Error in connected state transitions through connecting for retry.
+      Each handler returns a status dict with the new state and metadata.
+    tags: [state-machine, connection, retry, timeout, network]
+    difficulty: hard
+
+  - query: |
+      Write a Python class called `ElevatorFSM` that models an elevator with states: idle, moving_up, moving_down, door_open. Support events: call(floor), arrive, open_door, close_door. Track current floor and a request queue. The elevator services requests in the current direction before reversing (SCAN algorithm).
+    solution: |
+      ```python
+      class ElevatorFSM:
+          def __init__(self, num_floors: int = 10) -> None:
+              self._state = "idle"
+              self._current_floor = 1
+              self._num_floors = num_floors
+              self._requests: set[int] = set()
+              self._direction = "up"  # preferred direction
+
+          @property
+          def state(self) -> str:
+              return self._state
+
+          @property
+          def current_floor(self) -> int:
+              return self._current_floor
+
+          @property
+          def requests(self) -> set[int]:
+              return set(self._requests)
+
+          def call(self, floor: int) -> str:
+              """Request the elevator to go to a floor."""
+              if floor < 1 or floor > self._num_floors:
+                  raise ValueError(f"Floor {floor} out of range 1-{self._num_floors}")
+              self._requests.add(floor)
+              if self._state == "idle":
+                  self._decide_direction()
+              return self._state
+
+          def step(self) -> dict:
+              """Advance the elevator by one step. Returns status dict."""
+              if self._state == "idle":
+                  if self._requests:
+                      self._decide_direction()
+                  return {"state": self._state, "floor": self._current_floor}
+
+              if self._state == "door_open":
+                  self._requests.discard(self._current_floor)
+                  self._state = "idle"
+                  if self._requests:
+                      self._decide_direction()
+                  return {"state": self._state, "floor": self._current_floor, "action": "doors_closed"}
+
+              # Moving
+              if self._state == "moving_up":
+                  self._current_floor += 1
+              elif self._state == "moving_down":
+                  self._current_floor -= 1
+
+              # Check if we should stop at this floor
+              if self._current_floor in self._requests:
+                  self._state = "door_open"
+                  return {"state": self._state, "floor": self._current_floor, "action": "doors_opened"}
+
+              # Check if we need to reverse direction
+              if self._state == "moving_up" and not any(f > self._current_floor for f in self._requests):
+                  self._direction = "down"
+                  self._decide_direction()
+              elif self._state == "moving_down" and not any(f < self._current_floor for f in self._requests):
+                  self._direction = "up"
+                  self._decide_direction()
+
+              return {"state": self._state, "floor": self._current_floor}
+
+          def _decide_direction(self) -> None:
+              if not self._requests:
+                  self._state = "idle"
+                  return
+              # SCAN: continue in current direction if there are requests that way
+              if self._direction == "up":
+                  above = [f for f in self._requests if f > self._current_floor]
+                  below = [f for f in self._requests if f < self._current_floor]
+                  if above:
+                      self._state = "moving_up"
+                  elif below:
+                      self._direction = "down"
+                      self._state = "moving_down"
+                  else:
+                      self._state = "door_open"  # request is current floor
+              else:
+                  below = [f for f in self._requests if f < self._current_floor]
+                  above = [f for f in self._requests if f > self._current_floor]
+                  if below:
+                      self._state = "moving_down"
+                  elif above:
+                      self._direction = "up"
+                      self._state = "moving_up"
+                  else:
+                      self._state = "door_open"
+      ```
+
+      Key patterns: SCAN (elevator) algorithm services all requests in one direction before reversing, minimizing total travel. State transitions driven by step() -- each call moves one floor. Request queue is a set to avoid duplicates. Direction reversal happens when no more requests exist in the current direction.
+    tags: [state-machine, elevator, fsm, scan-algorithm, simulation]
+    difficulty: hard
+
+  - query: |
+      Write a Python class called `Tokenizer` that uses a state machine to tokenize a simple expression language. Token types: NUMBER, IDENT (identifiers), OP (+, -, *, /), LPAREN, RPAREN, WHITESPACE (skipped). States: start, in_number, in_ident. Return a list of (token_type, value) tuples.
+    solution: |
+      ```python
+      class Tokenizer:
+          def __init__(self) -> None:
+              self._state = "start"
+              self._tokens: list[tuple[str, str]] = []
+              self._buffer: list[str] = []
+
+          def tokenize(self, source: str) -> list[tuple[str, str]]:
+              self._state = "start"
+              self._tokens = []
+              self._buffer = []
+
+              for ch in source:
+                  self._feed(ch)
+              # Flush any remaining buffer
+              self._flush()
+              return self._tokens
+
+          def _feed(self, ch: str) -> None:
+              if self._state == "start":
+                  if ch.isdigit() or ch == '.':
+                      self._state = "in_number"
+                      self._buffer.append(ch)
+                  elif ch.isalpha() or ch == '_':
+                      self._state = "in_ident"
+                      self._buffer.append(ch)
+                  elif ch in '+-*/':
+                      self._tokens.append(("OP", ch))
+                  elif ch == '(':
+                      self._tokens.append(("LPAREN", ch))
+                  elif ch == ')':
+                      self._tokens.append(("RPAREN", ch))
+                  elif ch.isspace():
+                      pass  # skip whitespace
+                  else:
+                      raise ValueError(f"Unexpected character: {ch!r}")
+
+              elif self._state == "in_number":
+                  if ch.isdigit() or ch == '.':
+                      self._buffer.append(ch)
+                  else:
+                      self._flush()
+                      self._feed(ch)  # re-process in start state
+
+              elif self._state == "in_ident":
+                  if ch.isalnum() or ch == '_':
+                      self._buffer.append(ch)
+                  else:
+                      self._flush()
+                      self._feed(ch)  # re-process in start state
+
+          def _flush(self) -> None:
+              if not self._buffer:
+                  return
+              text = "".join(self._buffer)
+              if self._state == "in_number":
+                  self._tokens.append(("NUMBER", text))
+              elif self._state == "in_ident":
+                  self._tokens.append(("IDENT", text))
+              self._buffer.clear()
+              self._state = "start"
+      ```
+
+      Key patterns: Three states drive character classification. Multi-character tokens (numbers, identifiers) accumulate in a buffer until a non-matching character triggers a flush. The non-matching character is re-fed to the start state (lookahead). Single-character tokens (operators, parens) emit immediately. O(n) time, single pass over input.
+    tags: [state-machine, tokenizer, parser, lexer, fsm]
+    difficulty: medium
+
+  - query: |
+      Write a Python class called `GameCharacterFSM` that models a game character with states: idle, walking, jumping, attacking. Define valid transitions and per-state update logic. Support `update(dt)` for frame-based updates and `trigger(event)` for state changes. Track state duration and animation frame.
+    solution: |
+      ```python
+      class GameCharacterFSM:
+          TRANSITIONS = {
+              "idle": {"walk", "jump", "attack"},
+              "walking": {"idle", "jump", "attack"},
+              "jumping": {"idle", "attack"},  # can attack mid-air
+              "attacking": {"idle"},  # must finish attack before other actions
+          }
+
+          ANIMATION_FRAMES = {
+              "idle": 4,
+              "walking": 8,
+              "jumping": 6,
+              "attacking": 5,
+          }
+
+          ATTACK_DURATION = 0.5  # seconds
+
+          def __init__(self) -> None:
+              self._state = "idle"
+              self._state_time = 0.0
+              self._anim_frame = 0
+              self._anim_timer = 0.0
+              self._frame_duration = 0.1  # seconds per animation frame
+              self._velocity_y = 0.0
+              self._on_ground = True
+              self._position = {"x": 0.0, "y": 0.0}
+
+          @property
+          def state(self) -> str:
+              return self._state
+
+          @property
+          def state_time(self) -> float:
+              return self._state_time
+
+          @property
+          def anim_frame(self) -> int:
+              return self._anim_frame
+
+          @property
+          def position(self) -> dict:
+              return dict(self._position)
+
+          def trigger(self, event: str) -> bool:
+              """Attempt a state transition. Returns True if successful."""
+              state_map = {"walk": "walking", "jump": "jumping", "attack": "attacking", "idle": "idle"}
+              target = state_map.get(event)
+              if target is None:
+                  return False
+              if target not in self.TRANSITIONS.get(self._state, set()):
+                  return False
+              # Special guard: can't jump if not on ground
+              if target == "jumping" and not self._on_ground:
+                  return False
+              self._enter_state(target)
+              return True
+
+          def _enter_state(self, new_state: str) -> None:
+              self._state = new_state
+              self._state_time = 0.0
+              self._anim_frame = 0
+              self._anim_timer = 0.0
+              if new_state == "jumping":
+                  self._velocity_y = 5.0
+                  self._on_ground = False
+
+          def update(self, dt: float) -> dict:
+              """Update character for one frame. Returns status dict."""
+              self._state_time += dt
+              # Advance animation
+              self._anim_timer += dt
+              if self._anim_timer >= self._frame_duration:
+                  self._anim_timer -= self._frame_duration
+                  total_frames = self.ANIMATION_FRAMES[self._state]
+                  self._anim_frame = (self._anim_frame + 1) % total_frames
+
+              # State-specific update logic
+              if self._state == "jumping":
+                  self._velocity_y -= 9.8 * dt  # gravity
+                  self._position["y"] += self._velocity_y * dt
+                  if self._position["y"] <= 0:
+                      self._position["y"] = 0.0
+                      self._on_ground = True
+                      self._enter_state("idle")
+
+              elif self._state == "attacking":
+                  if self._state_time >= self.ATTACK_DURATION:
+                      self._enter_state("idle")
+
+              elif self._state == "walking":
+                  self._position["x"] += 2.0 * dt  # move right
+
+              return {
+                  "state": self._state,
+                  "frame": self._anim_frame,
+                  "position": self.position,
+                  "time_in_state": round(self._state_time, 3),
+              }
+      ```
+
+      Key patterns: TRANSITIONS dict defines which states can be reached from each state. update(dt) handles frame-based physics and animation. States have automatic exits (jumping lands, attack finishes). Guards prevent invalid transitions (e.g., double jump). Animation frame loops using modular arithmetic. Each state encapsulates its own update behavior.
+    tags: [state-machine, game, character, animation, fsm, physics]
+    difficulty: hard

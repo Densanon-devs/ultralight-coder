@@ -1,0 +1,279 @@
+domain: text
+category: pattern_glob
+examples:
+  - query: |
+      Write a glob_match(pattern, text) function supporting * and ? wildcards
+      using dynamic programming. * matches any sequence of characters (including
+      empty). ? matches exactly one character. Handle edge cases: glob_match("*", "")
+      should return True, glob_match("*", "anything") should return True.
+    solution: |
+      ```python
+      def glob_match(pattern, text):
+          m, n = len(pattern), len(text)
+          dp = [[False] * (n + 1) for _ in range(m + 1)]
+          dp[0][0] = True
+          # * can match empty string — propagate from dp[i-1][0]
+          for i in range(1, m + 1):
+              if pattern[i - 1] == '*':
+                  dp[i][0] = dp[i - 1][0]
+          for i in range(1, m + 1):
+              for j in range(1, n + 1):
+                  if pattern[i - 1] == '*':
+                      # * matches zero chars (dp[i-1][j]) or one more char (dp[i][j-1])
+                      dp[i][j] = dp[i - 1][j] or dp[i][j - 1]
+                  elif pattern[i - 1] == '?' or pattern[i - 1] == text[j - 1]:
+                      dp[i][j] = dp[i - 1][j - 1]
+          return dp[m][n]
+      ```
+
+      Key: dp[i][j] = can pattern[:i] match text[:j].
+      * matches zero (dp[i-1][j]) or more (dp[i][j-1]) characters.
+      ? matches exactly one (dp[i-1][j-1]).
+      Critical: dp[i][0] = dp[i-1][0] when pattern char is * allows
+      * to match the empty string. This makes glob_match("*", "") = True
+      and consecutive ** also works correctly.
+    tags: [glob, wildcard, dynamic-programming, pattern-matching]
+    difficulty: hard
+
+  - query: |
+      Write a `regex_match(pattern, text)` function that supports a subset of regex: `.` matches any single character, `*` means zero or more of the preceding element, `+` means one or more of the preceding element. Use dynamic programming.
+    solution: |
+      ```python
+      def regex_match(pattern: str, text: str) -> bool:
+          m, n = len(pattern), len(text)
+          dp = [[False] * (n + 1) for _ in range(m + 1)]
+          dp[0][0] = True
+
+          # Handle patterns like a*, a*b*, etc. that can match empty string
+          for i in range(1, m + 1):
+              if i >= 2 and pattern[i - 1] == '*':
+                  dp[i][0] = dp[i - 2][0]
+
+          for i in range(1, m + 1):
+              for j in range(1, n + 1):
+                  if pattern[i - 1] == '*':
+                      # * means zero or more of preceding element
+                      # Zero occurrences: dp[i-2][j]
+                      dp[i][j] = dp[i - 2][j]
+                      # One or more: preceding element matches current char
+                      if pattern[i - 2] == '.' or pattern[i - 2] == text[j - 1]:
+                          dp[i][j] = dp[i][j] or dp[i][j - 1]
+                  elif pattern[i - 1] == '+':
+                      # + means one or more of preceding element
+                      if pattern[i - 2] == '.' or pattern[i - 2] == text[j - 1]:
+                          dp[i][j] = dp[i][j - 1] or dp[i - 2][j - 1]
+                  elif pattern[i - 1] == '.' or pattern[i - 1] == text[j - 1]:
+                      dp[i][j] = dp[i - 1][j - 1]
+
+          return dp[m][n]
+      ```
+
+      Key patterns: DP table where dp[i][j] = can pattern[:i] match text[:j]. * references preceding element (pattern[i-2]). Zero occurrences of x* = dp[i-2][j]. One or more = dp[i][j-1] when preceding matches current char. + requires at least one match.
+    tags: [regex, pattern-matching, dynamic-programming]
+    difficulty: hard
+
+  - query: |
+      Write a `fnmatch(pattern, name)` function that implements Unix shell-style pattern matching. Support `*` (any chars), `?` (one char), `[seq]` (character set), and `[!seq]` (negated set).
+    solution: |
+      ```python
+      def fnmatch(pattern: str, name: str) -> bool:
+          i = j = 0
+          star_i = star_j = -1
+          plen, nlen = len(pattern), len(name)
+
+          while j < nlen:
+              if i < plen and pattern[i] == '[':
+                  # Character class
+                  close = pattern.index(']', i + 1)
+                  chars = pattern[i + 1:close]
+                  negate = chars.startswith('!')
+                  if negate:
+                      chars = chars[1:]
+                  matched = name[j] in chars
+                  if negate:
+                      matched = not matched
+                  if matched:
+                      i = close + 1
+                      j += 1
+                  elif star_i >= 0:
+                      i = star_i + 1
+                      star_j += 1
+                      j = star_j
+                  else:
+                      return False
+              elif i < plen and pattern[i] == '?':
+                  i += 1
+                  j += 1
+              elif i < plen and pattern[i] == '*':
+                  star_i = i
+                  star_j = j
+                  i += 1
+              elif i < plen and pattern[i] == name[j]:
+                  i += 1
+                  j += 1
+              elif star_i >= 0:
+                  i = star_i + 1
+                  star_j += 1
+                  j = star_j
+              else:
+                  return False
+
+          while i < plen and pattern[i] == '*':
+              i += 1
+          return i == plen
+      ```
+
+      Key patterns: Two-pointer with star backtracking. [seq] parsed by finding matching ]. [!seq] negates the set. On mismatch, backtrack to last * position and advance name pointer. Trailing *s consumed after name is exhausted.
+    tags: [fnmatch, glob, pattern-matching, character-class, wildcard]
+    difficulty: hard
+
+  - query: |
+      Write a `recursive_glob(root, pattern)` function that implements recursive glob matching with `**` support. `**` matches zero or more directory levels. For example, `src/**/*.py` matches `src/foo.py`, `src/a/foo.py`, and `src/a/b/foo.py`. Use os.walk for directory traversal.
+    solution: |
+      ```python
+      import os
+      import re
+
+
+      def recursive_glob(root: str, pattern: str) -> list[str]:
+          """Match files under root using glob pattern with ** support."""
+          regex = _glob_to_regex(pattern)
+          compiled = re.compile(f"^{regex}$")
+          matches = []
+          for dirpath, dirnames, filenames in os.walk(root):
+              for filename in filenames:
+                  full_path = os.path.join(dirpath, filename)
+                  rel_path = os.path.relpath(full_path, root).replace(os.sep, "/")
+                  if compiled.match(rel_path):
+                      matches.append(rel_path)
+          return sorted(matches)
+
+
+      def _glob_to_regex(pattern: str) -> str:
+          """Convert a glob pattern with ** support to a regex."""
+          parts = pattern.replace("\\", "/").split("/")
+          regex_parts = []
+          for part in parts:
+              if part == "**":
+                  regex_parts.append("(?:.+/)?")
+              else:
+                  regex_parts.append(_segment_to_regex(part))
+          # Join with / but handle ** specially (already includes /)
+          result = ""
+          for i, (orig, rx) in enumerate(zip(parts, regex_parts)):
+              if i > 0 and orig != "**" and (i < 2 or parts[i - 1] != "**"):
+                  result += "/"
+              result += rx
+          return result
+
+
+      def _segment_to_regex(segment: str) -> str:
+          """Convert a single path segment glob to regex."""
+          result = []
+          i = 0
+          while i < len(segment):
+              ch = segment[i]
+              if ch == "*":
+                  result.append("[^/]*")
+              elif ch == "?":
+                  result.append("[^/]")
+              elif ch == "[":
+                  j = segment.index("]", i + 1)
+                  chars = segment[i + 1:j]
+                  if chars.startswith("!"):
+                      result.append(f"[^{chars[1:]}]")
+                  else:
+                      result.append(f"[{chars}]")
+                  i = j
+              else:
+                  result.append(re.escape(ch))
+              i += 1
+          return "".join(result)
+      ```
+
+      Key patterns: `**` is converted to `(?:.+/)?` to match zero or more directory levels. Single `*` becomes `[^/]*` (no directory separators). os.walk traverses the tree, and paths are normalized to forward slashes for consistent matching. Segments are processed individually to correctly handle ** vs * semantics.
+    tags: [glob, recursive, doublestar, os-walk, pattern-matching]
+    difficulty: hard
+
+  - query: |
+      Write a `path_match(pattern, path)` function that supports character classes `[a-z]`, `[0-9]`, `[!abc]` (negation), and ranges within bracket expressions. Also support `*` (any chars except /) and `?` (single char except /). Match against full path strings.
+    solution: |
+      ```python
+      def path_match(pattern: str, path: str) -> bool:
+          """Match a path against a pattern with character class support."""
+          return _match(pattern, 0, path, 0)
+
+
+      def _parse_bracket(pattern: str, pos: int) -> tuple[set, int]:
+          """Parse a [...] bracket expression, returning (char_set, end_pos)."""
+          negate = False
+          i = pos
+          if i < len(pattern) and pattern[i] == "!":
+              negate = True
+              i += 1
+          chars = set()
+          while i < len(pattern) and pattern[i] != "]":
+              if i + 2 < len(pattern) and pattern[i + 1] == "-":
+                  # Range like a-z
+                  start_ch = pattern[i]
+                  end_ch = pattern[i + 2]
+                  for c in range(ord(start_ch), ord(end_ch) + 1):
+                      chars.add(chr(c))
+                  i += 3
+              else:
+                  chars.add(pattern[i])
+                  i += 1
+          return (chars, negate), i + 1  # skip closing ]
+
+
+      def _match(pattern: str, pi: int, path: str, si: int) -> bool:
+          star_pi = star_si = -1
+          plen, slen = len(pattern), len(path)
+
+          while si < slen:
+              if pi < plen and pattern[pi] == "[":
+                  (chars, negate), new_pi = _parse_bracket(pattern, pi + 1)
+                  in_set = path[si] in chars
+                  matched = (not in_set) if negate else in_set
+                  if matched:
+                      pi = new_pi
+                      si += 1
+                  elif star_pi >= 0:
+                      pi = star_pi + 1
+                      star_si += 1
+                      si = star_si
+                  else:
+                      return False
+              elif pi < plen and pattern[pi] == "?":
+                  if path[si] == "/":
+                      if star_pi >= 0:
+                          pi = star_pi + 1
+                          star_si += 1
+                          si = star_si
+                      else:
+                          return False
+                  else:
+                      pi += 1
+                      si += 1
+              elif pi < plen and pattern[pi] == "*":
+                  star_pi = pi
+                  star_si = si
+                  pi += 1
+              elif pi < plen and pattern[pi] == path[si]:
+                  pi += 1
+                  si += 1
+              elif star_pi >= 0:
+                  pi = star_pi + 1
+                  star_si += 1
+                  si = star_si
+              else:
+                  return False
+
+          while pi < plen and pattern[pi] == "*":
+              pi += 1
+          return pi == plen
+      ```
+
+      Key patterns: _parse_bracket handles character classes including ranges (a-z) and negation (!). Ranges are expanded into a set by iterating ord() values. The main matcher uses backtracking with star_pi/star_si for * wildcards. ? does not match /, keeping path semantics correct.
+    tags: [glob, character-class, range, path-matching, backtracking]
+    difficulty: hard

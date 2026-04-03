@@ -1,0 +1,45 @@
+domain: pattern
+category: pattern_iterator
+examples:
+  - query: |
+      Write a Pipeline class for lazy data processing. Constructor takes an
+      iterable. Methods: map(fn), filter(fn), take(n) return new Pipeline
+      (chainable, lazy). collect() materializes results as a list.
+    solution: |
+      ```python
+      class Pipeline:
+          def __init__(self, data):
+              self._data = iter(data)
+
+          def map(self, fn):
+              def gen():
+                  for item in self._data:
+                      yield fn(item)
+              return Pipeline(gen())
+
+          def filter(self, fn):
+              def gen():
+                  for item in self._data:
+                      if fn(item):
+                          yield item
+              return Pipeline(gen())
+
+          def take(self, n):
+              def gen():
+                  count = 0
+                  for item in self._data:
+                      if count >= n:
+                          break
+                      yield item
+                      count += 1
+              return Pipeline(gen())
+
+          def collect(self):
+              return list(self._data)
+      ```
+
+      Key: each method wraps self._data in a generator and returns a new
+      Pipeline. Operations are lazy — generators only execute when collect()
+      calls list(). iter(data) in __init__ ensures any iterable works.
+    tags: [pipeline, lazy-evaluation, generator, chaining, iterator]
+    difficulty: medium

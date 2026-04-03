@@ -1,0 +1,73 @@
+domain: data_processing
+category: data_transform
+examples:
+  - query: |
+      Write a data pipeline class with chainable .map(), .filter(), and .reduce()
+      methods that operate on an iterable lazily, like simplified functional data
+      processing.
+    solution: |
+      ```python
+      from functools import reduce
+
+
+      class Pipeline:
+          def __init__(self, iterable):
+              self._it = iter(iterable)
+
+          def map(self, fn):
+              self._it = (fn(x) for x in self._it)
+              return self
+
+          def filter(self, fn):
+              self._it = (x for x in self._it if fn(x))
+              return self
+
+          def reduce(self, fn, initial=None):
+              if initial is not None:
+                  return reduce(fn, self._it, initial)
+              return reduce(fn, self._it)
+
+          def collect(self):
+              return list(self._it)
+
+
+      if __name__ == "__main__":
+          result = Pipeline(range(10)).filter(lambda x: x % 2 == 0).map(lambda x: x * x).collect()
+          print(result)  # [0, 4, 16, 36, 64]
+          total = Pipeline([1, 2, 3, 4]).reduce(lambda a, b: a + b, 0)
+          print(total)  # 10
+      ```
+
+  - query: |
+      Write functions to flatten a nested dict to dot-notation keys and unflatten
+      it back. For example {"a": {"b": 1}} becomes {"a.b": 1} and vice versa.
+    solution: |
+      ```python
+      def flatten(d, prefix=""):
+          out = {}
+          for k, v in d.items():
+              key = f"{prefix}.{k}" if prefix else k
+              if isinstance(v, dict):
+                  out.update(flatten(v, key))
+              else:
+                  out[key] = v
+          return out
+
+
+      def unflatten(d):
+          out = {}
+          for key, val in d.items():
+              parts = key.split(".")
+              node = out
+              for part in parts[:-1]:
+                  node = node.setdefault(part, {})
+              node[parts[-1]] = val
+          return out
+
+
+      if __name__ == "__main__":
+          nested = {"a": {"b": 1, "c": {"d": 2}}, "e": 3}
+          flat = flatten(nested)
+          print(flat)   # {'a.b': 1, 'a.c.d': 2, 'e': 3}
+          print(unflatten(flat) == nested)  # True
+      ```

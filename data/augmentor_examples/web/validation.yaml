@@ -1,0 +1,51 @@
+domain: web
+category: web_validation
+examples:
+  - query: |
+      Write a Pydantic model for validating a user registration request with field constraints: username between 3-20 chars, age between 13-120, email as a string, and an optional bio with a default of empty string.
+    solution: |
+      ```python
+      from pydantic import BaseModel, Field
+
+      class UserRegistration(BaseModel):
+          username: str = Field(min_length=3, max_length=20)
+          email: str
+          age: int = Field(ge=13, le=120)
+          bio: str = Field(default="")
+
+      # Valid usage:
+      user = UserRegistration(
+          username="alice", email="alice@example.com", age=25
+      )
+      print(user.model_dump())
+      ```
+    tags: [pydantic, validation, model, field-constraints]
+    difficulty: easy
+
+  - query: |
+      Write a FastAPI error handler that catches Pydantic validation errors and returns a structured JSON response with status 422 listing each field error.
+    solution: |
+      ```python
+      from fastapi import FastAPI, Request
+      from fastapi.responses import JSONResponse
+      from fastapi.exceptions import RequestValidationError
+
+      app = FastAPI()
+
+      @app.exception_handler(RequestValidationError)
+      async def validation_error_handler(
+          request: Request, exc: RequestValidationError
+      ):
+          errors = []
+          for err in exc.errors():
+              errors.append({
+                  "field": ".".join(str(x) for x in err["loc"]),
+                  "message": err["msg"],
+              })
+          return JSONResponse(
+              status_code=422,
+              content={"detail": "Validation failed", "errors": errors},
+          )
+      ```
+    tags: [fastapi, error-handling, validation, pydantic]
+    difficulty: easy

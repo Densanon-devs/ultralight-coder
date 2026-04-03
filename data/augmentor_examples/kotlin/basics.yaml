@@ -1,0 +1,166 @@
+domain: kotlin
+category: kotlin_basics
+examples:
+  - query: |
+      Write a Kotlin function that groups a list of strings by their first character.
+    solution: |
+      ```kotlin
+      fun groupByFirstChar(words: List<String>): Map<Char, List<String>> {
+          return words.filter { it.isNotEmpty() }.groupBy { it.first() }
+      }
+      ```
+    tags: [kotlin, collection, groupby, map]
+    difficulty: easy
+
+  - query: |
+      Write a Kotlin data class with a builder-style copy pattern.
+    solution: |
+      ```kotlin
+      data class User(
+          val name: String,
+          val email: String,
+          val age: Int = 0,
+      )
+
+      fun main() {
+          val user = User(name = "Alice", email = "alice@example.com", age = 30)
+          val updated = user.copy(age = 31)
+          println(updated)
+      }
+      ```
+    tags: [kotlin, data-class, copy, named-arguments]
+    difficulty: easy
+
+  - query: |
+      Write a Kotlin sealed class for a Result type with Success and Failure.
+    solution: |
+      ```kotlin
+      sealed class Result<out T> {
+          data class Success<T>(val value: T) : Result<T>()
+          data class Failure(val error: Throwable) : Result<Nothing>()
+
+          fun getOrNull(): T? = when (this) {
+              is Success -> value
+              is Failure -> null
+          }
+
+          fun <R> map(transform: (T) -> R): Result<R> = when (this) {
+              is Success -> Success(transform(value))
+              is Failure -> Failure(error)
+          }
+      }
+      ```
+    tags: [kotlin, sealed-class, result, generics]
+    difficulty: medium
+
+  - query: |
+      Write a Kotlin extension function that retries a suspend function with exponential backoff.
+    solution: |
+      ```kotlin
+      import kotlinx.coroutines.delay
+
+      suspend fun <T> retry(
+          maxRetries: Int = 3,
+          initialDelay: Long = 100,
+          block: suspend () -> T,
+      ): T {
+          var currentDelay = initialDelay
+          repeat(maxRetries - 1) {
+              try {
+                  return block()
+              } catch (e: Exception) {
+                  delay(currentDelay)
+                  currentDelay *= 2
+              }
+          }
+          return block()
+      }
+      ```
+    tags: [kotlin, coroutines, retry, suspend]
+    difficulty: medium
+
+  - query: |
+      Write a Kotlin function that reads a JSON file using kotlinx.serialization.
+    solution: |
+      ```kotlin
+      import kotlinx.serialization.Serializable
+      import kotlinx.serialization.json.Json
+      import java.io.File
+
+      @Serializable
+      data class Config(val host: String, val port: Int)
+
+      fun loadConfig(path: String): Config {
+          val text = File(path).readText()
+          return Json.decodeFromString<Config>(text)
+      }
+      ```
+    tags: [kotlin, json, serialization, file-io]
+    difficulty: easy
+
+  - query: |
+      Write a Kotlin function using coroutines that fetches multiple URLs in parallel.
+    solution: |
+      ```kotlin
+      import kotlinx.coroutines.*
+      import java.net.URL
+
+      suspend fun fetchAll(urls: List<String>): List<String> = coroutineScope {
+          urls.map { url ->
+              async(Dispatchers.IO) {
+                  URL(url).readText()
+              }
+          }.awaitAll()
+      }
+      ```
+    tags: [kotlin, coroutines, async, parallel]
+    difficulty: medium
+
+  - query: |
+      Write a Kotlin data class with validation in the init block.
+    solution: |
+      ```kotlin
+      data class User(val name: String, val email: String, val age: Int) {
+          init {
+              require(name.isNotBlank()) { "Name must not be blank" }
+              require(email.contains("@")) { "Invalid email format" }
+              require(age in 0..150) { "Age must be between 0 and 150" }
+          }
+      }
+      ```
+    tags: [kotlin, data-class, init, validation, require]
+    difficulty: easy
+
+  - query: |
+      Write a Kotlin inline function with a reified type parameter for JSON deserialization.
+    solution: |
+      ```kotlin
+      import kotlinx.serialization.json.Json
+      import kotlinx.serialization.serializer
+
+      inline fun <reified T> fromJson(json: String): T {
+          return Json.decodeFromString(serializer(), json)
+      }
+      ```
+    tags: [kotlin, inline, reified, json, generics]
+    difficulty: medium
+
+  - query: |
+      Write a Kotlin object that implements a thread-safe singleton with lazy initialization.
+    solution: |
+      ```kotlin
+      object AppConfig {
+          val settings: Map<String, String> by lazy {
+              println("Loading configuration...")
+              mapOf(
+                  "host" to "localhost",
+                  "port" to "8080",
+                  "debug" to "false",
+              )
+          }
+
+          fun get(key: String): String? = settings[key]
+      }
+      ```
+    tags: [kotlin, object, singleton, lazy, thread-safe]
+    difficulty: easy

@@ -1,0 +1,498 @@
+domain: pattern
+category: pattern_pipeline
+examples:
+  - query: |
+      Write a StreamProcessor class that processes items one at a time
+      through a chain of transform functions. Support add_stage to add
+      transforms, process_one for single items, and process_all for
+      iterables. Include error handling that skips bad items and logs them.
+    solution: |
+      ```python
+      class StreamProcessor:
+          def __init__(self):
+              self._stages = []
+              self._errors = []
+
+          def add_stage(self, fn, name: str = ""):
+              """Add a transform function as a pipeline stage."""
+              self._stages.append((name or fn.__name__, fn))
+              return self
+
+          def process_one(self, item):
+              """Run a single item through all stages."""
+              current = item
+              for name, fn in self._stages:
+                  try:
+                      current = fn(current)
+                      if current is None:
+                          return None  # stage filtered it out
+                  except Exception as e:
+                      self._errors.append({
+                          "stage": name,
+                          "item": item,
+                          "error": str(e),
+                      })
+                      return None
+              return current
+
+          def process_all(self, items) -> list:
+              """Process all items, skipping failures."""
+              results = []
+              for item in items:
+                  result = self.process_one(item)
+                  if result is not None:
+                      results.append(result)
+              return results
+
+          def process_stream(self, items):
+              """Generator: yields results lazily."""
+              for item in items:
+                  result = self.process_one(item)
+                  if result is not None:
+                      yield result
+
+          @property
+          def errors(self) -> list:
+              return list(self._errors)
+
+          def clear_errors(self):
+              self._errors.clear()
+      ```
+
+      Key: stages are (name, function) tuples applied in order. Returning None
+      from a stage filters the item out. Errors are caught and logged, not
+      raised, so the stream continues. process_stream is a lazy generator
+      alternative to process_all.
+    tags: [pipeline, stream-processing, transform, error-handling, generator]
+    difficulty: medium
+
+  - query: |
+      Write an ETLPipeline class (Extract, Transform, Load) that takes
+      an extractor (callable returning iterable), a list of transform
+      functions, and a loader (callable accepting list). Support dry_run
+      mode and a progress callback.
+    solution: |
+      ```python
+      class ETLPipeline:
+          def __init__(self, name: str = "pipeline"):
+              self.name = name
+              self._extractor = None
+              self._transforms = []
+              self._loader = None
+              self._progress_cb = None
+
+          def extract(self, fn) -> "ETLPipeline":
+              """Set the extractor function (returns iterable of records)."""
+              self._extractor = fn
+              return self
+
+          def transform(self, fn) -> "ETLPipeline":
+              """Add a transform function (record -> record or None)."""
+              self._transforms.append(fn)
+              return self
+
+          def load(self, fn) -> "ETLPipeline":
+              """Set the loader function (accepts list of records)."""
+              self._loader = fn
+              return self
+
+          def on_progress(self, callback) -> "ETLPipeline":
+              """Set progress callback: fn(stage, count)."""
+              self._progress_cb = callback
+              return self
+
+          def _notify(self, stage: str, count: int):
+              if self._progress_cb:
+                  self._progress_cb(stage, count)
+
+          def run(self, dry_run: bool = False) -> dict:
+              """Execute the full ETL pipeline."""
+              if not self._extractor:
+                  raise RuntimeError("No extractor set")
+              if not self._loader and not dry_run:
+                  raise RuntimeError("No loader set")
+
+              # Extract
+              raw_data = list(self._extractor())
+              self._notify("extract", len(raw_data))
+
+              # Transform
+              transformed = []
+              skipped = 0
+              for record in raw_data:
+                  current = record
+                  for fn in self._transforms:
+                      current = fn(current)
+                      if current is None:
+                          skipped += 1
+                          break
+                  if current is not None:
+                      transformed.append(current)
+              self._notify("transform", len(transformed))
+
+              # Load
+              loaded = 0
+              if not dry_run and self._loader:
+                  self._loader(transformed)
+                  loaded = len(transformed)
+              self._notify("load", loaded)
+
+              return {
+                  "extracted": len(raw_data),
+                  "transformed": len(transformed),
+                  "skipped": skipped,
+                  "loaded": loaded,
+                  "dry_run": dry_run,
+              }
+      ```
+
+      Key: fluent builder pattern for setting extract/transform/load stages.
+      Transforms chain in order; returning None filters a record. dry_run
+      skips the load phase. run() returns a stats dict with counts for each
+      phase. Progress callback notifies after each phase completes.
+    tags: [pipeline, etl, builder-pattern, data-processing, dry-run]
+    difficulty: medium
+
+  - query: |
+      Write map_reduce(data, mapper, reducer) functions. The mapper takes
+      one item and returns a list of (key, value) pairs. The reducer takes
+      a key and list of values and returns a single result. Include a
+      shuffle/group step and support for combiners (local pre-reduction).
+    solution: |
+      ```python
+      from collections import defaultdict
+
+
+      def map_reduce(data, mapper, reducer, combiner=None) -> dict:
+          """Run a map-reduce pipeline over data.
+
+          mapper: item -> list of (key, value)
+          reducer: (key, [values]) -> result
+          combiner: optional (key, [values]) -> [values] for local pre-reduce
+          """
+          # Map phase
+          mapped = []
+          for item in data:
+              pairs = mapper(item)
+              mapped.extend(pairs)
+
+          # Combine phase (optional local pre-reduction)
+          if combiner:
+              grouped_local = defaultdict(list)
+              for key, value in mapped:
+                  grouped_local[key].append(value)
+              mapped = []
+              for key, values in grouped_local.items():
+                  combined = combiner(key, values)
+                  for v in combined:
+                      mapped.append((key, v))
+
+          # Shuffle phase (group by key)
+          groups = defaultdict(list)
+          for key, value in mapped:
+              groups[key].append(value)
+
+          # Reduce phase
+          results = {}
+          for key, values in groups.items():
+              results[key] = reducer(key, values)
+
+          return results
+
+
+      # Convenience: word count example
+      def word_count(texts: list[str]) -> dict:
+          def mapper(text):
+              return [(word.lower(), 1) for word in text.split()]
+
+          def reducer(key, values):
+              return sum(values)
+
+          def combiner(key, values):
+              return [sum(values)]
+
+          return map_reduce(texts, mapper, reducer, combiner)
+      ```
+
+      Key: classic map-reduce in three phases - map produces (key, value) pairs,
+      shuffle groups by key, reduce aggregates each group. Combiner is an
+      optional local pre-reduction step that reduces values before the shuffle,
+      improving performance when the reducer is associative and commutative.
+    tags: [pipeline, map-reduce, functional, aggregation, combiner]
+    difficulty: medium
+
+  - query: |
+      Write a ReactivePipeline class where each stage is a node that can
+      have multiple subscribers. Pushing a value into the source propagates
+      through all connected stages. Support map, filter, merge (combine two
+      streams), and collect (accumulate results into a list).
+    solution: |
+      ```python
+      class ReactiveNode:
+          def __init__(self):
+              self._subscribers = []
+
+          def subscribe(self, callback):
+              self._subscribers.append(callback)
+              return self
+
+          def _emit(self, value):
+              for sub in self._subscribers:
+                  sub(value)
+
+          def map(self, fn) -> "ReactiveNode":
+              node = ReactiveNode()
+              self.subscribe(lambda v: node._emit(fn(v)))
+              return node
+
+          def filter(self, predicate) -> "ReactiveNode":
+              node = ReactiveNode()
+              self.subscribe(lambda v: node._emit(v) if predicate(v) else None)
+              return node
+
+          def tap(self, fn) -> "ReactiveNode":
+              """Side-effect without modifying the value."""
+              node = ReactiveNode()
+              def handle(v):
+                  fn(v)
+                  node._emit(v)
+              self.subscribe(handle)
+              return node
+
+          def collect(self) -> "Collector":
+              collector = Collector()
+              self.subscribe(lambda v: collector._add(v))
+              return collector
+
+          @staticmethod
+          def merge(*sources) -> "ReactiveNode":
+              node = ReactiveNode()
+              for src in sources:
+                  src.subscribe(lambda v: node._emit(v))
+              return node
+
+
+      class Source(ReactiveNode):
+          def push(self, value):
+              self._emit(value)
+
+          def push_many(self, values):
+              for v in values:
+                  self._emit(v)
+
+
+      class Collector:
+          def __init__(self):
+              self.values = []
+
+          def _add(self, value):
+              self.values.append(value)
+
+          def __iter__(self):
+              return iter(self.values)
+
+          def __len__(self):
+              return len(self.values)
+
+
+      # Usage example:
+      # source = Source()
+      # results = (source
+      #     .filter(lambda x: x > 0)
+      #     .map(lambda x: x * 2)
+      #     .collect())
+      # source.push_many([1, -2, 3, -4, 5])
+      # print(results.values)  # [2, 6, 10]
+      ```
+
+      Key: push-based reactive pattern - Source.push() triggers the chain.
+      Each operator (map, filter, tap) creates a new ReactiveNode wired via
+      subscribe. merge combines multiple streams into one. Collector is a
+      terminal node that accumulates values. No pull/lazy semantics - values
+      propagate immediately on push.
+    tags: [pipeline, reactive, observer, stream, functional-composition]
+    difficulty: hard
+
+  - query: |
+      Write an AsyncPipeline class for async data processing. Support
+      add_stage to add async transform functions, run to process all items
+      through stages concurrently using asyncio, and a concurrency limit.
+      Each stage is an async callable. Items flow through stages in order
+      but multiple items can be in-flight concurrently.
+    solution: |
+      ```python
+      import asyncio
+
+
+      class AsyncPipeline:
+          def __init__(self, concurrency=5):
+              self._stages = []
+              self._concurrency = concurrency
+
+          def add_stage(self, fn, name=""):
+              self._stages.append((name or getattr(fn, "__name__", "stage"), fn))
+              return self
+
+          async def _process_one(self, item):
+              current = item
+              for name, fn in self._stages:
+                  current = await fn(current)
+                  if current is None:
+                      return None
+              return current
+
+          async def run(self, items):
+              semaphore = asyncio.Semaphore(self._concurrency)
+              results = []
+              errors = []
+
+              async def bounded(item):
+                  async with semaphore:
+                      try:
+                          return await self._process_one(item)
+                      except Exception as e:
+                          errors.append({"item": item, "error": str(e)})
+                          return None
+
+              tasks = [asyncio.create_task(bounded(item)) for item in items]
+              raw = await asyncio.gather(*tasks)
+              results = [r for r in raw if r is not None]
+              return {"results": results, "errors": errors}
+      ```
+
+      Key patterns:
+      1. Stages are async callables added via fluent add_stage method
+      2. _process_one pipelines a single item through all stages sequentially
+      3. run processes multiple items concurrently via asyncio.gather
+      4. Semaphore limits max in-flight items to prevent resource exhaustion
+      5. Errors are captured per-item, not raised — pipeline continues
+      6. Returning None from any stage filters the item out
+    tags: [pipeline, async, asyncio, concurrency, semaphore]
+    difficulty: hard
+
+  - query: |
+      Write a FanOutPipeline class where a single input can be routed to
+      multiple branch pipelines based on a routing function. Each branch
+      processes items independently. Results are collected per-branch.
+      Support add_branch(name, predicate, stages) and process(items).
+    solution: |
+      ```python
+      class FanOutPipeline:
+          def __init__(self):
+              self._branches = []
+
+          def add_branch(self, name, predicate, stages):
+              """Add a branch: predicate selects items, stages transform them."""
+              self._branches.append({
+                  "name": name,
+                  "predicate": predicate,
+                  "stages": list(stages),
+              })
+              return self
+
+          def _apply_stages(self, item, stages):
+              current = item
+              for fn in stages:
+                  current = fn(current)
+                  if current is None:
+                      return None
+              return current
+
+          def process(self, items):
+              results = {b["name"]: [] for b in self._branches}
+              unrouted = []
+              for item in items:
+                  routed = False
+                  for branch in self._branches:
+                      if branch["predicate"](item):
+                          routed = True
+                          result = self._apply_stages(item, branch["stages"])
+                          if result is not None:
+                              results[branch["name"]].append(result)
+                  if not routed:
+                      unrouted.append(item)
+              return {"branches": results, "unrouted": unrouted}
+      ```
+
+      Key patterns:
+      1. Each branch has a predicate (item -> bool) and a list of stage functions
+      2. An item can match multiple branches (fan-out, not exclusive routing)
+      3. _apply_stages chains transforms; None filters the item from that branch
+      4. process returns a dict with results per branch plus unrouted items
+      5. Fluent add_branch for builder-style configuration
+    tags: [pipeline, fan-out, branching, routing, data-processing]
+    difficulty: medium
+
+  - query: |
+      Write a BackpressurePipeline that uses a bounded queue between a
+      producer and consumer. The producer blocks when the queue is full
+      (backpressure). Use threading. Support start, stop, and stats
+      (items_produced, items_consumed, queue_size).
+    solution: |
+      ```python
+      import queue
+      import threading
+
+
+      class BackpressurePipeline:
+          def __init__(self, processor, max_queue_size=100):
+              self._processor = processor
+              self._queue = queue.Queue(maxsize=max_queue_size)
+              self._stop_event = threading.Event()
+              self._consumer_thread = None
+              self._items_produced = 0
+              self._items_consumed = 0
+              self._lock = threading.Lock()
+
+          def start(self):
+              self._stop_event.clear()
+              self._consumer_thread = threading.Thread(
+                  target=self._consume, daemon=True
+              )
+              self._consumer_thread.start()
+
+          def stop(self, timeout=5.0):
+              self._stop_event.set()
+              if self._consumer_thread:
+                  self._consumer_thread.join(timeout=timeout)
+
+          def produce(self, item, timeout=None):
+              """Put item into queue. Blocks if queue is full (backpressure)."""
+              self._queue.put(item, timeout=timeout)
+              with self._lock:
+                  self._items_produced += 1
+
+          def _consume(self):
+              while not self._stop_event.is_set():
+                  try:
+                      item = self._queue.get(timeout=0.1)
+                  except queue.Empty:
+                      continue
+                  try:
+                      self._processor(item)
+                      with self._lock:
+                          self._items_consumed += 1
+                  except Exception:
+                      pass  # skip failed items
+                  finally:
+                      self._queue.task_done()
+
+          @property
+          def stats(self):
+              with self._lock:
+                  return {
+                      "items_produced": self._items_produced,
+                      "items_consumed": self._items_consumed,
+                      "queue_size": self._queue.qsize(),
+                  }
+      ```
+
+      Key patterns:
+      1. Bounded queue.Queue provides natural backpressure — put() blocks when full
+      2. Consumer runs in a daemon thread, polling with short timeout to check stop_event
+      3. produce() blocks the caller when queue is at max capacity (backpressure)
+      4. Thread-safe counters protected by a lock for accurate stats
+      5. stop() sets event and joins thread with timeout for clean shutdown
+      6. task_done() called after processing for proper join/wait semantics
+    tags: [pipeline, backpressure, queue, threading, producer-consumer]
+    difficulty: hard

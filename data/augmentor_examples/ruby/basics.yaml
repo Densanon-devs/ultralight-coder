@@ -1,0 +1,123 @@
+domain: ruby
+category: ruby_basics
+examples:
+  - query: |
+      Write a Ruby method that reverses a string.
+    solution: |
+      ```ruby
+      def reverse_string(s)
+        s.reverse
+      end
+      ```
+    tags: [ruby, string, reverse]
+    difficulty: easy
+
+  - query: |
+      Write a Ruby class with attr_accessor, initialize, and a custom to_s.
+    solution: |
+      ```ruby
+      class User
+        attr_accessor :name, :email, :age
+
+        def initialize(name:, email:, age: 0)
+          @name = name
+          @email = email
+          @age = age
+        end
+
+        def to_s
+          "#{name} (#{email}), age #{age}"
+        end
+      end
+      ```
+    tags: [ruby, class, attr_accessor, initialize]
+    difficulty: easy
+
+  - query: |
+      Write a Ruby method that groups an array of hashes by a key.
+    solution: |
+      ```ruby
+      def group_by_key(items, key)
+        items.group_by { |item| item[key] }
+      end
+      ```
+    tags: [ruby, hash, group_by, enumerable]
+    difficulty: easy
+
+  - query: |
+      Write a Ruby method that reads a JSON file and returns a hash.
+    solution: |
+      ```ruby
+      require 'json'
+
+      def read_json(path)
+        JSON.parse(File.read(path))
+      end
+      ```
+    tags: [ruby, json, file-io]
+    difficulty: easy
+
+  - query: |
+      Write a Ruby module with a mixin method and include it in a class.
+    solution: |
+      ```ruby
+      module Greetable
+        def greet
+          "Hello, #{name}!"
+        end
+      end
+
+      class User
+        include Greetable
+
+        attr_reader :name
+
+        def initialize(name)
+          @name = name
+        end
+      end
+      ```
+    tags: [ruby, module, mixin, include]
+    difficulty: medium
+
+  - query: |
+      Write a Ruby method that fetches JSON from a URL using net/http.
+    solution: |
+      ```ruby
+      require 'net/http'
+      require 'json'
+      require 'uri'
+
+      def fetch_json(url)
+        uri = URI.parse(url)
+        response = Net::HTTP.get_response(uri)
+        raise "HTTP #{response.code}" unless response.is_a?(Net::HTTPSuccess)
+        JSON.parse(response.body)
+      end
+      ```
+    tags: [ruby, http, json, net-http]
+    difficulty: easy
+
+  - query: |
+      Write a Ruby class that implements Enumerable by defining each.
+    solution: |
+      ```ruby
+      class NumberRange
+        include Enumerable
+
+        def initialize(start, stop)
+          @start = start
+          @stop = stop
+        end
+
+        def each
+          current = @start
+          while current <= @stop
+            yield current
+            current += 1
+          end
+        end
+      end
+      ```
+    tags: [ruby, enumerable, iterator, yield]
+    difficulty: medium

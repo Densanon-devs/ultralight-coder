@@ -1,0 +1,118 @@
+domain: rust
+category: rust_basics
+examples:
+  - query: |
+      Write a Rust function that reverses a string.
+    solution: |
+      ```rust
+      fn reverse_string(s: &str) -> String {
+          s.chars().rev().collect()
+      }
+      ```
+    tags: [rust, string, reverse, iterator]
+    difficulty: easy
+
+  - query: |
+      Write a Rust function that removes duplicate values from a vector.
+    solution: |
+      ```rust
+      use std::collections::HashSet;
+
+      fn remove_duplicates(items: Vec<i32>) -> Vec<i32> {
+          let mut seen = HashSet::new();
+          items.into_iter().filter(|x| seen.insert(*x)).collect()
+      }
+      ```
+    tags: [rust, vec, hashset, dedup]
+    difficulty: easy
+
+  - query: |
+      Write a Rust function that reads a file to a string and returns a Result.
+    solution: |
+      ```rust
+      use std::fs;
+      use std::io;
+
+      fn read_file(path: &str) -> io::Result<String> {
+          fs::read_to_string(path)
+      }
+      ```
+    tags: [rust, file-io, result, error-handling]
+    difficulty: easy
+
+  - query: |
+      Write a Rust generic function that finds the maximum value in a slice.
+    solution: |
+      ```rust
+      fn find_max<T: PartialOrd>(items: &[T]) -> Option<&T> {
+          items.iter().reduce(|max, x| if x > max { x } else { max })
+      }
+      ```
+    tags: [rust, generics, slice, iterator]
+    difficulty: medium
+
+  - query: |
+      Write a Rust function that groups a vector of strings by their first character.
+    solution: |
+      ```rust
+      use std::collections::HashMap;
+
+      fn group_by_first_char(words: Vec<String>) -> HashMap<char, Vec<String>> {
+          let mut groups: HashMap<char, Vec<String>> = HashMap::new();
+          for word in words {
+              if let Some(c) = word.chars().next() {
+                  groups.entry(c).or_default().push(word);
+              }
+          }
+          groups
+      }
+      ```
+    tags: [rust, hashmap, groupby, iterator]
+    difficulty: medium
+
+  - query: |
+      Write a Rust function that flattens a nested Vec<Vec<T>> into a Vec<T>.
+    solution: |
+      ```rust
+      fn flatten<T>(nested: Vec<Vec<T>>) -> Vec<T> {
+          nested.into_iter().flatten().collect()
+      }
+      ```
+    tags: [rust, vec, flatten, iterator]
+    difficulty: easy
+
+  - query: |
+      Write a Rust function that reads all lines from a file and returns them as a Vec<String>.
+    solution: |
+      ```rust
+      use std::fs::File;
+      use std::io::{self, BufRead, BufReader};
+
+      fn read_lines(path: &str) -> Result<Vec<String>, io::Error> {
+          let file = File::open(path)?;
+          let reader = BufReader::new(file);
+          reader.lines().collect()
+      }
+      ```
+    tags: [rust, file-io, result, bufread]
+    difficulty: easy
+
+  - query: |
+      Write a Rust generic function that finds the minimum value in a slice and returns an Option.
+    solution: |
+      ```rust
+      fn find_min<T: PartialOrd>(items: &[T]) -> Option<&T> {
+          if items.is_empty() {
+              return None;
+          }
+          let mut min = &items[0];
+          for item in &items[1..] {
+              if item < min {
+                  min = item;
+              }
+          }
+          Some(min)
+      }
+      ```
+    tags: [rust, generics, option, slice]
+    difficulty: medium

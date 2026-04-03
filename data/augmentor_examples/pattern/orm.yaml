@@ -1,0 +1,496 @@
+domain: pattern
+category: pattern_orm
+examples:
+  - query: |
+      Write a `Model` base class and `Field` descriptor for a simple ORM that generates SQL.
+    solution: |
+      ```python
+      class Field:
+          def __init__(self, field_type, primary_key=False, default=None):
+              self.field_type = field_type
+              self.primary_key = primary_key
+              self.default = default
+              self.name = None
+
+
+      class ModelMeta(type):
+          def __new__(mcs, name, bases, namespace):
+              fields = {}
+              for key, value in namespace.items():
+                  if isinstance(value, Field):
+                      value.name = key
+                      fields[key] = value
+              namespace["_fields"] = fields
+              return super().__new__(mcs, name, bases, namespace)
+
+
+      class Model(metaclass=ModelMeta):
+          _fields = {}
+
+          @classmethod
+          def create_table_sql(cls):
+              cols = []
+              for name, f in cls._fields.items():
+                  col = name + " " + f.field_type
+                  if f.primary_key:
+                      col += " PRIMARY KEY"
+                  cols.append(col)
+              col_str = ", ".join(cols)
+              return "CREATE TABLE " + cls.__tablename__ + " (" + col_str + ")"
+
+          def insert_sql(self):
+              names = list(self._fields.keys())
+              vals = [getattr(self, n, self._fields[n].default) for n in names]
+              placeholders = ", ".join(["?"] * len(names))
+              name_str = ", ".join(names)
+              sql = "INSERT INTO " + self.__tablename__ + " (" + name_str + ") VALUES (" + placeholders + ")"
+              return sql, vals
+
+          @classmethod
+          def select_sql(cls, where=None, order_by=None, limit=None):
+              sql = "SELECT * FROM " + cls.__tablename__
+              if where:
+                  clauses = [k + " = ?" for k in where]
+                  sql += " WHERE " + " AND ".join(clauses)
+              if order_by:
+                  sql += " ORDER BY " + order_by
+              if limit:
+                  sql += " LIMIT " + str(limit)
+              return sql
+      ```
+
+      Key: metaclass collects Field instances into _fields dict. create_table_sql and select_sql are classmethods. insert_sql is instance method returning (sql, params).
+    tags: [orm, metaclass, descriptor, sql-generation]
+    difficulty: hard
+
+  - query: |
+      Write a QueryBuilder class with a fluent API for constructing SQL
+      queries. Support select, from_, where, join, order_by, limit, and
+      group_by. Each method returns self for chaining. build() returns
+      the SQL string and params list.
+    solution: |
+      ```python
+      class QueryBuilder:
+          def __init__(self):
+              self._select_cols = ["*"]
+              self._from_table = None
+              self._joins = []
+              self._where_clauses = []
+              self._params = []
+              self._order = None
+              self._group = None
+              self._limit_val = None
+
+          def select(self, *columns: str) -> "QueryBuilder":
+              self._select_cols = list(columns) if columns else ["*"]
+              return self
+
+          def from_(self, table: str) -> "QueryBuilder":
+              self._from_table = table
+              return self
+
+          def where(self, clause: str, *params) -> "QueryBuilder":
+              self._where_clauses.append(clause)
+              self._params.extend(params)
+              return self
+
+          def join(self, table: str, on: str, kind: str = "INNER") -> "QueryBuilder":
+              self._joins.append(f"{kind} JOIN {table} ON {on}")
+              return self
+
+          def order_by(self, column: str, direction: str = "ASC") -> "QueryBuilder":
+              self._order = f"{column} {direction}"
+              return self
+
+          def group_by(self, *columns: str) -> "QueryBuilder":
+              self._group = ", ".join(columns)
+              return self
+
+          def limit(self, n: int) -> "QueryBuilder":
+              self._limit_val = n
+              return self
+
+          def build(self) -> tuple[str, list]:
+              parts = ["SELECT " + ", ".join(self._select_cols)]
+              parts.append("FROM " + self._from_table)
+              for j in self._joins:
+                  parts.append(j)
+              if self._where_clauses:
+                  parts.append("WHERE " + " AND ".join(self._where_clauses))
+              if self._group:
+                  parts.append("GROUP BY " + self._group)
+              if self._order:
+                  parts.append("ORDER BY " + self._order)
+              if self._limit_val is not None:
+                  parts.append("LIMIT " + str(self._limit_val))
+              return " ".join(parts), list(self._params)
+      ```
+
+      Key: fluent interface - every method returns self for chaining. build()
+      assembles SQL from stored parts. WHERE params use ? placeholders and
+      are collected in order. Joins support INNER/LEFT/RIGHT via kind param.
+    tags: [orm, query-builder, fluent-api, sql, method-chaining]
+    difficulty: medium
+
+  - query: |
+      Write a MigrationGenerator class that compares two schema dicts
+      (old and new) and generates SQL ALTER TABLE statements. Support
+      adding columns, dropping columns, and renaming columns (when
+      specified via a rename map).
+    solution: |
+      ```python
+      class MigrationGenerator:
+          def __init__(self, table_name: str):
+              self.table_name = table_name
+
+          def generate(self, old_schema: dict, new_schema: dict,
+                       renames: dict | None = None) -> list[str]:
+              """Compare schemas and generate ALTER TABLE statements.
+
+              old_schema/new_schema: {col_name: col_type_str}
+              renames: {old_name: new_name}
+              """
+              renames = renames or {}
+              statements = []
+              old_cols = set(old_schema.keys())
+              new_cols = set(new_schema.keys())
+
+              # Handle renames first
+              for old_name, new_name in renames.items():
+                  if old_name in old_cols and new_name in new_cols:
+                      statements.append(
+                          f"ALTER TABLE {self.table_name} "
+                          f"RENAME COLUMN {old_name} TO {new_name}"
+                      )
+                      old_cols.discard(old_name)
+                      new_cols.discard(new_name)
+
+              # Added columns (in new but not old)
+              for col in sorted(new_cols - old_cols):
+                  col_type = new_schema[col]
+                  statements.append(
+                      f"ALTER TABLE {self.table_name} "
+                      f"ADD COLUMN {col} {col_type}"
+                  )
+
+              # Dropped columns (in old but not new)
+              for col in sorted(old_cols - new_cols):
+                  statements.append(
+                      f"ALTER TABLE {self.table_name} "
+                      f"DROP COLUMN {col}"
+                  )
+
+              # Type changes (columns in both but different types)
+              for col in sorted(old_cols & new_cols):
+                  if old_schema[col] != new_schema[col]:
+                      statements.append(
+                          f"ALTER TABLE {self.table_name} "
+                          f"ALTER COLUMN {col} TYPE {new_schema[col]}"
+                      )
+
+              return statements
+
+          def generate_sql(self, old_schema: dict, new_schema: dict,
+                           renames: dict | None = None) -> str:
+              stmts = self.generate(old_schema, new_schema, renames)
+              return ";\n".join(stmts) + (";" if stmts else "")
+      ```
+
+      Key: schema diff via set operations - symmetric difference finds adds
+      and drops, intersection finds type changes. Renames are handled first
+      and removed from both sets so they aren't treated as add+drop. Generates
+      standard ALTER TABLE SQL.
+    tags: [orm, migration, schema-diff, alter-table, code-generation]
+    difficulty: medium
+
+  - query: |
+      Write a Model class that supports relationships: ForeignKey, HasMany,
+      and BelongsTo. Models register themselves in a registry. Relationships
+      are resolved lazily by name. Include a simple in-memory store for
+      testing.
+    solution: |
+      ```python
+      _registry = {}
+      _store = {}  # {table_name: {id: record_dict}}
+
+
+      class RelationshipField:
+          def __init__(self, target_model: str, field_type: str):
+              self.target_model = target_model
+              self.field_type = field_type  # "foreign_key", "has_many", "belongs_to"
+              self.name = None
+
+
+      def ForeignKey(target: str):
+          return RelationshipField(target, "foreign_key")
+
+
+      def HasMany(target: str):
+          return RelationshipField(target, "has_many")
+
+
+      def BelongsTo(target: str):
+          return RelationshipField(target, "belongs_to")
+
+
+      class RelationalModelMeta(type):
+          def __new__(mcs, name, bases, namespace):
+              rels = {}
+              for key, val in namespace.items():
+                  if isinstance(val, RelationshipField):
+                      val.name = key
+                      rels[key] = val
+              namespace["_relationships"] = rels
+              cls = super().__new__(mcs, name, bases, namespace)
+              if name != "RelationalModel":
+                  _registry[name] = cls
+                  _store.setdefault(name, {})
+              return cls
+
+
+      class RelationalModel(metaclass=RelationalModelMeta):
+          _relationships = {}
+
+          def __init__(self, **kwargs):
+              self.id = kwargs.get("id")
+              for k, v in kwargs.items():
+                  setattr(self, k, v)
+
+          def save(self):
+              table = _store[type(self).__name__]
+              if self.id is None:
+                  self.id = len(table) + 1
+              table[self.id] = vars(self).copy()
+              return self
+
+          @classmethod
+          def find(cls, record_id: int):
+              data = _store[cls.__name__].get(record_id)
+              if data is None:
+                  return None
+              obj = cls.__new__(cls)
+              for k, v in data.items():
+                  setattr(obj, k, v)
+              return obj
+
+          @classmethod
+          def all(cls) -> list:
+              results = []
+              for data in _store[cls.__name__].values():
+                  obj = cls.__new__(cls)
+                  for k, v in data.items():
+                      setattr(obj, k, v)
+                  results.append(obj)
+              return results
+
+          def related(self, rel_name: str):
+              rel = self._relationships.get(rel_name)
+              if rel is None:
+                  raise AttributeError(f"No relationship: {rel_name}")
+              target_cls = _registry[rel.target_model]
+              if rel.field_type == "foreign_key":
+                  fk_value = getattr(self, rel_name + "_id", None)
+                  return target_cls.find(fk_value)
+              if rel.field_type == "has_many":
+                  fk_field = type(self).__name__.lower() + "_id"
+                  return [obj for obj in target_cls.all()
+                          if getattr(obj, fk_field, None) == self.id]
+              if rel.field_type == "belongs_to":
+                  fk_field = rel.target_model.lower() + "_id"
+                  fk_value = getattr(self, fk_field, None)
+                  return target_cls.find(fk_value)
+      ```
+
+      Key: metaclass collects RelationshipField instances and registers models
+      in a global registry. related() resolves relationships lazily by looking
+      up the target model class by name. ForeignKey/HasMany use naming conventions
+      (model_name + _id) for foreign key fields. In-memory _store dict acts as
+      a simple database.
+    tags: [orm, relationships, foreign-key, metaclass, registry]
+    difficulty: hard
+
+  - query: |
+      Write a ModelValidator mixin that validates model field values before
+      save. Support required, max_length, min_value, max_value, regex pattern,
+      and custom validator functions. Raise ValidationError with all errors.
+    solution: |
+      ```python
+      import re
+
+
+      class ValidationError(Exception):
+          def __init__(self, errors: list[str]):
+              self.errors = errors
+              super().__init__(f"Validation failed: {'; '.join(errors)}")
+
+
+      class FieldValidator:
+          def __init__(self, required=False, max_length=None,
+                       min_value=None, max_value=None,
+                       pattern=None, custom=None):
+              self.required = required
+              self.max_length = max_length
+              self.min_value = min_value
+              self.max_value = max_value
+              self.pattern = pattern
+              self.custom = custom  # callable(value) -> str or None
+              self.name = None
+
+
+      class ModelValidator:
+          """Mixin: add _validators dict of {field: FieldValidator}."""
+          _validators = {}
+
+          def validate(self) -> list[str]:
+              errors = []
+              for field_name, v in self._validators.items():
+                  value = getattr(self, field_name, None)
+                  if value is None or value == "":
+                      if v.required:
+                          errors.append(f"{field_name} is required")
+                      continue
+                  if v.max_length is not None and len(str(value)) > v.max_length:
+                      errors.append(
+                          f"{field_name} exceeds max length {v.max_length}"
+                      )
+                  if v.min_value is not None and value < v.min_value:
+                      errors.append(
+                          f"{field_name} must be >= {v.min_value}"
+                      )
+                  if v.max_value is not None and value > v.max_value:
+                      errors.append(
+                          f"{field_name} must be <= {v.max_value}"
+                      )
+                  if v.pattern is not None and not re.fullmatch(v.pattern, str(value)):
+                      errors.append(
+                          f"{field_name} does not match pattern {v.pattern}"
+                      )
+                  if v.custom is not None:
+                      err = v.custom(value)
+                      if err:
+                          errors.append(f"{field_name}: {err}")
+              return errors
+
+          def validate_or_raise(self):
+              errors = self.validate()
+              if errors:
+                  raise ValidationError(errors)
+
+
+      # Example usage:
+      class UserModel(ModelValidator):
+          _validators = {
+              "name": FieldValidator(required=True, max_length=100),
+              "age": FieldValidator(min_value=0, max_value=150),
+              "email": FieldValidator(
+                  required=True,
+                  pattern=r"[^@]+@[^@]+\.[^@]+",
+              ),
+          }
+
+          def __init__(self, **kwargs):
+              for k, v in kwargs.items():
+                  setattr(self, k, v)
+
+          def save(self):
+              self.validate_or_raise()
+              # ... save logic ...
+              return self
+      ```
+
+      Key: FieldValidator stores constraints per field. validate() iterates all
+      validators, collects errors as strings, returns list. validate_or_raise()
+      bundles all errors into one ValidationError. Custom validators are
+      callables returning error string or None. Mixin pattern keeps validation
+      separate from persistence.
+    tags: [orm, validation, mixin, constraints, error-handling]
+    difficulty: medium
+
+  - query: |
+      Write a QuerySet class that supports lazy, chainable filtering on
+      in-memory data. Support filter, exclude, order_by, values, first,
+      count, and iteration. Queries only execute on terminal operations.
+    solution: |
+      ```python
+      class QuerySet:
+          def __init__(self, data: list[dict]):
+              self._source = data
+              self._filters = []
+              self._excludes = []
+              self._order_key = None
+              self._order_reverse = False
+              self._value_fields = None
+
+          def _clone(self) -> "QuerySet":
+              qs = QuerySet(self._source)
+              qs._filters = list(self._filters)
+              qs._excludes = list(self._excludes)
+              qs._order_key = self._order_key
+              qs._order_reverse = self._order_reverse
+              qs._value_fields = self._value_fields
+              return qs
+
+          def filter(self, **kwargs) -> "QuerySet":
+              qs = self._clone()
+              qs._filters.append(kwargs)
+              return qs
+
+          def exclude(self, **kwargs) -> "QuerySet":
+              qs = self._clone()
+              qs._excludes.append(kwargs)
+              return qs
+
+          def order_by(self, field: str) -> "QuerySet":
+              qs = self._clone()
+              if field.startswith("-"):
+                  qs._order_key = field[1:]
+                  qs._order_reverse = True
+              else:
+                  qs._order_key = field
+                  qs._order_reverse = False
+              return qs
+
+          def values(self, *fields: str) -> "QuerySet":
+              qs = self._clone()
+              qs._value_fields = fields
+              return qs
+
+          def _evaluate(self) -> list[dict]:
+              result = list(self._source)
+              for f in self._filters:
+                  result = [r for r in result
+                            if all(r.get(k) == v for k, v in f.items())]
+              for e in self._excludes:
+                  result = [r for r in result
+                            if not all(r.get(k) == v for k, v in e.items())]
+              if self._order_key:
+                  result.sort(key=lambda r: r.get(self._order_key, ""),
+                              reverse=self._order_reverse)
+              if self._value_fields:
+                  result = [{k: r[k] for k in self._value_fields if k in r}
+                            for r in result]
+              return result
+
+          def __iter__(self):
+              return iter(self._evaluate())
+
+          def __len__(self):
+              return len(self._evaluate())
+
+          def first(self):
+              result = self._evaluate()
+              return result[0] if result else None
+
+          def count(self) -> int:
+              return len(self._evaluate())
+
+          def exists(self) -> bool:
+              return self.count() > 0
+      ```
+
+      Key: lazy evaluation - filter/exclude/order_by return cloned QuerySets
+      that store criteria without executing. _evaluate() applies all filters
+      at once on terminal operations (__iter__, first, count). Clone pattern
+      ensures each chain is independent.
+    tags: [orm, queryset, lazy-evaluation, fluent-api, clone-pattern]
+    difficulty: medium

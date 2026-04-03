@@ -1,0 +1,361 @@
+domain: class_design
+category: data_structure
+examples:
+  - query: |
+      Write a simple stack class.
+    solution: |
+      ```python
+      class Stack:
+          def __init__(self) -> None:
+              self._items: list = []
+
+          def push(self, item) -> None:
+              self._items.append(item)
+
+          def pop(self):
+              if not self._items:
+                  raise IndexError("pop from empty stack")
+              return self._items.pop()
+
+          def peek(self):
+              if not self._items:
+                  raise IndexError("peek at empty stack")
+              return self._items[-1]
+
+          def is_empty(self) -> bool:
+              return len(self._items) == 0
+
+          def __len__(self) -> int:
+              return len(self._items)
+      ```
+    tags: [stack, data-structure, IndexError]
+    difficulty: easy
+
+  - query: |
+      Write a `MinStack` class that supports push, pop, peek, and get_min operations, all in O(1) time.
+    solution: |
+      ```python
+      class MinStack:
+          def __init__(self) -> None:
+              self._stack: list[int] = []
+              self._min_stack: list[int] = []
+
+          def push(self, val: int) -> None:
+              self._stack.append(val)
+              if not self._min_stack or val <= self._min_stack[-1]:
+                  self._min_stack.append(val)
+
+          def pop(self) -> int:
+              if not self._stack:
+                  raise IndexError("pop from empty stack")
+              val = self._stack.pop()
+              if val == self._min_stack[-1]:
+                  self._min_stack.pop()
+              return val
+
+          def peek(self) -> int:
+              if not self._stack:
+                  raise IndexError("peek at empty stack")
+              return self._stack[-1]
+
+          def get_min(self) -> int:
+              if not self._min_stack:
+                  raise IndexError("min of empty stack")
+              return self._min_stack[-1]
+
+          def __len__(self) -> int:
+              return len(self._stack)
+      ```
+
+      Key patterns: Auxiliary min stack tracks current minimum. Only push to min stack when value <= current min. Pop from min stack only when popped value equals current min. All operations O(1).
+    tags: [min-stack, data-structure, stack, O(1)]
+    difficulty: medium
+
+  - query: |
+      Write a `QueueFromStacks` class that implements a FIFO queue using two stacks. Support enqueue, dequeue, and peek operations with amortized O(1) time.
+    solution: |
+      ```python
+      class QueueFromStacks:
+          def __init__(self) -> None:
+              self._in_stack: list = []
+              self._out_stack: list = []
+
+          def enqueue(self, item) -> None:
+              self._in_stack.append(item)
+
+          def _transfer(self) -> None:
+              if not self._out_stack:
+                  while self._in_stack:
+                      self._out_stack.append(self._in_stack.pop())
+
+          def dequeue(self):
+              self._transfer()
+              if not self._out_stack:
+                  raise IndexError("dequeue from empty queue")
+              return self._out_stack.pop()
+
+          def peek(self):
+              self._transfer()
+              if not self._out_stack:
+                  raise IndexError("peek at empty queue")
+              return self._out_stack[-1]
+
+          def is_empty(self) -> bool:
+              return not self._in_stack and not self._out_stack
+
+          def __len__(self) -> int:
+              return len(self._in_stack) + len(self._out_stack)
+      ```
+
+      Key patterns: Two stacks -- in_stack for enqueue, out_stack for dequeue. Transfer only when out_stack is empty (lazy transfer). Each element is moved at most twice, giving amortized O(1) per operation.
+    tags: [queue, stack, amortized, data-structure]
+    difficulty: medium
+
+  - query: |
+      Write a `Deque` class (double-ended queue) that supports push_front, push_back, pop_front, pop_back, peek_front, and peek_back using a doubly linked list.
+    solution: |
+      ```python
+      class _Node:
+          __slots__ = ('val', 'prev', 'next')
+
+          def __init__(self, val) -> None:
+              self.val = val
+              self.prev: _Node | None = None
+              self.next: _Node | None = None
+
+
+      class Deque:
+          def __init__(self) -> None:
+              self._head: _Node | None = None
+              self._tail: _Node | None = None
+              self._size: int = 0
+
+          def push_front(self, val) -> None:
+              node = _Node(val)
+              node.next = self._head
+              if self._head:
+                  self._head.prev = node
+              self._head = node
+              if self._tail is None:
+                  self._tail = node
+              self._size += 1
+
+          def push_back(self, val) -> None:
+              node = _Node(val)
+              node.prev = self._tail
+              if self._tail:
+                  self._tail.next = node
+              self._tail = node
+              if self._head is None:
+                  self._head = node
+              self._size += 1
+
+          def pop_front(self):
+              if not self._head:
+                  raise IndexError("pop from empty deque")
+              val = self._head.val
+              self._head = self._head.next
+              if self._head:
+                  self._head.prev = None
+              else:
+                  self._tail = None
+              self._size -= 1
+              return val
+
+          def pop_back(self):
+              if not self._tail:
+                  raise IndexError("pop from empty deque")
+              val = self._tail.val
+              self._tail = self._tail.prev
+              if self._tail:
+                  self._tail.next = None
+              else:
+                  self._head = None
+              self._size -= 1
+              return val
+
+          def peek_front(self):
+              if not self._head:
+                  raise IndexError("peek at empty deque")
+              return self._head.val
+
+          def peek_back(self):
+              if not self._tail:
+                  raise IndexError("peek at empty deque")
+              return self._tail.val
+
+          def __len__(self) -> int:
+              return self._size
+      ```
+
+      Key patterns: Doubly linked list with head/tail pointers. All operations O(1). __slots__ on Node for memory efficiency. Handle single-element edge case where head == tail.
+    tags: [deque, doubly-linked-list, data-structure]
+    difficulty: medium
+
+  - query: |
+      Write a Python class called `ExpressionEvaluator` that evaluates infix arithmetic expressions (with +, -, *, /, parentheses) using two stacks: one for operators and one for operands. Support integer and float operands.
+    solution: |
+      ```python
+      class ExpressionEvaluator:
+          PRECEDENCE = {'+': 1, '-': 1, '*': 2, '/': 2}
+
+          def __init__(self) -> None:
+              self._ops: list[str] = []
+              self._vals: list[float] = []
+
+          def evaluate(self, expression: str) -> float:
+              self._ops.clear()
+              self._vals.clear()
+              tokens = self._tokenize(expression)
+              for token in tokens:
+                  if isinstance(token, float):
+                      self._vals.append(token)
+                  elif token == '(':
+                      self._ops.append(token)
+                  elif token == ')':
+                      while self._ops and self._ops[-1] != '(':
+                          self._apply_op()
+                      if not self._ops:
+                          raise ValueError("Mismatched parentheses")
+                      self._ops.pop()  # remove '('
+                  else:
+                      while (self._ops and self._ops[-1] != '(' and
+                             self._ops[-1] in self.PRECEDENCE and
+                             self.PRECEDENCE[self._ops[-1]] >= self.PRECEDENCE[token]):
+                          self._apply_op()
+                      self._ops.append(token)
+              while self._ops:
+                  if self._ops[-1] == '(':
+                      raise ValueError("Mismatched parentheses")
+                  self._apply_op()
+              if len(self._vals) != 1:
+                  raise ValueError("Invalid expression")
+              return self._vals[0]
+
+          def _apply_op(self) -> None:
+              op = self._ops.pop()
+              b = self._vals.pop()
+              a = self._vals.pop()
+              if op == '+':
+                  self._vals.append(a + b)
+              elif op == '-':
+                  self._vals.append(a - b)
+              elif op == '*':
+                  self._vals.append(a * b)
+              elif op == '/':
+                  if b == 0:
+                      raise ZeroDivisionError("Division by zero")
+                  self._vals.append(a / b)
+
+          @staticmethod
+          def _tokenize(expression: str) -> list:
+              tokens: list = []
+              i = 0
+              while i < len(expression):
+                  ch = expression[i]
+                  if ch.isspace():
+                      i += 1
+                      continue
+                  if ch in '()+-*/':
+                      tokens.append(ch)
+                      i += 1
+                  elif ch.isdigit() or ch == '.':
+                      j = i
+                      while j < len(expression) and (expression[j].isdigit() or expression[j] == '.'):
+                          j += 1
+                      tokens.append(float(expression[i:j]))
+                      i = j
+                  else:
+                      raise ValueError(f"Unexpected character: {ch}")
+              return tokens
+      ```
+
+      Key patterns: Shunting-yard variant with two stacks. Operator precedence determines when to apply pending operators. Parentheses force immediate evaluation of enclosed sub-expression. Tokenizer separates parsing from evaluation. O(n) time for n-character expressions.
+    tags: [expression-evaluator, stack, shunting-yard, parsing, data-structure]
+    difficulty: hard
+
+  - query: |
+      Write a Python class called `UndoRedoStack` that provides undo and redo functionality. Support `execute(command, *args)` where command is a callable with an `undo` attribute (also callable). Provide `undo()`, `redo()`, and `history` property.
+    solution: |
+      ```python
+      class Command:
+          """Base class for undoable commands."""
+          def __init__(self, execute_fn, undo_fn, description: str = "") -> None:
+              self.execute_fn = execute_fn
+              self.undo_fn = undo_fn
+              self.description = description
+
+          def execute(self):
+              return self.execute_fn()
+
+          def undo(self):
+              return self.undo_fn()
+
+          def __repr__(self) -> str:
+              return f"Command({self.description!r})"
+
+
+      class UndoRedoStack:
+          def __init__(self) -> None:
+              self._undo_stack: list[Command] = []
+              self._redo_stack: list[Command] = []
+
+          def execute(self, command: Command):
+              result = command.execute()
+              self._undo_stack.append(command)
+              self._redo_stack.clear()  # new action invalidates redo history
+              return result
+
+          def undo(self):
+              if not self._undo_stack:
+                  raise IndexError("Nothing to undo")
+              command = self._undo_stack.pop()
+              command.undo()
+              self._redo_stack.append(command)
+
+          def redo(self):
+              if not self._redo_stack:
+                  raise IndexError("Nothing to redo")
+              command = self._redo_stack.pop()
+              command.execute()
+              self._undo_stack.append(command)
+
+          @property
+          def can_undo(self) -> bool:
+              return len(self._undo_stack) > 0
+
+          @property
+          def can_redo(self) -> bool:
+              return len(self._redo_stack) > 0
+
+          @property
+          def history(self) -> list[str]:
+              return [cmd.description for cmd in self._undo_stack]
+      ```
+
+      Key patterns: Command pattern pairs each action with its inverse. Two stacks -- undo_stack for executed commands, redo_stack for undone commands. Executing a new command clears the redo stack (branching history is discarded). O(1) for execute, undo, and redo operations.
+    tags: [undo-redo, command-pattern, stack, data-structure]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `next_greater_element(nums)` that, given a list of integers, returns a list where each element is replaced by the next greater element to its right. If no greater element exists, use -1. Use a monotonic stack for O(n) time.
+    solution: |
+      ```python
+      def next_greater_element(nums: list[int]) -> list[int]:
+          n = len(nums)
+          result = [-1] * n
+          stack: list[int] = []  # stack of indices
+
+          for i in range(n):
+              # Pop elements smaller than current -- current is their next greater
+              while stack and nums[stack[-1]] < nums[i]:
+                  idx = stack.pop()
+                  result[idx] = nums[i]
+              stack.append(i)
+
+          return result
+      ```
+
+      Key patterns: Monotonic decreasing stack stores indices of elements awaiting their next greater element. When a larger element arrives, it pops all smaller elements from the stack and becomes their answer. Each element is pushed and popped at most once, giving O(n) time. Elements remaining in the stack have no greater element to their right (default -1).
+    tags: [monotonic-stack, next-greater-element, stack, data-structure]
+    difficulty: medium

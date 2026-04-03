@@ -1,0 +1,59 @@
+domain: data_processing
+category: data_file_io
+examples:
+  - query: |
+      Write a CSV reader/writer class that reads a CSV file into a list of dicts
+      and writes a list of dicts back to CSV using the csv module.
+    solution: |
+      ```python
+      import csv
+
+
+      class CsvStore:
+          def __init__(self, path):
+              self.path = path
+
+          def read(self):
+              with open(self.path, newline="") as f:
+                  return list(csv.DictReader(f))
+
+          def write(self, rows):
+              if not rows:
+                  return
+              fieldnames = list(rows[0].keys())
+              with open(self.path, "w", newline="") as f:
+                  writer = csv.DictWriter(f, fieldnames=fieldnames)
+                  writer.writeheader()
+                  writer.writerows(rows)
+
+
+      if __name__ == "__main__":
+          store = CsvStore("demo.csv")
+          store.write([{"name": "Alice", "age": "30"}, {"name": "Bob", "age": "25"}])
+          print(store.read())
+      ```
+
+  - query: |
+      Write a streaming line-by-line file processor using a generator. It takes a
+      file path and a transform function, then yields transformed lines without
+      loading the whole file into memory.
+    solution: |
+      ```python
+      def stream_lines(path, transform):
+          with open(path) as f:
+              for line in f:
+                  yield transform(line.rstrip("\n"))
+
+
+      if __name__ == "__main__":
+          import tempfile, os
+
+          tmp = tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False)
+          tmp.write("hello\nworld\nfoo\n")
+          tmp.close()
+
+          for result in stream_lines(tmp.name, str.upper):
+              print(result)
+
+          os.unlink(tmp.name)
+      ```

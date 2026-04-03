@@ -1,0 +1,376 @@
+domain: common
+category: basic
+examples:
+  - query: |
+      Write a function that reverses a string.
+    solution: |
+      ```python
+      def reverse_string(s: str) -> str:
+          return s[::-1]
+      ```
+    tags: [string, reverse, basic]
+    difficulty: easy
+
+  - query: |
+      Write a function that finds the maximum in a list.
+    solution: |
+      ```python
+      def find_max(lst: list) -> int | None:
+          if not lst:
+              return None
+          result = lst[0]
+          for x in lst[1:]:
+              if x > result:
+                  result = x
+          return result
+      ```
+    tags: [list, max, basic]
+    difficulty: easy
+
+  - query: |
+      Write a function to check if a string is a palindrome.
+    solution: |
+      ```python
+      def is_palindrome(s: str) -> bool:
+          cleaned = s.lower().strip()
+          return cleaned == cleaned[::-1]
+      ```
+    tags: [string, palindrome]
+    difficulty: easy
+
+  - query: |
+      Write a function that counts word frequency in a string.
+    solution: |
+      ```python
+      def word_frequency(text: str) -> dict[str, int]:
+          counts: dict[str, int] = {}
+          for word in text.lower().split():
+              counts[word] = counts.get(word, 0) + 1
+          return counts
+      ```
+    tags: [string, dictionary, frequency]
+    difficulty: easy
+
+  - query: |
+      Write a function to read a JSON file and return the data.
+    solution: |
+      ```python
+      import json
+      from pathlib import Path
+
+
+      def read_json(filepath: str) -> dict:
+          return json.loads(Path(filepath).read_text())
+      ```
+    tags: [json, file-io]
+    difficulty: easy
+
+  - query: |
+      Write a function that fetches JSON from a URL.
+    solution: |
+      ```python
+      import urllib.request
+      import json
+
+
+      def fetch_json(url: str) -> dict:
+          with urllib.request.urlopen(url) as resp:
+              return json.loads(resp.read().decode())
+      ```
+    tags: [api, http, json]
+    difficulty: easy
+
+  - query: |
+      Write a function that parses command line arguments for a file converter.
+    solution: |
+      ```python
+      import argparse
+
+
+      def parse_args() -> argparse.Namespace:
+          parser = argparse.ArgumentParser(description="File converter")
+          parser.add_argument("input", help="Input file path")
+          parser.add_argument("-o", "--output", help="Output file path")
+          parser.add_argument("-f", "--format", choices=["json", "csv", "yaml"], default="json")
+          return parser.parse_args()
+      ```
+    tags: [cli, argparse]
+    difficulty: easy
+
+  - query: |
+      Write a Python function called `merge_sorted(list1, list2)` that merges two sorted lists into a single sorted list in O(n + m) time.
+    solution: |
+      ```python
+      def merge_sorted(list1: list, list2: list) -> list:
+          result: list = []
+          i = j = 0
+          while i < len(list1) and j < len(list2):
+              if list1[i] <= list2[j]:
+                  result.append(list1[i])
+                  i += 1
+              else:
+                  result.append(list2[j])
+                  j += 1
+          result.extend(list1[i:])
+          result.extend(list2[j:])
+          return result
+      ```
+
+      Key patterns: Two-pointer merge. <= preserves stability (equal elements from list1 come first). Extend with remaining elements after one list is exhausted.
+    tags: [merge, sorted, two-pointer, basic]
+    difficulty: easy
+
+  - query: |
+      Write a Python function called `flatten(nested)` that flattens an arbitrarily nested list into a single flat list. Example: flatten([1, [2, [3, 4]], 5]) returns [1, 2, 3, 4, 5].
+    solution: |
+      ```python
+      def flatten(nested) -> list:
+          result: list = []
+          stack = [nested]
+          while stack:
+              item = stack.pop()
+              if isinstance(item, list):
+                  for sub in reversed(item):
+                      stack.append(sub)
+              else:
+                  result.append(item)
+          return result
+      ```
+
+      Key patterns: Iterative with explicit stack avoids recursion limit. reversed() ensures left-to-right order when popping from stack. isinstance check distinguishes lists from leaf values.
+    tags: [flatten, nested-list, stack, iteration, basic]
+    difficulty: easy
+
+  - query: |
+      Write a Python function called `group_by(items, key_func)` that groups a list of items by a key function, returning a dict mapping keys to lists of items.
+    solution: |
+      ```python
+      def group_by(items: list, key_func) -> dict:
+          groups: dict = {}
+          for item in items:
+              key = key_func(item)
+              if key not in groups:
+                  groups[key] = []
+              groups[key].append(item)
+          return groups
+      ```
+
+      Key patterns: Single pass over items. key_func extracts the grouping key. Builds dict of lists without importing defaultdict. Example: group_by(words, len) groups words by length.
+    tags: [group-by, dictionary, higher-order-function, basic]
+    difficulty: easy
+
+  - query: |
+      Write a Python function called `chunk(lst, size)` that splits a list into sublists of the given size. The last chunk may be shorter.
+    solution: |
+      ```python
+      def chunk(lst: list, size: int) -> list[list]:
+          if size <= 0:
+              raise ValueError("Chunk size must be positive")
+          return [lst[i:i + size] for i in range(0, len(lst), size)]
+      ```
+
+      Key patterns: Slice with step -- range(0, len, size) gives chunk start indices. lst[i:i+size] handles the last partial chunk naturally. Validate size > 0.
+    tags: [chunk, list, slicing, basic]
+    difficulty: easy
+
+  - query: |
+      Write a Python function called `deep_merge(base, override)` that recursively merges two nested dicts. Values in override take precedence. Nested dicts are merged recursively rather than replaced.
+    solution: |
+      ```python
+      def deep_merge(base: dict, override: dict) -> dict:
+          result = base.copy()
+          for key, value in override.items():
+              if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+                  result[key] = deep_merge(result[key], value)
+              else:
+                  result[key] = value
+          return result
+      ```
+
+      Key patterns: Shallow copy of base preserves original. Recurse only when both values are dicts. Non-dict values in override replace base values. Returns new dict without mutating inputs.
+    tags: [deep-merge, dictionary, recursion, config, basic]
+    difficulty: easy
+
+  - query: |
+      Write a Python function called `lru_memoize(maxsize)` that returns a
+      decorator which caches function results with an LRU eviction policy.
+      When the cache exceeds maxsize, the least recently used entry is evicted.
+      Do not use functools.lru_cache — implement the cache manually using a
+      dict and a list or OrderedDict.
+    solution: |
+      ```python
+      from collections import OrderedDict
+
+
+      def lru_memoize(maxsize=128):
+          def decorator(func):
+              cache = OrderedDict()
+
+              def wrapper(*args):
+                  if args in cache:
+                      cache.move_to_end(args)
+                      return cache[args]
+                  result = func(*args)
+                  cache[args] = result
+                  if len(cache) > maxsize:
+                      cache.popitem(last=False)
+                  return result
+
+              wrapper.cache = cache
+              wrapper.cache_clear = cache.clear
+              return wrapper
+          return decorator
+      ```
+
+      Key patterns: OrderedDict tracks access order. move_to_end marks entry as recently used on hit. popitem(last=False) evicts the oldest entry when cache exceeds maxsize. Cache keyed on positional args tuple.
+    tags: [memoize, lru, cache, OrderedDict, decorator, basic]
+    difficulty: medium
+
+  - query: |
+      Write a Python function called `compose(*functions)` that composes
+      multiple functions right-to-left. compose(f, g, h)(x) should equal
+      f(g(h(x))). Return an identity function if no functions are given.
+    solution: |
+      ```python
+      import functools
+
+
+      def compose(*functions):
+          if not functions:
+              return lambda x: x
+
+          def composed(x):
+              result = x
+              for fn in reversed(functions):
+                  result = fn(result)
+              return result
+
+          return composed
+      ```
+
+      Key patterns: reversed() applies functions right-to-left (innermost first). Empty compose returns identity. Single pass through the function list, feeding each result to the next. No recursion needed.
+    tags: [compose, functional, higher-order-function, basic]
+    difficulty: easy
+
+  - query: |
+      Write a Python function called `retry_with_jitter(max_retries, base_delay)`
+      that returns a decorator. On failure, it retries with exponential backoff
+      plus random jitter (0 to base_delay). Return the result on success or
+      re-raise the last exception after all retries.
+    solution: |
+      ```python
+      import functools
+      import random
+      import time
+
+
+      def retry_with_jitter(max_retries=3, base_delay=1.0):
+          def decorator(func):
+              @functools.wraps(func)
+              def wrapper(*args, **kwargs):
+                  last_exc = None
+                  for attempt in range(max_retries):
+                      try:
+                          return func(*args, **kwargs)
+                      except Exception as e:
+                          last_exc = e
+                          if attempt < max_retries - 1:
+                              delay = base_delay * (2 ** attempt)
+                              jitter = random.uniform(0, base_delay)
+                              time.sleep(delay + jitter)
+                  raise last_exc
+
+              return wrapper
+          return decorator
+      ```
+
+      Key patterns: Exponential backoff (base * 2^attempt) plus random jitter prevents thundering herd. Jitter range is [0, base_delay]. Last exception re-raised after exhausting retries. functools.wraps preserves function metadata.
+    tags: [retry, jitter, backoff, decorator, resilience, basic]
+    difficulty: medium
+
+  - query: |
+      Write a Python generator function called `batched(iterable, n)` that
+      yields tuples of up to n items from the iterable. The last batch may
+      be shorter than n. Do not use itertools.batched.
+    solution: |
+      ```python
+      def batched(iterable, n):
+          if n < 1:
+              raise ValueError("n must be at least 1")
+          it = iter(iterable)
+          while True:
+              batch = []
+              for _ in range(n):
+                  try:
+                      batch.append(next(it))
+                  except StopIteration:
+                      if batch:
+                          yield tuple(batch)
+                      return
+              yield tuple(batch)
+      ```
+
+      Key patterns: Uses iter() + next() for universal iterable support. Builds each batch item-by-item up to n. StopIteration inside the inner loop yields the final partial batch and returns. Yields tuples for consistency with itertools.batched.
+    tags: [generator, batching, iterator, basic]
+    difficulty: easy
+
+  - query: |
+      Write a Python function called `debounce(delay)` that returns a
+      decorator. The decorated function only executes after `delay` seconds
+      have passed since the last call. Uses threading.Timer so it works in
+      threaded applications. Calling again before the delay resets the timer.
+    solution: |
+      ```python
+      import functools
+      import threading
+
+
+      def debounce(delay):
+          def decorator(func):
+              timer = {"ref": None}
+              lock = threading.Lock()
+
+              @functools.wraps(func)
+              def wrapper(*args, **kwargs):
+                  with lock:
+                      if timer["ref"] is not None:
+                          timer["ref"].cancel()
+                      timer["ref"] = threading.Timer(
+                          delay, func, args=args, kwargs=kwargs
+                      )
+                      timer["ref"].start()
+
+              wrapper.cancel = lambda: (
+                  timer["ref"].cancel() if timer["ref"] else None
+              )
+              return wrapper
+          return decorator
+      ```
+
+      Key patterns: threading.Timer schedules delayed execution. Each new call cancels the previous timer and starts a fresh one. Lock ensures thread safety when resetting the timer. cancel() exposed for cleanup. Timer dict used as mutable closure variable.
+    tags: [debounce, decorator, threading, timer, basic]
+    difficulty: medium
+
+  - query: |
+      Write a Python dataclass with field validation using __post_init__.
+    solution: |
+      ```python
+      from dataclasses import dataclass
+
+
+      @dataclass
+      class User:
+          name: str
+          email: str
+          age: int
+
+          def __post_init__(self):
+              if not self.name.strip():
+                  raise ValueError("Name must not be empty")
+              if "@" not in self.email:
+                  raise ValueError(f"Invalid email: {self.email}")
+              if not 0 <= self.age <= 150:
+                  raise ValueError(f"Invalid age: {self.age}")
+      ```
+    tags: [dataclass, validation, post_init, basic]
+    difficulty: easy

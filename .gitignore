@@ -17,6 +17,12 @@ models/*.gguf
 
 # Runtime data (generated at runtime)
 data/
+# But keep augmentor examples and module definitions (checked into repo)
+!data/augmentor_examples/
+!data/augmentor_examples/**
+!data/knowledge/
+!data/knowledge/**
+!data/pattern_graph.yaml
 
 # Tuned config (machine-specific)
 tuned_config.json

@@ -1,0 +1,116 @@
+domain: javascript
+category: js_basics
+examples:
+  - query: |
+      Write a JavaScript function that reverses a string.
+    solution: |
+      ```javascript
+      function reverseString(s) {
+        return s.split("").reverse().join("");
+      }
+      ```
+    tags: [javascript, string, reverse, basic]
+    difficulty: easy
+
+  - query: |
+      Write a JavaScript function that removes duplicate values from an array.
+    solution: |
+      ```javascript
+      function removeDuplicates(arr) {
+        return [...new Set(arr)];
+      }
+      ```
+    tags: [javascript, array, set, dedup]
+    difficulty: easy
+
+  - query: |
+      Write a JavaScript function that deep clones an object.
+    solution: |
+      ```javascript
+      function deepClone(obj) {
+        if (obj === null || typeof obj !== "object") return obj;
+        if (Array.isArray(obj)) return obj.map(deepClone);
+        const clone = {};
+        for (const key of Object.keys(obj)) {
+          clone[key] = deepClone(obj[key]);
+        }
+        return clone;
+      }
+      ```
+    tags: [javascript, object, clone, recursion]
+    difficulty: medium
+
+  - query: |
+      Write a JavaScript function that groups an array of objects by a key.
+    solution: |
+      ```javascript
+      function groupBy(arr, key) {
+        return arr.reduce((groups, item) => {
+          const val = item[key];
+          if (!groups[val]) groups[val] = [];
+          groups[val].push(item);
+          return groups;
+        }, {});
+      }
+      ```
+    tags: [javascript, array, reduce, groupby]
+    difficulty: easy
+
+  - query: |
+      Write a JavaScript function that flattens a nested array to any depth.
+    solution: |
+      ```javascript
+      function flattenDeep(arr) {
+        return arr.reduce((acc, val) =>
+          Array.isArray(val) ? acc.concat(flattenDeep(val)) : acc.concat(val),
+        []);
+      }
+      ```
+    tags: [javascript, array, flatten, recursion]
+    difficulty: medium
+
+  - query: |
+      Write a JavaScript function that debounces another function.
+    solution: |
+      ```javascript
+      function debounce(fn, delay) {
+        let timer = null;
+        return function (...args) {
+          clearTimeout(timer);
+          timer = setTimeout(() => fn.apply(this, args), delay);
+        };
+      }
+      ```
+    tags: [javascript, debounce, timing, closure]
+    difficulty: medium
+
+  - query: |
+      Write a JavaScript function that throttles another function.
+    solution: |
+      ```javascript
+      function throttle(fn, limit) {
+        let lastCall = 0;
+        return function (...args) {
+          const now = Date.now();
+          if (now - lastCall >= limit) {
+            lastCall = now;
+            return fn.apply(this, args);
+          }
+        };
+      }
+      ```
+    tags: [javascript, throttle, timing, closure]
+    difficulty: medium
+
+  - query: |
+      Write a JavaScript function that converts a string to camelCase.
+    solution: |
+      ```javascript
+      function toCamelCase(str) {
+        return str
+          .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ""))
+          .replace(/^[A-Z]/, (c) => c.toLowerCase());
+      }
+      ```
+    tags: [javascript, string, camelcase, regex]
+    difficulty: easy

@@ -1,0 +1,78 @@
+domain: async
+category: async_queue
+examples:
+  - query: |
+      Write a producer-consumer pattern using asyncio.Queue with
+      graceful shutdown using a sentinel value.
+    solution: |
+      ```python
+      import asyncio
+
+
+      async def producer(queue, items):
+          for item in items:
+              await queue.put(item)
+          await queue.put(None)
+
+
+      async def consumer(queue):
+          results = []
+          while True:
+              item = await queue.get()
+              if item is None:
+                  break
+              results.append(item)
+          return results
+
+
+      async def main():
+          queue = asyncio.Queue(maxsize=5)
+          prod = asyncio.create_task(producer(queue, [1, 2, 3]))
+          results = await consumer(queue)
+          await prod
+          print(f"Consumed: {results}")
+
+
+      asyncio.run(main())
+      ```
+
+      Key: None sentinel signals the consumer to stop. maxsize applies backpressure on the producer. task_done tracks processing completion. Both run as concurrent tasks.
+    tags: [producer-consumer, asyncio-queue, graceful-shutdown, asyncio]
+    difficulty: medium
+
+  - query: |
+      Write an async worker pool that processes items from a queue
+      using N worker coroutines running concurrently.
+    solution: |
+      ```python
+      import asyncio
+
+
+      async def worker(queue, results):
+          while True:
+              item = await queue.get()
+              if item is None:
+                  break
+              results.append(item * 2)
+
+
+      async def main():
+          queue = asyncio.Queue()
+          results = []
+          n_workers = 3
+          for i in range(6):
+              await queue.put(i)
+          for _ in range(n_workers):
+              await queue.put(None)
+          tasks = [asyncio.create_task(worker(queue, results))
+                   for _ in range(n_workers)]
+          await asyncio.gather(*tasks)
+          print(f"Processed: {sorted(results)}")
+
+
+      asyncio.run(main())
+      ```
+
+      Key: N workers pull from the same queue concurrently. One None sentinel per worker ensures all exit cleanly. Items are distributed across workers automatically by the queue.
+    tags: [worker-pool, asyncio-queue, concurrency, asyncio]
+    difficulty: medium

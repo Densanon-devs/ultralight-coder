@@ -1,0 +1,77 @@
+domain: cli
+category: cli_argparse
+examples:
+  - query: |
+      CLI tool with subcommands using argparse. Supports "add --name X" and "list --format json" subcommands.
+    solution: |
+      ```python
+      import argparse
+      import json
+
+      def cmd_add(args):
+          print(f"Added: {args.name}")
+
+      def cmd_list(args):
+          items = ["alpha", "beta", "gamma"]
+          if args.format == "json":
+              print(json.dumps(items))
+          else:
+              print("\n".join(items))
+
+      def main():
+          parser = argparse.ArgumentParser(prog="tool")
+          sub = parser.add_subparsers(dest="command", required=True)
+
+          add_p = sub.add_parser("add")
+          add_p.add_argument("--name", required=True)
+          add_p.set_defaults(func=cmd_add)
+
+          list_p = sub.add_parser("list")
+          list_p.add_argument("--format", choices=["text", "json"], default="text")
+          list_p.set_defaults(func=cmd_list)
+
+          args = parser.parse_args()
+          args.func(args)
+
+      if __name__ == "__main__":
+          main()
+      ```
+  - query: |
+      Config file loader with argparse overrides. Reads a JSON config file, then lets command-line args override any config values.
+    solution: |
+      ```python
+      import argparse
+      import json
+      import sys
+
+      def load_config(path):
+          try:
+              with open(path) as f:
+                  return json.load(f)
+          except FileNotFoundError:
+              return {}
+
+      def main():
+          parser = argparse.ArgumentParser()
+          parser.add_argument("--config", default="config.json")
+          parser.add_argument("--host", default=None)
+          parser.add_argument("--port", type=int, default=None)
+          parser.add_argument("--debug", action="store_true", default=None)
+          args = parser.parse_args()
+
+          cfg = load_config(args.config)
+          if args.host is not None:
+              cfg["host"] = args.host
+          if args.port is not None:
+              cfg["port"] = args.port
+          if args.debug is not None:
+              cfg["debug"] = args.debug
+
+          cfg.setdefault("host", "localhost")
+          cfg.setdefault("port", 8080)
+          cfg.setdefault("debug", False)
+          print(f"host={cfg['host']} port={cfg['port']} debug={cfg['debug']}")
+
+      if __name__ == "__main__":
+          main()
+      ```

@@ -1,0 +1,451 @@
+domain: pattern
+category: pattern_router
+examples:
+  - query: |
+      Write a `Router` class with decorator-based route registration and path parameter extraction.
+    solution: |
+      ```python
+      import re
+
+
+      class Router:
+          def __init__(self):
+              self._routes = []
+
+          def route(self, method, path):
+              pattern = re.sub(r"<(\w+)>", r"(?P<\1>[^/]+)", path)
+              pattern = f"^{pattern}$"
+              def decorator(func):
+                  self._routes.append({
+                      "method": method,
+                      "path": path,
+                      "pattern": re.compile(pattern),
+                      "handler": func,
+                  })
+                  return func
+              return decorator
+
+          def match(self, method, path):
+              for r in self._routes:
+                  if r["method"] != method:
+                      continue
+                  m = r["pattern"].match(path)
+                  if m:
+                      return r["handler"], m.groupdict()
+              return None
+
+          def dispatch(self, method, path, **kwargs):
+              result = self.match(method, path)
+              if result is None:
+                  raise LookupError(f"No route for {method} {path}")
+              handler, params = result
+              params.update(kwargs)
+              return handler(**params)
+
+          def routes(self):
+              return [
+                  {"method": r["method"], "path": r["path"], "handler": r["handler"].__name__}
+                  for r in self._routes
+              ]
+      ```
+
+      Key: `route()` returns a decorator. Convert `<param>` to regex named groups. `match` returns (handler, params_dict) or None. `dispatch` calls handler with merged params.
+    tags: [router, decorator, regex, http, path-params]
+    difficulty: hard
+
+  - query: |
+      Write a `RESTRouter` class that uses method-specific decorators (get, post, put, delete) for route registration. Support path parameters with `<param>` syntax and return structured responses.
+    solution: |
+      ```python
+      import re
+      from functools import wraps
+
+
+      class RESTRouter:
+          def __init__(self):
+              self._routes: list[dict] = []
+
+          def _add_route(self, method: str, path: str):
+              pattern = re.sub(r"<(\w+)>", r"(?P<\1>[^/]+)", path)
+              compiled = re.compile(f"^{pattern}$")
+              def decorator(func):
+                  @wraps(func)
+                  def wrapper(**kwargs):
+                      return func(**kwargs)
+                  self._routes.append({
+                      "method": method.upper(),
+                      "path": path,
+                      "pattern": compiled,
+                      "handler": wrapper,
+                      "name": func.__name__,
+                  })
+                  return wrapper
+              return decorator
+
+          def get(self, path: str):
+              return self._add_route("GET", path)
+
+          def post(self, path: str):
+              return self._add_route("POST", path)
+
+          def put(self, path: str):
+              return self._add_route("PUT", path)
+
+          def delete(self, path: str):
+              return self._add_route("DELETE", path)
+
+          def dispatch(self, method: str, path: str):
+              for route in self._routes:
+                  if route["method"] != method.upper():
+                      continue
+                  match = route["pattern"].match(path)
+                  if match:
+                      return {"status": 200, "body": route["handler"](**match.groupdict())}
+              return {"status": 404, "body": "Not Found"}
+
+          def list_routes(self) -> list[dict]:
+              return [{"method": r["method"], "path": r["path"], "handler": r["name"]} for r in self._routes]
+      ```
+
+      Key patterns: Method-specific decorators (get/post/put/delete) delegate to _add_route. @wraps preserves function metadata. dispatch returns structured response dicts with status codes.
+    tags: [rest, router, decorator, http, method-dispatch]
+    difficulty: hard
+
+  - query: |
+      Write a `RegexRouter` class that maps URL patterns with regex capture groups to handler functions. Support named groups, optional trailing slashes, and a fallback 404 handler.
+    solution: |
+      ```python
+      import re
+
+
+      class RegexRouter:
+          def __init__(self):
+              self._routes: list[tuple[re.Pattern, callable]] = []
+              self._fallback = None
+
+          def add_route(self, pattern: str, handler) -> None:
+              # Normalize: allow optional trailing slash
+              if not pattern.endswith("/?$"):
+                  pattern = pattern.rstrip("$") + "/?$"
+              self._routes.append((re.compile(pattern), handler))
+
+          def set_fallback(self, handler) -> None:
+              self._fallback = handler
+
+          def resolve(self, path: str) -> tuple[callable, dict]:
+              for pattern, handler in self._routes:
+                  match = pattern.match(path)
+                  if match:
+                      return handler, match.groupdict()
+              if self._fallback:
+                  return self._fallback, {}
+              raise LookupError(f"No route matches: {path}")
+
+          def dispatch(self, path: str):
+              handler, params = self.resolve(path)
+              return handler(**params)
+      ```
+
+      Key patterns: Routes store compiled regex patterns with named groups. Optional trailing slash via /?$ normalization. Fallback handler acts as a catch-all 404. resolve() returns (handler, params) for testability.
+    tags: [router, regex, url-routing, named-groups]
+    difficulty: medium
+
+  - query: |
+      Write a `WebSocketRouter` class that routes WebSocket messages by event type. Support registering handlers with decorators, broadcasting to connected clients, and message validation.
+    solution: |
+      ```python
+      class WebSocketRouter:
+          def __init__(self):
+              self._handlers: dict[str, callable] = {}
+              self._clients: set = set()
+              self._middleware: list[callable] = []
+
+          def on(self, event: str):
+              """Decorator to register a handler for an event type."""
+              def decorator(func):
+                  self._handlers[event] = func
+                  return func
+              return decorator
+
+          def use(self, middleware) -> None:
+              """Add middleware that processes messages before handlers."""
+              self._middleware.append(middleware)
+
+          def connect(self, client_id: str) -> None:
+              self._clients.add(client_id)
+              if "connect" in self._handlers:
+                  self._handlers["connect"](client_id)
+
+          def disconnect(self, client_id: str) -> None:
+              self._clients.discard(client_id)
+              if "disconnect" in self._handlers:
+                  self._handlers["disconnect"](client_id)
+
+          def handle(self, client_id: str, message: dict) -> dict | None:
+              if "event" not in message:
+                  return {"error": "Missing event field"}
+              event = message["event"]
+              data = message.get("data", {})
+
+              # Run middleware
+              for mw in self._middleware:
+                  result = mw(client_id, message)
+                  if result is not None:
+                      return result
+
+              handler = self._handlers.get(event)
+              if handler is None:
+                  return {"error": f"Unknown event: {event}"}
+              return handler(client_id, data)
+
+          def broadcast(self, event: str, data: dict) -> list[tuple[str, dict]]:
+              """Returns list of (client_id, message) pairs for all connected clients."""
+              msg = {"event": event, "data": data}
+              return [(cid, msg) for cid in self._clients]
+
+          @property
+          def connected_clients(self) -> set:
+              return self._clients.copy()
+      ```
+
+      Key patterns: Event-based routing with decorator registration. Middleware chain for cross-cutting concerns (auth, logging). broadcast() returns message pairs instead of doing I/O directly, keeping the router testable and transport-agnostic.
+    tags: [websocket, router, event-driven, decorator, middleware]
+    difficulty: hard
+
+  - query: |
+      Write a `MiddlewareRouter` class that supports registering middleware functions that run before/after route handlers. Middleware can short-circuit the request by returning a response. Support ordering via priority.
+    solution: |
+      ```python
+      import re
+      from functools import wraps
+
+
+      class MiddlewareRouter:
+          def __init__(self):
+              self._routes: list[dict] = []
+              self._before: list[tuple[int, callable]] = []
+              self._after: list[tuple[int, callable]] = []
+
+          def route(self, method: str, path: str):
+              pattern = re.sub(r"<(\w+)>", r"(?P<\1>[^/]+)", path)
+              compiled = re.compile(f"^{pattern}$")
+              def decorator(func):
+                  @wraps(func)
+                  def handler(**kwargs):
+                      return func(**kwargs)
+                  self._routes.append({
+                      "method": method.upper(),
+                      "pattern": compiled,
+                      "handler": handler,
+                  })
+                  return handler
+              return decorator
+
+          def before_request(self, priority: int = 0):
+              """Register middleware that runs before the handler.
+              Return a dict to short-circuit (skip handler)."""
+              def decorator(func):
+                  self._before.append((priority, func))
+                  self._before.sort(key=lambda x: x[0])
+                  return func
+              return decorator
+
+          def after_request(self, priority: int = 0):
+              """Register middleware that can modify the response."""
+              def decorator(func):
+                  self._after.append((priority, func))
+                  self._after.sort(key=lambda x: x[0])
+                  return func
+              return decorator
+
+          def dispatch(self, method: str, path: str) -> dict:
+              request = {"method": method.upper(), "path": path}
+
+              # Run before-middleware
+              for _, mw in self._before:
+                  result = mw(request)
+                  if result is not None:
+                      return result  # short-circuit
+
+              # Match route
+              for route in self._routes:
+                  if route["method"] != request["method"]:
+                      continue
+                  match = route["pattern"].match(path)
+                  if match:
+                      response = {
+                          "status": 200,
+                          "body": route["handler"](**match.groupdict()),
+                      }
+                      # Run after-middleware
+                      for _, mw in self._after:
+                          response = mw(request, response) or response
+                      return response
+
+              return {"status": 404, "body": "Not Found"}
+      ```
+
+      Key patterns: Middleware stored as (priority, callable) tuples and sorted by priority. Before-middleware receives the request dict and can short-circuit by returning a response. After-middleware receives both request and response for transformation. Dispatch chains before -> handler -> after.
+    tags: [router, middleware, decorator, pipeline, http]
+    difficulty: hard
+
+  - query: |
+      Write a `GroupRouter` class that supports route groups with a shared prefix. Groups can nest, and each group can have its own middleware. Provide `group(prefix)` that returns a sub-router, and `mount(group)` to attach it.
+    solution: |
+      ```python
+      import re
+
+
+      class GroupRouter:
+          def __init__(self, prefix: str = ""):
+              self._prefix = prefix.rstrip("/")
+              self._routes: list[dict] = []
+              self._groups: list["GroupRouter"] = []
+              self._middleware: list[callable] = []
+
+          def use(self, middleware: callable) -> None:
+              """Add middleware to this group."""
+              self._middleware.append(middleware)
+
+          def route(self, method: str, path: str):
+              full_path = self._prefix + path
+              pattern = re.sub(r"<(\w+)>", r"(?P<\1>[^/]+)", full_path)
+              compiled = re.compile(f"^{pattern}$")
+              def decorator(func):
+                  self._routes.append({
+                      "method": method.upper(),
+                      "pattern": compiled,
+                      "path": full_path,
+                      "handler": func,
+                      "middleware": list(self._middleware),
+                  })
+                  return func
+              return decorator
+
+          def group(self, prefix: str) -> "GroupRouter":
+              """Create a sub-group that inherits this group's prefix and middleware."""
+              child = GroupRouter(self._prefix + prefix)
+              child._middleware = list(self._middleware)
+              self._groups.append(child)
+              return child
+
+          def mount(self, group: "GroupRouter") -> None:
+              """Attach an external group router."""
+              self._groups.append(group)
+
+          def _collect_routes(self) -> list[dict]:
+              """Gather all routes from this group and nested groups."""
+              routes = list(self._routes)
+              for g in self._groups:
+                  routes.extend(g._collect_routes())
+              return routes
+
+          def dispatch(self, method: str, path: str) -> dict:
+              for route in self._collect_routes():
+                  if route["method"] != method.upper():
+                      continue
+                  match = route["pattern"].match(path)
+                  if match:
+                      params = match.groupdict()
+                      request = {"method": method, "path": path, "params": params}
+                      # Run group middleware
+                      for mw in route["middleware"]:
+                          result = mw(request)
+                          if result is not None:
+                              return result
+                      return {"status": 200, "body": route["handler"](**params)}
+              return {"status": 404, "body": "Not Found"}
+
+          def list_routes(self) -> list[dict]:
+              return [
+                  {"method": r["method"], "path": r["path"]}
+                  for r in self._collect_routes()
+              ]
+      ```
+
+      Key patterns: group() creates a child router that inherits the parent prefix and middleware. Routes store their own middleware snapshot at registration time. _collect_routes() recursively gathers routes from all nested groups. mount() allows attaching external group routers for modular app composition.
+    tags: [router, route-groups, prefix, middleware, nesting]
+    difficulty: hard
+
+  - query: |
+      Write a `TypedRouter` class that supports path parameter type coercion. Route patterns like `/users/<id:int>` and `/files/<name:str>` and `/items/<uuid:uuid>` automatically convert extracted parameters to the declared type before calling the handler.
+    solution: |
+      ```python
+      import re
+      import uuid as _uuid
+
+
+      class TypedRouter:
+          CONVERTERS = {
+              "int": int,
+              "str": str,
+              "float": float,
+              "uuid": _uuid.UUID,
+          }
+
+          def __init__(self):
+              self._routes: list[dict] = []
+
+          def route(self, method: str, path: str):
+              # Parse typed params like <name:type> and plain <name>
+              param_types: dict[str, str] = {}
+              def replace_param(m):
+                  name = m.group(1)
+                  ptype = m.group(2)
+                  if ptype:
+                      param_types[name] = ptype
+                      # Choose regex based on type
+                      if ptype == "int":
+                          return f"(?P<{name}>\\d+)"
+                      if ptype == "float":
+                          return f"(?P<{name}>\\d+\\.?\\d*)"
+                      if ptype == "uuid":
+                          return f"(?P<{name}>[0-9a-f{{8}}-[0-9a-f]{{4}}-[0-9a-f]{{4}}-[0-9a-f]{{4}}-[0-9a-f]{{12}})"
+                  return f"(?P<{name}>[^/]+)"
+
+              pattern = re.sub(r"<(\w+)(?::(\w+))?>", replace_param, path)
+              compiled = re.compile(f"^{pattern}$")
+
+              def decorator(func):
+                  self._routes.append({
+                      "method": method.upper(),
+                      "pattern": compiled,
+                      "handler": func,
+                      "param_types": dict(param_types),
+                  })
+                  return func
+              return decorator
+
+          def _coerce_params(self, params: dict, param_types: dict) -> dict:
+              result = {}
+              for name, value in params.items():
+                  ptype = param_types.get(name)
+                  if ptype and ptype in self.CONVERTERS:
+                      try:
+                          result[name] = self.CONVERTERS[ptype](value)
+                      except (ValueError, TypeError) as e:
+                          raise ValueError(
+                              f"Parameter '{name}' cannot be converted to {ptype}: {value}"
+                          ) from e
+                  else:
+                      result[name] = value
+              return result
+
+          def dispatch(self, method: str, path: str):
+              for route in self._routes:
+                  if route["method"] != method.upper():
+                      continue
+                  match = route["pattern"].match(path)
+                  if match:
+                      raw_params = match.groupdict()
+                      try:
+                          params = self._coerce_params(raw_params, route["param_types"])
+                      except ValueError as e:
+                          return {"status": 400, "body": str(e)}
+                      return {"status": 200, "body": route["handler"](**params)}
+              return {"status": 404, "body": "Not Found"}
+      ```
+
+      Key patterns: Route patterns use `<name:type>` syntax parsed at registration time. CONVERTERS dict maps type names to conversion functions. Regex patterns are type-aware (e.g., \\d+ for int). _coerce_params applies converters before calling the handler, returning 400 on conversion failure.
+    tags: [router, type-coercion, path-params, regex, validation]
+    difficulty: hard
