@@ -243,10 +243,16 @@ class UltralightCodeAssistant:
         if not self.dry_run and self._augmentors_enabled and routing.selected_modules:
             module_hint = routing.selected_modules[0]
 
-            # Inject project context into augmentor prompt
-            extra_ctx = ""
+            # Build extra context for augmentor: conversation history + project context
+            extra_parts = []
+            conv_history = self.memory.short_term.get_context()
+            if conv_history:
+                extra_parts.append(conv_history)
             if self.project_index.is_indexed:
-                extra_ctx = self.project_index.get_context(user_input, top_k=3)
+                project_ctx = self.project_index.get_context(user_input, top_k=3)
+                if project_ctx:
+                    extra_parts.append(project_ctx)
+            extra_ctx = "\n\n".join(extra_parts)
 
             augmentor_result = self.augmentor_router.process(
                 query=user_input,
