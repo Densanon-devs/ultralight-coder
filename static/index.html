@@ -184,7 +184,7 @@
   </div>
   <div class="spacer"></div>
   <button class="new-chat" onclick="newChat()" title="Start a new conversation">New Chat</button>
-  <select id="model-select" title="Select model"></select>
+  <select id="model-select" title="Select model" onchange="switchModel(this.value)"></select>
 </header>
 
 <div id="chat">
@@ -259,6 +259,29 @@ async function loadModels() {
     }
   } catch {
     modelSelect.innerHTML = '<option>default model</option>';
+  }
+}
+
+// ── Switch model ──
+async function switchModel(path) {
+  if (!path || busy) return;
+  statusDot.className = 'dot loading';
+  statusText.textContent = 'Switching model...';
+  try {
+    const r = await fetch('/models/switch', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({path}),
+    });
+    const data = await r.json();
+    if (data.error) {
+      statusText.textContent = data.error;
+    } else {
+      statusText.textContent = data.model;
+      statusDot.className = 'dot ready';
+    }
+  } catch {
+    statusText.textContent = 'Switch failed';
   }
 }
 

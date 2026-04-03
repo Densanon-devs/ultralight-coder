@@ -147,6 +147,37 @@ def create_app():
             })
         return {"models": result}
 
+    class ModelSwitchRequest(PydanticModel):
+        path: str
+
+    @app.post("/models/switch")
+    async def switch_model(req: ModelSwitchRequest):
+        """Hot-swap the active model. Unloads current, loads new."""
+        engine = get_engine()
+        model_path = PROJECT_ROOT / req.path
+        if not model_path.exists():
+            return {"error": f"Model not found: {req.path}"}
+
+        try:
+            logger.info(f"Switching model to {req.path}")
+            engine.base_model.unload()
+            engine.config.base_model.path = req.path
+            engine.base_model.config.path = req.path
+            engine.base_model.load()
+
+            # Update augmentor mode based on new model size
+            size_mb = model_path.stat().st_size / (1024 * 1024)
+            engine.augmentor_router.use_auto_augmentors(size_mb)
+
+            return {
+                "switched": True,
+                "model": model_path.stem,
+                "size_mb": round(size_mb),
+            }
+        except Exception as e:
+            logger.error(f"Failed to switch model: {e}")
+            return {"error": str(e)}
+
     @app.post("/session/reset")
     async def session_reset():
         """Clear conversation history to start a new chat."""
