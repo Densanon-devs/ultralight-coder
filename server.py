@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Ultralight Code Assistant — REST API Server
+Ultralite Code Assistant — REST API Server
 
 Endpoints:
     POST /generate          — Generate a response
@@ -51,8 +51,8 @@ _engine = None
 def get_engine():
     global _engine
     if _engine is None:
-        from main import UltralightCodeAssistant
-        _engine = UltralightCodeAssistant(dry_run=False)
+        from main import UltraliteCodeAssistant
+        _engine = UltraliteCodeAssistant(dry_run=False)
         _engine.initialize()
         logger.info("Engine initialized for API server")
     return _engine
@@ -71,8 +71,8 @@ def create_app():
         sys.exit(1)
 
     app = FastAPI(
-        title="Ultralight Code Assistant API",
-        description="REST API for the ultralight local coding assistant",
+        title="Ultralite Code Assistant API",
+        description="REST API for the ultralite local coding assistant",
         version="0.1.0",
     )
 
@@ -124,7 +124,7 @@ def create_app():
         index = PROJECT_ROOT / "static" / "index.html"
         if index.exists():
             return FileResponse(str(index))
-        return {"message": "Ultralight Code Assistant API. See /docs for endpoints."}
+        return {"message": "Ultralite Code Assistant API. See /docs for endpoints."}
 
     @app.get("/models/available")
     async def list_available_models():
@@ -369,7 +369,7 @@ def create_app():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Ultralight Code Assistant — API Server")
+    parser = argparse.ArgumentParser(description="Ultralite Code Assistant — API Server")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", "-p", type=int, default=8000)
     parser.add_argument("--reload", action="store_true")
@@ -387,7 +387,7 @@ def main():
         print("uvicorn not installed. Install with: pip install uvicorn")
         sys.exit(1)
 
-    print(f"\n  Ultralight Code Assistant")
+    print(f"\n  Ultralite Code Assistant")
     print(f"  Web UI: http://{args.host}:{args.port}")
     print(f"  API Docs: http://{args.host}:{args.port}/docs\n")
 

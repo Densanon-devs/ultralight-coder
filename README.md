@@ -1,4 +1,4 @@
-# Ultralight Code Assistant
+# Ultralite Code Assistant
 
 A local AI coding assistant powered by tiny GGUF models (0.5B-3B parameters). Uses a curated augmentor system to make small models perform like large ones -- 437 examples across 12 languages push a 469MB model to 99.2% accuracy on real-world coding queries.
 
@@ -18,23 +18,23 @@ Everything runs on your machine. No API keys, no cloud, no data leaves your comp
 
 **One-line install (Linux/macOS):**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralight-coder/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralite-coder/master/install.sh | bash
 ```
 
 **One-line install (Windows PowerShell):**
 ```powershell
-irm https://raw.githubusercontent.com/densanon-devs/ultralight-coder/master/install.ps1 | iex
+irm https://raw.githubusercontent.com/densanon-devs/ultralite-coder/master/install.ps1 | iex
 ```
 
 **With GPU support** -- add `--gpu` (Linux/macOS) or `-GPU` (Windows):
 ```bash
-curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralight-coder/master/install.sh | bash -s -- --gpu
+curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralite-coder/master/install.sh | bash -s -- --gpu
 ```
 
 **Manual install:**
 ```bash
-git clone https://github.com/densanon-devs/ultralight-coder.git
-cd ultralight-coder
+git clone https://github.com/densanon-devs/ultralite-coder.git
+cd ultralite-coder
 pip install -r requirements.txt
 python download_model.py
 python launch.py
@@ -168,7 +168,7 @@ augmentors:
 ## Project Structure
 
 ```
-ultralight-coder/
+ultralite-coder/
   launch.py              # One-click launcher
   server.py              # FastAPI server + web UI
   main.py                # CLI entry point + engine orchestrator

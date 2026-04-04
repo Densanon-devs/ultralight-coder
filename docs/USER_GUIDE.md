@@ -1,4 +1,4 @@
-# Ultralight Code Assistant -- User Guide
+# Ultralite Code Assistant -- User Guide
 
 This guide walks you through everything from installation to daily use.
 
@@ -29,9 +29,9 @@ No Python installation needed. This downloads a portable Python and handles ever
 
 1. Open PowerShell and run:
 ```powershell
-git clone https://github.com/densanon-devs/ultralight-coder.git
+git clone https://github.com/densanon-devs/ultralite-coder.git
 ```
-2. Open the `ultralight-coder` folder in File Explorer
+2. Open the `ultralite-coder` folder in File Explorer
 3. **Double-click `start.bat`**
 
 That's it. First run will:
@@ -45,12 +45,12 @@ That's it. First run will:
 ### Linux / macOS -- One-Line Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralight-coder/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralite-coder/master/install.sh | bash
 ```
 
 With GPU acceleration:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralight-coder/master/install.sh | bash -s -- --gpu
+curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralite-coder/master/install.sh | bash -s -- --gpu
 ```
 
 ### Manual Install (all platforms)
@@ -58,8 +58,8 @@ curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralight-coder/mast
 Requires Python 3.10-3.12 (3.13+ will work but installs slower).
 
 ```bash
-git clone https://github.com/densanon-devs/ultralight-coder.git
-cd ultralight-coder
+git clone https://github.com/densanon-devs/ultralite-coder.git
+cd ultralite-coder
 
 # Install llama-cpp-python with pre-built wheels (fast, no C++ compiler needed)
 pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
@@ -116,7 +116,7 @@ Double-click `start.bat`. It opens the app in a native desktop window. If the de
 ### Windows (manual / PowerShell)
 
 ```powershell
-cd ultralight-coder
+cd ultralite-coder
 python\python.exe server.py
 ```
 Then open `http://localhost:8000` in your browser.
@@ -124,7 +124,7 @@ Then open `http://localhost:8000` in your browser.
 ### Linux / macOS
 
 ```bash
-cd ultralight-coder
+cd ultralite-coder
 python launch.py
 ```
 
@@ -153,7 +153,7 @@ python launch.py --port 9000  # Use a different port
 The UI has four main areas:
 
 ### Header Bar
-- **Ultralight Code Assistant** -- app title
+- **Ultralite Code Assistant** -- app title
 - **Green dot** -- shows the model is loaded and ready (yellow = still loading)
 - **Model name** -- displays which model is active
 - **New Chat** -- clears the conversation and starts fresh
@@ -375,7 +375,7 @@ python main.py
 This gives you an interactive REPL:
 
 ```
-  Ultralight Code Assistant v0.1.0
+  Ultralite Code Assistant v0.1.0
   Model: qwen2.5-coder-0.5b-instruct-q4_k_m
   Type /help for commands, /quit to exit
 
@@ -551,6 +551,6 @@ python launch.py --browser
 
 ## Getting Help
 
-- GitHub Issues: https://github.com/densanon-devs/ultralight-coder/issues
+- GitHub Issues: https://github.com/densanon-devs/ultralite-coder/issues
 - API Docs: http://localhost:8000/docs (when server is running)
 - Commands: Type `/help` in terminal mode

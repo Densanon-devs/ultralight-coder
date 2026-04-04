@@ -1,8 +1,8 @@
 #!/bin/bash
-# Ultralight Code Assistant — One-Line Installer
+# Ultralite Code Assistant — One-Line Installer
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralight-coder/master/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralite-coder/master/install.sh | bash
 #
 # Or manually:
 #   bash install.sh
@@ -17,7 +17,7 @@ BOLD='\033[1m'
 RESET='\033[0m'
 
 echo ""
-echo -e "${BOLD}  Ultralight Code Assistant — Installer${RESET}"
+echo -e "${BOLD}  Ultralite Code Assistant — Installer${RESET}"
 echo -e "${DIM}  Local AI coding assistant, 12 languages, 469MB model${RESET}"
 echo ""
 
@@ -75,14 +75,14 @@ fi
 echo -e "  Python $PY_VERSION ${GREEN}OK${RESET}"
 
 # Clone
-INSTALL_DIR="ultralight-coder"
+INSTALL_DIR="ultralite-coder"
 if [ -d "$INSTALL_DIR" ]; then
     echo "  Directory $INSTALL_DIR already exists, pulling latest..."
     cd "$INSTALL_DIR"
     git pull --ff-only
 else
     echo "  Cloning repository..."
-    git clone https://github.com/densanon-devs/ultralight-coder.git
+    git clone https://github.com/densanon-devs/ultralite-coder.git
     cd "$INSTALL_DIR"
 fi
 

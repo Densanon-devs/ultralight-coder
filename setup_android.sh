@@ -43,7 +43,7 @@ if [ -d "$WORK_DIR" ]; then
     cd "$WORK_DIR"
     git pull
 else
-    git clone https://github.com/Densanon-devs/ultralight-coder.git "$WORK_DIR"
+    git clone https://github.com/Densanon-devs/ultralite-coder.git "$WORK_DIR"
     cd "$WORK_DIR"
 fi
 git checkout mobile-digest-engine

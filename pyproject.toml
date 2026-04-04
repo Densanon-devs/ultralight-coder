@@ -3,7 +3,7 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ultralight-coder"
+name = "ultralite-coder"
 version = "0.1.0"
 description = "Local AI coding assistant powered by tiny GGUF models with augmentor-driven accuracy"
 readme = "README.md"
@@ -37,12 +37,12 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/densanon-devs/ultralight-coder"
-Repository = "https://github.com/densanon-devs/ultralight-coder"
-Issues = "https://github.com/densanon-devs/ultralight-coder/issues"
+Homepage = "https://github.com/densanon-devs/ultralite-coder"
+Repository = "https://github.com/densanon-devs/ultralite-coder"
+Issues = "https://github.com/densanon-devs/ultralite-coder/issues"
 
 [project.scripts]
-ultralight-coder = "main:main"
+ultralite-coder = "main:main"
 
 [tool.setuptools.packages.find]
 include = ["engine*", "modules*"]

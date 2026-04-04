@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Ultralight Code Assistant — Desktop App
+Ultralite Code Assistant — Desktop App
 
 One click: starts the server in the background and opens a native window.
 No browser, no localhost URL, no confusion.
@@ -60,7 +60,7 @@ def wait_for_server(port, timeout=120):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Ultralight Code Assistant — Desktop")
+    parser = argparse.ArgumentParser(description="Ultralite Code Assistant — Desktop")
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
 
@@ -89,14 +89,14 @@ def main():
     server_thread = threading.Thread(target=start_server, args=(args.port,), daemon=True)
     server_thread.start()
 
-    print("Starting Ultralight Code Assistant...")
+    print("Starting Ultralite Code Assistant...")
     if not wait_for_server(args.port):
         print("Server failed to start within timeout.")
         sys.exit(1)
 
     # Open native window
     window = webview.create_window(
-        "Ultralight Code Assistant",
+        "Ultralite Code Assistant",
         f"http://127.0.0.1:{args.port}",
         width=1100,
         height=750,

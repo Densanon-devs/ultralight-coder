@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Ultralight Code Assistant — One-Click Launcher
+Ultralite Code Assistant — One-Click Launcher
 
 Run this file. It handles everything:
   1. Checks Python version
@@ -63,7 +63,7 @@ def bold(s):   return f"\033[1m{s}\033[0m" if USE_COLOR else s
 
 def banner():
     print()
-    print(bold("  Ultralight Code Assistant"))
+    print(bold("  Ultralite Code Assistant"))
     print(dim("  Local AI coding assistant powered by tiny models"))
     print()
 
@@ -277,7 +277,7 @@ def start_desktop(port):
             print(red("  Server failed to start."))
             return
         window = webview.create_window(
-            "Ultralight Code Assistant",
+            "Ultralite Code Assistant",
             f"http://127.0.0.1:{port}",
             width=1100, height=750, min_size=(800, 500),
         )
@@ -319,15 +319,15 @@ def start_cli():
     os.chdir(str(PROJECT_ROOT))
     sys.path.insert(0, str(PROJECT_ROOT))
 
-    from main import UltralightCodeAssistant
-    engine = UltralightCodeAssistant()
+    from main import UltraliteCodeAssistant
+    engine = UltraliteCodeAssistant()
     engine.initialize()
     engine.interactive()
 
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description="Ultralight Code Assistant Launcher")
+    parser = argparse.ArgumentParser(description="Ultralite Code Assistant Launcher")
     parser.add_argument("--cli", action="store_true", help="Start in terminal mode")
     parser.add_argument("--browser", action="store_true", help="Force browser mode (skip desktop window)")
     parser.add_argument("--port", type=int, default=8000, help="Web UI port (default: 8000)")

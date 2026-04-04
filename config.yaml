@@ -1,5 +1,5 @@
 system:
-  name: Ultralight Code Assistant
+  name: Ultralite Code Assistant
   version: 0.1.0
   log_level: INFO
 base_model:

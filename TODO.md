@@ -1,4 +1,4 @@
-# Ultralight Code Assistant — Roadmap
+# Ultralite Code Assistant — Roadmap
 
 ## Status: v0.1.0 Release
 
@@ -42,7 +42,7 @@ Let users point at a directory and have the system understand their codebase:
 4. Add auth/hashing keywords to failure routing
 
 ### 3.4 VS Code Extension
-Wrap the FastAPI server as a VS Code extension backend. Users select code, right-click, "Generate/Review/Explain with Ultralight."
+Wrap the FastAPI server as a VS Code extension backend. Users select code, right-click, "Generate/Review/Explain with Ultralite."
 
 ### 3.5 Benchmark Hardening
 - Add execution tests to real-world benchmark (actually run the generated code)

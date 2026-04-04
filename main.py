@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Ultralight Code Assistant — CLI Entry Point
+Ultralite Code Assistant — CLI Entry Point
 
 A local coding assistant powered by tiny code-specialized models.
 Branched from Plug-in Intelligence Engine.
@@ -40,7 +40,7 @@ from engine.project_context import ProjectIndex
 logger = logging.getLogger("UCA")
 
 
-class UltralightCodeAssistant:
+class UltraliteCodeAssistant:
     """
     Main orchestrator. Wires all components together
     and runs the inference loop for code assistance.
@@ -526,7 +526,7 @@ class UltralightCodeAssistant:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Ultralight Code Assistant"
+        description="Ultralite Code Assistant"
     )
     parser.add_argument("--config", default="config.yaml", help="Config file path")
     parser.add_argument("--dry-run", action="store_true", help="Test without model")
@@ -536,7 +536,7 @@ def main():
     parser.add_argument("--train", action="store_true", help="Train the classifier")
     args = parser.parse_args()
 
-    engine = UltralightCodeAssistant(
+    engine = UltraliteCodeAssistant(
         config_path=args.config,
         dry_run=args.dry_run,
         use_pipeline=not args.no_pipeline,
@@ -566,7 +566,7 @@ def main():
         console = None
         use_rich = False
 
-    print(f"\n  Ultralight Code Assistant v{engine.config.system.version}")
+    print(f"\n  Ultralite Code Assistant v{engine.config.system.version}")
     print(f"  Model: {Path(engine.config.base_model.path).name}")
     print(f"  Type /help for commands, /quit to exit\n")
 

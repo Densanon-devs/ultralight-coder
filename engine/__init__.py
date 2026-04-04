@@ -1,5 +1,5 @@
 """
-Ultralight Code Assistant
+Ultralite Code Assistant
 Branched from Plug-in Intelligence Engine
 """
 

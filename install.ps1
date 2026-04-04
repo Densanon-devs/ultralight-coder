@@ -1,7 +1,7 @@
-# Ultralight Code Assistant — Windows Installer
+# Ultralite Code Assistant — Windows Installer
 #
 # Usage (PowerShell):
-#   irm https://raw.githubusercontent.com/densanon-devs/ultralight-coder/master/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/densanon-devs/ultralite-coder/master/install.ps1 | iex
 #
 # Or manually:
 #   .\install.ps1
@@ -16,7 +16,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 Write-Host ""
-Write-Host "  Ultralight Code Assistant - Installer" -ForegroundColor White
+Write-Host "  Ultralite Code Assistant - Installer" -ForegroundColor White
 Write-Host "  Local AI coding assistant, 12 languages, 469MB model" -ForegroundColor DarkGray
 Write-Host ""
 
@@ -73,14 +73,14 @@ if ([int]$pyMajor -eq 3 -and [int]$pyMinor -ge 13) {
 Write-Host "  Python $pyVersion OK" -ForegroundColor Green
 
 # Clone
-$installDir = "ultralight-coder"
+$installDir = "ultralite-coder"
 if (Test-Path $installDir) {
     Write-Host "  Directory $installDir already exists, pulling latest..."
     Set-Location $installDir
     git pull --ff-only
 } else {
     Write-Host "  Cloning repository..."
-    git clone https://github.com/densanon-devs/ultralight-coder.git
+    git clone https://github.com/densanon-devs/ultralite-coder.git
     Set-Location $installDir
 }
 

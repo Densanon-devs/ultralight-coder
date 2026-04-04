@@ -1,7 +1,7 @@
 @echo off
-title Ultralight Code Assistant
+title Ultralite Code Assistant
 echo.
-echo   Ultralight Code Assistant
+echo   Ultralite Code Assistant
 echo   ========================
 echo.
 
@@ -74,7 +74,7 @@ echo.
 
 :: Launch
 echo.
-echo   Starting Ultralight Code Assistant...
+echo   Starting Ultralite Code Assistant...
 echo   Close this window to stop.
 echo.
 "%PYTHON%" "%ROOT%desktop.py"

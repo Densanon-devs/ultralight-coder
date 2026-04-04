@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Ultralight Code Assistant — Comprehensive Model Benchmark
+Ultralite Code Assistant — Comprehensive Model Benchmark
 
 Tests GGUF models on code-specific tasks across 4 categories:
   1. Code Generation (10 tests)
@@ -1427,7 +1427,7 @@ def save_text_summary(results: list[ModelResult], output_path: Path):
     """Save a human-readable summary to text file."""
     lines = []
     lines.append("=" * 80)
-    lines.append("ULTRALIGHT CODE ASSISTANT — BENCHMARK RESULTS")
+    lines.append("ULTRALITE CODE ASSISTANT — BENCHMARK RESULTS")
     lines.append(f"Date: {time.strftime('%Y-%m-%d %H:%M:%S')}")
     lines.append("=" * 80)
     lines.append("")
@@ -1608,7 +1608,7 @@ def main():
         print("Download a model first: python download_model.py")
         sys.exit(1)
 
-    print(f"\nUltralight Code Assistant — Benchmark")
+    print(f"\nUltralite Code Assistant — Benchmark")
     print(f"Models: {len(models)}")
     print(f"Tests:  {len(all_tests)} per model")
     print(f"Modes:  {'direct' if not args.no_direct else ''}"

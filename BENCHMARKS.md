@@ -1,4 +1,4 @@
-# Ultralight Code Assistant — Benchmark Results
+# Ultralite Code Assistant — Benchmark Results
 
 **Date:** 2026-03-29 (Phases 1-4), 2026-03-30 (Phase 5)
 **Models tested:** 20 total (12 structural, 8 execution)
