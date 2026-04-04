@@ -1,0 +1,704 @@
+domain: component
+category: component_builder
+examples:
+  # ── Standalone data model (no deps) ──
+  - query: |
+      Write a Python Task that represents a task to be processed.
+      Inputs: task_id (int), title (str), priority (int)
+      Returns: Task instance
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - TaskQueue.add_task(task: Task): manages the queue of tasks
+        - SQLiteBackend.store(task: Task): persists tasks to database
+        - WorkerThread(queue: TaskQueue): processes tasks from the queue
+    solution: |
+      ```python
+      from dataclasses import dataclass
+
+      @dataclass
+      class Task:
+          task_id: int
+          title: str
+          priority: int = 0
+          completed: bool = False
+
+          def mark_done(self):
+              self.completed = True
+
+          def __repr__(self):
+              status = "done" if self.completed else "pending"
+              return f"Task({self.task_id}, {self.title!r}, priority={self.priority}, {status})"
+      ```
+
+  # ── Class that depends on one sibling ──
+  - query: |
+      Write a Python WorkerThread that processes tasks from a queue.
+      Inputs: task_queue (TaskQueue)
+      Returns: None
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - TaskQueue.get_task() -> Task: retrieves next task from queue
+        - TaskQueue.task_done(): marks current task as complete
+        - Task(task_id: int, title: str, priority: int): a task to process
+        - SQLiteBackend.store(task: Task): persists tasks to database
+    solution: |
+      ```python
+      import threading
+
+      class WorkerThread(threading.Thread):
+          def __init__(self, task_queue: 'TaskQueue'):
+              super().__init__(daemon=True)
+              self.task_queue = task_queue
+              self.running = True
+
+          def run(self):
+              while self.running:
+                  task = self.task_queue.get_task()
+                  if task is None:
+                      break
+                  try:
+                      print(f"Processing: {task}")
+                      task.mark_done()
+                  finally:
+                      self.task_queue.task_done()
+
+          def stop(self):
+              self.running = False
+      ```
+
+  # ── Database backend class ──
+  - query: |
+      Write a Python SQLiteBackend that stores and retrieves tasks from SQLite.
+      Inputs: db_path (str)
+      Returns: SQLiteBackend instance
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - Task(task_id: int, title: str, priority: int): a task to process
+        - TaskQueue.add_task(task: Task): manages the queue
+    solution: |
+      ```python
+      import sqlite3
+
+      class SQLiteBackend:
+          def __init__(self, db_path: str = ':memory:'):
+              self.conn = sqlite3.connect(db_path, check_same_thread=False)
+              self.conn.execute(
+                  'CREATE TABLE IF NOT EXISTS tasks '
+                  '(task_id INTEGER PRIMARY KEY, title TEXT, priority INTEGER, completed INTEGER DEFAULT 0)'
+              )
+              self.conn.commit()
+
+          def store(self, task: 'Task'):
+              self.conn.execute(
+                  'INSERT OR REPLACE INTO tasks (task_id, title, priority, completed) VALUES (?, ?, ?, ?)',
+                  (task.task_id, task.title, task.priority, int(task.completed))
+              )
+              self.conn.commit()
+
+          def load_all(self) -> list:
+              rows = self.conn.execute('SELECT task_id, title, priority, completed FROM tasks').fetchall()
+              return rows
+
+          def delete(self, task_id: int):
+              self.conn.execute('DELETE FROM tasks WHERE task_id = ?', (task_id,))
+              self.conn.commit()
+
+          def close(self):
+              self.conn.close()
+      ```
+
+  # ── CLI component referencing multiple siblings ──
+  - query: |
+      Write a Python CLI that provides a command-line interface for managing tasks.
+      Inputs: task_queue (TaskQueue), backend (SQLiteBackend)
+      Returns: None
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - TaskQueue.add_task(task: Task): adds task to queue
+        - TaskQueue.get_all() -> list[Task]: lists all tasks
+        - Task(task_id: int, title: str, priority: int): a task
+        - SQLiteBackend.store(task: Task): persists to db
+        - SQLiteBackend.load_all() -> list: loads all tasks
+        - WorkerThread(queue: TaskQueue): processes tasks
+    solution: |
+      ```python
+      import argparse
+
+      class CLI:
+          def __init__(self, task_queue: 'TaskQueue', backend: 'SQLiteBackend'):
+              self.task_queue = task_queue
+              self.backend = backend
+
+          def run(self):
+              parser = argparse.ArgumentParser(description='Task Queue CLI')
+              sub = parser.add_subparsers(dest='command')
+
+              add_p = sub.add_parser('add', help='Add a task')
+              add_p.add_argument('title', help='Task title')
+              add_p.add_argument('--priority', type=int, default=0)
+
+              sub.add_parser('list', help='List all tasks')
+              sub.add_parser('process', help='Process next task')
+
+              args = parser.parse_args()
+              if args.command == 'add':
+                  task = Task(task_id=0, title=args.title, priority=args.priority)
+                  self.task_queue.add_task(task)
+                  self.backend.store(task)
+                  print(f"Added: {task}")
+              elif args.command == 'list':
+                  for row in self.backend.load_all():
+                      print(row)
+              elif args.command == 'process':
+                  print("Processing tasks...")
+              else:
+                  parser.print_help()
+      ```
+
+  # ── Queue manager (standalone with typed interface) ──
+  - query: |
+      Write a Python TaskQueue that manages a thread-safe queue of tasks.
+      Inputs: None
+      Returns: TaskQueue instance
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - Task(task_id: int, title: str, priority: int): a task to process
+        - WorkerThread(queue: TaskQueue): processes tasks from queue
+        - SQLiteBackend.store(task: Task): persists tasks
+    solution: |
+      ```python
+      import queue
+      import threading
+
+      class TaskQueue:
+          def __init__(self):
+              self._queue = queue.Queue()
+              self._lock = threading.Lock()
+              self._tasks = []
+
+          def add_task(self, task: 'Task'):
+              with self._lock:
+                  self._tasks.append(task)
+              self._queue.put(task)
+
+          def get_task(self) -> 'Task':
+              return self._queue.get()
+
+          def task_done(self):
+              self._queue.task_done()
+
+          def get_all(self) -> list:
+              with self._lock:
+                  return list(self._tasks)
+
+          def size(self) -> int:
+              return self._queue.qsize()
+      ```
+
+  # ── Password hasher (standalone, security domain) ──
+  - query: |
+      Write a Python PasswordHasher that hashes passwords securely.
+      Inputs: password (str)
+      Returns: hashed password (str)
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - UserRegistration.register(username: str, password: str) -> str: registers a user
+        - TokenGenerator.generate(user_id: str) -> str: generates JWT token
+        - TokenVerifier.verify(token: str) -> str: verifies JWT token
+    solution: |
+      ```python
+      import hashlib
+      import os
+
+      class PasswordHasher:
+          def __init__(self, iterations: int = 100000):
+              self.iterations = iterations
+
+          def hash(self, password: str) -> str:
+              salt = os.urandom(32)
+              key = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, self.iterations)
+              return salt.hex() + ':' + key.hex()
+
+          def verify(self, password: str, stored_hash: str) -> bool:
+              salt_hex, key_hex = stored_hash.split(':')
+              salt = bytes.fromhex(salt_hex)
+              key = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, self.iterations)
+              return key.hex() == key_hex
+      ```
+
+  # ── Token generator (depends on secret key) ──
+  - query: |
+      Write a Python TokenGenerator that generates JWT tokens for authenticated users.
+      Inputs: user_id (str)
+      Returns: token (str)
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - PasswordHasher.hash(password: str) -> str: hashes passwords
+        - PasswordHasher.verify(password: str, stored: str) -> bool: checks passwords
+        - UserRegistration.register(username: str, password: str) -> str: creates user
+        - TokenVerifier.verify(token: str) -> str: verifies tokens
+    solution: |
+      ```python
+      import hmac
+      import hashlib
+      import json
+      import time
+      import base64
+
+      class TokenGenerator:
+          def __init__(self, secret: str = 'change-me', expiry: int = 3600):
+              self.secret = secret
+              self.expiry = expiry
+
+          def generate(self, user_id: str) -> str:
+              payload = json.dumps({
+                  'user_id': user_id,
+                  'exp': int(time.time()) + self.expiry,
+              })
+              encoded = base64.urlsafe_b64encode(payload.encode()).decode()
+              sig = hmac.new(self.secret.encode(), encoded.encode(), hashlib.sha256).hexdigest()
+              return f"{encoded}.{sig}"
+      ```
+
+  # ── Token verifier (mirrors generator interface) ──
+  - query: |
+      Write a Python TokenVerifier that verifies JWT tokens.
+      Inputs: token (str)
+      Returns: user_id (str) or None
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - TokenGenerator.generate(user_id: str) -> str: creates tokens
+        - PasswordHasher.hash(password: str) -> str: hashes passwords
+        - UserRegistration.register(username: str, password: str): creates user
+        - UserProfileEndpoint.get_profile(token: str) -> dict: returns profile
+    solution: |
+      ```python
+      import hmac
+      import hashlib
+      import json
+      import time
+      import base64
+
+      class TokenVerifier:
+          def __init__(self, secret: str = 'change-me'):
+              self.secret = secret
+
+          def verify(self, token: str):
+              try:
+                  encoded, sig = token.rsplit('.', 1)
+                  expected = hmac.new(self.secret.encode(), encoded.encode(), hashlib.sha256).hexdigest()
+                  if not hmac.compare_digest(sig, expected):
+                      return None
+                  payload = json.loads(base64.urlsafe_b64decode(encoded))
+                  if payload.get('exp', 0) < time.time():
+                      return None
+                  return payload.get('user_id')
+              except Exception:
+                  return None
+      ```
+
+  # ── User registration (depends on hasher + backend) ──
+  - query: |
+      Write a Python UserRegistration that handles user registration.
+      Inputs: username (str), password (str)
+      Returns: user_id (str)
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - PasswordHasher.hash(password: str) -> str: hashes a password
+        - TokenGenerator.generate(user_id: str) -> str: creates JWT token
+        - TokenVerifier.verify(token: str) -> str: verifies JWT token
+        - UserProfileEndpoint.get_profile(token: str) -> dict: returns profile
+    solution: |
+      ```python
+      import uuid
+
+      class UserRegistration:
+          def __init__(self, hasher: 'PasswordHasher', db: dict = None):
+              self.hasher = hasher
+              self.db = db if db is not None else {}
+
+          def register(self, username: str, password: str) -> str:
+              if username in self.db:
+                  raise ValueError(f"User '{username}' already exists")
+              user_id = str(uuid.uuid4())
+              self.db[username] = {
+                  'user_id': user_id,
+                  'username': username,
+                  'password_hash': self.hasher.hash(password),
+              }
+              return user_id
+
+          def get_user(self, username: str) -> dict:
+              return self.db.get(username)
+      ```
+
+  # ── Protected endpoint (depends on verifier) ──
+  - query: |
+      Write a Python UserProfileEndpoint that returns user profile data for authenticated users.
+      Inputs: token (str)
+      Returns: dict or None
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - TokenVerifier.verify(token: str) -> str: verifies token, returns user_id
+        - UserRegistration.get_user(username: str) -> dict: retrieves user data
+        - PasswordHasher.hash(password: str) -> str: hashes passwords
+        - TokenGenerator.generate(user_id: str) -> str: creates tokens
+    solution: |
+      ```python
+      class UserProfileEndpoint:
+          def __init__(self, verifier: 'TokenVerifier', user_db: dict):
+              self.verifier = verifier
+              self.user_db = user_db
+
+          def get_profile(self, token: str):
+              user_id = self.verifier.verify(token)
+              if user_id is None:
+                  return None
+              for user in self.user_db.values():
+                  if user.get('user_id') == user_id:
+                      return {
+                          'user_id': user['user_id'],
+                          'username': user['username'],
+                      }
+              return None
+      ```
+
+  # ── Config/settings class (standalone utility) ──
+  - query: |
+      Write a Python AppConfig that loads configuration from a YAML file.
+      Inputs: config_path (str)
+      Returns: AppConfig instance
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - Server.start(host: str, port: int): starts the HTTP server
+        - Database(connection_string: str): manages DB connections
+        - Logger.setup(level: str): configures logging
+    solution: |
+      ```python
+      from pathlib import Path
+
+      class AppConfig:
+          def __init__(self, config_path: str = 'config.yaml'):
+              self.config_path = Path(config_path)
+              self._data = {}
+              if self.config_path.exists():
+                  self._load()
+
+          def _load(self):
+              import yaml
+              with open(self.config_path) as f:
+                  self._data = yaml.safe_load(f) or {}
+
+          def get(self, key: str, default=None):
+              return self._data.get(key, default)
+
+          @property
+          def host(self) -> str:
+              return self.get('host', 'localhost')
+
+          @property
+          def port(self) -> int:
+              return self.get('port', 8080)
+
+          @property
+          def db_url(self) -> str:
+              return self.get('database_url', 'sqlite:///app.db')
+      ```
+
+  # ── HTTP route handler (depends on auth + data) ──
+  - query: |
+      Write a Python Router that handles HTTP route registration and dispatch.
+      Inputs: None
+      Returns: Router instance
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - TokenVerifier.verify(token: str) -> str: verifies auth token
+        - UserProfileEndpoint.get_profile(token: str) -> dict: gets user data
+        - AppConfig.get(key: str) -> Any: reads config values
+    solution: |
+      ```python
+      class Router:
+          def __init__(self):
+              self._routes = {}
+
+          def route(self, method: str, path: str):
+              def decorator(func):
+                  self._routes[(method.upper(), path)] = func
+                  return func
+              return decorator
+
+          def dispatch(self, method: str, path: str, **kwargs):
+              handler = self._routes.get((method.upper(), path))
+              if handler is None:
+                  return {'status': 404, 'body': 'Not Found'}
+              try:
+                  result = handler(**kwargs)
+                  return {'status': 200, 'body': result}
+              except Exception as e:
+                  return {'status': 500, 'body': str(e)}
+      ```
+
+  # ── Loader that ONLY discovers and loads (no register/manage) ──
+  - query: |
+      Write a Python PluginLoader that discovers and loads plugins from a directory.
+      Inputs: directory (str)
+      Returns: PluginLoader instance
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - PluginRegistry.register(name: str, plugin: object): stores a plugin
+        - PluginRegistry.unregister(name: str): removes a plugin
+        - HookSystem.fire_pre(event: str, data: dict): fires pre-event hooks
+        - PluginManager.enable(name: str): enables a plugin
+        - PluginManager.disable(name: str): disables a plugin
+    solution: |
+      ```python
+      import importlib.util
+      from pathlib import Path
+
+      class PluginLoader:
+          def __init__(self, directory: str):
+              self.directory = Path(directory)
+
+          def discover(self) -> list[str]:
+              if not self.directory.exists():
+                  return []
+              return [f.stem for f in self.directory.glob('*.py') if f.stem != '__init__']
+
+          def load(self, name: str) -> object:
+              path = self.directory / f"{name}.py"
+              spec = importlib.util.spec_from_file_location(name, path)
+              module = importlib.util.module_from_spec(spec)
+              spec.loader.exec_module(module)
+              return module
+      ```
+
+  # ── Registry that ONLY stores and retrieves (no enable/disable/reload) ──
+  - query: |
+      Write a Python PluginRegistry that stores and retrieves registered plugins.
+      Inputs: None
+      Returns: PluginRegistry instance
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - PluginLoader.discover() -> list[str]: finds plugin files
+        - PluginLoader.load(name: str) -> object: loads a plugin module
+        - HookSystem.fire_pre(event: str, data: dict): fires pre-event hooks
+        - PluginManager.enable(name: str): enables a plugin
+        - PluginManager.reload(name: str): reloads a plugin
+    solution: |
+      ```python
+      class PluginRegistry:
+          def __init__(self):
+              self._plugins = {}
+
+          def register(self, name: str, plugin: object):
+              self._plugins[name] = plugin
+
+          def unregister(self, name: str):
+              self._plugins.pop(name, None)
+
+          def get(self, name: str) -> object:
+              return self._plugins.get(name)
+
+          def list_all(self) -> list[str]:
+              return list(self._plugins.keys())
+
+          def has(self, name: str) -> bool:
+              return name in self._plugins
+      ```
+
+  # ── Manager/orchestrator that delegates (NOT reimplements) ──
+  - query: |
+      Write a Python PluginManager that manages plugins with enable, disable, and reload.
+      Inputs: loader (PluginLoader), registry (PluginRegistry), hooks (HookSystem)
+      Returns: PluginManager instance
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - PluginLoader.discover(directory: str) -> list[str]: finds plugin files
+        - PluginLoader.load(name: str) -> object: loads a plugin module
+        - PluginRegistry.register(name: str, plugin: object): stores a plugin
+        - PluginRegistry.unregister(name: str): removes a plugin
+        - PluginRegistry.get(name: str) -> object: retrieves a plugin
+        - HookSystem.fire_pre(event: str, data: dict): fires pre-event hooks
+        - HookSystem.fire_post(event: str, data: dict): fires post-event hooks
+    solution: |
+      ```python
+      class PluginManager:
+          def __init__(self, loader: 'PluginLoader', registry: 'PluginRegistry', hooks: 'HookSystem'):
+              self.loader = loader
+              self.registry = registry
+              self.hooks = hooks
+
+          def enable(self, name: str):
+              plugin = self.loader.load(name)
+              self.registry.register(name, plugin)
+              self.hooks.fire_post('plugin_enabled', {'name': name})
+
+          def disable(self, name: str):
+              self.hooks.fire_pre('plugin_disabled', {'name': name})
+              self.registry.unregister(name)
+
+          def reload(self, name: str):
+              self.disable(name)
+              self.enable(name)
+
+          def load_all(self, directory: str):
+              for name in self.loader.discover(directory):
+                  self.enable(name)
+      ```
+
+  # ── CSV/JSON exporter (reads from another component) ──
+  - query: |
+      Write a Python CSVExporter that exports data to a CSV file.
+      Inputs: data (list[dict]), output_path (str)
+      Returns: None
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - Database.query(sql: str) -> list[dict]: runs a SQL query
+        - HTMLParser.parse(html: str) -> dict: parses HTML into structured data
+        - RateLimiter.wait(): blocks until rate limit allows next request
+    solution: |
+      ```python
+      import csv
+
+      class CSVExporter:
+          def __init__(self, output_path: str = 'output.csv'):
+              self.output_path = output_path
+
+          def export(self, data: list[dict]):
+              if not data:
+                  return
+              fieldnames = list(data[0].keys())
+              with open(self.output_path, 'w', newline='') as f:
+                  writer = csv.DictWriter(f, fieldnames=fieldnames)
+                  writer.writeheader()
+                  writer.writerows(data)
+
+          def export_from_db(self, db: 'Database', query: str):
+              rows = db.query(query)
+              self.export(rows)
+      ```
+
+  # ── Event/hook system (standalone, callback-based) ──
+  - query: |
+      Write a Python HookSystem that supports pre/post event hooks with callbacks.
+      Inputs: None
+      Returns: HookSystem instance
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - PluginLoader.discover(directory: str) -> list[str]: finds plugins
+        - PluginRegistry.register(name: str, plugin: object): registers a plugin
+        - PluginManager.enable(name: str): enables a plugin
+        - PluginManager.disable(name: str): disables a plugin
+    solution: |
+      ```python
+      from collections import defaultdict
+
+      class HookSystem:
+          def __init__(self):
+              self._pre_hooks = defaultdict(list)
+              self._post_hooks = defaultdict(list)
+
+          def on_pre(self, event: str, callback):
+              self._pre_hooks[event].append(callback)
+
+          def on_post(self, event: str, callback):
+              self._post_hooks[event].append(callback)
+
+          def fire_pre(self, event: str, data: dict = None):
+              for cb in self._pre_hooks.get(event, []):
+                  cb(data or {})
+
+          def fire_post(self, event: str, data: dict = None):
+              for cb in self._post_hooks.get(event, []):
+                  cb(data or {})
+      ```
+
+  # ── Data validator (processes stream, doesn't redefine reader/writer) ──
+  - query: |
+      Write a Python DataValidator that validates rows against constraint rules.
+      Inputs: rules (dict)
+      Returns: DataValidator instance
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - CSVReader.read_rows() -> Iterator[dict]: streams CSV rows
+        - ColumnTransformer.transform(row: dict) -> dict: applies type conversions
+        - JSONWriter.write(row: dict): writes a row to JSONL output
+    solution: |
+      ```python
+      class DataValidator:
+          def __init__(self, rules: dict = None):
+              self.rules = rules or {}
+              self.errors = []
+
+          def validate(self, row: dict) -> bool:
+              self.errors.clear()
+              for field, constraints in self.rules.items():
+                  value = row.get(field)
+                  if constraints.get('required') and value is None:
+                      self.errors.append(f"Missing required field: {field}")
+                  if 'type' in constraints and value is not None:
+                      if not isinstance(value, constraints['type']):
+                          self.errors.append(f"{field}: expected {constraints['type'].__name__}")
+                  if 'max_length' in constraints and isinstance(value, str):
+                      if len(value) > constraints['max_length']:
+                          self.errors.append(f"{field}: exceeds max length {constraints['max_length']}")
+              return len(self.errors) == 0
+
+          def validate_stream(self, rows) -> list[dict]:
+              valid = []
+              for row in rows:
+                  if self.validate(row):
+                      valid.append(row)
+              return valid
+      ```
+
+  # ── File watcher (uses filesystem events, standalone) ──
+  - query: |
+      Write a Python FileWatcher that watches a directory for file changes.
+      Inputs: directory (str), callback (callable)
+      Returns: FileWatcher instance
+
+      Other components in this project (use these interfaces, do NOT redefine them):
+        - ChecksumCalculator.compute(path: str) -> str: computes file hash
+        - SyncManifest.update(path: str, checksum: str): updates manifest
+        - FileCopier.copy(src: str, dst: str): copies a file
+    solution: |
+      ```python
+      import os
+      import time
+      import threading
+
+      class FileWatcher:
+          def __init__(self, directory: str, callback=None):
+              self.directory = directory
+              self.callback = callback
+              self._running = False
+              self._snapshots = {}
+
+          def start(self):
+              self._running = True
+              self._snapshots = self._scan()
+              self._thread = threading.Thread(target=self._poll, daemon=True)
+              self._thread.start()
+
+          def stop(self):
+              self._running = False
+
+          def _poll(self):
+              while self._running:
+                  time.sleep(1)
+                  current = self._scan()
+                  for path, mtime in current.items():
+                      if path not in self._snapshots or self._snapshots[path] != mtime:
+                          if self.callback:
+                              self.callback(path)
+                  self._snapshots = current
+
+          def _scan(self) -> dict:
+              snap = {}
+              for root, dirs, files in os.walk(self.directory):
+                  for f in files:
+                      path = os.path.join(root, f)
+                      snap[path] = os.path.getmtime(path)
+              return snap
+      ```

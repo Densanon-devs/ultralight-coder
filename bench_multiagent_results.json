@@ -1,0 +1,1007 @@
+[
+  {
+    "prompt_name": "Task Queue",
+    "run": 1,
+    "total_time": 99.7,
+    "plan_time": 25.0,
+    "build_time": 31.0,
+    "assemble_time": 43.6,
+    "num_subtasks": 5,
+    "num_sections": 5,
+    "output_lines": 151,
+    "output_chars": 3751,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "TaskQueue",
+      "Task",
+      "WorkerThread",
+      "SQLiteBackend",
+      "TaskQueue",
+      "Task",
+      "WorkerThread",
+      "SQLiteBackend"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Task Queue",
+    "run": 2,
+    "total_time": 99.8,
+    "plan_time": 22.7,
+    "build_time": 29.2,
+    "assemble_time": 43.2,
+    "num_subtasks": 4,
+    "num_sections": 4,
+    "output_lines": 137,
+    "output_chars": 3504,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "TaskQueue",
+      "Task",
+      "Worker",
+      "TaskQueue",
+      "Task",
+      "Worker"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Task Queue",
+    "run": 3,
+    "total_time": 127.2,
+    "plan_time": 28.6,
+    "build_time": 49.7,
+    "assemble_time": 45.1,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 180,
+    "output_chars": 5013,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "TaskQueue",
+      "Task",
+      "TaskQueueBackend",
+      "WorkerThread",
+      "SQLiteBackend",
+      "TaskQueue",
+      "Task",
+      "TaskQueueBackend",
+      "WorkerThread",
+      "SQLiteBackend"
+    ],
+    "functions_found": [
+      "task_done"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Task Queue",
+    "run": 4,
+    "total_time": 112.0,
+    "plan_time": 25.6,
+    "build_time": 54.2,
+    "assemble_time": 32.2,
+    "num_subtasks": 5,
+    "num_sections": 4,
+    "output_lines": 121,
+    "output_chars": 3026,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "Task",
+      "WorkerThread",
+      "SQLiteBackend",
+      "Task",
+      "WorkerThread",
+      "SQLiteBackend"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Task Queue",
+    "run": 5,
+    "total_time": 85.8,
+    "plan_time": 26.7,
+    "build_time": 17.5,
+    "assemble_time": 41.5,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 204,
+    "output_chars": 5596,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "TaskQueue",
+      "SQLiteBackend",
+      "WorkerThread",
+      "CLIInterface",
+      "Task",
+      "TaskQueue",
+      "SQLiteBackend",
+      "WorkerThread",
+      "CLIInterface"
+    ],
+    "functions_found": [],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "REST API Auth",
+    "run": 1,
+    "total_time": 67.7,
+    "plan_time": 27.8,
+    "build_time": 22.6,
+    "assemble_time": 17.3,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 127,
+    "output_chars": 4558,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "UserRegistrationService",
+      "PasswordHasher",
+      "TokenGenerator",
+      "AuthenticationMiddleware",
+      "UserProfileController"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "REST API Auth",
+    "run": 2,
+    "total_time": 60.5,
+    "plan_time": 29.7,
+    "build_time": 14.9,
+    "assemble_time": 15.8,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 117,
+    "output_chars": 3996,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "UserRegistrationService",
+      "PasswordHasher",
+      "TokenGenerator",
+      "AuthenticationService",
+      "ProtectedEndpoint"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "REST API Auth",
+    "run": 3,
+    "total_time": 63.3,
+    "plan_time": 30.9,
+    "build_time": 11.2,
+    "assemble_time": 21.3,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 120,
+    "output_chars": 3679,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "UserRegistration",
+      "PasswordHashing",
+      "TokenGenerator",
+      "TokenValidator",
+      "ProtectedEndpoint"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "REST API Auth",
+    "run": 4,
+    "total_time": 57.1,
+    "plan_time": 30.7,
+    "build_time": 11.3,
+    "assemble_time": 15.1,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 104,
+    "output_chars": 3117,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "UserRegistration",
+      "PasswordHashing",
+      "TokenGenerator",
+      "TokenVerifier",
+      "ProtectedEndpoint"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "REST API Auth",
+    "run": 5,
+    "total_time": 57.8,
+    "plan_time": 29.6,
+    "build_time": 14.3,
+    "assemble_time": 13.9,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 120,
+    "output_chars": 4221,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "UserRegistrationService",
+      "PasswordHasher",
+      "TokenGenerator",
+      "AuthenticationService",
+      "UserProfileController"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Web Scraper",
+    "run": 1,
+    "total_time": 50.3,
+    "plan_time": 22.6,
+    "build_time": 15.5,
+    "assemble_time": 12.2,
+    "num_subtasks": 4,
+    "num_sections": 5,
+    "output_lines": 84,
+    "output_chars": 2418,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "fetch_pages",
+      "parse_html",
+      "StoreResults",
+      "export_to_csv"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Web Scraper",
+    "run": 2,
+    "total_time": 51.3,
+    "plan_time": 22.0,
+    "build_time": 16.6,
+    "assemble_time": 12.7,
+    "num_subtasks": 4,
+    "num_sections": 5,
+    "output_lines": 87,
+    "output_chars": 2252,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "fetch_pages",
+      "parse_html",
+      "StoreResults",
+      "export_to_csv"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Web Scraper",
+    "run": 3,
+    "total_time": 48.0,
+    "plan_time": 23.0,
+    "build_time": 13.8,
+    "assemble_time": 11.1,
+    "num_subtasks": 4,
+    "num_sections": 5,
+    "output_lines": 84,
+    "output_chars": 2002,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "fetch_pages",
+      "parse_html",
+      "store_in_db",
+      "export_to_csv"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Web Scraper",
+    "run": 4,
+    "total_time": 61.9,
+    "plan_time": 28.0,
+    "build_time": 16.8,
+    "assemble_time": 17.1,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 135,
+    "output_chars": 3840,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "WebScraper",
+      "RateLimiter",
+      "BeautifulSoup",
+      "SQLiteDB",
+      "CSVExporter"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Web Scraper",
+    "run": 5,
+    "total_time": 54.7,
+    "plan_time": 26.0,
+    "build_time": 13.5,
+    "assemble_time": 15.3,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 121,
+    "output_chars": 3513,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "RateLimitingMiddleware",
+      "WebScraper",
+      "HTMLParser",
+      "DatabaseManager",
+      "CSVExporter"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Chat Server",
+    "run": 1,
+    "total_time": 86.6,
+    "plan_time": 38.7,
+    "build_time": 31.3,
+    "assemble_time": 16.6,
+    "num_subtasks": 7,
+    "num_sections": 8,
+    "output_lines": 220,
+    "output_chars": 6746,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "ChatServer",
+      "RoomManager",
+      "UserManager",
+      "Room",
+      "User",
+      "CommandHandler",
+      "Message"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Chat Server",
+    "run": 2,
+    "total_time": 57.8,
+    "plan_time": 24.8,
+    "build_time": 9.5,
+    "assemble_time": 23.6,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 114,
+    "output_chars": 2408,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "ChatServer",
+      "Room",
+      "User",
+      "Message",
+      "CommandHandler",
+      "ChatServer",
+      "Room",
+      "User",
+      "Message",
+      "CommandHandler"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Chat Server",
+    "run": 3,
+    "total_time": 99.3,
+    "plan_time": 30.3,
+    "build_time": 27.3,
+    "assemble_time": 41.6,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 174,
+    "output_chars": 6044,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "ChatServer",
+      "Room",
+      "User",
+      "CommandHandler",
+      "ConnectionHandler",
+      "ChatServer",
+      "Room",
+      "User",
+      "CommandHandler"
+    ],
+    "functions_found": [],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Chat Server",
+    "run": 4,
+    "total_time": 68.9,
+    "plan_time": 26.0,
+    "build_time": 12.6,
+    "assemble_time": 30.3,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 126,
+    "output_chars": 3091,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "ChatServer",
+      "Room",
+      "User",
+      "Message",
+      "CommandHandler",
+      "ChatServer",
+      "Room",
+      "User",
+      "Message",
+      "CommandHandler"
+    ],
+    "functions_found": [],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Chat Server",
+    "run": 5,
+    "total_time": 145.3,
+    "plan_time": 49.5,
+    "build_time": 45.1,
+    "assemble_time": 41.4,
+    "num_subtasks": 10,
+    "num_sections": 9,
+    "output_lines": 130,
+    "output_chars": 3402,
+    "syntax_ok": false,
+    "syntax_error": "'(' was never closed (line 130)",
+    "imports_ok": false,
+    "import_errors": [],
+    "classes_found": [
+      "ChatServer",
+      "Room",
+      "User",
+      "handle_join",
+      "handle_leave",
+      "handle_list",
+      "handle_nick",
+      "handle_command",
+      "ChatServer",
+      "Room",
+      "User",
+      "handle_join",
+      "handle_leave",
+      "handle_list",
+      "handle_nick",
+      "handle_command"
+    ],
+    "functions_found": [],
+    "exec_ok": false,
+    "exec_error": "syntax error"
+  },
+  {
+    "prompt_name": "File Sync",
+    "run": 1,
+    "total_time": 63.5,
+    "plan_time": 28.9,
+    "build_time": 27.2,
+    "assemble_time": 7.4,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 214,
+    "output_chars": 6623,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "FileWatcher",
+      "ChecksumCalculator",
+      "SyncManifest",
+      "FileCopier",
+      "SyncTool"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "File Sync",
+    "run": 2,
+    "total_time": 60.7,
+    "plan_time": 28.9,
+    "build_time": 17.3,
+    "assemble_time": 14.4,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 142,
+    "output_chars": 4006,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "FileWatcher",
+      "ChecksumCalculator",
+      "SyncManifest",
+      "FileCopier",
+      "SyncProcess"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "File Sync",
+    "run": 3,
+    "total_time": 66.8,
+    "plan_time": 28.5,
+    "build_time": 22.5,
+    "assemble_time": 15.8,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 202,
+    "output_chars": 6120,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "FileWatcher",
+      "ChecksumCalculator",
+      "SyncManifest",
+      "FileCopier",
+      "SyncProcess"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "File Sync",
+    "run": 4,
+    "total_time": 71.9,
+    "plan_time": 28.3,
+    "build_time": 23.0,
+    "assemble_time": 20.6,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 208,
+    "output_chars": 6500,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "FileWatcher",
+      "ChecksumCalculator",
+      "SyncManifestManager",
+      "FileCopier",
+      "SyncTool"
+    ],
+    "functions_found": [
+      "main",
+      "on_file_change"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "File Sync",
+    "run": 5,
+    "total_time": 72.3,
+    "plan_time": 28.2,
+    "build_time": 34.7,
+    "assemble_time": 9.5,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 193,
+    "output_chars": 5635,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "FileWatcher",
+      "ChecksumCalculator",
+      "SyncManifest",
+      "FileCopier",
+      "SyncTool"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": false,
+    "exec_error": "NameError: name 'EventEmitter' is not defined"
+  },
+  {
+    "prompt_name": "Plugin System",
+    "run": 1,
+    "total_time": 65.2,
+    "plan_time": 20.6,
+    "build_time": 15.5,
+    "assemble_time": 14.9,
+    "num_subtasks": 4,
+    "num_sections": 5,
+    "output_lines": 138,
+    "output_chars": 3691,
+    "syntax_ok": false,
+    "syntax_error": "unindent does not match any outer indentation level (line 50)",
+    "imports_ok": false,
+    "import_errors": [],
+    "classes_found": [
+      "PluginLoader",
+      "PluginRegistry",
+      "HookSystem",
+      "PluginManager"
+    ],
+    "functions_found": [
+      "register",
+      "main"
+    ],
+    "exec_ok": false,
+    "exec_error": "syntax error"
+  },
+  {
+    "prompt_name": "Plugin System",
+    "run": 2,
+    "total_time": 120.1,
+    "plan_time": 27.4,
+    "build_time": 51.2,
+    "assemble_time": 41.6,
+    "num_subtasks": 5,
+    "num_sections": 4,
+    "output_lines": 193,
+    "output_chars": 4831,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "HookSystem",
+      "PluginManager",
+      "Plugin",
+      "PluginSystem",
+      "PluginManager",
+      "Plugin"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Plugin System",
+    "run": 3,
+    "total_time": 68.0,
+    "plan_time": 24.2,
+    "build_time": 17.7,
+    "assemble_time": 26.0,
+    "num_subtasks": 4,
+    "num_sections": 5,
+    "output_lines": 159,
+    "output_chars": 4551,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "PluginLoader",
+      "PluginRegistry",
+      "HookSystem",
+      "PluginManager"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Plugin System",
+    "run": 4,
+    "total_time": 80.1,
+    "plan_time": 27.6,
+    "build_time": 34.2,
+    "assemble_time": 18.3,
+    "num_subtasks": 5,
+    "num_sections": 6,
+    "output_lines": 117,
+    "output_chars": 2908,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "PluginLoader",
+      "PluginRegistry",
+      "HookSystem",
+      "PluginManager",
+      "Plugin"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Plugin System",
+    "run": 5,
+    "total_time": 55.1,
+    "plan_time": 21.7,
+    "build_time": 14.7,
+    "assemble_time": 18.7,
+    "num_subtasks": 4,
+    "num_sections": 5,
+    "output_lines": 148,
+    "output_chars": 3953,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "PluginLoader",
+      "PluginRegistry",
+      "HookSystem",
+      "PluginManager"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Data Pipeline",
+    "run": 1,
+    "total_time": 51.3,
+    "plan_time": 25.1,
+    "build_time": 11.4,
+    "assemble_time": 14.8,
+    "num_subtasks": 4,
+    "num_sections": 5,
+    "output_lines": 93,
+    "output_chars": 2822,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "CSVReader",
+      "ColumnTransformer",
+      "Validator",
+      "JSONWriter"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Data Pipeline",
+    "run": 2,
+    "total_time": 51.1,
+    "plan_time": 25.8,
+    "build_time": 14.7,
+    "assemble_time": 10.6,
+    "num_subtasks": 4,
+    "num_sections": 5,
+    "output_lines": 75,
+    "output_chars": 2619,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "CSVReader",
+      "ColumnTransformer",
+      "Validator",
+      "JSONWriter"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Data Pipeline",
+    "run": 3,
+    "total_time": 43.2,
+    "plan_time": 23.5,
+    "build_time": 9.2,
+    "assemble_time": 10.6,
+    "num_subtasks": 4,
+    "num_sections": 5,
+    "output_lines": 69,
+    "output_chars": 1740,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "CSVReader",
+      "ColumnTransformer",
+      "Validator",
+      "JSONWriter"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Data Pipeline",
+    "run": 4,
+    "total_time": 40.8,
+    "plan_time": 22.3,
+    "build_time": 7.4,
+    "assemble_time": 11.1,
+    "num_subtasks": 4,
+    "num_sections": 5,
+    "output_lines": 78,
+    "output_chars": 2118,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "CSVReader",
+      "ColumnTransformer",
+      "Validator",
+      "JSONWriter"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  },
+  {
+    "prompt_name": "Data Pipeline",
+    "run": 5,
+    "total_time": 40.5,
+    "plan_time": 23.0,
+    "build_time": 8.6,
+    "assemble_time": 8.9,
+    "num_subtasks": 4,
+    "num_sections": 5,
+    "output_lines": 68,
+    "output_chars": 1980,
+    "syntax_ok": true,
+    "syntax_error": "",
+    "imports_ok": true,
+    "import_errors": [],
+    "classes_found": [
+      "CSVReader",
+      "ColumnTransformer",
+      "Validator",
+      "JSONWriter"
+    ],
+    "functions_found": [
+      "main"
+    ],
+    "exec_ok": true,
+    "exec_error": ""
+  }
+]

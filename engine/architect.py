@@ -105,6 +105,16 @@ RULES:
 - If pieces reference each other, ensure the order is correct (dependencies first)
 - Fix any obvious interface mismatches (wrong parameter names, missing returns)"""
 
+GLUE_SYSTEM = """You are a code integrator. Given component classes with their exact methods, write ONLY a short main() that wires them together.
+
+RULES:
+- Output ONLY the main() code in a ```python block
+- Do NOT redefine any classes or functions
+- Do NOT include imports
+- Use ONLY the exact constructor signatures and method names shown
+- Pass all required constructor parameters when instantiating
+- Keep it under 30 lines"""
+
 
 class Architect:
     """Decomposes complex tasks using the large model."""
@@ -210,27 +220,29 @@ class Worker:
     """Builds individual subtasks using the small model + augmentors."""
 
     def __init__(self, model, augmentor_router, chat_format: str = "chatml",
-                 max_tokens: int = 512, temperature: float = 0.2):
+                 max_tokens: int = 768, temperature: float = 0.2):
         self.model = model
         self.augmentor_router = augmentor_router
         self.chat_format = chat_format
         self.max_tokens = max_tokens
         self.temperature = temperature
 
-    def build(self, subtask: Subtask) -> SubtaskResult:
+    def build(self, subtask: Subtask, siblings: list[Subtask] | None = None) -> SubtaskResult:
         """Generate code for a single subtask using the augmentor system."""
-        # Build a clear, specific prompt from the subtask spec
-        prompt = self._subtask_to_prompt(subtask)
+        # Build a clear, specific prompt from the subtask spec + sibling interfaces
+        prompt = self._subtask_to_prompt(subtask, siblings)
 
         start = time.monotonic()
         try:
             if self.augmentor_router:
                 # Use the full PIE augmentor pipeline
+                # Route to component augmentor when building with sibling context
                 from engine.augmentors import AugmentorResult
+                hint = "component" if siblings else "code_gen"
                 shim = _ModelShim(self.model, self.max_tokens, self.temperature)
                 result = self.augmentor_router.process(
                     query=prompt, model=shim, chat_format=self.chat_format,
-                    module_hint="code_gen",
+                    module_hint=hint,
                     gen_kwargs={"max_tokens": self.max_tokens, "temperature": self.temperature},
                 )
                 if result:
@@ -255,8 +267,8 @@ class Worker:
                 elapsed=elapsed, success=False, error=str(e),
             )
 
-    def _subtask_to_prompt(self, subtask: Subtask) -> str:
-        """Convert a subtask spec into a natural coding prompt."""
+    def _subtask_to_prompt(self, subtask: Subtask, siblings: list[Subtask] | None = None) -> str:
+        """Convert a subtask spec into a natural coding prompt with interface context."""
         parts = [f"Write a Python {subtask.name}"]
         if subtask.description:
             parts.append(f"that {subtask.description}")
@@ -264,12 +276,43 @@ class Worker:
             parts.append(f"Inputs: {subtask.inputs}")
         if subtask.outputs:
             parts.append(f"Returns: {subtask.outputs}")
-        return ". ".join(parts)
+
+        prompt = ". ".join(parts)
+
+        # Inject sibling interface specs so this piece can reference others
+        if siblings:
+            others = [s for s in siblings if s.id != subtask.id]
+            if others:
+                iface_lines = []
+                for s in others:
+                    sig = s.name
+                    if s.inputs:
+                        sig += f"({s.inputs})"
+                    if s.outputs:
+                        sig += f" -> {s.outputs}"
+                    iface_lines.append(f"  - {sig}: {s.description}")
+                prompt += (
+                    "\n\nOther components in this project (use these interfaces, "
+                    "do NOT redefine them):\n" + "\n".join(iface_lines)
+                )
+
+        return prompt
 
     def _generate_direct(self, prompt: str) -> str:
         """Generate without augmentors (fallback)."""
-        system = ("You are a Python coding assistant. Write clean, correct, complete Python code "
-                  "in ```python blocks. Include all imports.")
+        if "Other components in this project" in prompt:
+            system = (
+                "You are a Python component builder. Write ONLY the ONE class or function requested. "
+                "Do NOT define other components. Do NOT add methods that belong to other components. "
+                "Each component has its own job — only implement methods for YOUR component. "
+                "Accept dependencies as constructor parameters. "
+                "Use forward references (quotes) for type hints to sibling classes. "
+                "Include only the imports YOUR component needs. "
+                "Output in a ```python block."
+            )
+        else:
+            system = ("You are a Python coding assistant. Write clean, correct, complete Python code "
+                      "in ```python blocks. Include all imports.")
         full = self._build_prompt(system, prompt)
         stop = ["</s>", "<|im_end|>", "<|end|>", "<|eot_id|>"]
         output = self.model(
@@ -294,35 +337,378 @@ class Worker:
 
 
 class Assembler:
-    """Stitches worker outputs into a final working module."""
+    """Fast deterministic assembly: concat + dedup imports + short LLM glue.
 
-    def __init__(self, model, chat_format: str = "chatml",
-                 max_tokens: int = 2048, temperature: float = 0.2):
+    Instead of asking the 3B to rewrite all code (~100s, error-prone),
+    this concatenates worker outputs deterministically and only uses the
+    LLM for a short glue/main section (~10-15s).
+    """
+
+    def __init__(self, model=None, chat_format: str = "chatml",
+                 max_tokens: int = 512, temperature: float = 0.2):
         self.model = model
         self.chat_format = chat_format
         self.max_tokens = max_tokens
         self.temperature = temperature
 
     def assemble(self, plan: ArchitectPlan, results: list[SubtaskResult]) -> str:
-        """Combine worker outputs into final code."""
-        # Build the assembly prompt
-        pieces = []
-        for r in results:
-            if r.success and r.code:
-                pieces.append(f"# === {r.subtask.name}: {r.subtask.description} ===\n{r.code}")
+        """Fast assembly: deterministic concat + optional LLM glue."""
+        pieces = [(r.subtask, r.code) for r in results if r.success and r.code]
+        if not pieces:
+            return ""
+        if len(pieces) == 1:
+            return pieces[0][1]
 
-        if len(pieces) <= 1:
-            # Single piece — no assembly needed
-            return pieces[0] if pieces else ""
+        # Step 1: Extract only the assigned component from each worker output,
+        # strip if-main blocks, dedup methods, collect imports
+        all_imports: list[str] = []
+        code_blocks: list[tuple[Subtask, str]] = []
+        for subtask, code in pieces:
+            code = self._strip_if_main(code)
+            code = self._dedup_methods(code)
+            imports, body = self._split_imports(code)
+            all_imports.extend(imports)
+            # Extract only the class/function this worker was assigned
+            extracted = self._extract_named(body, subtask.name)
+            if extracted:
+                code_blocks.append((subtask, extracted))
+            elif body.strip():
+                code_blocks.append((subtask, body.strip()))
 
-        assembly_input = (
-            f"Original task: {plan.original_prompt}\n\n"
-            f"Architecture: {plan.overview}\n\n"
-            f"Code pieces to combine:\n\n"
-            + "\n\n".join(pieces)
-        )
+        unique_imports = self._dedup_imports(all_imports)
 
-        full_prompt = self._build_prompt(ASSEMBLER_SYSTEM, assembly_input)
+        # Step 2: Deduplicate and prune
+        # - Remove class/function defs that belong to other workers
+        # - Remove methods that semantically belong to sibling components
+        all_subtasks = [s for s, _ in code_blocks]
+        assigned_names = {s.name for s in all_subtasks}
+        final_blocks: list[tuple[Subtask, str]] = []
+        for subtask, body in code_blocks:
+            cleaned = self._remove_foreign_defs(body, subtask.name, assigned_names)
+            cleaned = self._prune_foreign_methods(cleaned, subtask, all_subtasks)
+            if cleaned.strip():
+                final_blocks.append((subtask, cleaned.strip()))
+
+        # Step 3: Concatenate bodies in dependency order (already ordered)
+        # Skip sections that are only comments or whitespace
+        sections = []
+        for subtask, body in final_blocks:
+            # Check if body has any actual code (not just comments)
+            has_code = any(line.strip() and not line.strip().startswith("#")
+                          for line in body.split("\n"))
+            if has_code:
+                sections.append(f"# -- {subtask.name} --\n{body}")
+
+        # Prepend future annotations to make all type hints lazy —
+        # prevents NameError for forward references (Iterator, Plugin, etc.)
+        combined = "from __future__ import annotations\n\n"
+        if unique_imports:
+            combined += "\n".join(unique_imports) + "\n\n\n"
+        combined += "\n\n\n".join(sections)
+
+        # Step 4: Short LLM pass for glue/main section only
+        if self.model:
+            glue = self._generate_glue(plan, [s.name for s, _ in final_blocks],
+                                        assembled_code=combined)
+            if glue:
+                combined += f"\n\n\n# -- main --\n{glue}"
+
+        logger.info(f"FastAssembler: {len(combined)} chars, "
+                     f"{len(unique_imports)} imports, {len(final_blocks)} sections")
+        return combined
+
+    def _dedup_methods(self, code: str) -> str:
+        """Remove duplicate method definitions within a class."""
+        import re
+        lines = code.split("\n")
+        result = []
+        seen_methods = set()
+        current_class = None
+        skip_method = False
+        skip_indent = 0
+
+        for line in lines:
+            stripped = line.strip()
+            indent = len(line) - len(line.lstrip()) if line.strip() else 999
+
+            # Track class context
+            if re.match(r'^class\s+\w+', stripped):
+                current_class = stripped.split('(')[0].split(':')[0]
+                seen_methods = set()
+                skip_method = False
+
+            # Track method definitions
+            m = re.match(r'^def\s+(\w+)\(', stripped)
+            if m and current_class and indent > 0:
+                method_name = m.group(1)
+                key = f"{current_class}.{method_name}"
+                if key in seen_methods:
+                    skip_method = True
+                    skip_indent = indent
+                    continue
+                seen_methods.add(key)
+                skip_method = False
+
+            if skip_method:
+                if indent > skip_indent or not stripped:
+                    continue
+                else:
+                    skip_method = False
+
+            result.append(line)
+        return "\n".join(result)
+
+    def _strip_if_main(self, code: str) -> str:
+        """Remove if __name__ == '__main__' blocks from worker output."""
+        lines = code.split("\n")
+        result = []
+        skip = False
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith("if __name__") and "__main__" in stripped:
+                skip = True
+                continue
+            if skip:
+                # Keep skipping indented lines under the if-main block
+                if line and not line[0].isspace() and stripped:
+                    skip = False
+                    result.append(line)
+                continue
+            result.append(line)
+        return "\n".join(result)
+
+    def _extract_named(self, body: str, name: str) -> str:
+        """Extract only the class or function definition matching `name`."""
+        import re
+        lines = body.split("\n")
+        # Find the start of the matching class/def
+        pattern = re.compile(rf'^(class\s+{re.escape(name)}\b|def\s+{re.escape(name)}\b)')
+        start_idx = None
+        for i, line in enumerate(lines):
+            if pattern.match(line.strip()):
+                start_idx = i
+                break
+        if start_idx is None:
+            return ""
+        # Find the end: next top-level class/def/comment-header or EOF
+        end_idx = len(lines)
+        for i in range(start_idx + 1, len(lines)):
+            stripped = lines[i].strip()
+            if stripped and not lines[i][0].isspace():
+                # Top-level line — check if it's a new def/class
+                if stripped.startswith("class ") or stripped.startswith("def "):
+                    end_idx = i
+                    break
+                # Or an "Example usage" / standalone expression
+                if stripped.startswith("#") and any(kw in stripped.lower()
+                        for kw in ["example", "usage", "test"]):
+                    end_idx = i
+                    break
+        return "\n".join(lines[start_idx:end_idx]).rstrip()
+
+    def _prune_foreign_methods(self, body: str, subtask: Subtask,
+                                siblings: list[Subtask]) -> str:
+        """Remove methods from a class that semantically belong to sibling components.
+
+        Uses the Architect's subtask descriptions to determine ownership:
+        - Extract keyword stems from each subtask's description and name
+        - If a method name matches a sibling's keywords but NOT the owner's, strip it
+        - Always keep __init__, __repr__, __str__, and private methods
+        """
+        import re
+        if not siblings:
+            return body
+
+        def extract_keywords(text: str) -> set[str]:
+            """Extract lowercase word stems from description text."""
+            words = re.findall(r'[a-z]+', text.lower())
+            # Also split camelCase/PascalCase names
+            for w in list(words):
+                parts = re.findall(r'[a-z]+', re.sub(r'([A-Z])', r' \1', w).lower())
+                words.extend(parts)
+            # Stem: keep both full word and 5-char prefix for fuzzy matching
+            stems = set()
+            for w in words:
+                if len(w) > 2:
+                    stems.add(w)
+                    if len(w) > 5:
+                        stems.add(w[:5])
+            return stems
+
+        own_keywords = extract_keywords(f"{subtask.name} {subtask.description}")
+        sibling_keywords: dict[str, set[str]] = {}
+        for s in siblings:
+            if s.id != subtask.id:
+                sibling_keywords[s.name] = extract_keywords(f"{s.name} {s.description}")
+
+        lines = body.split("\n")
+        result = []
+        skip_method = False
+        skip_indent = 0
+
+        for line in lines:
+            stripped = line.strip()
+            indent = len(line) - len(line.lstrip()) if stripped else 999
+
+            if skip_method:
+                if indent > skip_indent or not stripped:
+                    continue
+                else:
+                    skip_method = False
+
+            # Check method definitions inside a class (indented def)
+            m = re.match(r'^def\s+(\w+)\(', stripped)
+            if m and indent > 0:
+                method_name = m.group(1)
+                # Always keep special methods and private methods
+                if method_name.startswith('_'):
+                    result.append(line)
+                    continue
+                # Check if this method name matches sibling keywords (with stems)
+                raw_words = re.findall(r'[a-z]+', method_name.lower())
+                method_stems = set()
+                for w in raw_words:
+                    if len(w) > 2:
+                        method_stems.add(w)
+                        if len(w) > 5:
+                            method_stems.add(w[:5])
+                matches_sibling = any(
+                    method_stems & sib_kw for sib_kw in sibling_keywords.values()
+                )
+                matches_own = bool(method_stems & own_keywords)
+                if matches_sibling and not matches_own:
+                    skip_method = True
+                    skip_indent = indent
+                    continue
+
+            result.append(line)
+        return "\n".join(result)
+
+    def _remove_foreign_defs(self, body: str, owner_name: str,
+                              all_names: set[str]) -> str:
+        """Remove class/def definitions that belong to other workers."""
+        import re
+        lines = body.split("\n")
+        result = []
+        skip_until_dedent = False
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            if skip_until_dedent:
+                if line and not line[0].isspace() and stripped:
+                    skip_until_dedent = False
+                else:
+                    continue
+            # Check if this line defines a class/function owned by another worker
+            for name in all_names:
+                if name == owner_name:
+                    continue
+                pat = re.compile(rf'^(class\s+{re.escape(name)}\b|def\s+{re.escape(name)}\b)')
+                if pat.match(stripped):
+                    skip_until_dedent = True
+                    break
+            if not skip_until_dedent:
+                result.append(line)
+        return "\n".join(result)
+
+    def _split_imports(self, code: str) -> tuple[list[str], str]:
+        """Split code into import lines and body."""
+        imports = []
+        body_lines = []
+        in_body = False
+        for line in code.split("\n"):
+            stripped = line.strip()
+            if not in_body and (stripped.startswith("import ") or
+                                stripped.startswith("from ")):
+                imports.append(stripped)
+            else:
+                if stripped and not stripped.startswith("#"):
+                    in_body = True
+                body_lines.append(line)
+        # Strip leading blank lines from body
+        while body_lines and not body_lines[0].strip():
+            body_lines.pop(0)
+        return imports, "\n".join(body_lines)
+
+    def _dedup_imports(self, imports: list[str]) -> list[str]:
+        """Deduplicate, validate, and sort imports. stdlib first, then third-party."""
+        import sys
+        stdlib_names = set(sys.stdlib_module_names) if hasattr(sys, 'stdlib_module_names') else set()
+
+        seen = set()
+        stdlib = []
+        thirdparty = []
+        for imp in imports:
+            if imp in seen:
+                continue
+            seen.add(imp)
+            # Extract module name for sorting
+            parts = imp.split()
+            if len(parts) < 2:
+                continue
+            mod = parts[1] if parts[0] == "import" else parts[1]
+            mod = mod.split(".")[0]
+            if not mod:
+                continue
+            # Validate: check if module actually exists
+            if mod not in stdlib_names:
+                try:
+                    __import__(mod)
+                except (ImportError, ValueError):
+                    logger.debug(f"Stripping unresolvable import: {imp}")
+                    continue
+            if mod in stdlib_names:
+                stdlib.append(imp)
+            else:
+                thirdparty.append(imp)
+
+        result = sorted(stdlib)
+        if thirdparty:
+            if result:
+                result.append("")  # blank line between stdlib and third-party
+            result.extend(sorted(thirdparty))
+        return result
+
+    def _extract_signatures(self, code: str) -> str:
+        """Extract class/function signatures from assembled code for glue context."""
+        import re
+        sigs = []
+        lines = code.split("\n")
+        current_class = None
+        for line in lines:
+            stripped = line.strip()
+            # Class definition
+            m = re.match(r'^class\s+(\w+)', stripped)
+            if m:
+                current_class = m.group(1)
+                sigs.append(f"\n{stripped}")
+                continue
+            # Method definition inside a class
+            if current_class and re.match(r'^def\s+', stripped):
+                # Extract just the signature, skip private/dunder except __init__
+                m2 = re.match(r'^def\s+(\w+)\(([^)]*)\)', stripped)
+                if m2:
+                    name = m2.group(1)
+                    if name.startswith('_') and name != '__init__':
+                        continue
+                    sigs.append(f"    {stripped.split(':')[0]}:")
+                continue
+            # Top-level function
+            if not current_class and re.match(r'^def\s+', stripped):
+                sigs.append(stripped.split(':')[0] + ":")
+        return "\n".join(sigs)
+
+    def _generate_glue(self, plan: ArchitectPlan, component_names: list[str],
+                        assembled_code: str = "") -> str:
+        """Short LLM pass to generate ONLY the main/demo wiring section."""
+        # Extract actual signatures so the 3B knows real method names
+        sig_block = self._extract_signatures(assembled_code) if assembled_code else ""
+        user_msg = f"Task: {plan.original_prompt}\n"
+        if sig_block:
+            user_msg += f"Components and their methods:\n{sig_block}\n\n"
+        else:
+            user_msg += f"Components defined above: {', '.join(component_names)}\n"
+        user_msg += "Write a main() that wires these together and demonstrates usage. Use ONLY the methods shown above."
+        full_prompt = self._build_prompt(GLUE_SYSTEM, user_msg)
 
         start = time.monotonic()
         stop = ["</s>", "<|im_end|>", "<|end|>", "<|eot_id|>"]
@@ -334,8 +720,7 @@ class Assembler:
 
         text = output["choices"][0]["text"].strip()
         code = self._extract_code(text)
-
-        logger.info(f"Assembler: {len(code)} chars in {elapsed:.1f}s")
+        logger.info(f"Glue generation: {len(code)} chars in {elapsed:.1f}s")
         return code
 
     def _extract_code(self, text: str) -> str:
@@ -457,9 +842,14 @@ class MultiAgentOrchestrator:
             final_code = self.assembler.assemble(plan, results)
         assemble_time = time.monotonic() - assemble_start
 
-        total_time = time.monotonic() - total_start
         lines = len(final_code.strip().split("\n")) if final_code else 0
         print(f"  [ASSEMBLER] Done: {lines} lines in {assemble_time:.1f}s")
+
+        # Step 4: Validate — try to compile, fix if broken
+        final_code = self._validate_and_fix(final_code, plan)
+
+        total_time = time.monotonic() - total_start
+        lines = len(final_code.strip().split("\n")) if final_code else 0
         print(f"\n  Total: {total_time:.1f}s (plan={plan.plan_time:.1f}s build={build_time:.1f}s assemble={assemble_time:.1f}s)")
 
         return AssemblyResult(
@@ -471,6 +861,119 @@ class MultiAgentOrchestrator:
             build_time=build_time,
             assemble_time=assemble_time,
         )
+
+    def _fix_empty_bodies(self, code: str) -> str:
+        """Deterministic fix: add 'pass' to empty def/class bodies.
+
+        Common 0.5B issue: generates `def __init__(self):\\n    # comment`
+        with no actual body, causing SyntaxError.
+        """
+        import re
+        lines = code.split("\n")
+        result = []
+        for i, line in enumerate(lines):
+            result.append(line)
+            stripped = line.strip()
+            if stripped.startswith("def ") or stripped.startswith("class "):
+                if stripped.endswith(":"):
+                    # Check if next non-blank, non-comment line is at same or lower indent
+                    indent = len(line) - len(line.lstrip())
+                    needs_pass = True
+                    for j in range(i + 1, min(i + 10, len(lines))):
+                        next_stripped = lines[j].strip()
+                        if not next_stripped or next_stripped.startswith("#"):
+                            continue
+                        next_indent = len(lines[j]) - len(lines[j].lstrip())
+                        if next_indent > indent:
+                            needs_pass = False
+                        break
+                    if needs_pass:
+                        result.append(" " * (indent + 4) + "pass")
+        return "\n".join(result)
+
+    def _validate_and_fix(self, code: str, plan: ArchitectPlan,
+                          max_attempts: int = 2) -> str:
+        """Try to compile the assembled code; if it fails, do a targeted fix pass."""
+        # First: deterministic fixes for common 0.5B issues
+        code = self._fix_empty_bodies(code)
+
+        for attempt in range(max_attempts):
+            try:
+                compile(code, "<assembled>", "exec")
+                if attempt == 0:
+                    print(f"  [VALIDATE] Syntax OK")
+                else:
+                    print(f"  [VALIDATE] Fixed after {attempt} attempt(s)")
+                return code
+            except SyntaxError as e:
+                print(f"  [VALIDATE] Syntax error: {e.msg} (line {e.lineno})")
+                if not self.architect_llm:
+                    break
+                code = self._fix_pass(code, e)
+
+        # Final check — return whatever we have
+        try:
+            compile(code, "<assembled>", "exec")
+        except SyntaxError:
+            print(f"  [VALIDATE] Could not fix syntax errors after {max_attempts} attempts")
+        return code
+
+    def _fix_pass(self, code: str, error: SyntaxError) -> str:
+        """Targeted fix: extract a window around the error, fix it, splice back."""
+        lines = code.split("\n")
+        err_line = (error.lineno or 1) - 1  # 0-indexed
+        # Window: 5 lines before and after the error
+        win_start = max(0, err_line - 5)
+        win_end = min(len(lines), err_line + 6)
+        snippet = "\n".join(lines[win_start:win_end])
+
+        fix_system = (
+            "Fix ONLY the syntax error in this Python code snippet. "
+            "Output ONLY the fixed snippet in a ```python block. "
+            "Do NOT add, remove, or change anything else."
+        )
+        fix_user = (
+            f"Error: {error.msg} on line {error.lineno}\n\n"
+            f"```python\n{snippet}\n```"
+        )
+
+        chat_format = getattr(self.architect, 'chat_format', 'chatml')
+        if chat_format == "chatml":
+            prompt = (f"<|im_start|>system\n{fix_system}<|im_end|>\n"
+                      f"<|im_start|>user\n{fix_user}<|im_end|>\n"
+                      f"<|im_start|>assistant\n")
+        else:
+            prompt = f"{fix_system}\n\nUser: {fix_user}\nAssistant:\n"
+
+        start = time.monotonic()
+        stop = ["</s>", "<|im_end|>", "<|end|>", "<|eot_id|>"]
+        output = self.architect_llm(
+            prompt, max_tokens=512,
+            temperature=0.1, stop=stop, echo=False,
+        )
+        elapsed = time.monotonic() - start
+        text = output["choices"][0]["text"].strip()
+
+        # Extract fixed snippet
+        if "```python" in text:
+            fixed_snippet = text.split("```python")[1].split("```")[0].strip()
+        elif "```" in text:
+            fixed_snippet = text.split("```")[1].split("```")[0].strip()
+        else:
+            fixed_snippet = text.strip()
+
+        if not fixed_snippet:
+            logger.info(f"Fix pass: empty response in {elapsed:.1f}s")
+            print(f"  [VALIDATE] Fix pass: empty ({elapsed:.1f}s)")
+            return code
+
+        # Splice fixed snippet back into the full code
+        fixed_lines = fixed_snippet.split("\n")
+        result_lines = lines[:win_start] + fixed_lines + lines[win_end:]
+
+        logger.info(f"Fix pass: {elapsed:.1f}s (lines {win_start+1}-{win_end})")
+        print(f"  [VALIDATE] Fix pass: {elapsed:.1f}s (lines {win_start+1}-{win_end})")
+        return "\n".join(result_lines)
 
     def _execute_subtasks(self, subtasks: list[Subtask]) -> list[SubtaskResult]:
         """Execute subtasks respecting dependency order.
@@ -495,13 +998,13 @@ class MultiAgentOrchestrator:
             # Execute ready tasks (parallel if multiple workers)
             if self.max_workers > 1 and len(ready) > 1:
                 with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
-                    futures = {pool.submit(self.worker.build, s): s for s in ready}
+                    futures = {pool.submit(self.worker.build, s, subtasks): s for s in ready}
                     for future in as_completed(futures):
                         result = future.result()
                         completed[result.subtask.id] = result
             else:
                 for s in ready:
-                    result = self.worker.build(s)
+                    result = self.worker.build(s, subtasks)
                     completed[result.subtask.id] = result
 
         # Return in original order

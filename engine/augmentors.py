@@ -112,6 +112,9 @@ FAILURE_PATTERNS: dict[str, list[str]] = {
         "wsgi middleware", "request timing", "api key middleware",
         "authentication middleware", "auth middleware",
         "request logging middleware",
+        "password hash", "passwordhasher", "bcrypt", "hashlib",
+        "token auth", "token verif", "jwt", "bearer token",
+        "user registration", "login endpoint", "session token",
     ],
     "web_validation": [
         "pydantic", "request validation", "field(",
@@ -181,6 +184,12 @@ FAILURE_PATTERNS: dict[str, list[str]] = {
     "resilience_retry": [
         "retry with backoff", "exponential backoff", "retry on exception",
         "retry decorator", "max retries", "circuit breaker",
+    ],
+    "component_builder": [
+        "other components in this project",
+        "use these interfaces",
+        "do not redefine them",
+        "do not redefine",
     ],
     "algorithm": [
         "digits of pi", "compute pi", "calculate pi", "pi to n",
@@ -610,6 +619,37 @@ def verify_code_gen(response: str, query: str) -> tuple[bool, str]:
     if has_def and not has_return:
         if "def " in r or "function " in r:
             return False, "Function should have a return statement or produce output."
+
+    return True, ""
+
+
+def verify_component(response: str, query: str) -> tuple[bool, str]:
+    """Verify component output: exactly 1 top-level class/function, no example usage."""
+    import re
+    r = response.strip()
+
+    # Extract code block if present
+    code = r
+    if "```python" in r:
+        code = r.split("```python")[1].split("```")[0].strip()
+    elif "```" in r:
+        code = r.split("```")[1].split("```")[0].strip()
+
+    # Count top-level class/function definitions
+    classes = re.findall(r'^class\s+\w+', code, re.MULTILINE)
+    top_defs = re.findall(r'^def\s+\w+', code, re.MULTILINE)
+    total = len(classes) + len(top_defs)
+
+    if total == 0:
+        return False, "No class or function found. Write exactly ONE class for the requested component."
+
+    if len(classes) > 1:
+        return False, (f"Found {len(classes)} class definitions ({', '.join(c.split()[1] for c in classes)}). "
+                       f"Write ONLY the ONE requested class. Other components already exist.")
+
+    # Check for if __name__ blocks (example usage that shouldn't be there)
+    if "if __name__" in code:
+        return False, "Do not include 'if __name__' example usage. Write only the class definition."
 
     return True, ""
 
@@ -1821,13 +1861,16 @@ def _load_yaml_examples(base_dir: str = "data/augmentor_examples") -> dict[str, 
 
     groups: dict[str, list[SolvedExample]] = {
         "code_gen": [], "code_review": [], "debugger": [], "explainer": [],
+        "component": [],
     }
 
     for ex in raw:
         aug_type = ex.get("augmentor", "")
         category = ex.get("category", "")
 
-        if aug_type == "code_review" or category == "code_review":
+        if aug_type == "component" or category == "component_builder":
+            target = "component"
+        elif aug_type == "code_review" or category == "code_review":
             target = "code_review"
         elif aug_type == "debugger" or category == "debug":
             target = "debugger"
@@ -1856,15 +1899,33 @@ def build_yaml_augmentors(base_dir: str = "data/augmentor_examples") -> dict[str
     """
     groups = _load_yaml_examples(base_dir)
 
-    # Fall back to hardcoded if YAML yielded nothing
+    # Fall back to hardcoded if YAML yielded nothing for code_gen
     if not groups["code_gen"]:
         logger.warning("No YAML code_gen examples found, falling back to hardcoded pack")
-        return {
+        augmentors = {
             "code_gen": build_programmer_pack_augmentor(),
             "code_review": build_code_review_augmentor(),
             "debugger": build_debug_augmentor(),
             "explainer": build_explainer_augmentor(),
         }
+        # Still register component augmentor if YAML component examples exist
+        if groups.get("component"):
+            augmentors["component"] = Augmentor(
+                name="component",
+                system_context=(
+                    "You are a Python component builder. Write ONLY the ONE class or function requested. "
+                    "Do NOT define other components. Do NOT add methods that belong to other components. "
+                    "Each component has its own job — only implement methods for YOUR component. "
+                    "Accept dependencies as constructor parameters using forward references (quoted type hints). "
+                    "Include only the imports YOUR component needs. Output in a ```python block."
+                ),
+                examples=groups["component"],
+                scaffolding="Write exactly ONE class. No example usage. No other classes.",
+                verifier=verify_component,
+                max_examples=2,
+                max_retries=2,
+            )
+        return augmentors
 
     augmentors = {}
 
@@ -1911,6 +1972,24 @@ def build_yaml_augmentors(base_dir: str = "data/augmentor_examples") -> dict[str
         max_examples=2,
         max_retries=1,
     )
+
+    # Component builder augmentor — for multi-agent workers
+    if groups["component"]:
+        augmentors["component"] = Augmentor(
+            name="component",
+            system_context=(
+                "You are a Python component builder. Write ONLY the ONE class or function requested. "
+                "Do NOT define other components. Do NOT add methods that belong to other components. "
+                "Each component has its own job — only implement methods for YOUR component. "
+                "Accept dependencies as constructor parameters using forward references (quoted type hints). "
+                "Include only the imports YOUR component needs. Output in a ```python block."
+            ),
+            examples=groups["component"],
+            scaffolding="Write exactly ONE class. No example usage. No other classes.",
+            verifier=verify_component,
+            max_examples=2,
+            max_retries=2,
+        )
 
     logger.info(
         f"Built YAML augmentors: {', '.join(f'{k}({len(v.examples)})' for k, v in augmentors.items())}"
@@ -2295,6 +2374,9 @@ class AugmentorRouter:
         - 3B+ models: two-example injection (rerank) uses extra context productively
         - Failure-aware routing stays enabled (it correctly handles known patterns)
 
+        Falls back to YAML augmentors (flat retrieval) when pattern graph is
+        unavailable (e.g. multi-agent branch without graph data).
+
         Args:
             model_size_mb: Model file size in MB. Used to determine tier.
                           < 1500 MB → rerank1 (single example)
@@ -2302,10 +2384,29 @@ class AugmentorRouter:
         """
         if model_size_mb >= 1500:
             self.use_rerank_augmentors()
-            logger.info(f"Auto mode: model {model_size_mb:.0f}MB >= 1500MB → RERANK (2 examples)")
+            if not self.augmentors:
+                self._use_yaml_fallback()
+            else:
+                logger.info(f"Auto mode: model {model_size_mb:.0f}MB >= 1500MB → RERANK (2 examples)")
         else:
             self.use_rerank1_augmentors()
-            logger.info(f"Auto mode: model {model_size_mb:.0f}MB < 1500MB → RERANK1 (1 example)")
+            if not self.augmentors:
+                self._use_yaml_fallback()
+            else:
+                logger.info(f"Auto mode: model {model_size_mb:.0f}MB < 1500MB → RERANK1 (1 example)")
+
+    def _use_yaml_fallback(self):
+        """Fall back to YAML augmentors when graph-based modes are unavailable."""
+        if self._yaml_augmentors:
+            self.augmentors = dict(self._yaml_augmentors)
+            if self._embedder:
+                for aug in self._yaml_augmentors.values():
+                    if aug._embedder is None:
+                        aug.init_embeddings(self._embedder)
+            logger.info(
+                f"Auto mode: graph unavailable, falling back to YAML flat: "
+                f"{', '.join(f'{k}({len(v.examples)})' for k, v in self.augmentors.items())}"
+            )
 
     def set_skip_failure_routing(self, skip: bool):
         """Toggle failure-aware routing bypass on ALL augmentor sets.
@@ -2341,6 +2442,8 @@ class AugmentorRouter:
 
     def select_augmentor(self, query: str, module_hint: Optional[str] = None) -> Optional[Augmentor]:
         """Select the best augmentor for a query."""
+        if module_hint == "component":
+            return self.augmentors.get("component", self.augmentors.get("code_gen"))
         if module_hint == "code_gen":
             return self.augmentors.get("code_gen")
         if module_hint == "code_review":

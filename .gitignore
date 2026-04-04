@@ -3,6 +3,8 @@ __pycache__/
 *.pyo
 models/*.gguf
 data/
+!data/augmentor_examples/
+!data/augmentor_examples/**
 *.egg-info/
 .env
 tuned_config.json
