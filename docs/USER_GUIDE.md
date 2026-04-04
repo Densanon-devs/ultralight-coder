@@ -23,40 +23,76 @@ This guide walks you through everything from installation to daily use.
 
 ## 1. Installation
 
-### Automatic (recommended)
+### Windows -- Zero Install (recommended)
 
-**Linux / macOS:**
+No Python installation needed. This downloads a portable Python and handles everything.
+
+1. Open PowerShell and run:
+```powershell
+git clone https://github.com/densanon-devs/ultralight-coder.git
+```
+2. Open the `ultralight-coder` folder in File Explorer
+3. **Double-click `start.bat`**
+
+That's it. First run will:
+- Download portable Python 3.12 (~25MB)
+- Install pip and all dependencies
+- Download the default AI model (469MB)
+- Start the app
+
+**First run takes 5-10 minutes** (downloading). Every run after that starts in ~15 seconds.
+
+### Linux / macOS -- One-Line Install
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralight-coder/master/install.sh | bash
 ```
 
-**Windows (PowerShell -- run as Administrator if needed):**
-```powershell
-irm https://raw.githubusercontent.com/densanon-devs/ultralight-coder/master/install.ps1 | iex
-```
-
-**With GPU acceleration (NVIDIA CUDA):**
+With GPU acceleration:
 ```bash
-# Linux/macOS
 curl -fsSL https://raw.githubusercontent.com/densanon-devs/ultralight-coder/master/install.sh | bash -s -- --gpu
-
-# Windows
-irm https://raw.githubusercontent.com/densanon-devs/ultralight-coder/master/install.ps1 | iex -GPU
 ```
 
-The installer will:
-- Check that Python 3.10+ is installed
-- Clone the repository
-- Install all dependencies
-- Download the default model (Qwen 0.5B, 469MB)
+### Manual Install (all platforms)
 
-### Manual
+Requires Python 3.10-3.12 (3.13+ will work but installs slower).
 
 ```bash
 git clone https://github.com/densanon-devs/ultralight-coder.git
 cd ultralight-coder
+
+# Install llama-cpp-python with pre-built wheels (fast, no C++ compiler needed)
+pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+
+# Install everything else
 pip install -r requirements.txt
+
+# Download the AI model (469MB)
 python download_model.py
+
+# Start the app
+python launch.py
+```
+
+**Important:** Always install llama-cpp-python with the `--extra-index-url` flag. Without it, pip tries to compile from C++ source which takes 20+ minutes and requires a C++ compiler.
+
+For NVIDIA GPU acceleration, use `/whl/cu121` instead of `/whl/cpu`:
+```bash
+pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu121
+```
+
+### First-Time Internet Requirements
+
+The first launch downloads a sentence-transformer model (~90MB) from HuggingFace. After that, the app works **fully offline**. If you get a connection error on first launch:
+
+```bash
+# Windows (start.bat users)
+set TRANSFORMERS_OFFLINE=0
+set HF_HUB_OFFLINE=0
+python\python.exe server.py
+
+# Linux/macOS / manual install
+TRANSFORMERS_OFFLINE=0 HF_HUB_OFFLINE=0 python server.py
 ```
 
 ### What gets installed
@@ -64,7 +100,7 @@ python download_model.py
 | Component | Size | Purpose |
 |---|---|---|
 | Python packages | ~1.5 GB | llama-cpp-python, sentence-transformers, FastAPI, FAISS, etc. |
-| Sentence-transformer model | ~90 MB | Cached in ~/.cache/huggingface (first run only) |
+| Sentence-transformer model | ~90 MB | Cached locally (first run only) |
 | Coding model (Qwen 0.5B) | 469 MB | The AI model that generates code |
 
 Total disk usage: ~2 GB after first setup.
@@ -72,6 +108,20 @@ Total disk usage: ~2 GB after first setup.
 ---
 
 ## 2. First Launch
+
+### Windows (start.bat)
+
+Double-click `start.bat`. It opens the app in a native desktop window. If the desktop window doesn't appear, it falls back to your browser at `http://localhost:8000`.
+
+### Windows (manual / PowerShell)
+
+```powershell
+cd ultralight-coder
+python\python.exe server.py
+```
+Then open `http://localhost:8000` in your browser.
+
+### Linux / macOS
 
 ```bash
 cd ultralight-coder
@@ -281,11 +331,17 @@ python download_model.py --model phi-3.5-mini   # 2.3GB  -- strong performance
 
 See all options: `python download_model.py --help`
 
-### Switching in the UI
+### Hot-swapping in the UI
 
-Use the dropdown in the top-right corner of the header. All `.gguf` files in the `models/` directory appear here.
+Use the **model dropdown** in the top-right corner of the header. Select a different model and it will:
 
-**Note:** Switching models requires a server restart. The dropdown shows available models but the active model is set in `config.yaml`.
+1. Show "Switching model..." in the status area
+2. Unload the current model from memory
+3. Load the new model
+4. Auto-adjust augmentor mode (rerank1 for small models, rerank for large)
+5. Show the new model name when ready
+
+**No restart needed.** All downloaded `.gguf` files in the `models/` directory appear in the dropdown.
 
 ### Which model to pick
 
@@ -295,6 +351,16 @@ Use the dropdown in the top-right corner of the header. All `.gguf` files in the
 | General use | Qwen 0.5B (469MB) or Llama 1B (770MB) |
 | Need maximum quality | Qwen 3B (2.0GB) |
 | Have a GPU | Any model -- GPU offload makes them all fast |
+| Complex refactoring | Qwen 1.5B+ (0.5B struggles with multi-step changes) |
+
+### Tips for small models (0.5B)
+
+The 0.5B model handles single-task prompts excellently but struggles with compound instructions. If a response misses what you wanted:
+
+- **Be explicit about the language**: "Write a **Go** function..." not just "write a function..."
+- **One change at a time**: Instead of "change the type and swap the checks and keep the old logic", break it into steps
+- **Repeat context**: "In the CheckCondition function from before, change X to Y"
+- **Upgrade to 1.5B** for complex refactoring — use the dropdown to switch without restarting
 
 ---
 
@@ -426,20 +492,6 @@ project_context:
 ---
 
 ## 12. Troubleshooting
-
-### Installation stuck on "Building wheel for llama-cpp-python"
-
-This means pip is compiling llama-cpp-python from C++ source, which can take 20+ minutes and requires CMake. Use pre-built wheels instead:
-
-```bash
-# CPU only
-pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
-
-# NVIDIA GPU
-pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu121
-```
-
-Then continue with `pip install -r requirements.txt`. The install scripts (`install.sh` / `install.ps1`) use pre-built wheels automatically.
 
 ### "No models found"
 
