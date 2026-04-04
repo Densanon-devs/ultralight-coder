@@ -304,6 +304,63 @@ def create_app():
         engine.project_index.clear()
         return {"cleared": True}
 
+    # ── Multi-Agent Mode ──
+
+    _orchestrator = None
+
+    class MultiAgentRequest(PydanticModel):
+        prompt: str
+        architect_model: Optional[str] = None
+        worker_model: Optional[str] = None
+
+    @app.post("/generate/multi")
+    async def generate_multi(req: MultiAgentRequest):
+        """Multi-agent generation: 3B architect decomposes, 0.5B workers build, 3B assembles."""
+        nonlocal _orchestrator
+
+        # Find models
+        models_dir = PROJECT_ROOT / "models"
+        architect_path = req.architect_model
+        worker_path = req.worker_model
+
+        if not architect_path:
+            # Auto-detect: pick largest model as architect
+            ggufs = sorted(models_dir.glob("*.gguf"), key=lambda p: p.stat().st_size, reverse=True)
+            if len(ggufs) < 2:
+                return {"error": "Multi-agent mode requires at least 2 models (a large one for planning and a small one for building). Download more with: python download_model.py --model coder-3b"}
+            architect_path = str(ggufs[0].relative_to(PROJECT_ROOT)).replace("\\", "/")
+            worker_path = worker_path or str(ggufs[-1].relative_to(PROJECT_ROOT)).replace("\\", "/")
+
+        if not worker_path:
+            worker_path = get_engine().config.base_model.path
+
+        # Lazy init orchestrator
+        if _orchestrator is None or _orchestrator._architect_path != str(PROJECT_ROOT / architect_path):
+            try:
+                from engine.architect import MultiAgentOrchestrator
+                _orchestrator = MultiAgentOrchestrator(
+                    architect_model_path=str(PROJECT_ROOT / architect_path),
+                    worker_model_path=str(PROJECT_ROOT / worker_path),
+                )
+                _orchestrator._architect_path = str(PROJECT_ROOT / architect_path)
+                _orchestrator.initialize()
+            except Exception as e:
+                return {"error": f"Failed to initialize multi-agent: {e}"}
+
+        start = time.monotonic()
+        try:
+            result = _orchestrator.process(req.prompt)
+            return {
+                "code": result.code,
+                "plan_time": round(result.plan_time, 1),
+                "build_time": round(result.build_time, 1),
+                "assemble_time": round(result.assemble_time, 1),
+                "total_time": round(result.total_time, 1),
+                "subtasks": len(result.plan.subtasks),
+            }
+        except Exception as e:
+            return {"error": str(e)}
+
     @app.get("/health")
     async def health():
         return {"status": "ok", "version": "0.1.0"}

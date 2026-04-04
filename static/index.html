@@ -184,6 +184,7 @@
   </div>
   <div class="spacer"></div>
   <button class="new-chat" onclick="newChat()" title="Start a new conversation">New Chat</button>
+  <button class="new-chat" id="multi-btn" onclick="toggleMulti()" title="Multi-agent: 3B plans, 0.5B builds, 3B assembles">Multi</button>
   <select id="model-select" title="Select model" onchange="switchModel(this.value)"></select>
 </header>
 
@@ -223,6 +224,8 @@ const sendBtn = document.getElementById('send');
 const statusDot = document.getElementById('status-dot');
 const statusText = document.getElementById('status-text');
 const modelSelect = document.getElementById('model-select');
+const multiBtn = document.getElementById('multi-btn');
+let multiMode = false;
 const codeArea = document.getElementById('code-area');
 const codeInput = document.getElementById('code-input');
 const codeToggle = document.getElementById('code-toggle');
@@ -260,6 +263,14 @@ async function loadModels() {
   } catch {
     modelSelect.innerHTML = '<option>default model</option>';
   }
+}
+
+// ── Multi-agent toggle ──
+function toggleMulti() {
+  multiMode = !multiMode;
+  multiBtn.style.borderColor = multiMode ? 'var(--accent)' : '';
+  multiBtn.style.color = multiMode ? 'var(--accent)' : '';
+  multiBtn.textContent = multiMode ? 'Multi ON' : 'Multi';
 }
 
 // ── Switch model ──
@@ -346,10 +357,16 @@ async function send() {
   sendBtn.disabled = true;
   const start = performance.now();
 
-  // Try streaming first, fall back to non-streaming
   const body = {prompt: text};
   if (code) body.code = code;
 
+  // Multi-agent mode: use /generate/multi (no streaming)
+  if (multiMode) {
+    await sendMultiAgent(text, body, start);
+    return;
+  }
+
+  // Try streaming first, fall back to non-streaming
   try {
     const r = await fetch('/generate/stream', {
       method: 'POST',
@@ -440,6 +457,35 @@ async function sendNonStreaming(text, body, start) {
   } catch (err) {
     typing.remove();
     addMsg('Connection error. Is the server running?', 'system');
+  }
+  busy = false;
+  sendBtn.disabled = false;
+  prompt.focus();
+}
+
+async function sendMultiAgent(text, body, start) {
+  const typing = addTyping();
+  try {
+    const r = await fetch('/generate/multi', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({prompt: text}),
+    });
+    const data = await r.json();
+    const elapsed = ((performance.now() - start) / 1000).toFixed(1);
+    typing.remove();
+    if (data.error) {
+      addMsg(data.error, 'system');
+    } else {
+      addBotMsg(data.code, {
+        time: elapsed,
+        generation_time: data.total_time,
+        modules: [`${data.subtasks} subtasks | plan ${data.plan_time}s | build ${data.build_time}s | assemble ${data.assemble_time}s`],
+      });
+    }
+  } catch (err) {
+    typing.remove();
+    addMsg('Multi-agent error. Is the server running?', 'system');
   }
   busy = false;
   sendBtn.disabled = false;
