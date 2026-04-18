@@ -23,21 +23,65 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from engine.config import Config
-from engine.base_model import BaseModel
-from engine.router import Router
-from engine.module_manager import ModuleManager
-from engine.memory import MemorySystem
-from engine.fusion import FusionLayer
-from engine.pipeline import Pipeline
-from engine.kv_cache import KVCacheManager
-from engine.micro_adapters import MicroAdapterEngine
-from engine.tools import ToolRegistry
-from engine.augmentors import AugmentorRouter
-from engine.speculative import SpeculativeEngine
-from engine.project_context import ProjectIndex
+_CORE_ROOT = PROJECT_ROOT.parent / "densanon-core"
+if _CORE_ROOT.exists() and str(_CORE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_CORE_ROOT))
+
+from densanon.core.config import Config
+from densanon.core.model_loader import BaseModel
+from densanon.core.router import Router
+from densanon.core.modules import ModuleManager
+from densanon.core.memory import MemorySystem
+from densanon.core.fusion import FusionLayer
+from densanon.core.pipeline import Pipeline
+from densanon.core.cache import KVCacheManager
+from densanon.core.adapters import MicroAdapterEngine
+from densanon.core.tools import ToolRegistry
+from engine.augmentors import AugmentorRouter  # KEEP - unique to ultralight-coder
+from engine.agent import Agent, AgentEvent
+from engine.agent_builtins import build_default_registry
+from engine.agent_memory import AgentMemory
+from engine.agent_tools import ToolCall
+from densanon.core.cache import SpeculativeEngine
+from densanon.core.project_context import ProjectIndex
 
 logger = logging.getLogger("UCA")
+
+
+def _load_speculative_config(config_path: str):
+    """
+    Parse the `speculative:` section of config_path directly into a
+    NativeSpeculativeConfig, bypassing densanon-core's Config class (which
+    doesn't know about this section). Returns None if the section is
+    missing, disabled, or the engine helper is unavailable.
+    """
+    try:
+        import yaml
+        from engine.native_speculative import NativeSpeculativeConfig
+    except ImportError as exc:
+        logger.debug(f"Speculative config unavailable: {exc}")
+        return None
+
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            raw = yaml.safe_load(f) or {}
+    except OSError as exc:
+        logger.debug(f"Could not read {config_path} for speculative config: {exc}")
+        return None
+
+    spec = raw.get("speculative") or {}
+    if not spec.get("enabled", False):
+        return None
+
+    return NativeSpeculativeConfig(
+        enabled=bool(spec.get("enabled", False)),
+        mode=str(spec.get("mode", "prompt_lookup")),
+        num_pred_tokens=int(spec.get("num_pred_tokens", 10)),
+        max_ngram_size=int(spec.get("max_ngram_size", 2)),
+        draft_model_path=str(spec.get("draft_model_path", "")),
+        draft_gpu_layers=int(spec.get("draft_gpu_layers", 99)),
+        draft_context_length=int(spec.get("draft_context_length", 4096)),
+    )
 
 
 class UltraliteCodeAssistant:
@@ -54,8 +98,14 @@ class UltraliteCodeAssistant:
 
         logger.info(f"=== {self.config.system.name} v{self.config.system.version} ===")
 
-        # Core components
-        self.base_model = BaseModel(self.config.base_model)
+        # Core components — speculative_config is only passed if the installed
+        # BaseModel accepts it (the local engine/base_model.py does, the
+        # densanon-core one does not). Phase 13 added it opt-in via config.
+        spec_cfg = getattr(self.config, "speculative", None)
+        try:
+            self.base_model = BaseModel(self.config.base_model, speculative_config=spec_cfg)
+        except TypeError:
+            self.base_model = BaseModel(self.config.base_model)
         self.router = Router(self.config.router)
         self.modules = ModuleManager(self.config.modules)
         self.memory = MemorySystem(self.config.memory)
@@ -99,8 +149,21 @@ class UltraliteCodeAssistant:
         # Response cache
         self.speculative = SpeculativeEngine(storage_dir="data/cache")
 
-        # Project context indexer
-        self.project_index = ProjectIndex(self.config.project_context)
+        # Project context indexer — densanon-core's Config does not always
+        # expose project_context, so guard the lookup and degrade gracefully.
+        project_ctx_cfg = getattr(self.config, "project_context", None)
+        if project_ctx_cfg is not None:
+            try:
+                self.project_index = ProjectIndex(project_ctx_cfg)
+            except Exception as exc:
+                logger.warning(f"ProjectIndex init failed, disabling: {exc}")
+                self.project_index = None
+        else:
+            self.project_index = None
+
+        # Phase 14 agentic harness — lazy-built on first /agent or --agent use
+        self._agent: Agent | None = None
+        self._auto_approve_risky: bool = False
 
         # Performance tracking
         self._perf_history: list[dict] = []
@@ -197,7 +260,7 @@ class UltraliteCodeAssistant:
 
         # Initialize augmentor embeddings + auto mode
         try:
-            from engine.embedder import get_embedder
+            from densanon.core.embeddings import get_embedder
             embedder = get_embedder()
             if embedder:
                 self.augmentor_router.init_embeddings(embedder)
@@ -517,9 +580,255 @@ class UltraliteCodeAssistant:
         ]
         return "\n".join(lines)
 
+    # ── Phase 14 agentic harness ────────────────────────────────
+
+    def _build_workspace_hint(self, workspace: Path) -> str:
+        """
+        Cheap project-awareness snippet for the agent's system prompt:
+        cwd, detected project type, top-level layout. Pure stdlib, no indexing.
+        """
+        lines = [f"Workspace: {workspace}"]
+
+        markers = {
+            "pyproject.toml": "Python (pyproject.toml)",
+            "requirements.txt": "Python (requirements.txt)",
+            "package.json": "Node.js / TypeScript",
+            "Cargo.toml": "Rust",
+            "go.mod": "Go",
+            "build.gradle": "Java/Kotlin (Gradle)",
+            "pom.xml": "Java (Maven)",
+            "Gemfile": "Ruby",
+            "composer.json": "PHP",
+            "CMakeLists.txt": "C/C++ (CMake)",
+        }
+        detected = [label for marker, label in markers.items() if (workspace / marker).exists()]
+        if detected:
+            lines.append("Project type: " + ", ".join(detected))
+
+        noise = {
+            "__pycache__", "node_modules", ".git", ".venv", "venv",
+            ".mypy_cache", ".pytest_cache", "dist", "build", ".idea", ".vscode",
+        }
+        try:
+            entries: list[str] = []
+            for child in sorted(workspace.iterdir(), key=lambda x: (not x.is_dir(), x.name.lower())):
+                if child.name.startswith(".") or child.name in noise:
+                    continue
+                entries.append(child.name + ("/" if child.is_dir() else ""))
+                if len(entries) >= 40:
+                    entries.append("...")
+                    break
+            if entries:
+                lines.append("Top-level: " + ", ".join(entries))
+        except OSError:
+            pass
+
+        return "\n".join(lines)
+
+    def _get_agent(self, workspace: Path | None = None) -> Agent:
+        """Lazy-build the Agent. Reuses the already-loaded base_model."""
+        if workspace is None:
+            workspace = Path.cwd()
+        if self._agent is not None:
+            return self._agent
+
+        memory = AgentMemory(workspace=workspace)
+        registry = build_default_registry(
+            workspace, memory=memory, ask_user_fn=self._ask_user,
+            extended_tools=True,
+        )
+        hint = self._build_workspace_hint(workspace)
+
+        self._agent = Agent(
+            model=self.base_model,
+            registry=registry,
+            system_prompt_extra=hint,
+            workspace_root=Path(workspace).resolve(),
+            memory=memory,
+            auto_verify_python=True,
+            max_iterations=20,
+            max_wall_time=600.0,
+            max_tokens_per_turn=1024,
+            confirm_risky=self._confirm_risky_tool,
+            on_event=self._render_agent_event,
+        )
+        return self._agent
+
+    def _ask_user(self, question: str) -> str:
+        print(f"\n  [agent asks] {question}")
+        try:
+            answer = input("  > ").strip()
+        except (EOFError, KeyboardInterrupt):
+            answer = "(no response)"
+        return answer or "(no response)"
+
+    def _confirm_risky_tool(self, call: ToolCall) -> bool:
+        """
+        Interactive y/N prompt for risky tools (run_bash, etc.). Default deny.
+        If self._auto_approve_risky is set (e.g. --yes flag), auto-approve and
+        log the call instead of prompting.
+        """
+        if getattr(self, "_auto_approve_risky", False):
+            print(f"\n  ! Risky tool (auto-approved): {call.name}")
+            for k, v in call.arguments.items():
+                shown = str(v)
+                if len(shown) > 200:
+                    shown = shown[:200] + "..."
+                print(f"    {k} = {shown}")
+            return True
+
+        print()
+        print(f"  ! Risky tool: {call.name}")
+        for k, v in call.arguments.items():
+            shown = str(v)
+            if len(shown) > 200:
+                shown = shown[:200] + "..."
+            print(f"    {k} = {shown}")
+        try:
+            answer = input("  Approve? [y/N] ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            print("  -> denied")
+            return False
+        approved = answer in ("y", "yes")
+        print(f"  -> {'approved' if approved else 'denied'}")
+        return approved
+
+    def _render_agent_event(self, event: AgentEvent) -> None:
+        """Print agent events to the console as the loop runs."""
+        if event.type == "iteration":
+            print(f"\n[iter {event.iteration}]")
+        elif event.type == "model_text":
+            text = (event.payload or "").strip()
+            if text and "<tool_call>" not in text:
+                # Plain reasoning text between/before tool calls
+                preview = text if len(text) < 400 else text[:400] + " ..."
+                print(f"  thought: {preview}")
+        elif event.type == "tool_call":
+            call = event.payload
+            args_preview = ", ".join(
+                f"{k}={str(v)[:60] + ('...' if len(str(v)) > 60 else '')}"
+                for k, v in call.arguments.items()
+            )
+            print(f"  -> {call.name}({args_preview})")
+        elif event.type == "tool_result":
+            result = event.payload
+            if result.success:
+                content_str = str(result.content)
+                if len(content_str) > 200:
+                    content_str = content_str[:200] + " ..."
+                # Strip newlines for one-line display
+                content_str = content_str.replace("\n", " | ")
+                print(f"     ok: {content_str}")
+            else:
+                print(f"     err: {result.error}")
+        elif event.type == "final":
+            print("\n[done]")
+        elif event.type == "stopped":
+            if event.payload and event.payload != "answered":
+                print(f"[stopped: {event.payload}]")
+
+    def run_agent(self, goal: str, workspace: Path | None = None) -> None:
+        """Run one agentic task end-to-end and print the final answer."""
+        if not self.base_model.is_loaded:
+            print("Model not loaded — cannot run agent.")
+            return
+
+        agent = self._get_agent(workspace)
+        print(f"\n=== Agent goal ===\n{goal}\n")
+        try:
+            result = agent.run(goal)
+        except KeyboardInterrupt:
+            print("\n[agent aborted by user]")
+            return
+
+        print("\n=== Final answer ===")
+        print(result.final_answer or "(no final answer)")
+        print(
+            f"\n[{result.iterations} iterations, "
+            f"{len(result.tool_calls)} tool calls, "
+            f"{result.wall_time:.1f}s, stop={result.stop_reason}]"
+        )
+
+    # ── Phase 14 standalone agent entry ─────────────────────────
+
+    @staticmethod
+    def run_agent_fast(
+        config_path: str,
+        goal: str,
+        workspace: Path | None = None,
+        auto_approve_risky: bool = False,
+    ) -> int:
+        """
+        Lightweight agent entry: load Config + BaseModel + Agent only, skip
+        the full UCA stack (router, modules, memory, fusion, augmentors,
+        sentence-transformer embedder, FAISS, project_index).
+
+        Motivation: the agent loop only needs the GGUF and the tool registry.
+        Loading the rest costs ~2 minutes of HuggingFace HEAD requests +
+        embedder init AND allocates the sentence-transformer on CUDA, which
+        competes for VRAM with the main model on a 12 GB card. Skipping it
+        drops startup from ~2 minutes to ~5 seconds and gives the main model
+        full VRAM for its KV cache.
+
+        Uses the LOCAL `engine.base_model.BaseModel` (not densanon-core's)
+        because the local one accepts `speculative_config` for prompt_lookup
+        draft decoding — an agent-loop-relevant speedup that the shared
+        densanon-core BaseModel doesn't support. This is the one divergence
+        between the agent fast path and the rest of UCA's model loading.
+
+        Reuses UCA's agent instance methods (`run_agent`, `_get_agent`,
+        `_render_agent_event`, `_confirm_risky_tool`, `_build_workspace_hint`)
+        by constructing a bare UCA shell via `object.__new__` and setting
+        only the attributes those methods touch.
+        """
+        config = Config(config_path)
+        config.setup_logging()
+
+        logger.info(
+            f"=== {config.system.name} v{config.system.version} (agent mode) ==="
+        )
+        logger.info(f"Loading model (agent mode): {config.base_model.path}")
+
+        # densanon-core's Config class doesn't expose the `speculative:` YAML
+        # section, so parse it ourselves for the agent fast path. Without
+        # this, prompt_lookup draft decoding is silently disabled no matter
+        # what config_agent14b.yaml says.
+        spec_cfg = _load_speculative_config(config_path)
+        try:
+            from engine.base_model import BaseModel as LocalBaseModel
+            base_model = LocalBaseModel(config.base_model, speculative_config=spec_cfg)
+            if spec_cfg is not None and getattr(spec_cfg, "enabled", False):
+                logger.info(
+                    f"Speculative decoding: {spec_cfg.mode} "
+                    f"(num_pred_tokens={getattr(spec_cfg, 'num_pred_tokens', '?')})"
+                )
+        except ImportError as exc:
+            logger.warning(
+                f"Local engine.base_model unavailable ({exc}); falling back to "
+                f"densanon-core BaseModel without speculative decoding."
+            )
+            base_model = BaseModel(config.base_model)
+        base_model.load()
+
+        uca = object.__new__(UltraliteCodeAssistant)
+        uca.base_model = base_model
+        uca._agent = None
+        uca._auto_approve_risky = auto_approve_risky
+
+        try:
+            uca.run_agent(goal, workspace=workspace)
+            return 0
+        finally:
+            base_model.unload()
+
     def shutdown(self):
         """Clean shutdown."""
-        self.pipeline.shutdown()
+        shutdown_fn = getattr(self.pipeline, "shutdown", None)
+        if callable(shutdown_fn):
+            try:
+                shutdown_fn()
+            except Exception as exc:
+                logger.debug(f"Pipeline shutdown raised: {exc}")
         self.base_model.unload()
         logger.info("Shutdown complete")
 
@@ -534,7 +843,34 @@ def main():
     parser.add_argument("--list-modules", action="store_true", help="List available modules")
     parser.add_argument("--explain", type=str, help="Explain routing for a prompt")
     parser.add_argument("--train", action="store_true", help="Train the classifier")
+    parser.add_argument(
+        "--agent",
+        type=str,
+        metavar="GOAL",
+        help="Run one agentic task in the current directory and exit (Phase 14)",
+    )
+    parser.add_argument(
+        "--agent-full-init",
+        action="store_true",
+        help="Use the full UCA init path for --agent (slower, loads embedder/router/augmentors). "
+             "Default is the fast path that skips everything except the base model.",
+    )
+    parser.add_argument(
+        "--yes",
+        action="store_true",
+        help="Auto-approve all risky tool calls (run_bash, etc.) without prompting. "
+             "Use for unattended runs; interactive use should leave this off.",
+    )
     args = parser.parse_args()
+
+    # Fast agent path: skip the full UCA init entirely. Only Config + BaseModel
+    # + Agent are needed for the tool loop, and the rest (embedder on CUDA,
+    # FAISS, augmentor embeddings, HF HEAD requests) costs ~2 minutes of
+    # startup + contends for VRAM with the main model.
+    if args.agent and not args.agent_full_init:
+        return UltraliteCodeAssistant.run_agent_fast(
+            args.config, args.agent, auto_approve_risky=args.yes
+        )
 
     engine = UltraliteCodeAssistant(
         config_path=args.config,
@@ -556,6 +892,11 @@ def main():
         print(f"Training result: {stats}")
         return
 
+    if args.agent:
+        engine.run_agent(args.agent)
+        engine.shutdown()
+        return
+
     # Interactive REPL
     try:
         from rich.console import Console
@@ -574,6 +915,14 @@ def main():
         try:
             user_input = input("you> ").strip()
             if not user_input:
+                continue
+
+            if user_input.startswith("/agent "):
+                goal = user_input[len("/agent "):].strip()
+                if goal:
+                    engine.run_agent(goal)
+                else:
+                    print("Usage: /agent <goal>")
                 continue
 
             response = engine.process(user_input)
