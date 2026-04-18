@@ -1,0 +1,121 @@
+system:
+  name: Ultralite Code Assistant (R1-Distill)
+  version: 0.1.0
+  log_level: INFO
+base_model:
+  path: D:/LLCWork/ultralight-coder/models/DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf
+  # R1-distill models emit long <think>...</think> reasoning blocks
+  # before the actual answer, so a larger context helps the loop
+  # retain the post-think tool calls when iterating.
+  context_length: 16384
+  gpu_layers: 99
+  threads: 8
+  # R1-distill's prose ceiling is temp 0.6 (DeepSeek's recommendation)
+  # but tool-use tasks benefit from tighter sampling — 0.4 produces
+  # cleaner JSON escapes on multi-line content values where 0.6 trips on
+  # nested triple quotes. Phase 14 iter2l@0.6 had 3/8 and iter2k@0.6 had
+  # 2/8 with multiple bare-JSON parse failures on docstring edits.
+  temperature: 0.4
+  # With suppress_think enabled (auto-detected from model path), the
+  # reasoning block is pre-closed at the start of each assistant turn, so
+  # the model goes directly to the tool call. 2048 is ample for the
+  # tool call itself, and a smaller budget means faster gens and fewer
+  # tokens wasted on narrative between tool calls.
+  max_tokens: 2048
+  batch_size: 512
+router:
+  mode: hybrid
+  max_active_modules: 2
+  default_modules:
+  - code_gen
+  rules: []
+  classifier:
+    type: neural
+    model_path: data/router_model
+    min_training_samples: 10
+    confidence_threshold: 0.4
+    retrain_interval: 50
+    max_features: 5000
+    embedding_model: all-MiniLM-L6-v2
+  blending:
+    enabled: true
+    strategy: weighted
+    max_blend_modules: 2
+    conflict_resolution: priority
+    weight_decay: 0.7
+augmentors:
+  enabled: true
+  mode: auto
+  examples_dir: data/augmentor_examples
+  model_size_threshold: 1500
+  failure_routing: true
+modules:
+  directory: modules
+  cache_ttl: 300
+  max_cached: 5
+  predictive_preload: true
+  preload_top_k: 2
+memory:
+  enabled: true
+  short_term:
+    max_turns: 30
+    max_tokens: 2048
+  long_term:
+    enabled: true
+    backend: faiss
+    storage_dir: data/memory
+    top_k: 5
+    similarity_threshold: 0.3
+    embedding_model: all-MiniLM-L6-v2
+  system:
+    enabled: true
+    knowledge_dir: data/knowledge
+  compressor:
+    max_summary_sentences: 10
+    max_topics: 8
+fusion:
+  mode: lean
+  chat_format: chatml
+  system_prompt: You are a coding assistant. Write clean, correct Python in ```python
+    blocks.
+  max_prompt_tokens: 2048
+  budget_system: 0.05
+  budget_modules: 0.1
+  budget_memory: 0.1
+  budget_conversation: 0.55
+  budget_reserve: 0.2
+pipeline:
+  enabled: true
+  parallel_workers: 3
+  enable_generation_queue: true
+  generation_timeout: 180
+kv_cache:
+  enabled: true
+  compression_threshold: 0.8
+micro_adapters:
+  enabled: true
+  storage_dir: data/adapters
+  embedding_model: all-MiniLM-L6-v2
+  min_cluster_size: 5
+  max_adapters: 8
+  regenerate_interval: 20
+project_context:
+  enabled: true
+  storage_dir: data/project_index
+  top_k: 5
+  similarity_threshold: 0.35
+  max_chunk_lines: 40
+  overlap_lines: 5
+  max_file_size_kb: 500
+npc:
+  enabled: false
+digest:
+  enabled: true
+  topics_dir: digest/topics
+  grammars_dir: data/digest_grammars
+  examples_dir: data/augmentor_examples/curation
+  max_selections: 10
+  max_takeaways: 4
+  compact_summary_chars: 100
+speculative:
+  enabled: false
