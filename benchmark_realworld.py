@@ -26,10 +26,16 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 @dataclass
 class RealWorldQuery:
-    """A realistic user query with expected code markers."""
+    """A realistic user query with expected code markers.
+
+    must_contain entries are strings (literal required) or tuples (OR-group — any
+    one alternative satisfies the check). Tuples let the checks stay strict while
+    accepting valid alternative patterns, e.g. ("__enter__", "contextmanager") to
+    accept both class-based and decorator-based context managers.
+    """
     query: str
     domain: str  # web, database, async, testing, cli, algorithm, pattern, data, general
-    must_contain: list[str] = field(default_factory=list)  # strings that MUST appear in output
+    must_contain: list = field(default_factory=list)  # str or tuple[str, ...]
     must_not_contain: list[str] = field(default_factory=list)  # strings that must NOT appear
     min_lines: int = 3  # minimum code lines expected
 
@@ -47,7 +53,8 @@ def build_realworld_queries() -> list[RealWorldQuery]:
         RealWorldQuery("build a calculator that shows pi to n decimal places", "algorithm",
                        must_contain=["Decimal"], must_not_contain=["math.pi *"]),
         RealWorldQuery("compute e to 50 decimal places", "algorithm",
-                       must_contain=["Decimal", "getcontext"], must_not_contain=["math.e"]),
+                       must_contain=[("Decimal", "mpmath", "mp.dps"), ("getcontext", "mp.dps", "mpmath.mp")],
+                       must_not_contain=["math.e"]),
         RealWorldQuery("write a function to check if a number is prime", "algorithm",
                        must_contain=["def ", "return"], min_lines=4),
         RealWorldQuery("give me code to reverse a linked list", "algorithm",
@@ -119,7 +126,10 @@ def build_realworld_queries() -> list[RealWorldQuery]:
         RealWorldQuery("write code to export a sqlite table to csv", "database",
                        must_contain=["csv", "sqlite3"], min_lines=5),
         RealWorldQuery("build a key-value store backed by sqlite", "database",
-                       must_contain=["sqlite3", "def get", "def set"], min_lines=8),
+                       must_contain=["sqlite3",
+                                     ("def get", "__getitem__"),
+                                     ("def set", "__setitem__", "def put")],
+                       min_lines=8),
 
         # ── Async (8) ──
         RealWorldQuery("write an async function that fetches multiple urls concurrently", "async",
@@ -143,7 +153,9 @@ def build_realworld_queries() -> list[RealWorldQuery]:
         RealWorldQuery("write a pytest fixture that sets up a temporary database", "testing",
                        must_contain=["@pytest.fixture", "yield"], min_lines=5),
         RealWorldQuery("how do I mock an api call in my tests?", "testing",
-                       must_contain=["mock", "patch"], min_lines=5),
+                       must_contain=[("mock", "Mock", "AsyncMock", "MagicMock"),
+                                     ("patch", "monkeypatch", "respx", "return_value")],
+                       min_lines=5),
         RealWorldQuery("write parametrized tests for a function with multiple inputs", "testing",
                        must_contain=["parametrize"], min_lines=4),
         RealWorldQuery("create a test factory for generating user objects", "testing",
@@ -151,11 +163,15 @@ def build_realworld_queries() -> list[RealWorldQuery]:
         RealWorldQuery("how to mock file reading in a unit test?", "testing",
                        must_contain=["mock_open"], min_lines=4),
         RealWorldQuery("write tests for a calculator class with add subtract multiply", "testing",
-                       must_contain=["def test_", "assert"], min_lines=5),
+                       must_contain=[("def test_", "class TestCalculator", "TestCase"),
+                                     ("assert", "assertEqual", "self.assertEqual")],
+                       min_lines=5),
         RealWorldQuery("create a custom assertion helper for checking api responses", "testing",
                        must_contain=["def assert_", "raise"], min_lines=4),
         RealWorldQuery("how do I test async functions with pytest?", "testing",
-                       must_contain=["async", "test"], min_lines=4),
+                       must_contain=["async",
+                                     ("def test_", "async def test", "@pytest.mark.asyncio", "pytest-asyncio")],
+                       min_lines=4),
 
         # ── CLI / Scripting (8) ──
         RealWorldQuery("build a cli tool with subcommands using argparse", "cli",
@@ -173,7 +189,9 @@ def build_realworld_queries() -> list[RealWorldQuery]:
         RealWorldQuery("write a script that processes command line arguments", "cli",
                        must_contain=["argparse"], min_lines=4),
         RealWorldQuery("build a rotating log file system", "cli",
-                       must_contain=["RotatingFileHandler"], min_lines=4),
+                       must_contain=[("RotatingFileHandler", "TimedRotatingFileHandler",
+                                      "os.rename", "shutil.move", "rotate")],
+                       min_lines=4),
 
         # ── Data Processing (8) ──
         RealWorldQuery("write a function to read a csv file into a list of dicts", "data",
@@ -205,7 +223,9 @@ def build_realworld_queries() -> list[RealWorldQuery]:
         RealWorldQuery("create an iterator class that generates fibonacci numbers", "pattern",
                        must_contain=["class ", "__iter__"], min_lines=6),
         RealWorldQuery("write a context manager for temporarily changing a directory", "pattern",
-                       must_contain=["def ", "__enter__"], min_lines=5),
+                       must_contain=[("def ", "class "),
+                                     ("__enter__", "contextmanager", "@contextmanager")],
+                       min_lines=5),
         RealWorldQuery("implement the observer pattern in python", "pattern",
                        must_contain=["class ", "def "], min_lines=8),
         RealWorldQuery("build a simple template engine that replaces {{variables}}", "pattern",
@@ -414,7 +434,9 @@ def build_realworld_queries_v2() -> list[RealWorldQuery]:
         RealWorldQuery("write a function to backup a sqlite database to a file", "database",
                        must_contain=["sqlite3", "backup"], min_lines=4),
         RealWorldQuery("create an audit log table that tracks all changes to a users table", "database",
-                       must_contain=["class ", "log"], min_lines=5),
+                       must_contain=[("class ", "CREATE TABLE", "create table"),
+                                     ("log", "audit")],
+                       min_lines=5),
         RealWorldQuery("write a function that exports sqlite query results to a pandas dataframe", "database",
                        must_contain=["sqlite3", "pandas"], min_lines=4),
 
@@ -521,7 +543,12 @@ def check_query(code: str, query: RealWorldQuery) -> dict:
     }
 
     for marker in query.must_contain:
-        if marker.lower() in code_lower:
+        if isinstance(marker, tuple):
+            if any(alt.lower() in code_lower for alt in marker):
+                results["must_contain_pass"].append(marker)
+            else:
+                results["must_contain_fail"].append(marker)
+        elif marker.lower() in code_lower:
             results["must_contain_pass"].append(marker)
         else:
             results["must_contain_fail"].append(marker)
@@ -587,8 +614,12 @@ def check_routing_only(queries: list[RealWorldQuery]):
 
 
 def run_benchmark(model_path: Path, queries: list[RealWorldQuery], gpu_layers: int = 99,
-                  threads: int = 8, context_length: int = 4096) -> dict:
-    """Run all queries through the model and check results."""
+                  threads: int = 8, context_length: int = 4096, max_tokens: int = 0) -> dict:
+    """Run all queries through the model and check results.
+
+    max_tokens=0 (default) auto-selects: 1024 for models >=3 GB, 512 otherwise.
+    The 14B default comes from Phase 13 — 512 truncated ~2-3 queries per run at that size.
+    """
     from llama_cpp import Llama
     from engine.augmentors import AugmentorRouter
     from engine.embedder import get_embedder
@@ -597,9 +628,12 @@ def run_benchmark(model_path: Path, queries: list[RealWorldQuery], gpu_layers: i
     # Load model
     model_size_mb = model_path.stat().st_size / (1024 * 1024)
     chat_format = detect_chat_format(str(model_path))
+    if max_tokens == 0:
+        max_tokens = 1024 if model_size_mb >= 3000 else 512
     print(f"\n  Model: {model_path.stem} ({model_size_mb:.0f} MB)")
     print(f"  Format: {chat_format}")
     print(f"  Queries: {len(queries)}")
+    print(f"  max_tokens: {max_tokens}")
 
     model = Llama(
         model_path=str(model_path), n_ctx=context_length,
@@ -628,7 +662,7 @@ def run_benchmark(model_path: Path, queries: list[RealWorldQuery], gpu_layers: i
             prompt = wrap_chat(system, q.query, chat_format)
 
         start = time.monotonic()
-        output = model(prompt, max_tokens=512, temperature=0.2, stop=stop, echo=False)
+        output = model(prompt, max_tokens=max_tokens, temperature=0.2, stop=stop, echo=False)
         elapsed = time.monotonic() - start
 
         response = output["choices"][0]["text"].strip()

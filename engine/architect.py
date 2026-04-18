@@ -237,7 +237,7 @@ class Worker:
             if self.augmentor_router:
                 # Use the full PIE augmentor pipeline
                 # Route to component augmentor when building with sibling context
-                from engine.augmentors import AugmentorResult
+                from engine.augmentors import AugmentorResult  # KEEP - unique to ultralight-coder
                 hint = "component" if siblings else "code_gen"
                 shim = _ModelShim(self.model, self.max_tokens, self.temperature)
                 result = self.augmentor_router.process(
@@ -794,8 +794,8 @@ class MultiAgentOrchestrator:
         )
 
         # Set up augmentors for workers
-        from engine.augmentors import AugmentorRouter
-        from engine.embedder import get_embedder
+        from engine.augmentors import AugmentorRouter  # KEEP - unique to ultralight-coder
+        from densanon.core.embeddings import get_embedder
         self.augmentor_router = AugmentorRouter(yaml_dir="data/augmentor_examples")
         embedder = get_embedder()
         self.augmentor_router.init_embeddings(embedder)

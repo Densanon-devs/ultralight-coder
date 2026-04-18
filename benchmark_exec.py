@@ -35,6 +35,10 @@ from typing import Optional
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+_CORE_ROOT = PROJECT_ROOT.parent / "densanon-core"
+if _CORE_ROOT.exists() and str(_CORE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_CORE_ROOT))
+
 logger = logging.getLogger("bench_exec")
 
 
@@ -916,7 +920,7 @@ class ExecBenchmarkRunner:
         """Run a test. If augmentor_router is provided, use it to build the prompt."""
         if augmentor_router:
             # Use augmentor system to build prompt + generate
-            from engine.augmentors import AugmentorResult
+            from engine.augmentors import AugmentorResult  # KEEP - unique to ultralight-coder
             shim = _ModelShim(model, self.max_tokens, self.temperature)
             augmentor_result = augmentor_router.process(
                 query=test.prompt, model=shim, chat_format=chat_format,
@@ -976,7 +980,7 @@ class ExecBenchmarkRunner:
 
     def run_test_pipeline(self, model, test: ExecTest, chat_format: str) -> ExecTestResult:
         """Run a test through the generate→execute→repair pipeline."""
-        from engine.code_pipeline import CodePipeline
+        from engine.code_pipeline import CodePipeline  # KEEP - unique to ultralight-coder
         pipeline = CodePipeline(max_retries=2)
 
         start = time.monotonic()
@@ -1005,7 +1009,7 @@ class ExecBenchmarkRunner:
     def run_test_multi(self, generator, debugger, test: ExecTest,
                        gen_format: str, dbg_format: str) -> ExecTestResult:
         """Run a test with multi-model: generate with A, debug with B."""
-        from engine.code_pipeline import CodePipeline
+        from engine.code_pipeline import CodePipeline  # KEEP - unique to ultralight-coder
         pipeline = CodePipeline(max_retries=2)
 
         start = time.monotonic()
@@ -1106,7 +1110,7 @@ class ExecBenchmarkRunner:
         for mode in modes:
             augmentor_router = None
             if mode in ("generic", "tuned"):
-                from engine.augmentors import AugmentorRouter
+                from engine.augmentors import AugmentorRouter  # KEEP - unique to ultralight-coder
                 augmentor_router = AugmentorRouter(tuned=(mode == "tuned"))
 
             mr = self._run_suite(model, model_name, str(model_path),

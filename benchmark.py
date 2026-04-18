@@ -35,6 +35,10 @@ from typing import Optional
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+_CORE_ROOT = PROJECT_ROOT.parent / "densanon-core"
+if _CORE_ROOT.exists() and str(_CORE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_CORE_ROOT))
+
 logger = logging.getLogger("benchmark")
 
 # ---------------------------------------------------------------------------
@@ -1078,8 +1082,8 @@ class BenchmarkRunner:
         try:
             if augmentor_router is not None:
                 # Run through augmentor system
-                from engine.augmentors import AugmentorRouter as _AR
-                from engine.base_model import BaseModel as _BM
+                from engine.augmentors import AugmentorRouter as _AR  # KEEP - unique to ultralight-coder
+                from densanon.core.model_loader import BaseModel as _BM
 
                 # Create a minimal shim that wraps the raw llama model
                 # so AugmentorRouter.process() can call model.generate() and
@@ -1187,7 +1191,7 @@ class BenchmarkRunner:
         # --- Run WITH augmentors ---
         if run_augmentors:
             print(f"\n  --- Mode: WITH AUGMENTORS ---")
-            from engine.augmentors import AugmentorRouter
+            from engine.augmentors import AugmentorRouter  # KEEP - unique to ultralight-coder
             augmentor_router = AugmentorRouter()
             mr = self._run_suite(
                 model, model_name, str(model_path), model_size_mb,

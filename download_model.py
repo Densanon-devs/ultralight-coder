@@ -56,6 +56,21 @@ MODELS = {
         "filename": "Yi-Coder-1.5B-Chat-Q4_K_M.gguf",
         "description": "Yi-Coder-1.5B-Chat Q4_K_M (~1.0GB) — 01-ai, chatml, Apache 2.0",
     },
+    "coder-14b": {
+        "repo": "Qwen/Qwen2.5-Coder-14B-Instruct-GGUF",
+        "filename": "qwen2.5-coder-14b-instruct-q4_k_m.gguf",
+        "description": "Qwen2.5-Coder-14B Q4_K_M (~9.0GB) — Phase 13 target, code specialist",
+    },
+    "qwen-14b": {
+        "repo": "Qwen/Qwen2.5-14B-Instruct-GGUF",
+        "filenames": [
+            "qwen2.5-14b-instruct-q4_k_m-00001-of-00003.gguf",
+            "qwen2.5-14b-instruct-q4_k_m-00002-of-00003.gguf",
+            "qwen2.5-14b-instruct-q4_k_m-00003-of-00003.gguf",
+        ],
+        "filename": "qwen2.5-14b-instruct-q4_k_m-00001-of-00003.gguf",
+        "description": "Qwen2.5-14B Q4_K_M split (3 files, ~9.0GB total) — Phase 13 target, general instruct. llama.cpp auto-loads siblings from the first file.",
+    },
 }
 
 MODELS_DIR = Path(__file__).parent / "models"
@@ -69,26 +84,31 @@ def download_model(key: str):
         sys.exit(1)
 
     info = MODELS[key]
-    dest = MODELS_DIR / info["filename"]
-
-    if dest.exists():
-        size_mb = dest.stat().st_size / (1024 * 1024)
-        print(f"Already exists: {dest} ({size_mb:.0f}MB)")
-        return
+    # Support both single-file and split-file entries. `filenames` (plural)
+    # is the authoritative list when present; `filename` is the first-part
+    # path that llama.cpp should be pointed at to auto-discover siblings.
+    filenames = info.get("filenames") or [info["filename"]]
 
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
     print(f"Downloading: {info['description']}")
     print(f"  From: {info['repo']}")
-    print(f"  File: {info['filename']}")
+    print(f"  Files: {len(filenames)}")
     print()
 
-    path = hf_hub_download(
-        repo_id=info["repo"],
-        filename=info["filename"],
-        local_dir=str(MODELS_DIR),
-        local_dir_use_symlinks=False,
-    )
-    print(f"\nSaved to: {path}")
+    for fn in filenames:
+        dest = MODELS_DIR / fn
+        if dest.exists():
+            size_mb = dest.stat().st_size / (1024 * 1024)
+            print(f"  [exists] {fn} ({size_mb:.0f}MB)")
+            continue
+        print(f"  [fetch]  {fn}")
+        path = hf_hub_download(
+            repo_id=info["repo"],
+            filename=fn,
+            local_dir=str(MODELS_DIR),
+        )
+        print(f"           -> {path}")
+    print(f"\nPrimary file: {MODELS_DIR / info['filename']}")
 
 
 def main():

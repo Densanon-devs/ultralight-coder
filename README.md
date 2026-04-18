@@ -8,6 +8,8 @@ Everything runs on your machine. No API keys, no cloud, no data leaves your comp
 
 - **12 languages** -- Python, JavaScript, TypeScript, Go, Rust, SQL, C, Java, C#, Ruby, Bash, Kotlin, Swift
 - **99.2% accuracy** on 130-query multi-language benchmark (469MB model)
+- **14B large-model support** -- Qwen 2.5 Coder 14B and Qwen 2.5 14B both hit **198/200 (99.0%)** on V1+V2 and **127–128/130** on multi-language via auto + language-scoped augmentor mode (Phase 13)
+- **Agent mode** -- `--agent "GOAL"` runs an autonomous ReAct loop with 9 builtin tools (read/write/edit/list/glob/grep/run_bash/run_tests/remember). Auto-syntax-checks Python writes, prompts before risky bash, and remembers per-project notes across sessions. Zero servers, pure in-process. (Phase 14)
 - **Web UI** with streaming responses, multi-turn conversation, code paste-and-fix
 - **Project context** -- index your codebase so the model references your actual code
 - **One-click launcher** -- `python launch.py` handles deps, GPU detection, model selection
@@ -51,6 +53,43 @@ python server.py                # API + web UI on :8000
 python main.py                  # Terminal REPL
 python main.py --dry-run        # Test routing without a model
 ```
+
+## Agent Mode
+
+Run an autonomous coding task in your current directory:
+
+```bash
+# One-shot from the CLI
+python main.py --agent "fix the failing test in tests/test_paginate.py"
+python main.py --agent "add a --verbose flag to launch.py and wire it into logging"
+python main.py --agent "create a Todo CLI in todo.py with add/list/done commands"
+
+# Interactive — at the `you>` REPL prompt
+/agent fix the failing test in tests/test_paginate.py
+```
+
+The agent runs a ReAct loop on top of the same local GGUF (we recommend Qwen 2.5 Coder 14B from Phase 13) and has 9 builtin tools:
+
+| Tool | Purpose |
+|---|---|
+| `read_file` | Read with line numbers and offset/limit for big files |
+| `write_file` | Create or overwrite a file |
+| `edit_file` | Exact-string replace in an existing file |
+| `list_dir` | Recursive directory listing (skips noise dirs) |
+| `glob` | Pattern-based file search, sorted by mtime |
+| `grep` | Ripgrep if installed, stdlib fallback otherwise |
+| `run_bash` | **Risky** — prompts for y/N before executing |
+| `run_tests` | pytest / unittest / npm / go / cargo |
+| `remember` | Save a per-project note for the next session |
+
+**Built-in safety:**
+- Python files are auto-syntax-checked after `write_file`/`edit_file`; if the model writes broken syntax, it sees the `auto_verify` error in the next turn and corrects.
+- `run_bash` is flagged risky — every command is shown to you with a `[y/N]` prompt before executing.
+- Cross-session memory is stored at `~/.ultralight-coder/memory/<workspace-hash>/notes.md` — local file only, never leaves your machine.
+
+**Zero servers, 100% private.** No HTTP, no localhost webview, no telemetry. The whole agent runs in the same Python process as the model.
+
+**Fast startup.** `--agent` uses a lightweight init path that only loads the base model, skipping the full routing/fusion/memory/embedder stack. On an RTX 3060 12 GB with Qwen 2.5 Coder 14B Q4_K_M, startup is ~4 seconds and sustained generation is ~20 tok/s. A typical 4-iteration task completes in under a minute. (If you need the full UCA stack for some reason, pass `--agent-full-init` — mostly useful for debugging or benchmarking.)
 
 ## Web UI
 
@@ -145,6 +184,24 @@ V4 (deep gaps + niche):   100/100
 TOTAL:                    399/400  99.8%
 ```
 
+### 14B models (Phase 13 + scoping followup)
+
+```
+V1+V2 (200 queries):
+  Qwen 2.5 Coder 14B        198/200   99.0%
+  Qwen 2.5 14B (non-coder)  198/200   99.0%
+
+Multi-language (130 queries, 12 languages):
+  Qwen 2.5 Coder 14B        128/130   98.5%
+  Qwen 2.5 14B (non-coder)  127/130   97.7%
+```
+
+Both 14B models come within 1–2 queries of the 0.5B–3B baseline across both
+benchmarks. Auto mode activates automatically for models ≥3 GB with language
+scoping + large-mode gating (keeps augmentors on for Python testing/data
+intents and all non-Python queries, skips for Python non-testing where the
+14B's canonical patterns dominate flat example injection).
+
 ## Configuration
 
 Edit `config.yaml` to customize. Key settings:
@@ -162,7 +219,7 @@ fusion:
   max_prompt_tokens: 2048 # Total prompt budget
 
 augmentors:
-  mode: auto              # auto selects rerank1 (<1.5GB) or rerank (>=1.5GB)
+  mode: auto              # auto: <1.5GB→rerank1, 1.5-3GB→rerank, ≥3GB→rerank+large-mode+language-scoping
 ```
 
 ## Project Structure

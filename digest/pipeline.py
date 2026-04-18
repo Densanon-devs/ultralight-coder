@@ -12,10 +12,16 @@ Orchestrates the three-pass curation flow:
 
 import json
 import logging
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+
+# Add densanon-core to sys.path for shared modules
+_CORE_ROOT = Path(__file__).resolve().parent.parent.parent / "densanon-core"
+if _CORE_ROOT.exists() and str(_CORE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_CORE_ROOT))
 
 from digest.config_loader import load_topic_config, discover_topics
 from digest.assembler import assemble_digest, save_digest
@@ -42,8 +48,8 @@ class DigestPipeline:
 
         Returns path to pending_digest.json.
         """
-        from digest.sources import fetch_all
-        from digest.dedup import load_seen, save_seen, prune_old, filter_new
+        from densanon.core.feed_fetcher import fetch_all
+        from densanon.core.dedup import load_seen, save_seen, prune_old, filter_new
 
         config = load_topic_config(self.topics_dir, topic_id)
         topic_dir = Path(self.topics_dir) / topic_id

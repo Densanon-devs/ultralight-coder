@@ -10,6 +10,8 @@ from dataclasses import dataclass, field
 from typing import Optional
 from pathlib import Path
 
+from engine.native_speculative import NativeSpeculativeConfig
+
 logger = logging.getLogger(__name__)
 
 
@@ -218,6 +220,7 @@ class Config:
         self.kv_cache = KVCacheConfig()
         self.micro_adapters = MicroAdapterConfig()
         self.project_context = ProjectContextConfig()
+        self.speculative = NativeSpeculativeConfig()
 
         if self.config_path.exists():
             self._load()
@@ -404,6 +407,21 @@ class Config:
                 file_extensions=pc.get("file_extensions", self.project_context.file_extensions),
                 ignore_patterns=pc.get("ignore_patterns", self.project_context.ignore_patterns),
                 max_file_size_kb=pc.get("max_file_size_kb", self.project_context.max_file_size_kb),
+            )
+
+        # Native speculative decoding (llama-cpp-python draft model)
+        if "speculative" in raw:
+            sp = raw["speculative"]
+            self.speculative = NativeSpeculativeConfig(
+                enabled=sp.get("enabled", self.speculative.enabled),
+                mode=sp.get("mode", self.speculative.mode),
+                num_pred_tokens=sp.get("num_pred_tokens", self.speculative.num_pred_tokens),
+                max_ngram_size=sp.get("max_ngram_size", self.speculative.max_ngram_size),
+                draft_model_path=self._resolve_path(
+                    sp.get("draft_model_path", self.speculative.draft_model_path)
+                ) if sp.get("draft_model_path") else self.speculative.draft_model_path,
+                draft_gpu_layers=sp.get("draft_gpu_layers", self.speculative.draft_gpu_layers),
+                draft_context_length=sp.get("draft_context_length", self.speculative.draft_context_length),
             )
 
         logger.info(f"Configuration loaded from {self.config_path}")

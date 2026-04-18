@@ -23,16 +23,22 @@ class BaseModel:
     - LoRA adapter hot-loading and unloading
     - Text generation with streaming support
     - Token counting for prompt budget management
+    - Optional native speculative decoding (prompt_lookup or draft_model)
     """
 
-    def __init__(self, config):
+    def __init__(self, config, speculative_config=None):
         """
         Args:
             config: BaseModelConfig dataclass from engine.config
+            speculative_config: Optional NativeSpeculativeConfig.
+                When enabled, passes a draft_model to llama-cpp-python's
+                Llama constructor for 2-3x throughput. Safe to leave None.
         """
         self.config = config
+        self.speculative_config = speculative_config
         self.model = None
         self._loaded_lora: Optional[str] = None
+        self._speculative_active: bool = False
 
     def load(self):
         """Load the base GGUF model into memory."""
@@ -57,7 +63,7 @@ class BaseModel:
         try:
             from llama_cpp import Llama
 
-            self.model = Llama(
+            llama_kwargs = dict(
                 model_path=str(model_path),
                 n_ctx=self.config.context_length,
                 n_gpu_layers=self.config.gpu_layers,
@@ -65,7 +71,37 @@ class BaseModel:
                 n_batch=self.config.batch_size,
                 verbose=logger.isEnabledFor(logging.DEBUG),
             )
-            logger.info("Model loaded successfully")
+
+            draft = self._maybe_build_draft_model()
+            if draft is not None:
+                llama_kwargs["draft_model"] = draft
+
+            try:
+                self.model = Llama(**llama_kwargs)
+                self._speculative_active = draft is not None
+            except TypeError as e:
+                if draft is not None and "draft_model" in str(e):
+                    logger.warning(
+                        "llama-cpp-python in this environment does not accept "
+                        "draft_model kwarg. Loading without native speculative decoding."
+                    )
+                    llama_kwargs.pop("draft_model", None)
+                    self.model = Llama(**llama_kwargs)
+                    self._speculative_active = False
+                else:
+                    raise
+
+            # KV cache reuse: NOT auto-enabled. On short prompts (<2000 tokens)
+            # the cache save/load overhead EXCEEDS eval savings — measured 15%
+            # slower on rename_function (100s vs 87s baseline). Only beneficial
+            # on very long multi-turn sessions. Callers can enable manually via:
+            #   from llama_cpp import LlamaRAMCache
+            #   bm.model.set_cache(LlamaRAMCache(capacity_bytes=2*1024**3))
+
+            if self._speculative_active:
+                logger.info("Model loaded successfully (native speculative decoding active)")
+            else:
+                logger.info("Model loaded successfully")
 
         except ImportError:
             logger.error(
@@ -252,9 +288,28 @@ class BaseModel:
         except Exception:
             return len(text) // 4
 
+    def _maybe_build_draft_model(self):
+        """Build a native speculative draft model if configured. Never raises."""
+        cfg = self.speculative_config
+        if cfg is None or not getattr(cfg, "enabled", False):
+            return None
+        try:
+            from engine.native_speculative import build_draft_model, describe
+            draft = build_draft_model(cfg)
+            if draft is not None:
+                logger.info(describe(cfg))
+            return draft
+        except Exception as e:
+            logger.warning(f"Native speculative draft build failed: {e}")
+            return None
+
     @property
     def is_loaded(self) -> bool:
         return self.model is not None
+
+    @property
+    def speculative_active(self) -> bool:
+        return self._speculative_active
 
     @property
     def active_lora(self) -> Optional[str]:

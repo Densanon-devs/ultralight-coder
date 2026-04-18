@@ -153,3 +153,25 @@ digest:
   max_selections: 10
   max_takeaways: 4
   compact_summary_chars: 100
+speculative:
+  # Native speculative decoding via llama-cpp-python's draft_model kwarg.
+  # Disabled by default. Safe to enable with mode=prompt_lookup for any model.
+  #
+  # Use mode=draft_model only when base and draft share a tokenizer family AND
+  # come from the same training lineage. Vocab match is necessary but not
+  # sufficient — Gemma 2 2B fails to draft Gemma 2 9B despite shared vocab
+  # because the training data diverges. See ggml-org/llama.cpp discussion
+  # #10466 for reports of 2.5x speedup on code with Qwen 0.5B -> 14B/32B.
+  enabled: false
+  mode: prompt_lookup   # prompt_lookup | draft_model
+  # prompt_lookup params:
+  num_pred_tokens: 10
+  max_ngram_size: 2
+  # draft_model params (unused unless mode=draft_model):
+  #   Default points at the Qwen 2.5 Coder 0.5B — community benchmarks on
+  #   llama.cpp report 0.5B as the sweet spot for drafting 14B+ targets
+  #   within the same family (~2.5x on coding tasks). The 1.5B also works
+  #   but is slower and uses more VRAM without a proportional speedup.
+  draft_model_path: ""  # e.g., models/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf
+  draft_gpu_layers: 99
+  draft_context_length: 4096

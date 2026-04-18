@@ -22,8 +22,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from engine.base_model import BaseModel
-from engine.config import BaseModelConfig
+from densanon.core.model_loader import BaseModel
+from densanon.core.config import BaseModelConfig
 
 logger = logging.getLogger(__name__)
 

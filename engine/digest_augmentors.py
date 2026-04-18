@@ -17,8 +17,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from engine.augmentors import Augmentor, SolvedExample, AugmentorResult
-from engine.example_loader import load_domain_examples, to_solved_examples
+from engine.augmentors import Augmentor, SolvedExample, AugmentorResult  # KEEP - unique to ultralight-coder
+from densanon.core.example_loader import load_domain_examples, to_solved_examples
 
 logger = logging.getLogger(__name__)
 

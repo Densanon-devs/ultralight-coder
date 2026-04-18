@@ -120,7 +120,7 @@ def load_domain_examples(base_dir: str, domain: str) -> list[dict]:
 
 def to_solved_examples(raw_examples: list[dict]) -> list:
     """Convert raw dicts to SolvedExample objects."""
-    from engine.augmentors import SolvedExample
+    from densanon.core.expert_system import SolvedExample
     return [
         SolvedExample(
             query=ex["query"],

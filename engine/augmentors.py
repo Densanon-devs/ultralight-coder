@@ -305,6 +305,133 @@ FAILURE_PATTERNS: dict[str, list[str]] = {
 logger = logging.getLogger(__name__)
 
 
+# ── Language Scoping ──────────────────────────────────────────
+# Phase 13 followup: Multi-language library expansion in Phase 10 added per-language
+# augmentor categories (c_*, bash_*, rust_*, js_*, etc.). Embedding retrieval is
+# topic-biased and language-blind, so a Python query about "camelCase to snake_case"
+# retrieves js_basics (because JS has a topically similar example). Graph mode compounds
+# this by walking from the wrong root. The fix: detect query language from natural-language
+# markers ("Write a Rust function...") and filter retrieval candidates to only examples
+# that match the detected language, with Python as the default.
+#
+# Category naming convention in data/augmentor_examples/:
+#   <lang>_*      — language-specific (rust_basics, bash_basics, csharp_basics, js_web, etc.)
+#   <domain>_*    — Python-implicit neutral (pattern_decorator, cli_argparse, test_mocking, etc.)
+#   basic         — generic Python
+# Allowed sets below are derived from this convention.
+
+_LANGUAGE_CATEGORY_PREFIXES = {
+    "js":     ("js_",),
+    "ts":     ("ts_", "js_"),      # TS queries can use JS examples
+    "rust":   ("rust_",),
+    "go":     ("go_",),
+    "java":   ("java_",),
+    "csharp": ("csharp_",),
+    "kotlin": ("kotlin_",),
+    "swift":  ("swift_",),
+    "ruby":   ("ruby_",),
+    "bash":   ("bash_",),
+    "sql":    ("sql_",),
+    "c":      ("c_",),
+}
+_ALL_NON_PYTHON_PREFIXES = tuple(p for prefixes in _LANGUAGE_CATEGORY_PREFIXES.values() for p in prefixes)
+
+
+def _detect_query_language(query: str) -> str:
+    """Return a language key ('python' default) based on explicit markers in the query.
+
+    Multi-language benchmark queries follow 'Write a <LANG>...' — the cheap path.
+    Falls back to keyword scanning for language-specific identifiers (goroutine,
+    fn main, cargo, etc.) before defaulting to python.
+    """
+    q = (query or "").lower()
+    import re
+    # C# is special because # isn't a word character in regex. Check it before the
+    # main pattern so "c#" wins over the bare "c" fallback.
+    if re.search(r"\b(?:write|create|build|implement|make|design|develop)\s+(?:an?\s+|some\s+)?c#", q):
+        return "csharp"
+    # "Write a <lang>" / "create a <lang>" / "build a <lang>" / "implement <lang>"
+    m = re.search(
+        r"\b(?:write|create|build|implement|make|design|develop)\s+(?:an?\s+|some\s+)?"
+        r"(python|javascript|typescript|rust|go|java|c-sharp|csharp|kotlin|swift|ruby|bash|shell|sql|c)\b",
+        q,
+    )
+    if m:
+        lang = m.group(1)
+        if lang == "c-sharp":
+            return "csharp"
+        if lang == "shell":
+            return "bash"
+        if lang == "typescript":
+            return "ts"
+        if lang == "javascript":
+            return "js"
+        return lang
+    # Standalone signal phrases (no preceding verb)
+    for phrase, lang in (
+        ("goroutine", "go"), ("fn main", "rust"), ("cargo ", "rust"), ("use std::", "rust"),
+        ("package main", "go"), (":: ", "cpp"),
+        (".ts ", "ts"), (".tsx", "ts"),
+        ("class interface", "java"),  # rare
+    ):
+        if phrase in q:
+            if lang == "cpp":
+                return "c"  # treat C++ as c bucket (closest library coverage)
+            return lang
+    return "python"
+
+
+def _filter_forced_by_language(forced_examples, language: str):
+    """Filter a list of SolvedExamples (from failure-routing) to the target language.
+
+    Returns the subset whose category matches the language scoping rules. Empty list
+    is a valid return (caller decides whether to fall through to similarity retrieval).
+    """
+    if not forced_examples:
+        return forced_examples
+    if language == "python":
+        return [
+            ex for ex in forced_examples
+            if not (ex.category or "").lower().startswith(_ALL_NON_PYTHON_PREFIXES)
+        ]
+    prefixes = _LANGUAGE_CATEGORY_PREFIXES.get(language)
+    if not prefixes:
+        return forced_examples
+    return [ex for ex in forced_examples if (ex.category or "").lower().startswith(prefixes)]
+
+
+def _filter_examples_for_language(examples, embeddings, language: str):
+    """Return (filtered_examples, filtered_embeddings) scoped to the given language.
+
+    Python (default): allow all categories EXCEPT explicit non-python prefixes.
+    Non-Python: allow only categories whose prefix matches the target language.
+
+    If filtering would leave <3 examples, falls back to the unfiltered inputs to avoid
+    starving retrieval. Preserves index alignment between examples and embeddings.
+    """
+    if not examples or embeddings is None:
+        return examples, embeddings
+    if language == "python":
+        allowed_idx = [
+            i for i, ex in enumerate(examples)
+            if not (ex.category or "").lower().startswith(_ALL_NON_PYTHON_PREFIXES)
+        ]
+    else:
+        prefixes = _LANGUAGE_CATEGORY_PREFIXES.get(language)
+        if not prefixes:
+            return examples, embeddings
+        allowed_idx = [
+            i for i, ex in enumerate(examples)
+            if (ex.category or "").lower().startswith(prefixes)
+        ]
+    if len(allowed_idx) < 3:
+        return examples, embeddings
+    import numpy as np
+    filtered_examples = [examples[i] for i in allowed_idx]
+    filtered_embeddings = embeddings[allowed_idx] if hasattr(embeddings, "__getitem__") else np.asarray(embeddings)[allowed_idx]
+    return filtered_examples, filtered_embeddings
+
+
 @dataclass
 class SolvedExample:
     """A solved example in the augmentor's knowledge bank."""
@@ -361,6 +488,7 @@ class Augmentor:
         self._graph = None  # Optional PatternGraph for graph-enhanced retrieval
         self._retrieval_mode = "flat"  # "flat", "graph", "rerank", "plan", "rerank1"
         self.skip_failure_routing = False  # When True, disables FAILURE_PATTERNS bypass
+        self._language_scoping = False  # When True, filter examples by detected query language
 
     def init_embeddings(self, embedder):
         """Pre-embed all examples for fast retrieval."""
@@ -388,14 +516,15 @@ class Augmentor:
         if self._graph is None or self._embedder is None or self._example_embeddings is None:
             return self.retrieve_examples(query, top_k=top_k)
 
-        from engine.pattern_graph import graph_retrieve_examples
-        k = min(top_k or self.max_examples, len(self.examples))
+        from densanon.core.pattern_graph import graph_retrieve_examples
+        examples, embeddings = self._scoped_examples(query)
+        k = min(top_k or self.max_examples, len(examples))
         fp = None if self.skip_failure_routing else FAILURE_PATTERNS
         return graph_retrieve_examples(
             query=query,
             embedder=self._embedder,
-            example_embeddings=self._example_embeddings,
-            examples=self.examples,
+            example_embeddings=embeddings,
+            examples=examples,
             graph=self._graph,
             failure_patterns=fp,
             top_k=k,
@@ -413,14 +542,15 @@ class Augmentor:
         if self._graph is None or self._embedder is None or self._example_embeddings is None:
             return self.retrieve_examples(query, top_k=top_k)
 
-        from engine.pattern_graph import graph_rerank_examples
-        k = min(top_k or 2, len(self.examples))  # default 2 for rerank
+        from densanon.core.pattern_graph import graph_rerank_examples
+        examples, embeddings = self._scoped_examples(query)
+        k = min(top_k or 2, len(examples))  # default 2 for rerank
         fp = None if self.skip_failure_routing else FAILURE_PATTERNS
         return graph_rerank_examples(
             query=query,
             embedder=self._embedder,
-            example_embeddings=self._example_embeddings,
-            examples=self.examples,
+            example_embeddings=embeddings,
+            examples=examples,
             graph=self._graph,
             failure_patterns=fp,
             top_k=k,
@@ -437,16 +567,29 @@ class Augmentor:
         if self._graph is None or self._embedder is None or self._example_embeddings is None:
             return self.retrieve_examples(query, top_k=1)
 
-        from engine.pattern_graph import graph_plan_examples
+        from densanon.core.pattern_graph import graph_plan_examples
+        examples, embeddings = self._scoped_examples(query)
         fp = None if self.skip_failure_routing else FAILURE_PATTERNS
         return graph_plan_examples(
             query=query,
             embedder=self._embedder,
-            example_embeddings=self._example_embeddings,
-            examples=self.examples,
+            example_embeddings=embeddings,
+            examples=examples,
             graph=self._graph,
             failure_patterns=fp,
         )
+
+    def _scoped_examples(self, query: str):
+        """Return (examples, embeddings) filtered for the query's detected language.
+
+        When _language_scoping is False, returns the full unfiltered set (backward
+        compat with the pre-Phase 13 behavior). Used by the graph-family retrieval
+        methods to avoid cross-language example bleeding.
+        """
+        if not self._language_scoping:
+            return self.examples, self._example_embeddings
+        lang = _detect_query_language(query)
+        return _filter_examples_for_language(self.examples, self._example_embeddings, lang)
 
     def retrieve_examples(self, query: str, top_k: Optional[int] = None,
                           multi_expert: Optional[bool] = None) -> list[SolvedExample]:
@@ -468,18 +611,27 @@ class Augmentor:
         if not self._embedder or self._example_embeddings is None or len(self.examples) == 0:
             return self.examples[:self.max_examples]
 
-        k = min(top_k or self.max_examples, len(self.examples))
+        # Apply language scoping if enabled. Uses local variables so this doesn't mutate
+        # self.examples / self._example_embeddings. All indexing below refers to the
+        # scoped arrays; returned SolvedExample objects are the originals.
+        scoped_examples, scoped_embeddings = self._scoped_examples(query)
 
-        # Layer 0: Failure-aware routing — force-inject for known failure patterns
+        k = min(top_k or self.max_examples, len(scoped_examples))
+
+        # Layer 0: Failure-aware routing — force-inject for known failure patterns.
+        # If language scoping is on, filter forced results to the detected language.
         if not self.skip_failure_routing:
             forced = self._check_failure_patterns(query)
+            if forced and self._language_scoping:
+                lang = _detect_query_language(query)
+                forced = _filter_forced_by_language(forced, lang)
             if forced:
                 logger.debug(f"Failure-aware: force-injecting {len(forced)} examples for known patterns")
                 return forced[:k]
 
         query_vec = self._embedder.encode([query], normalize_embeddings=True)
 
-        sims = np.dot(self._example_embeddings, query_vec.T).flatten()
+        sims = np.dot(scoped_embeddings, query_vec.T).flatten()
         ranked = sims.argsort()[::-1]
 
         # Layer 1: High threshold for best match
@@ -489,7 +641,7 @@ class Augmentor:
             return []
 
         if multi_expert:
-            return self._retrieve_multi_expert(sims, ranked, k)
+            return self._retrieve_multi_expert(sims, ranked, k, examples=scoped_examples)
 
         # Layer 2: Confidence-based injection limit
         # Low confidence (< 0.60) = inject only 1 example to minimize risk
@@ -497,7 +649,7 @@ class Augmentor:
         if sims[best_idx] < 0.60:
             max_inject = 1
 
-        best_category = self.examples[best_idx].category
+        best_category = scoped_examples[best_idx].category
         selected = [best_idx]
 
         # Layer 3: Tiered thresholds — same category is easier, cross-category is harder
@@ -505,10 +657,10 @@ class Augmentor:
         min_sim_cross_cat = 0.55
 
         same_cat = [i for i in ranked[1:] if sims[i] >= min_sim_same_cat
-                    and self.examples[i].category == best_category
+                    and scoped_examples[i].category == best_category
                     and i not in selected]
         other = [i for i in ranked[1:] if sims[i] >= min_sim_cross_cat
-                 and self.examples[i].category != best_category
+                 and scoped_examples[i].category != best_category
                  and i not in selected]
 
         for i in same_cat:
@@ -520,10 +672,11 @@ class Augmentor:
                 break
             selected.append(i)
 
-        return [self.examples[i] for i in selected]
+        return [scoped_examples[i] for i in selected]
 
     def _retrieve_multi_expert(self, sims: np.ndarray, ranked: np.ndarray,
-                               max_inject: int) -> list[SolvedExample]:
+                               max_inject: int,
+                               examples: Optional[list] = None) -> list[SolvedExample]:
         """Category-diversified retrieval for composite tasks.
 
         Instead of taking the globally top-k examples, picks the best example
@@ -535,6 +688,9 @@ class Augmentor:
         - Best pattern_decorator example
         - Best pattern_rate_limit example
         """
+        # When examples is passed, it's the language-scoped subset; otherwise fall back
+        # to the full self.examples (legacy callers before language scoping).
+        source_examples = examples if examples is not None else self.examples
         min_sim = 0.30  # Lower threshold for complementary experts
         max_categories = max(max_inject, 3)  # Allow up to 3 categories
 
@@ -543,7 +699,7 @@ class Augmentor:
         for i in ranked:
             if sims[i] < min_sim:
                 break
-            cat = self.examples[i].category
+            cat = source_examples[i].category
             if cat not in best_per_category:
                 best_per_category[cat] = (int(i), float(sims[i]))
                 if len(best_per_category) >= max_categories:
@@ -562,7 +718,7 @@ class Augmentor:
                 break
             selected.append(idx)
 
-        return [self.examples[i] for i in selected]
+        return [source_examples[i] for i in selected]
 
     def _check_failure_patterns(self, query: str) -> list[SolvedExample]:
         """Check if query matches known failure patterns from benchmark data.
@@ -1930,9 +2086,9 @@ def _load_yaml_examples(base_dir: str = "data/augmentor_examples") -> dict[str, 
     - Everything else (pattern, algorithm, class_design, common basics, text) → code_gen
     """
     try:
-        from engine.example_loader import load_all_examples
+        from densanon.core.example_loader import load_all_examples
     except ImportError:
-        from example_loader import load_all_examples
+        from densanon.core.example_loader import load_all_examples
 
     raw = load_all_examples(base_dir)
     if not raw:
@@ -2059,6 +2215,7 @@ class AugmentorRouter:
         self._plan_mode = plan
         self._adaptive_mode = False
         self._hybrid_mode = False
+        self._large_mode = False
         self._examples_dir = yaml_dir or examples_dir
         # Keep all sets available for runtime switching
         self._generic_augmentors: dict[str, Augmentor] = {}
@@ -2127,7 +2284,7 @@ class AugmentorRouter:
     def _build_graph_augmentors(self) -> dict[str, Augmentor]:
         """Build graph-enhanced augmentors reusing YAML examples."""
         try:
-            from engine.pattern_graph import PatternGraph
+            from densanon.core.pattern_graph import PatternGraph
             graph = PatternGraph("data/pattern_graph.yaml")
             if not graph.nodes:
                 logger.warning("Pattern graph empty, graph augmentors unavailable")
@@ -2149,6 +2306,10 @@ class AugmentorRouter:
                 multi_expert=aug.multi_expert,
             )
             clone.set_graph(graph)
+            # Crucial: set _retrieval_mode so _retrieve_for_mode dispatches to
+            # retrieve_examples_graph(). Pre-Phase-13-followup this was left as "flat",
+            # which meant graph mode never actually did graph retrieval.
+            clone._retrieval_mode = "graph"
             # Share pre-computed embeddings (set during init_embeddings)
             clone._example_embeddings = aug._example_embeddings
             clone._embedder = aug._embedder
@@ -2166,7 +2327,7 @@ class AugmentorRouter:
         mode so build_prompt dispatches to the right retrieval method.
         """
         try:
-            from engine.pattern_graph import PatternGraph
+            from densanon.core.pattern_graph import PatternGraph
             graph = PatternGraph("data/pattern_graph.yaml")
             if not graph.nodes:
                 logger.warning(f"Pattern graph empty, {mode} augmentors unavailable")
@@ -2268,7 +2429,12 @@ class AugmentorRouter:
         )
 
     def use_graph_augmentors(self):
-        """Swap in graph-enhanced augmentors (pattern dependency traversal)."""
+        """Swap in graph-enhanced augmentors (pattern dependency traversal).
+
+        Language scoping is automatically enabled for graph mode — the Phase 13
+        followup established that cross-language retrieval is the dominant failure
+        mode for graph on V1+V2. Disable via ._set_language_scoping(False) if needed.
+        """
         self._tuned = False
         self._stress = False
         self._pack = False
@@ -2283,10 +2449,27 @@ class AugmentorRouter:
             for gaug in self._graph_augmentors.values():
                 if gaug._embedder is None:
                     gaug.init_embeddings(self._embedder)
+        self._set_language_scoping(True)
         logger.info(
-            f"Switched to graph augmentors: "
+            f"Switched to graph augmentors (language scoping ON): "
             f"{', '.join(f'{k}({len(v.examples)})' for k, v in self.augmentors.items())}"
         )
+
+    def _set_language_scoping(self, enabled: bool):
+        """Toggle _language_scoping on every augmentor in every active set.
+
+        Scoping filters retrieval candidates by detected query language to avoid
+        cross-language bleeding (Phase 10 multi-language library expansion made
+        this bleeding a significant failure mode at 14B).
+        """
+        all_sets = (
+            self._generic_augmentors, self._tuned_augmentors, self._stress_augmentors,
+            self._pack_augmentors, self._yaml_augmentors, self._graph_augmentors,
+            self._rerank_augmentors, self._plan_augmentors, self.augmentors,
+        )
+        for aug_set in all_sets:
+            for aug in aug_set.values():
+                aug._language_scoping = enabled
 
     def use_adaptive_augmentors(self):
         """Adaptive mode: auto-select flat vs graph per-query based on composite signal."""
@@ -2305,7 +2488,8 @@ class AugmentorRouter:
             for aug in list(self._yaml_augmentors.values()) + list(self._graph_augmentors.values()):
                 if aug._embedder is None:
                     aug.init_embeddings(self._embedder)
-        logger.info("Switched to adaptive augmentors (auto flat/graph per-query)")
+        self._set_language_scoping(True)
+        logger.info("Switched to adaptive augmentors (auto flat/graph per-query, language scoping ON)")
 
     def use_hybrid_augmentors(self):
         """Hybrid mode: try graph first, fall back to flat on exec failure."""
@@ -2324,7 +2508,8 @@ class AugmentorRouter:
             for aug in list(self._yaml_augmentors.values()) + list(self._graph_augmentors.values()):
                 if aug._embedder is None:
                     aug.init_embeddings(self._embedder)
-        logger.info("Switched to hybrid augmentors (graph first, flat fallback)")
+        self._set_language_scoping(True)
+        logger.info("Switched to hybrid augmentors (graph first, flat fallback, language scoping ON)")
 
     def use_rerank_augmentors(self):
         """Swap in graph-rerank augmentors (flat candidates, graph-scored reranking)."""
@@ -2417,17 +2602,66 @@ class AugmentorRouter:
         - 3B+ models: two-example injection (rerank) uses extra context productively
         - Failure-aware routing stays enabled (it correctly handles known patterns)
 
+        Phase 13 findings (added 2026-04-13):
+        - 14B models (>= 3000 MB): augmentors net-hurt on V1+V2 (-4 queries coder-14b,
+          -8 queries qwen-14b). Effect concentrates in async/cli/web/general — domains
+          where 14B already has strong canonical patterns and the injected example
+          drags it off-canon. testing and data domains still benefit from injection.
+          Large mode: keep the router loaded but gate selection on query intent.
+
         Args:
             model_size_mb: Model file size in MB. Used to determine tier.
                           < 1500 MB → rerank1 (single example)
-                          >= 1500 MB → rerank (two examples)
+                          1500 - 3000 MB → rerank (two examples)
+                          >= 3000 MB → rerank + large_mode (domain-gated)
         """
-        if model_size_mb >= 1500:
+        self._large_mode = model_size_mb >= 3000
+        if self._large_mode:
+            self.use_rerank_augmentors()
+            # Large models benefit from language scoping because the multi-language
+            # library expansion (Phase 10) introduced cross-language bleeding that
+            # topic-biased embeddings don't resolve. Also: large_mode keeps augmentors
+            # on for non-Python queries (see _large_mode_should_augment), and those
+            # need scoped retrieval to land on the right per-language examples.
+            self._set_language_scoping(True)
+            logger.info(
+                f"Auto mode: model {model_size_mb:.0f}MB >= 3000MB → RERANK + LARGE MODE "
+                f"(augmentors fire for testing/data-intent Python queries and all non-Python; "
+                f"language scoping ON)"
+            )
+        elif model_size_mb >= 1500:
             self.use_rerank_augmentors()
             logger.info(f"Auto mode: model {model_size_mb:.0f}MB >= 1500MB → RERANK (2 examples)")
         else:
             self.use_rerank1_augmentors()
             logger.info(f"Auto mode: model {model_size_mb:.0f}MB < 1500MB → RERANK1 (1 example)")
+
+    # Phase 13: domains where augmentor injection helped 14B models on V1+V2.
+    # Derived from the per-domain delta in phase13_*_aug.json vs phase13_*_raw.json.
+    # Everything else is gated off for large models; canonical 14B output already
+    # handles those domains as well or better than the injected examples.
+    _LARGE_MODE_KEEP_KEYWORDS: tuple[str, ...] = (
+        "test", "pytest", "unittest", "mock", "fixture", "assert",
+        "parametriz", "factory", "patch(",
+        "csv", "dataframe", "pandas", "etl", "data pipeline",
+        "json lines", "parquet",
+    )
+
+    def _large_mode_should_augment(self, query: str) -> bool:
+        """Return True if a large model should still receive augmentor injection.
+
+        Three-layer decision:
+        1. Non-Python queries: always augment. Phase 13's "14B is Python-native and
+           the augmentor drags it off-canon" finding only applies to Python — for
+           Rust/Kotlin/Java/etc. the 14B is weaker and scaffolding helps (see Phase 10
+           multi-language 129/130 baseline which depended on per-language augmentors).
+        2. Python testing/data intents: keep (original allowlist).
+        3. Python everything else: skip (off-canon drag dominates).
+        """
+        if _detect_query_language(query) != "python":
+            return True
+        q = query.lower()
+        return any(k in q for k in self._LARGE_MODE_KEEP_KEYWORDS)
 
     def set_skip_failure_routing(self, skip: bool):
         """Toggle failure-aware routing bypass on ALL augmentor sets.
@@ -2450,7 +2684,7 @@ class AugmentorRouter:
 
     def reload_yaml(self, base_dir: str = ""):
         """Reload YAML examples from disk (hot-reload for development)."""
-        from engine.example_loader import _cache
+        from densanon.core.example_loader.loader import _cache
         _cache.clear()  # Clear file cache to force re-read
         dir_to_use = base_dir or self._examples_dir
         self._yaml_augmentors = build_yaml_augmentors(dir_to_use)
@@ -2462,7 +2696,14 @@ class AugmentorRouter:
         logger.info("YAML augmentors reloaded from disk")
 
     def select_augmentor(self, query: str, module_hint: Optional[str] = None) -> Optional[Augmentor]:
-        """Select the best augmentor for a query."""
+        """Select the best augmentor for a query.
+
+        In large mode (models >= 3000 MB), augmentors only fire for queries whose
+        intent matches the testing/data allowlist. See Phase 13 findings in
+        use_auto_augmentors() for the rationale.
+        """
+        if self._large_mode and not self._large_mode_should_augment(query):
+            return None
         if module_hint == "code_gen":
             return self.augmentors.get("code_gen")
         if module_hint == "code_review":

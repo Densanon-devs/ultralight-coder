@@ -47,3 +47,7 @@ Thumbs.db
 htmlcov/
 .coverage
 .mypy_cache/
+results/
+parse_dumps/
+__pycache__/
+*.pyc
