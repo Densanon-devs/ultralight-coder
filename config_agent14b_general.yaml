@@ -6,7 +6,7 @@ base_model:
   # Qwen 2.5 14B Instruct (general-purpose, non-coder variant)
   # Same Hermes tool-call format as the Coder, but better at conversation,
   # reasoning, and general file/system tasks.
-  path: D:/LLCWork/ultralight-coder/models/qwen2.5-14b-instruct-q4_k_m-00001-of-00003.gguf
+  path: models/qwen2.5-14b-instruct-q4_k_m-00001-of-00003.gguf
   context_length: 16384
   gpu_layers: 99
   threads: 8

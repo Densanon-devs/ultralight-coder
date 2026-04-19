@@ -3,7 +3,7 @@ system:
   version: 0.1.0
   log_level: INFO
 base_model:
-  path: D:/LLCWork/ultralight-coder/models/qwen2.5-coder-14b-instruct-q4_k_m.gguf
+  path: models/qwen2.5-coder-14b-instruct-q4_k_m.gguf
   context_length: 16384
   gpu_layers: 99
   threads: 8

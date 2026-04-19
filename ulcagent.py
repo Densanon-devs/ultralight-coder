@@ -194,10 +194,13 @@ class ModelManager:
                 label = PROFILES[profile]["label"]
                 print(f"  {_dim(f'Loading {label}...')}", end=" ", flush=True)
 
-        from densanon.core.config import Config
+        try:
+            from densanon.core.config import Config
+            self._config = Config(PROFILES[profile]["config"])
+        except ImportError:
+            from engine._config_shim import load_config
+            self._config = load_config(PROFILES[profile]["config"])
         from engine.base_model import BaseModel
-
-        self._config = Config(PROFILES[profile]["config"])
         # Apply model path override if /model was used
         if override:
             self._config.base_model.path = override
