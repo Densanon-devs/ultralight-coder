@@ -1297,7 +1297,12 @@ _DOC_GOALS = {
 
 
 _HELP_TEXT = """
-  {bold}ulcagent commands:{end}
+  {bold}Three ways to use ulcagent:{end}
+    Terminal:   {cyan}ulcagent{end}
+    Browser:    {cyan}python web_agent.py{end}  (localhost:8899)
+    VS Code:    right-click → Ask/Fix/Explain with ulcagent
+
+  {bold}ulcagent commands (30):{end}
     {cyan}?{end}  / {cyan}help{end}              Show this help
     {cyan}/code{end} <goal>          Force the Coder model for this goal
     {cyan}/general{end} <goal>       Force the General model for this goal
@@ -1311,8 +1316,7 @@ _HELP_TEXT = """
     {cyan}/models{end}              List available GGUF models in models/
     {cyan}/model code <name>{end}   Set the code profile's model
     {cyan}/model general <name>{end} Set the general profile's model
-    {cyan}/model <name>{end}        Set both profiles to the same model
-    {cyan}/default <name>{end}      Set default model for future sessions
+    {cyan}/default <name>{end}      Set default model for both profiles
     {cyan}/modelpath{end}           List model search directories
     {cyan}/modelpath add <dir>{end} Add a directory to scan for GGUFs
     {cyan}/modelpath remove <dir>{end} Remove a search directory
@@ -1320,19 +1324,23 @@ _HELP_TEXT = """
     {cyan}/export{end} [file]       Save session conversation to markdown
     {cyan}/paste{end}               Send clipboard contents as context
     {cyan}/copy{end}                Copy last answer to clipboard
-    {cyan}/snippet list{end}        Show saved code snippets
     {cyan}/snippet save <n>{end}    Save last answer as a named snippet
+    {cyan}/snippet list{end}        Show saved code snippets
     {cyan}/snippet delete <n>{end}  Delete a saved snippet
     {cyan}/snippet <name>{end}      Load a snippet as context
     {cyan}/stats{end}               Show session statistics
-    {cyan}/test{end}                Alias: run pytest and report failures
-    {cyan}/lint{end}                Alias: run the project linter
-    {cyan}/format{end}              Alias: run the code formatter
+    {cyan}/test{end}                Run project tests (auto-detects framework)
+    {cyan}/lint{end}                Run the project linter
+    {cyan}/format{end}              Run the project code formatter
     {cyan}/autofix{end} [N]         Run tests, fix failures, re-run — loop up to N times (default 5)
     {cyan}/watch{end} [action]      Watch for file changes, auto-run: test, lint, or custom goal
     {cyan}/batch{end} <file>        Run goals from a text file (one per line)
     {cyan}/docs{end} readme|api|arch  Auto-generate project documentation
     {cyan}/plugins{end}             List loaded plugins from plugins/ directory
+    {cyan}/learn{end}               Capture a correction for future sessions
+    {cyan}/learn list{end}          List stored corrections
+    {cyan}/learn clear{end}         Clear all corrections
+    {cyan}/learn delete{end} N      Delete correction at index N
     {cyan}cd <path>{end}             Switch workspace directory
     {cyan}exit{end} / {cyan}quit{end}            Exit the agent
     {cyan}Ctrl+C{end}               Cancel a running task

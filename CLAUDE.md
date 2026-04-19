@@ -216,7 +216,7 @@ ulcagent --extended         # enable 21 advanced tools (rename, git, checkpoint,
 
 Override with `/code <goal>` or `/general <goal>`.
 
-**Slash commands:**
+**Slash commands (30):**
 | Command | Action |
 |---------|--------|
 | `?` | Show help with tips and examples |
@@ -236,18 +236,28 @@ Override with `/code <goal>` or `/general <goal>`.
 | `/modelpath` | Show current model search directories |
 | `/modelpath add <dir>` | Add a directory to the model search path |
 | `/modelpath remove <dir>` | Remove a directory from the model search path |
+| `/modelpath list` | List all model search directories |
 | `/review` | Review recent changes (code review mode) |
 | `/export` | Export session transcript |
 | `/paste` | Paste clipboard contents as context |
 | `/copy` | Copy last response to clipboard |
-| `/snippet list` | List saved snippets |
 | `/snippet save <name>` | Save last response as a named snippet |
-| `/snippet <name>` | Insert a saved snippet as context |
+| `/snippet list` | List saved snippets |
 | `/snippet delete <name>` | Delete a saved snippet |
+| `/snippet load <name>` | Insert a saved snippet as context |
 | `/stats` | Show session statistics (tokens, turns, timing) |
 | `/test` | Run project tests (auto-detects framework) |
 | `/lint` | Run project linter |
 | `/format` | Run project formatter |
+| `/autofix [N]` | Auto-fix lint/test errors, up to N iterations |
+| `/watch [action]` | Watch files for changes and run action on save |
+| `/batch <file>` | Run a batch of goals from a file |
+| `/docs (readme/api/arch)` | Generate project documentation |
+| `/plugins` | List loaded plugins |
+| `/learn` | Capture a correction for future sessions |
+| `/learn list` | List stored corrections |
+| `/learn clear` | Clear all corrections |
+| `/learn delete <id>` | Delete a specific correction |
 | `cd <path>` | Switch workspace |
 | `exit` | Quit ulcagent |
 
@@ -275,6 +285,33 @@ Tests live in tests/ and use pytest. Always run tests after code changes.
 ```
 
 When ulcagent starts in a directory containing `.ulcagent`, it reads the file automatically. Instructions appear in the agent's system prompt; aliases appear alongside the built-in slash commands.
+
+### Web UI (web_agent.py)
+- Browser-based chat at localhost:8899
+- `python web_agent.py [--port 8899] [--workspace .]`
+- Dark theme, tool call rendering, session memory, model switching
+- Pure stdlib HTTP server
+
+### VS Code Extension (vscode-ulcagent/)
+- Right-click context menu: Ask / Fix / Explain with ulcagent
+- Ctrl+Shift+P command palette integration
+- Install: copy to ~/.vscode/extensions/ or F5 dev mode
+- Configure ulcagent.agentPath in VS Code settings
+
+### Plugin System (plugins/)
+- Drop a .py file in plugins/ with a register(registry) function
+- Auto-loaded on agent startup
+- Example: plugins/example_plugin.py
+
+### Model Profiles (profiles/)
+- Per-model system prompt + temperature overrides
+- YAML files matched by model filename patterns
+- Ready for Qwen 3 Coder when it ships
+
+### Correction Learning (engine/correction_memory.py)
+- /learn captures user corrections as structured patterns
+- Fuzzy-matched and injected into future system prompts
+- Persists to ~/.ulcagent_corrections.json
 
 ### Known Ceilings and Workarounds
 
