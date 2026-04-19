@@ -1,0 +1,67 @@
+{
+  "name": "ulcagent",
+  "displayName": "ulcagent - Local AI Coding Agent",
+  "description": "Send code to ulcagent for analysis, fixes, and generation. 100% local, zero cloud.",
+  "version": "0.1.0",
+  "publisher": "densanon-devs",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "activationEvents": [
+    "onCommand:ulcagent.ask",
+    "onCommand:ulcagent.fix",
+    "onCommand:ulcagent.explain"
+  ],
+  "main": "./extension.js",
+  "categories": [
+    "AI",
+    "Other"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "ulcagent.ask",
+        "title": "Ask ulcagent"
+      },
+      {
+        "command": "ulcagent.fix",
+        "title": "Fix with ulcagent"
+      },
+      {
+        "command": "ulcagent.explain",
+        "title": "Explain with ulcagent"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "ulcagent.ask",
+          "group": "ulcagent@1"
+        },
+        {
+          "command": "ulcagent.fix",
+          "group": "ulcagent@2"
+        },
+        {
+          "command": "ulcagent.explain",
+          "group": "ulcagent@3"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "ulcagent",
+      "properties": {
+        "ulcagent.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Path to the Python interpreter."
+        },
+        "ulcagent.agentPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to ulcagent.py (e.g. D:\\LLCWork\\ultralight-coder\\ulcagent.py)."
+        }
+      }
+    }
+  }
+}

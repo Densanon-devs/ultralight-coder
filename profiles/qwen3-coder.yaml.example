@@ -1,0 +1,20 @@
+# Example model prompt profile for Qwen 3 Coder (when it ships).
+#
+# Place in profiles/ directory. ulcagent matches the "match" patterns
+# against the loaded GGUF filename. When matched, the system_prompt and
+# settings override the defaults.
+#
+# Rename this file to qwen3-coder.yaml and update when the model is available.
+
+match:
+  - "qwen3"
+  - "qwen-3"
+  - "Qwen3"
+
+system_prompt: |
+  You are a precise coding agent powered by Qwen 3 Coder.
+  Use tools to complete tasks, then give a concise final answer.
+
+temperature: 0.1
+repeat_penalty: 1.15
+max_tokens: 1024

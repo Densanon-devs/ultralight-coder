@@ -249,6 +249,12 @@ def _build_agent(mgr: ModelManager, workspace: Path):
     if profile == "general":
         _register_system_tools(registry)
 
+    # Load plugins
+    plugin_count = _load_plugins(registry)
+
+    # Load model-specific prompt profile
+    model_profile = _load_model_profile(mgr.bm.config.base_model.path if hasattr(mgr.bm, 'config') else "")
+
     def _confirm_risky(call):
         _spinner.stop()
         args_s = ', '.join(f'{k}={str(v)[:60]}' for k, v in call.arguments.items())
@@ -1116,6 +1122,180 @@ def _show_stats():
     print(f"    Peak context:     {_stats['ctx_peak']:.0f}%")
 
 
+# ── Autofix loop ─────────────────────────────────────────────────
+
+def _autofix_goal(max_rounds: int = 5) -> str:
+    """Generate a goal string for the test-fix loop."""
+    return (
+        f"Run pytest (or the project's test suite). If any tests fail, read the "
+        f"failure output, identify the bug, fix it, and re-run the tests. "
+        f"Repeat until all tests pass or you've tried {max_rounds} fix attempts. "
+        f"Be concise — just fix and verify."
+    )
+
+
+# ── Watch mode ───────────────────────────────────────────────────
+
+def _watch_loop(workspace: Path, action: str, mgr, warm: bool, build_agent_fn):
+    """Poll for file changes and run an action on each change."""
+    import time as _time
+    extensions = {".py", ".js", ".ts", ".jsx", ".tsx", ".go", ".rs", ".yaml", ".yml", ".json"}
+    action_goals = {
+        "test": "Run pytest. Report results concisely.",
+        "lint": "Run the linter on changed files. Report issues concisely.",
+        "check": "Check all .py files for syntax errors. Report any found.",
+    }
+    goal = action_goals.get(action, action)
+
+    # Snapshot mtimes
+    def _snapshot():
+        times = {}
+        for p in workspace.rglob("*"):
+            if p.is_file() and p.suffix in extensions:
+                if any(skip in p.parts for skip in (".git", "__pycache__", "node_modules", ".venv")):
+                    continue
+                try:
+                    times[str(p)] = p.stat().st_mtime
+                except OSError:
+                    pass
+        return times
+
+    prev = _snapshot()
+    print(f"  {_dim(f'Watching {len(prev)} files for changes...')}")
+    print(f"  {_dim(f'Action: {goal[:80]}')}")
+    print(f"  {_dim('Press Ctrl+C to stop.')}\n")
+
+    try:
+        while True:
+            _time.sleep(2)
+            curr = _snapshot()
+            changed = [f for f in curr if curr[f] != prev.get(f, 0)]
+            new_files = [f for f in curr if f not in prev]
+            changed.extend(new_files)
+            if changed:
+                names = [Path(f).name for f in changed[:5]]
+                more = f" +{len(changed)-5}" if len(changed) > 5 else ""
+                print(f"\n  {_yellow('Changed:')} {', '.join(names)}{more}")
+                # Load model and run
+                if not warm:
+                    mgr.ensure_profile("code")
+                else:
+                    mgr.ensure_profile("code", quiet=True)
+                agent = build_agent_fn(mgr, workspace)
+                _run_one(agent, goal)
+                if not warm:
+                    mgr.unload()
+                prev = _snapshot()
+            else:
+                prev = curr
+    except KeyboardInterrupt:
+        print(f"\n  {_dim('Watch stopped.')}")
+
+
+# ── Batch mode ───────────────────────────────────────────────────
+
+def _run_batch(filepath: str, workspace: Path, mgr, warm: bool, build_agent_fn):
+    """Run goals from a file, one per line."""
+    p = Path(filepath.strip())
+    if not p.is_file():
+        print(f"  {_red('File not found:')} {p}")
+        return
+    goals = [line.strip() for line in p.read_text(encoding="utf-8").splitlines() if line.strip() and not line.strip().startswith("#")]
+    if not goals:
+        print(f"  {_dim('No goals in file.')}")
+        return
+    print(f"  {_bold(f'Batch: {len(goals)} goals from {p.name}')}\n")
+    passed = 0
+    for i, goal in enumerate(goals, 1):
+        print(f"  {_bold(f'[{i}/{len(goals)}]')} {goal[:80]}")
+        if not warm:
+            profile = _detect_profile(goal)
+            mgr.ensure_profile(profile)
+        else:
+            mgr.ensure_profile(_detect_profile(goal), quiet=True)
+        agent = build_agent_fn(mgr, workspace)
+        result = _run_one(agent, goal)
+        if result and result.final_answer:
+            passed += 1
+        if not warm:
+            mgr.unload()
+    print(f"\n  {_bold(f'Batch complete: {passed}/{len(goals)} goals')}")
+
+
+# ── Plugin system ────────────────────────────────────────────────
+
+_PLUGINS_DIR = _SELF / "plugins"
+
+
+def _load_plugins(registry):
+    """Scan plugins/ for .py files and call their register() function."""
+    if not _PLUGINS_DIR.exists():
+        return 0
+    count = 0
+    for p in sorted(_PLUGINS_DIR.glob("*.py")):
+        if p.name.startswith("_"):
+            continue
+        try:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location(f"plugin_{p.stem}", p)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            if hasattr(mod, "register"):
+                mod.register(registry)
+                count += 1
+        except Exception as e:
+            print(f"  {_yellow(f'Plugin {p.name} failed:')} {e}")
+    return count
+
+
+# ── Model prompt profiles ────────────────────────────────────────
+
+_PROFILES_DIR = _SELF / "profiles"
+
+
+def _load_model_profile(model_path: str) -> dict:
+    """Load a per-model prompt profile if one exists.
+    Returns {"system_prompt": str, "temperature": float, ...} or empty dict."""
+    if not _PROFILES_DIR.exists():
+        return {}
+    model_name = Path(model_path).stem.lower()
+    for p in _PROFILES_DIR.glob("*.yaml"):
+        try:
+            import yaml
+            data = yaml.safe_load(p.read_text(encoding="utf-8"))
+            patterns = data.get("match", [])
+            if any(pat.lower() in model_name for pat in patterns):
+                return data
+        except Exception:
+            continue
+    # Also try .txt files (plain system prompt)
+    for p in _PROFILES_DIR.glob("*.txt"):
+        if p.stem.lower() in model_name:
+            return {"system_prompt": p.read_text(encoding="utf-8").strip()}
+    return {}
+
+
+# ── Doc generation ───────────────────────────────────────────────
+
+_DOC_GOALS = {
+    "readme": (
+        "Read all files in this project. Generate a comprehensive README.md that includes: "
+        "project name, what it does, installation steps, usage examples, file structure, "
+        "and key dependencies. Write the README using write_file."
+    ),
+    "api": (
+        "Read all source files. Find every public function, class, and API endpoint. "
+        "Generate API documentation in markdown format listing each with its signature, "
+        "parameters, return value, and a one-line description. Write to API_DOCS.md."
+    ),
+    "arch": (
+        "Read the project structure and key source files. Write an ARCHITECTURE.md that "
+        "describes: high-level design, main components and how they interact, data flow, "
+        "key design decisions, and file-by-file purpose summary."
+    ),
+}
+
+
 _HELP_TEXT = """
   {bold}ulcagent commands:{end}
     {cyan}?{end}  / {cyan}help{end}              Show this help
@@ -1148,6 +1328,11 @@ _HELP_TEXT = """
     {cyan}/test{end}                Alias: run pytest and report failures
     {cyan}/lint{end}                Alias: run the project linter
     {cyan}/format{end}              Alias: run the code formatter
+    {cyan}/autofix{end} [N]         Run tests, fix failures, re-run — loop up to N times (default 5)
+    {cyan}/watch{end} [action]      Watch for file changes, auto-run: test, lint, or custom goal
+    {cyan}/batch{end} <file>        Run goals from a text file (one per line)
+    {cyan}/docs{end} readme|api|arch  Auto-generate project documentation
+    {cyan}/plugins{end}             List loaded plugins from plugins/ directory
     {cyan}cd <path>{end}             Switch workspace directory
     {cyan}exit{end} / {cyan}quit{end}            Exit the agent
     {cyan}Ctrl+C{end}               Cancel a running task
@@ -1464,6 +1649,50 @@ def main():
         # /stats — session statistics
         if goal.lower() in ("/stats",):
             _show_stats()
+            continue
+
+        # /autofix — test-fix loop
+        if goal.lower().startswith("/autofix"):
+            parts = goal.split()
+            rounds = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 5
+            goal = _autofix_goal(rounds)
+            # fall through to normal goal processing
+
+        # /watch — file watcher
+        if goal.lower().startswith("/watch"):
+            action = goal[6:].strip() or "test"
+            _watch_loop(workspace, action, mgr, warm, _build_agent)
+            continue
+
+        # /batch — run goals from file
+        if goal.lower().startswith("/batch"):
+            filepath = goal[6:].strip()
+            if filepath:
+                _run_batch(filepath, workspace, mgr, warm, _build_agent)
+            else:
+                print(f"  {_dim('Usage: /batch goals.txt')}")
+            continue
+
+        # /docs — generate documentation
+        if goal.lower().startswith("/docs"):
+            doc_type = goal[5:].strip().lower() or "readme"
+            if doc_type in _DOC_GOALS:
+                goal = _DOC_GOALS[doc_type]
+                # fall through to normal goal processing
+            else:
+                print(f"  {_dim('Usage: /docs readme | /docs api | /docs arch')}")
+                continue
+
+        # /plugins — list loaded plugins
+        if goal.lower() in ("/plugins",):
+            if _PLUGINS_DIR.exists():
+                plugins = [p.stem for p in _PLUGINS_DIR.glob("*.py") if not p.name.startswith("_")]
+                if plugins:
+                    print(f"  {_bold('Plugins:')} {', '.join(plugins)}")
+                else:
+                    print(f"  {_dim('No plugins in plugins/')}")
+            else:
+                print(f"  {_dim('No plugins/ directory. Create it and add .py files with a register(registry) function.')}")
             continue
 
         # Check aliases (built-in + project-specific)
