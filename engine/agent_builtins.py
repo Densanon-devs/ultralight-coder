@@ -743,6 +743,8 @@ def build_default_registry(
     memory: Optional[AgentMemory] = None,
     ask_user_fn: Optional[Callable] = None,
     extended_tools: bool = False,
+    mcp_servers: Optional[list[str]] = None,
+    mcp_tool_pack: Optional[list[str]] = None,
 ) -> ToolRegistry:
     """
     Build a ToolRegistry pre-populated with the 8 core Phase 14 agent tools,
@@ -751,6 +753,19 @@ def build_default_registry(
 
     If *memory* is provided, also registers a `remember` tool that lets the
     model save short cross-session notes to the per-project memory store.
+
+    `mcp_servers` (optional, default None): list of MCP server names or
+    config paths. Empty/None = no MCP tools (the default and the only
+    code path exercised today). When non-empty, mounts tools from each
+    server alongside the builtins. **Currently scaffolded but not wired** —
+    see `engine/mcp_adapter.py`. Passing a non-empty list today raises
+    NotImplementedError so the gap is loud, not silent.
+
+    `mcp_tool_pack` (optional): whitelist of MCP tool names to actually
+    expose. Important because the 14B models in this repo regress when
+    the registry crosses ~10 tools (see user-memory
+    `feedback_tool_count_regression.md`). Pass e.g.
+    `["search_cards", "analyze_deck"]` to mount only those.
     """
     ws = Workspace(root=Path(workspace_root).resolve())
     reg = ToolRegistry()
@@ -1107,6 +1122,12 @@ def build_default_registry(
     # confused by the extra schemas. Only enable for interactive use where
     # the user needs refactoring/git/navigation tools.
     if not extended_tools:
+        # MCP-mounted tools fire regardless of extended_tools — they're a
+        # separate axis (external server vs. local builtin). Empty list
+        # is a no-op so this is safe to call unconditionally.
+        if mcp_servers:
+            from engine.mcp_adapter import register_mcp_tools
+            register_mcp_tools(reg, mcp_servers, tool_pack=mcp_tool_pack)
         return reg
 
     # ── rename_symbol: atomic multi-file rename ──
@@ -1583,6 +1604,13 @@ def build_default_registry(
         function=lambda patch: _apply_patch(patch),
         category="file",
     ))
+
+    # Same MCP hook the lean-mode return runs. Non-empty mcp_servers will
+    # raise NotImplementedError today (see engine/mcp_adapter.py), and
+    # the empty/None case is a clean no-op.
+    if mcp_servers:
+        from engine.mcp_adapter import register_mcp_tools
+        register_mcp_tools(reg, mcp_servers, tool_pack=mcp_tool_pack)
 
     return reg
 

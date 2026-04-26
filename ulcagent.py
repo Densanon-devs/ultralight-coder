@@ -231,6 +231,25 @@ class ModelManager:
 
 # ── Agent builder ────────────────────────────────────────────────
 
+
+def _parse_mcp_arg(argv: list[str]) -> list[str]:
+    """Pull `--mcp <comma-separated-names>` out of argv.
+
+    Supports both `--mcp foo,bar` (two args) and `--mcp=foo,bar` (one arg)
+    forms. Returns an empty list when --mcp is absent (the default).
+
+    Built-in shortcuts the value can use are listed in
+    `engine.mcp_adapter._BUILTIN_SERVERS`. The `register_mcp_tools`
+    call validates them and raises a clear ValueError on unknowns.
+    """
+    for i, a in enumerate(argv):
+        if a == "--mcp" and i + 1 < len(argv):
+            return [s.strip() for s in argv[i + 1].split(",") if s.strip()]
+        if a.startswith("--mcp="):
+            return [s.strip() for s in a.split("=", 1)[1].split(",") if s.strip()]
+    return []
+
+
 def _build_agent(mgr: ModelManager, workspace: Path):
     from engine.agent import Agent, AgentEvent
     from engine.agent_builtins import build_default_registry
@@ -239,10 +258,15 @@ def _build_agent(mgr: ModelManager, workspace: Path):
     profile = mgr.profile
     memory = AgentMemory(workspace=workspace)
     extended = "--extended" in sys.argv
+    # `--mcp <name1,name2>` opt-in MCP-server mounting. Scaffolded today,
+    # raises NotImplementedError if used (see engine/mcp_adapter.py).
+    # Default = no MCP, identical behavior to before this scaffold landed.
+    mcp_servers = _parse_mcp_arg(sys.argv)
     registry = build_default_registry(
         workspace, memory=memory,
         ask_user_fn=_ask_user,
         extended_tools=extended,
+        mcp_servers=mcp_servers,
     )
 
     # Add system tools for the general profile

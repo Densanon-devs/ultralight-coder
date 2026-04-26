@@ -636,6 +636,7 @@ class UltraliteCodeAssistant:
         registry = build_default_registry(
             workspace, memory=memory, ask_user_fn=self._ask_user,
             extended_tools=True,
+            mcp_servers=getattr(self, "_mcp_servers", None),
         )
         hint = self._build_workspace_hint(workspace)
 
@@ -757,6 +758,7 @@ class UltraliteCodeAssistant:
         goal: str,
         workspace: Path | None = None,
         auto_approve_risky: bool = False,
+        mcp_servers: list[str] | None = None,
     ) -> int:
         """
         Lightweight agent entry: load Config + BaseModel + Agent only, skip
@@ -814,6 +816,10 @@ class UltraliteCodeAssistant:
         uca.base_model = base_model
         uca._agent = None
         uca._auto_approve_risky = auto_approve_risky
+        # Stash for `_get_agent()` so the registry build picks them up.
+        # When the scaffold is empty/None this is a no-op; when populated
+        # the agent_builtins MCP hook fires.
+        uca._mcp_servers = mcp_servers or []
 
         try:
             uca.run_agent(goal, workspace=workspace)
@@ -861,6 +867,16 @@ def main():
         help="Auto-approve all risky tool calls (run_bash, etc.) without prompting. "
              "Use for unattended runs; interactive use should leave this off.",
     )
+    parser.add_argument(
+        "--mcp",
+        type=str,
+        default="",
+        metavar="SERVERS",
+        help="Comma-separated MCP servers to mount (e.g. 'densa-deck'). "
+             "Scaffolded but NOT WIRED — passing a non-empty value raises "
+             "NotImplementedError today; the flag exists so future activation "
+             "is one flip in engine/mcp_adapter.py. See docs/MCP.md.",
+    )
     args = parser.parse_args()
 
     # Fast agent path: skip the full UCA init entirely. Only Config + BaseModel
@@ -868,8 +884,11 @@ def main():
     # FAISS, augmentor embeddings, HF HEAD requests) costs ~2 minutes of
     # startup + contends for VRAM with the main model.
     if args.agent and not args.agent_full_init:
+        mcp_servers = [s.strip() for s in args.mcp.split(",") if s.strip()]
         return UltraliteCodeAssistant.run_agent_fast(
-            args.config, args.agent, auto_approve_risky=args.yes
+            args.config, args.agent,
+            auto_approve_risky=args.yes,
+            mcp_servers=mcp_servers,
         )
 
     engine = UltraliteCodeAssistant(
