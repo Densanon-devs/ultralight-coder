@@ -281,14 +281,31 @@ def _edit_file(
         )
         has_main_guard = 'if __name__' in new_string
         if (has_import_stmt and has_def_or_class) or has_main_guard:
-            chunk = new_string if new_string.endswith("\n") else new_string + "\n"
-            p.write_text(chunk, encoding="utf-8")
-            return (
-                f"Rewrote {p} ({len(chunk)} chars) — empty old_string + "
-                f"multi-construct content interpreted as full-file replace. "
-                f"(Next time, use write_file directly for rewrites — "
-                f"edit_file's prepend semantics would have duplicated the "
-                f"existing code.)"
+            # REJECT — don't silently rewrite. The earlier "auto-rewrite"
+            # path was added to forgive one model mistake but created a
+            # worse one: when the model intends a targeted edit but uses
+            # empty old_string as a shortcut, the file gets silently nuked.
+            # Observed catastrophically in the 2026-04-26 self-proof test
+            # (model wiped all 3 tests in test_timer.py and replaced them
+            # with 7 lines of patcher invocation).
+            #
+            # Force the model to pick the right tool:
+            #   - write_file for a full-file rewrite (intentional)
+            #   - edit_file with a SPECIFIC old_string anchor for a
+            #     targeted change (preserves surrounding code)
+            raise ValueError(
+                f"Ambiguous edit_file: empty old_string + multi-construct "
+                f"content (imports + def/class or main guard) would "
+                f"either silently overwrite the file OR duplicate its "
+                f"existing code. Choose one explicitly:\n"
+                f"  (a) Full rewrite intended -> use write_file with "
+                f"path={p.name!r} and the full content\n"
+                f"  (b) Targeted change intended -> use edit_file with a "
+                f"SHORT unique old_string anchor from the current file "
+                f"(read_file first to pick one) and the replacement code "
+                f"in new_string\n"
+                f"empty old_string is ONLY for prepending a small "
+                f"import-only block at the top of the file."
             )
         # Size thresholds — generous enough for a full small function
         # (add_docstring / extend_calculator append a few functions at
@@ -424,21 +441,39 @@ def _edit_file(
             if no_line_nums_stripped and no_line_nums_stripped != no_line_nums:
                 candidates.append(("line numbers + whitespace stripped", no_line_nums_stripped))
 
+        # The 14B that pastes line-number prefixes into old_string almost
+        # always pastes them into new_string too. The old_string fuzzy
+        # match catches the lookup side, but the file ends up corrupted
+        # because new_string still has "    15\t..." prefixes that aren't
+        # valid Python. Strip new_string the same way before applying.
+        # Caught in the 2026-04-26 counter-prime experiment iters 1-3.
+        clean_new_string = new_string
+        if line_prefix_pat.search(new_string or ""):
+            clean_new_string = line_prefix_pat.sub("", new_string)
+
         for label, fuzzy in candidates:
             fuzzy_count = text.count(fuzzy)
             if fuzzy_count == 1 and not replace_all:
-                new_text = text.replace(fuzzy, new_string, 1)
+                new_text = text.replace(fuzzy, clean_new_string, 1)
                 p.write_text(new_text, encoding="utf-8")
+                note = (
+                    "; new_string line-number prefix stripped"
+                    if clean_new_string != new_string else ""
+                )
                 return (
                     f"Replaced 1 occurrence(s) in {p} "
-                    f"(fuzzy match: {label})"
+                    f"(fuzzy match: {label}{note})"
                 )
             if fuzzy_count > 0 and replace_all:
-                new_text = text.replace(fuzzy, new_string)
+                new_text = text.replace(fuzzy, clean_new_string)
                 p.write_text(new_text, encoding="utf-8")
+                note = (
+                    "; new_string line-number prefix stripped"
+                    if clean_new_string != new_string else ""
+                )
                 return (
                     f"Replaced {fuzzy_count} occurrence(s) in {p} "
-                    f"(fuzzy match: {label})"
+                    f"(fuzzy match: {label}{note})"
                 )
 
         # No fuzzy match either. Give a hint if one of the normalized
@@ -494,14 +529,24 @@ def _edit_file(
             f"decide which matches need updating."
         )
 
+    # Exact-match path also needs new_string line-prefix stripping —
+    # see the fuzzy-path comment above and test_edit_file_new_string_strip.
+    import re as _re_em
+    line_prefix_pat_em = _re_em.compile(r"^\s*\d+\t", _re_em.MULTILINE)
+    clean_new_string_em = new_string
+    note_em = ""
+    if line_prefix_pat_em.search(new_string or ""):
+        clean_new_string_em = line_prefix_pat_em.sub("", new_string)
+        note_em = " (new_string line-number prefix stripped)"
+
     if replace_all:
-        new_text = text.replace(old_string, new_string)
+        new_text = text.replace(old_string, clean_new_string_em)
     else:
-        new_text = text.replace(old_string, new_string, 1)
+        new_text = text.replace(old_string, clean_new_string_em, 1)
     p.write_text(new_text, encoding="utf-8")
     diff = _diff_preview(text, new_text, path)
     tail = f"\n\n{diff}" if diff else ""
-    return f"Replaced {count if replace_all else 1} occurrence(s) in {p}{tail}"
+    return f"Replaced {count if replace_all else 1} occurrence(s) in {p}{note_em}{tail}"
 
 
 def _list_dir(ws: Workspace, path: str = ".", depth: int = 1, show_hidden: bool = False) -> str:
@@ -743,6 +788,7 @@ def build_default_registry(
     memory: Optional[AgentMemory] = None,
     ask_user_fn: Optional[Callable] = None,
     extended_tools: bool = False,
+    lsp_tools: bool = False,
     mcp_servers: Optional[list[str]] = None,
     mcp_tool_pack: Optional[list[str]] = None,
 ) -> ToolRegistry:
@@ -1121,6 +1167,18 @@ def build_default_registry(
     # 97.6% to 85.7% when all 21 tools are registered — the model gets
     # confused by the extra schemas. Only enable for interactive use where
     # the user needs refactoring/git/navigation tools.
+    # ── LSP / code-intelligence tools (jedi-backed, opt-in) ──
+    # Modular: failure to import the helper or jedi just no-ops. Removing
+    # engine/agent_lsp.py + the jedi requirement leaves the rest of the
+    # registry untouched.
+    if lsp_tools:
+        try:
+            from engine.agent_lsp import register_lsp_tools, is_available
+            if is_available():
+                register_lsp_tools(reg, ws.root)
+        except ImportError:
+            pass
+
     if not extended_tools:
         # MCP-mounted tools fire regardless of extended_tools — they're a
         # separate axis (external server vs. local builtin). Empty list
@@ -1602,6 +1660,121 @@ def build_default_registry(
             "required": ["patch"],
         },
         function=lambda patch: _apply_patch(patch),
+        category="file",
+    ))
+
+    # ── edit_html: AST-aware DOM editor (kills the ambiguous-anchor failure class) ──
+
+    def _edit_html(
+        path: str,
+        selector: str,
+        action: str,
+        payload: str | None = None,
+        attr: str | None = None,
+        index: int = 0,
+    ) -> str:
+        try:
+            from bs4 import BeautifulSoup
+        except ImportError:
+            raise RuntimeError("edit_html requires beautifulsoup4 (pip install beautifulsoup4)")
+        action = (action or "").lower().strip()
+        valid = {"append-child", "prepend-child", "replace", "remove", "set-attr", "set-text"}
+        if action not in valid:
+            raise ValueError(f"action must be one of {sorted(valid)}; got {action!r}")
+        p = ws.resolve(path)
+        if not p.exists():
+            raise FileNotFoundError(f"File not found: {path}")
+        if p.suffix.lower() not in (".html", ".htm", ".xhtml", ".svg", ".xml", ".vue"):
+            raise ValueError(f"edit_html only supports HTML/XML-like files; got {p.suffix}")
+        text = p.read_text(encoding="utf-8", errors="replace")
+        soup = BeautifulSoup(text, "html.parser")
+        matches = soup.select(selector)
+        if not matches:
+            raise ValueError(f"selector {selector!r} matched 0 elements")
+        if index < 0 or index >= len(matches):
+            raise ValueError(
+                f"index {index} out of range; selector {selector!r} matched {len(matches)} element(s)"
+            )
+        target = matches[index]
+
+        if action in ("append-child", "prepend-child"):
+            if not payload:
+                raise ValueError(f"{action} requires payload (HTML fragment to insert)")
+            frag = BeautifulSoup(payload, "html.parser")
+            children = list(frag.children)
+            if action == "append-child":
+                for child in children:
+                    target.append(child)
+            else:
+                for child in reversed(children):
+                    target.insert(0, child)
+            verb = "Appended" if action == "append-child" else "Prepended"
+            note = f"{verb} {len(children)} node(s) to {selector!r}[{index}]"
+        elif action == "replace":
+            if not payload:
+                raise ValueError("replace requires payload (replacement HTML)")
+            frag = BeautifulSoup(payload, "html.parser")
+            children = list(frag.children)
+            if not children:
+                raise ValueError("replace payload produced no nodes")
+            target.replace_with(children[0])
+            for extra in children[1:]:
+                children[0].insert_after(extra)
+            note = f"Replaced {selector!r}[{index}] with {len(children)} node(s)"
+        elif action == "remove":
+            target.decompose()
+            note = f"Removed {selector!r}[{index}]"
+        elif action == "set-attr":
+            if not attr:
+                raise ValueError("set-attr requires attr name")
+            if payload is None:
+                del target[attr]
+                note = f"Deleted attr {attr!r} on {selector!r}[{index}]"
+            else:
+                target[attr] = payload
+                note = f"Set {attr}={payload!r} on {selector!r}[{index}]"
+        else:  # set-text
+            if payload is None:
+                raise ValueError("set-text requires payload")
+            target.string = payload
+            note = f"Set text of {selector!r}[{index}] to {len(payload)} chars"
+
+        out = str(soup)
+        p.write_text(out, encoding="utf-8")
+        diff = _diff_preview(text, out, path)
+        tail = f"\n\n{diff}" if diff else ""
+        return f"{note} in {path}{tail}"
+
+    reg.register(ToolSchema(
+        name="edit_html",
+        description=(
+            "AST-aware HTML/XML editor. Use a CSS selector to target an element, "
+            "then perform a structural action: 'append-child' or 'prepend-child' "
+            "(insert HTML fragment as child), 'replace' (replace element with new "
+            "HTML), 'remove' (delete element), 'set-attr' (set/delete attribute — "
+            "pass null payload to delete), 'set-text' (replace text content). "
+            "Sidesteps the ambiguous-anchor failure mode of edit_file on large "
+            "HTML files. Use index to disambiguate when the selector matches "
+            "multiple elements (default 0 = first match)."
+        ),
+        parameters={
+            "type": "object",
+            "properties": {
+                "path": {"type": "string", "description": "HTML/XML file path"},
+                "selector": {"type": "string", "description": "CSS selector (e.g. '#gallery', '.item:nth-of-type(3)', 'nav > ul')"},
+                "action": {
+                    "type": "string",
+                    "description": "append-child | prepend-child | replace | remove | set-attr | set-text",
+                },
+                "payload": {"type": "string", "description": "HTML fragment, attribute value, or text — depends on action"},
+                "attr": {"type": "string", "description": "Attribute name (only for set-attr)"},
+                "index": {"type": "integer", "description": "Which match to act on if selector matches multiple", "default": 0},
+            },
+            "required": ["path", "selector", "action"],
+        },
+        function=lambda path, selector, action, payload=None, attr=None, index=0: _edit_html(
+            path, selector, action, payload, attr, index
+        ),
         category="file",
     ))
 

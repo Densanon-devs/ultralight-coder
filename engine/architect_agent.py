@@ -323,9 +323,28 @@ class ArchitectAgent:
                 except Exception:
                     logger.exception("architect fixup sub-agent raised")
 
+        # Phase 4: MANDATORY post-step consolidation — added 2026-04-26 after
+        # the handheld walkthrough's Goal 1.5 catastrophe (architect rewrote
+        # storage.py to 1 line + duplicated cli.py handlers, then claimed
+        # "Completed 4 steps" without re-running tests).
+        #
+        # If the goal mentions tests OR a test_*.py file exists in the
+        # workspace, run pytest at the end. The result is woven into the
+        # final_answer so the caller sees an honest "tests pass" or
+        # "tests FAIL: ..." instead of a misleading completion claim.
+        verification_summary = ""
+        try:
+            verification_summary = self._final_test_pass(goal)
+        except Exception:
+            logger.exception("architect post-step verification raised")
+            verification_summary = ""
+
         total_wall = time.monotonic() - start
+        final_msg = f"Completed {len(steps)} steps via architect."
+        if verification_summary:
+            final_msg += f" {verification_summary}"
         return AgentResult(
-            final_answer=f"Completed {len(steps)} steps via architect.",
+            final_answer=final_msg,
             iterations=len(steps),
             stop_reason=last_stop_reason,
             wall_time=total_wall,
@@ -333,6 +352,50 @@ class ArchitectAgent:
             tool_results=all_results,
             transcript=transcript_merged,
         )
+
+    def _final_test_pass(self, goal: str) -> str:
+        """Run pytest one last time if the goal asked for tests or any
+        test_*.py exists in the workspace. Returns a short summary string
+        for the architect's final_answer.
+
+        Returns "" when no verification was warranted (goal didn't ask
+        for it AND no test files present)."""
+        # Decide whether verification is appropriate
+        g_lower = (goal or "").lower()
+        test_signal_in_goal = any(p in g_lower for p in (
+            "run the tests", "run tests", "verify they pass", "test_",
+            "pytest", "unittest", "all tests pass",
+        ))
+        test_files_present = False
+        if self.workspace_root and self.workspace_root.exists():
+            try:
+                test_files_present = any(self.workspace_root.rglob("test_*.py"))
+                if not test_files_present:
+                    test_files_present = any(self.workspace_root.rglob("*_test.py"))
+            except Exception:
+                pass
+        if not test_signal_in_goal and not test_files_present:
+            return ""
+
+        # Run via the registry's run_tests tool — same path the agent uses,
+        # so we get the same auto-detection of pytest/unittest/etc.
+        try:
+            run_tests_tool = self.registry.get("run_tests")
+            if run_tests_tool is None:
+                return ""
+            result = run_tests_tool.function(path=".", runner="pytest")
+        except Exception as exc:
+            return f"(post-step verification raised: {exc})"
+
+        # `result` is the tool's return content — typically a dict.
+        if isinstance(result, dict):
+            passed = result.get("passed")
+            exit_code = result.get("exit_code")
+            stdout = str(result.get("stdout", ""))[:200]
+            if passed is True or exit_code == 0:
+                return "Tests pass."
+            return f"Tests FAIL (exit={exit_code}): {stdout}"
+        return f"Verification ran: {str(result)[:200]}"
 
     def _final_goal_token_check(self, goal: str) -> list[tuple[str, str]]:
         """Walk every .py file in the workspace and return goal-required

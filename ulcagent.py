@@ -125,17 +125,26 @@ def _magenta(t): return _c("35", t)
 # ── Spinner ──────────────────────────────────────────────────────
 
 class _Spinner:
+    """Animated progress spinner. No-op when stdout isn't a TTY — without
+    this guard, headless runs (one-shot piped to a log file) accumulate
+    kilobytes of `[2m| thinking...[0m` ANSI escapes per second. Surfaced
+    in the 2026-04-26 handheld walkthrough."""
     _FRAMES = ["|", "/", "-", "\\"]
     def __init__(self):
         self._active = False
         self._thread = None
         self._stop = threading.Event()
+        self._enabled = sys.stdout.isatty()
     def start(self):
+        if not self._enabled:
+            return
         self._stop.clear()
         self._active = True
         self._thread = threading.Thread(target=self._spin, daemon=True)
         self._thread.start()
     def stop(self):
+        if not self._enabled:
+            return
         if not self._active:
             return
         self._stop.set()
@@ -258,6 +267,7 @@ def _build_agent(mgr: ModelManager, workspace: Path):
     profile = mgr.profile
     memory = AgentMemory(workspace=workspace)
     extended = "--extended" in sys.argv
+    lsp = "--lsp" in sys.argv
     # `--mcp <name1,name2>` opt-in MCP-server mounting. Scaffolded today,
     # raises NotImplementedError if used (see engine/mcp_adapter.py).
     # Default = no MCP, identical behavior to before this scaffold landed.
@@ -266,6 +276,7 @@ def _build_agent(mgr: ModelManager, workspace: Path):
         workspace, memory=memory,
         ask_user_fn=_ask_user,
         extended_tools=extended,
+        lsp_tools=lsp,
         mcp_servers=mcp_servers,
     )
 
@@ -276,10 +287,23 @@ def _build_agent(mgr: ModelManager, workspace: Path):
     # Load plugins
     plugin_count = _load_plugins(registry)
 
-    # Load model-specific prompt profile
-    model_profile = _load_model_profile(mgr.bm.config.base_model.path if hasattr(mgr.bm, 'config') else "")
+    # Load model-specific prompt profile. mgr.bm.config is a BaseModelConfig
+    # (the per-model section, not the top-level Config), so .path is the
+    # GGUF path directly. Earlier code wrote `.base_model.path` which crashed
+    # on AttributeError when the agent path was first exercised in one-shot.
+    model_profile = _load_model_profile(getattr(mgr.bm.config, "path", "") if hasattr(mgr.bm, 'config') else "")
+
+    # Auto-approve risky tools when explicitly requested (--yes) or when
+    # stdin isn't a TTY (one-shot pipes, automation, headless runs). The
+    # walkthrough's Goal 1 hit this: every run_bash silently denied
+    # because the input() prompt got EOFError → defaulted to deny.
+    auto_yes = "--yes" in sys.argv or not sys.stdin.isatty()
 
     def _confirm_risky(call):
+        if auto_yes:
+            args_s = ', '.join(f'{k}={str(v)[:60]}' for k, v in call.arguments.items())
+            print(f"  {_dim('[auto-approved risky]')} {call.name}({args_s})")
+            return True
         _spinner.stop()
         args_s = ', '.join(f'{k}={str(v)[:60]}' for k, v in call.arguments.items())
         print(f"\n  {_yellow('[risky]')} {call.name}({args_s})")
@@ -342,7 +366,147 @@ def _build_agent(mgr: ModelManager, workspace: Path):
         confirm_risky=_confirm_risky,
         on_event=_on_event,
     )
+    # Stash the build inputs on the agent so we can spawn a parallel
+    # ArchitectAgent against the same registry/model/memory if needed.
+    agent._ulcagent_ctx = {
+        "model": mgr.bm,
+        "registry": registry,
+        "system_prompt_extra": workspace_hint,
+        "workspace_root": workspace,
+        "memory": memory,
+        "max_tokens_per_turn": int(cfg_max) if cfg_max else 1024,
+        "temperature": cfg_temp if cfg_temp is not None else 0.1,
+        "confirm_risky": _confirm_risky,
+        "on_event": _on_event,
+    }
     return agent
+
+
+# ── Architect mode (B6) ──────────────────────────────────────────
+
+# Heuristic patterns that signal the goal is multi-file scaffolding —
+# the failure mode the flat Agent flaps on (build_todo_cli @ 14B).
+# Auto-architect kicks in when one of these matches and the user hasn't
+# explicitly disabled it with --no-architect.
+_ARCH_TRIGGER_PHRASES = (
+    "build a", "build the", "scaffold", "create a project", "create a new",
+    "implement a", "set up a", "set up the",
+    "multi-file", "multiple files",
+    "todo cli", "todo app", "rest api", "fastapi app", "flask app",
+    "with these files", "with the following files",
+)
+
+# A list of >=3 distinct filename-like tokens in one sentence is a strong
+# scaffold signal (e.g. "todo.py, storage.py, cli.py, tests/test_todo.py").
+_FILE_TOKEN_RE = re.compile(
+    r"\b[\w/\\.-]+\.(?:py|js|ts|jsx|tsx|go|rs|java|cs|rb|sh|html|yaml|yml|json|toml|md)\b",
+    re.IGNORECASE,
+)
+
+_ARCH_NEGATION = re.compile(r"\b(?:no|not|don't|dont|skip|avoid|don't use)\s+architect\b", re.IGNORECASE)
+
+# Goals containing these patterns are FIX/DEBUG/REFACTOR shapes — they
+# require cross-file consistency, which architect's per-step isolation
+# explicitly destroys. Goal 1.5 of the 2026-04-26 handheld walkthrough
+# proved this catastrophically: architect rewrote storage.py to a single
+# import line and duplicated cli.py handlers because each sub-agent had
+# no shared context. Suppress architect even with 3+ file tokens when
+# any of these phrases match.
+_ARCH_SUPPRESS_PHRASES = (
+    "fix the bug", "fix the bugs", "fix three bugs", "fix two bugs",
+    "fix this", "fix that", "fix it", "fix:", "fix —", "fix -",
+    "broken", "is failing", "are failing", "doesn't work", "does not work",
+    "rename ", "refactor ", "debug ", "repair ",
+    "remove the duplicate", "remove duplicate",
+    "shadows", "shadow the builtin",
+    "cross-file", "cross-module",
+    "inconsistent", "out of sync", "out-of-sync",
+)
+
+
+def _should_use_architect(goal: str, force_on: bool = False, force_off: bool = False) -> bool:
+    """Decide whether to route this goal through ArchitectAgent.
+
+    Force flags from the CLI (`--architect` / `--no-architect`) win. Otherwise
+    return True iff the goal looks like multi-file SCAFFOLDING (not fix/debug):
+      - matches one of the scaffold-trigger phrases, OR
+      - mentions 3+ distinct filename-like tokens AND no fix/debug verbs.
+
+    Goals with fix/debug/rename/refactor language ALWAYS suppress architect,
+    regardless of file-token count (per the 2026-04-26 walkthrough finding).
+    """
+    if force_off:
+        return False
+    if force_on:
+        return True
+    if _ARCH_NEGATION.search(goal):
+        return False
+
+    g = goal.lower()
+
+    # Suppress architect for fix/debug/refactor goals — these need cross-file
+    # consistency which per-step isolation destroys.
+    if any(p in g for p in _ARCH_SUPPRESS_PHRASES):
+        return False
+
+    if any(p in g for p in _ARCH_TRIGGER_PHRASES):
+        return True
+
+    tokens = {m.group(0).lower() for m in _FILE_TOKEN_RE.finditer(goal)}
+    if len(tokens) >= 3:
+        return True
+
+    return False
+
+
+def _build_architect_agent(flat_agent):
+    """Spawn an ArchitectAgent that shares model + registry + memory + workspace
+    with the existing flat Agent. Cheap — no new model load.
+    """
+    from engine.architect_agent import ArchitectAgent
+    ctx = getattr(flat_agent, "_ulcagent_ctx", None)
+    if ctx is None:
+        raise RuntimeError("flat agent has no _ulcagent_ctx; rebuild via _build_agent first")
+    return ArchitectAgent(
+        model=ctx["model"],
+        registry=ctx["registry"],
+        system_prompt_extra=ctx["system_prompt_extra"],
+        workspace_root=ctx["workspace_root"],
+        memory=ctx["memory"],
+        auto_verify_python=True,
+        max_iterations_per_step=6,
+        max_wall_time=600.0,
+        max_tokens_per_turn=ctx["max_tokens_per_turn"],
+        temperature=ctx["temperature"],
+        confirm_risky=ctx["confirm_risky"],
+        on_event=ctx["on_event"],
+    )
+
+
+def _build_handheld_driver(flat_agent):
+    """Spawn a HandheldDriver that shares model + registry + memory +
+    workspace with the existing flat Agent. Different from architect:
+    each step's sub-agent gets prior-step DELIVERABLE summaries injected
+    into its system prompt — true cross-step context, not just isolated
+    workspace sharing. Use for projects too large for the flat agent."""
+    from engine.handheld_driver import HandheldDriver
+    ctx = getattr(flat_agent, "_ulcagent_ctx", None)
+    if ctx is None:
+        raise RuntimeError("flat agent has no _ulcagent_ctx; rebuild via _build_agent first")
+    return HandheldDriver(
+        model=ctx["model"],
+        registry=ctx["registry"],
+        system_prompt_extra=ctx["system_prompt_extra"],
+        workspace_root=ctx["workspace_root"],
+        memory=ctx["memory"],
+        auto_verify_python=True,
+        max_iterations_per_step=8,
+        max_wall_time=1800.0,  # 30 min — large projects need it
+        max_tokens_per_turn=ctx["max_tokens_per_turn"],
+        temperature=ctx["temperature"],
+        confirm_risky=ctx["confirm_risky"],
+        on_event=ctx["on_event"],
+    )
 
 
 def _register_system_tools(registry):
@@ -913,6 +1077,49 @@ def _suggest_next(result) -> str:
     return ""
 
 
+def _maybe_auto_flag(result, goal: str) -> None:
+    """Run the failure flagger silently after every goal. Writes YAML
+    augmentor entries to data/augmentor_examples/_auto_generated/ when
+    known failure patterns are detected; no-op on clean runs.
+
+    Print is one line — visible only when records are written, so clean
+    runs don't add noise.
+
+    Disabled via --no-auto-flag CLI flag.
+    """
+    if result is None:
+        return
+    try:
+        from engine.failure_flagger import flag, summarize
+        from engine.yaml_augmentor_builder import write_all
+        from engine.recovery_detector import write_all_recoveries
+    except Exception:
+        return  # missing module — silently skip rather than break the REPL
+    failure_paths: list = []
+    recovery_paths: list = []
+    try:
+        records = flag(result, goal)
+        if records:
+            failure_paths = write_all(records, goal, _SELF)
+    except Exception:
+        records = []
+    try:
+        recovery_paths = write_all_recoveries(result, goal, _SELF)
+    except Exception:
+        pass
+    if not failure_paths and not recovery_paths:
+        return
+    parts = []
+    if records:
+        counts = summarize(records)
+        parts.append(", ".join(f"{k}×{v}" for k, v in counts.items()))
+    if recovery_paths:
+        parts.append(f"recoveries×{len(recovery_paths)}")
+    summary = " | ".join(parts)
+    total = len(failure_paths) + len(recovery_paths)
+    print(f"  {_dim('[auto-flagged:')} {_yellow(summary)} {_dim(f'-> {total} YAML(s) under data/auto_generated_review/]')}")
+
+
 # ── Project rules (.ulcagent) ────────────────────────────────────
 
 def _load_project_rules(workspace: Path) -> str:
@@ -1077,6 +1284,80 @@ def _do_review(workspace: Path):
         return None
 
 
+def _do_review_deep(workspace: Path, base: str = "HEAD"):
+    """Return a goal string for a structured deep review against a base ref.
+
+    Different posture from `/review`: the agent is told to read the changed
+    files in full (not just diff context), then output a structured review
+    with explicit categories. Uses read-only tools — the agent should not
+    modify the working tree.
+    """
+    import subprocess
+    try:
+        # Find changed files vs base (handles both committed-on-branch and uncommitted)
+        names_cmd = subprocess.run(
+            ["git", "diff", "--name-only", base], capture_output=True, text=True, timeout=15, cwd=str(workspace),
+        )
+        unstaged = subprocess.run(
+            ["git", "diff", "--name-only"], capture_output=True, text=True, timeout=15, cwd=str(workspace),
+        )
+        staged = subprocess.run(
+            ["git", "diff", "--name-only", "--staged"], capture_output=True, text=True, timeout=15, cwd=str(workspace),
+        )
+        files = sorted({
+            ln.strip()
+            for src in (names_cmd.stdout, unstaged.stdout, staged.stdout)
+            for ln in src.splitlines()
+            if ln.strip()
+        })
+        if not files:
+            print(f"  {_dim('No changed files to review.')}")
+            return None
+
+        diff_cmd = subprocess.run(
+            ["git", "diff", base], capture_output=True, text=True, timeout=30, cwd=str(workspace),
+        )
+        diff_text = diff_cmd.stdout.strip()
+        if not diff_text:
+            # Fall back to working-tree diff if base has no diff (e.g. base == HEAD)
+            diff_text = (subprocess.run(
+                ["git", "diff"], capture_output=True, text=True, timeout=15, cwd=str(workspace),
+            ).stdout + subprocess.run(
+                ["git", "diff", "--staged"], capture_output=True, text=True, timeout=15, cwd=str(workspace),
+            ).stdout).strip()
+
+        diff_lines = diff_text.splitlines()
+        if len(diff_lines) > 400:
+            diff_text = "\n".join(diff_lines[:400]) + f"\n... ({len(diff_lines) - 400} more lines truncated; read the files directly with read_file)"
+
+        file_list = "\n".join(f"  - {f}" for f in files[:30])
+        if len(files) > 30:
+            file_list += f"\n  ... +{len(files) - 30} more"
+
+        return (
+            f"DEEP CODE REVIEW (read-only — do NOT modify any files).\n\n"
+            f"Base: {base}. Changed files ({len(files)}):\n{file_list}\n\n"
+            f"WORKFLOW:\n"
+            f"  1. Read each changed file in full with read_file (not just the diff).\n"
+            f"  2. For each file, look for: bugs, security issues, missing error handling,\n"
+            f"     missing tests, style/idiom violations, performance regressions,\n"
+            f"     documentation gaps.\n"
+            f"  3. Cross-check: do the changes break callers in unchanged files?\n"
+            f"     Use grep to find callers. Do NOT edit anything.\n\n"
+            f"OUTPUT — produce a structured review with these sections (skip empty ones):\n"
+            f"  ## Critical    — bugs, data loss, security holes, crashes\n"
+            f"  ## High        — likely bugs, broken contracts, missing validation\n"
+            f"  ## Medium      — code smell, missing tests, weak error handling\n"
+            f"  ## Low         — style nits, doc gaps, minor refactor opportunities\n"
+            f"  ## Questions   — anything ambiguous you'd ask the author\n"
+            f"Each item: one line, format `file:line — description`. No prose intro.\n\n"
+            f"```diff\n{diff_text}\n```"
+        )
+    except Exception as e:
+        print(f"  {_red('Error:')} {e}")
+        return None
+
+
 # ── Snippets ─────────────────────────────────────────────────────
 
 _SNIPPETS_DIR = Path.home() / ".ulcagent_snippets"
@@ -1158,6 +1439,185 @@ def _autofix_goal(max_rounds: int = 5) -> str:
     )
 
 
+def _tdd_goal(user_goal: str, max_rounds: int = 5) -> str:
+    """Wrap a user goal into a test-driven development loop.
+
+    The agent writes pytest tests for the goal first, then iterates on
+    implementation until the tests pass. Designed to convert one-shot
+    multi-file emissions (where 14B flaps) into incremental loops where
+    each turn has a clear pass/fail signal.
+    """
+    user_goal = (user_goal or "").strip()
+    if not user_goal:
+        return ""
+    return (
+        "Follow a strict test-driven workflow for this task:\n"
+        f"  GOAL: {user_goal}\n\n"
+        "STEP 1. Write pytest tests for the goal in tests/ (or the project's existing\n"
+        "        test directory). Cover the happy path and at least one edge case.\n"
+        "        Use write_file. Do NOT write the implementation yet.\n"
+        "STEP 2. Run the tests with run_tests — they should fail (red phase).\n"
+        "STEP 3. Write the minimum implementation to make the tests pass. Use\n"
+        "        write_file or edit_file. Keep it small.\n"
+        "STEP 4. Run the tests again. If any fail, read the failure, fix one bug,\n"
+        f"        re-run. Loop up to {max_rounds} times.\n"
+        "STEP 5. When all tests pass, give a 1-2 sentence summary. Do not refactor\n"
+        "        beyond what was needed.\n\n"
+        "Stop and report if step 1 or 3 produces no testable behavior."
+    )
+
+
+def _expand_slash_command(goal: str) -> str:
+    """Pre-expand goal-rewriting slash commands so they work in one-shot
+    mode the same way they do in the REPL dispatcher.
+
+    Supports: /proof [path], /tdd <goal>, /autofix [N]. Other slash
+    commands (/diff, /commit, /context, /clear, ...) are interactive
+    and don't make sense as one-shot args — they pass through unchanged.
+
+    /proof PRE-EXECUTES pytest on the user's behalf and embeds the
+    failure traceback into the goal. Required because empirically the
+    14B cannot drive open-ended diagnose-and-fix loops — it bails at
+    iter 1-2 with "I cannot complete..." or "Let's read the file..."
+    narration. Embedding the concrete failure converts "discover the
+    bug" (which the model can't reliably do) into "fix this specific
+    traceback" (which it can).
+    """
+    if not goal:
+        return goal
+    g = goal.strip()
+    g_lower = g.lower()
+    if g_lower.startswith("/proof"):
+        target = g[len("/proof"):].strip()
+        return _proof_goal(target, run_pytest_preflight=True)
+    if g_lower.startswith("/tdd"):
+        user_goal = g[4:].strip()
+        if user_goal:
+            return _tdd_goal(user_goal)
+    if g_lower.startswith("/autofix"):
+        parts = g.split()
+        rounds = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 5
+        return _autofix_goal(rounds)
+    return goal
+
+
+def _run_pytest_preflight(target: str = "") -> tuple[bool, str]:
+    """Run pytest in the current workspace and capture the result.
+    Returns (passed, output). Used by /proof to embed the actual
+    traceback in the goal so the 14B has a concrete fix-this task
+    instead of open-ended discovery (which it can't reliably drive).
+
+    `target` is an optional pytest argument (file path or test node).
+    If empty, pytest discovers tests in the current directory.
+
+    Times out at 60s — pytest on a small project should finish in <2s,
+    so 60s is a generous safety net for a misconfigured project.
+    """
+    import subprocess
+    cmd = [sys.executable, "-m", "pytest", "-q", "--tb=short", "--no-header"]
+    if target:
+        cmd.append(target)
+    try:
+        proc = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=60,
+            cwd=str(Path.cwd()),
+        )
+    except FileNotFoundError:
+        return False, "[pytest preflight: python or pytest not on PATH]"
+    except subprocess.TimeoutExpired:
+        return False, "[pytest preflight: timed out after 60s]"
+    output = (proc.stdout or "") + (proc.stderr or "")
+    # exit 0 = all passed; 5 = no tests collected; anything else = failure
+    passed = proc.returncode == 0
+    return passed, output
+
+
+def _proof_goal(target: str = "", run_pytest_preflight: bool = False) -> str:
+    """Self-proof goal: pre-execute pytest, embed any failure traceback
+    into a concrete fix-this goal.
+
+    KNOWN LIMITATION (2026-04-26): With Qwen 2.5 Coder 14B, the /proof
+    goal shape consistently triggers a stock "I can't execute commands
+    directly on your system" / "outside the workspace" refusal at iter 1
+    regardless of:
+      - whether tests actually fail (preflight success path also bails)
+      - target path quoted vs unquoted
+      - terse vs elaborate goal text
+      - workspace (pomodoro/ AND ulcagent's own repo both bailed)
+    The 14B appears to recognize the slash-command-derived goal shape
+    as a "system action" pattern and refuse defensively. The same model
+    in the SAME workspace handles human-written fix goals fine
+    (self-proof v2: 3/3 tests fixed in 100s) — the shape, not the
+    workspace or content, is the trigger.
+
+    The pre-flight pytest invocation + traceback embedding remains
+    sound infrastructure. A different model with looser refusal
+    behavior (or augmentor-driven counter-bias against this stock
+    refusal) should be able to use /proof end-to-end. Shipping the
+    plumbing now so it's ready when that model is available.
+
+    Set run_pytest_preflight=False for unit tests that don't want to
+    actually invoke pytest at expansion time (e.g. test_proof_command.py).
+    """
+    target = (target or "").strip()
+
+    if not run_pytest_preflight:
+        # Test-friendly path: returns the no-preflight goal text without
+        # invoking pytest. Used by unit tests that just want to verify
+        # the goal shape.
+        if target:
+            return (
+                f"Run the tests in {target} via run_tests. If any fail, "
+                f"read the full traceback, find the bug (it could be in "
+                f"source code OR test setup — check mocks, fixtures, "
+                f"imports), fix it with a targeted edit_file (use "
+                f"write_file only for a genuine full-file rewrite). Re-run "
+                f"until tests pass. Do not give up — the bug is fixable."
+            )
+        return (
+            "Run all tests in this project via run_tests. If any fail, "
+            "read the full traceback, find the bug (it could be in source "
+            "code OR test setup — check mocks, fixtures, imports), fix it "
+            "with a targeted edit_file (use write_file only for a genuine "
+            "full-file rewrite). Re-run until tests pass. Do not give up "
+            "— the bug is fixable."
+        )
+
+    # Real path — pre-execute pytest and embed result.
+    passed, output = _run_pytest_preflight(target)
+    if passed:
+        # Trivial success path: tell the agent "everything is green,
+        # nothing to do" so it gives a one-line confirmation and exits.
+        return (
+            "Pytest already passed for this project (verified at goal "
+            "expansion time). No edits needed. Confirm with a single "
+            "sentence and stop."
+        )
+
+    # Trim the captured output so the goal stays under ~3k chars
+    # (keeps the model's prompt budget intact). Most useful info is the
+    # last 2KB which contains the traceback + summary line.
+    output = output.strip()
+    if len(output) > 2400:
+        head = output[:400]
+        tail = output[-2000:]
+        output = head + "\n... [middle truncated] ...\n" + tail
+
+    target_clause = f"in {target}" if target else "in this project"
+    return (
+        f"Pytest is currently FAILING {target_clause}. Captured output:\n\n"
+        f"```\n{output}\n```\n\n"
+        f"Diagnose the failure(s) above and fix them. The bug may be in "
+        f"source code OR test setup — check mocks, fixtures, imports. "
+        f"Use targeted edit_file with a SHORT unique anchor for line "
+        f"changes; use write_file only for a genuine full-file rewrite "
+        f"(NEVER use edit_file with empty old_string + multi-construct "
+        f"new_string — that pattern is rejected). After your fix, call "
+        f"run_tests again to confirm the failures are gone. Do NOT bail "
+        f"early — the bug shown above IS fixable from the traceback."
+    )
+
+
 # ── Watch mode ───────────────────────────────────────────────────
 
 def _watch_loop(workspace: Path, action: str, mgr, warm: bool, build_agent_fn):
@@ -1214,6 +1674,129 @@ def _watch_loop(workspace: Path, action: str, mgr, warm: bool, build_agent_fn):
                 prev = curr
     except KeyboardInterrupt:
         print(f"\n  {_dim('Watch stopped.')}")
+
+
+# ── Daemon mode ──────────────────────────────────────────────────
+
+def _detect_test_command(workspace: Path) -> str | None:
+    """Return the most likely test command for the workspace, or None."""
+    if (workspace / "pytest.ini").exists() or (workspace / "pyproject.toml").exists():
+        # Best-effort — assume pytest if there's any python project file
+        return "pytest"
+    if any((workspace / f).exists() for f in ("tests", "test")):
+        return "pytest"
+    if (workspace / "package.json").exists():
+        return "npm test"
+    if (workspace / "Cargo.toml").exists():
+        return "cargo test"
+    if (workspace / "go.mod").exists():
+        return "go test ./..."
+    return None
+
+
+_DAEMON_GOAL_TEMPLATE = (
+    "Run the project's tests using run_tests. "
+    "If they pass, respond with EXACTLY one line: PASS\n"
+    "If they fail, respond with at most 5 lines: the first line is `FAIL`, "
+    "and the next lines list each failing test and the file:line where it broke. "
+    "No prose, no fix attempt — this is a status check, not a repair."
+)
+
+
+def _daemon_loop(workspace: Path, mgr, build_agent_fn):
+    """Long-lived background daemon. Watches the workspace for file changes
+    and runs the project test suite on each batch of changes. Stays quiet on
+    pass; surfaces a one-line FAIL summary on failure.
+
+    Privacy invariant preserved: stdin/stdout only, no sockets, no HTTP.
+    """
+    import time as _time
+    extensions = {".py", ".js", ".ts", ".jsx", ".tsx", ".go", ".rs", ".yaml", ".yml", ".json", ".toml"}
+
+    cmd = _detect_test_command(workspace)
+    if cmd is None:
+        print(f"  {_yellow('No test framework detected.')} "
+              f"{_dim('Daemon will still watch for changes but cannot self-verify.')}")
+    else:
+        print(f"  {_dim(f'detected test command: {cmd}')}")
+
+    def _snapshot():
+        times = {}
+        for p in workspace.rglob("*"):
+            if not p.is_file() or p.suffix not in extensions:
+                continue
+            if any(skip in p.parts for skip in (".git", "__pycache__", "node_modules", ".venv", "dist", "build")):
+                continue
+            try:
+                times[str(p)] = p.stat().st_mtime
+            except OSError:
+                pass
+        return times
+
+    prev = _snapshot()
+    print(f"  {_dim(f'watching {len(prev)} files. Ctrl+C to stop.')}\n")
+
+    # Warm-load once — the daemon stays running and re-uses the model
+    mgr.ensure_profile("code", quiet=True)
+    agent = build_agent_fn(mgr, workspace)
+
+    debounce_until = 0.0
+    try:
+        while True:
+            _time.sleep(2)
+            now = _time.time()
+            curr = _snapshot()
+            changed = [f for f in curr if curr[f] != prev.get(f, 0)]
+            new_files = [f for f in curr if f not in prev]
+            changed.extend(new_files)
+            if not changed:
+                prev = curr
+                continue
+
+            # Debounce: wait 3s of quiet before firing, to coalesce save bursts
+            prev = curr
+            debounce_until = now + 3.0
+            while _time.time() < debounce_until:
+                _time.sleep(0.5)
+                curr2 = _snapshot()
+                more = [f for f in curr2 if curr2[f] != prev.get(f, 0)]
+                more.extend([f for f in curr2 if f not in prev])
+                if more:
+                    prev = curr2
+                    debounce_until = _time.time() + 3.0
+
+            ts = _time.strftime("%H:%M:%S")
+            stamp = _dim(f"[{ts}]")
+            names = sorted({Path(f).name for f in changed})[:5]
+            tail = f" +{len(changed) - 5}" if len(changed) > 5 else ""
+            print(f"{stamp} change: {', '.join(names)}{tail}")
+
+            if cmd is None:
+                continue
+
+            try:
+                result = agent.run(_DAEMON_GOAL_TEMPLATE, continue_session=False)
+            except KeyboardInterrupt:
+                raise
+            except Exception as exc:
+                print(f"{stamp} {_red('[error]')} {exc}")
+                continue
+
+            answer = (result.final_answer or "").strip()
+            first = answer.splitlines()[0].strip().upper() if answer else ""
+            if first.startswith("PASS"):
+                # Quiet on green — single character so the user knows we ran
+                print(f"{stamp} {_green('PASS')}")
+            elif first.startswith("FAIL"):
+                print(f"{stamp} {_red('FAIL')}")
+                for line in answer.splitlines()[1:6]:
+                    if line.strip():
+                        print(f"        {line.rstrip()}")
+            else:
+                # Unknown shape — print first line so the user sees something
+                print(f"{stamp} {_yellow('?')} {answer.splitlines()[0][:120] if answer else '(no output)'}")
+    except KeyboardInterrupt:
+        print(f"\n  {_dim('daemon stopped.')}")
 
 
 # ── Batch mode ───────────────────────────────────────────────────
@@ -1345,6 +1928,7 @@ _HELP_TEXT = """
     {cyan}/modelpath add <dir>{end} Add a directory to scan for GGUFs
     {cyan}/modelpath remove <dir>{end} Remove a search directory
     {cyan}/review{end}              Review uncommitted changes for bugs + security
+    {cyan}/review-deep{end} [base]   Structured deep review (reads full files, severity buckets)
     {cyan}/export{end} [file]       Save session conversation to markdown
     {cyan}/paste{end}               Send clipboard contents as context
     {cyan}/copy{end}                Copy last answer to clipboard
@@ -1357,6 +1941,12 @@ _HELP_TEXT = """
     {cyan}/lint{end}                Run the project linter
     {cyan}/format{end}              Run the project code formatter
     {cyan}/autofix{end} [N]         Run tests, fix failures, re-run — loop up to N times (default 5)
+    {cyan}/tdd{end} <goal>           Test-driven loop: write tests first, then implement until they pass
+    {cyan}/proof{end} [path]         Self-proof: run tests, diagnose any failures (source OR test bugs), fix, re-run
+    {cyan}/distill{end}              Capture the last run as a reusable trajectory artifact
+    {cyan}/flag-errors{end}          Analyze last run for known failure patterns + auto-synthesize YAML augmentor fixes
+    {cyan}/promote{end} [cat|--all|--list]  Validate + promote auto-generated YAMLs from review queue into retrieval index
+    {cyan}/library{end}                     Status snapshot: trajectories, review queue, promoted YAMLs, total augmentor count
     {cyan}/watch{end} [action]      Watch for file changes, auto-run: test, lint, or custom goal
     {cyan}/batch{end} <file>        Run goals from a text file (one per line)
     {cyan}/docs{end} readme|api|arch  Auto-generate project documentation
@@ -1444,6 +2034,13 @@ _HELP_TEXT = """
   {bold}Startup flags:{end}
     --warm          Keep model loaded between goals (instant, ~10GB VRAM)
     --extended      Enable 21 advanced tools (git, checkpoint, etc.)
+    --lsp           Enable code-intelligence tools (goto_def, refs, diagnostics, completions; needs jedi)
+    --daemon        Headless watcher: runs project tests on every file save, quiet on PASS
+    --architect     Force plan-then-execute on every goal (auto-triggered for multi-file scaffolding)
+    --no-architect  Disable architect auto-trigger (always run flat agent)
+    --handheld      Plan + per-step driver with prior-state injection. For LARGE projects (8+ files). Slower than architect but each step sees what prior steps actually wrote, eliminating cross-file class duplication.
+    --no-auto-flag  Disable auto-flag-on-fail (silent failure-pattern detector that writes YAML augmentors)
+    --yes           Auto-approve all risky tool calls (run_bash etc) — no interactive prompt. Auto-enabled when stdin is not a TTY.
 """
 
 
@@ -1468,7 +2065,11 @@ def _run_one(agent, goal: str, continue_session: bool = False):
     _spinner.start()
     t0 = time.monotonic()
     try:
-        result = agent.run(goal, continue_session=continue_session)
+        try:
+            result = agent.run(goal, continue_session=continue_session)
+        except TypeError:
+            # ArchitectAgent.run takes goal only — no continue_session
+            result = agent.run(goal)
     except KeyboardInterrupt:
         _spinner.stop()
         print("\n[interrupted]")
@@ -1531,24 +2132,53 @@ def main():
 
     workspace = Path.cwd().resolve()
     warm = "--warm" in sys.argv
+    daemon = "--daemon" in sys.argv
 
     print(f"{_bold('ulcagent')} {_dim('- adaptive local agent')}")
     print(f"  {_dim('workspace:')} {workspace}")
     _startup_greeting(workspace)
     if warm:
         print(f"  {_dim('mode: --warm')}")
+    if daemon:
+        print(f"  {_dim('mode: --daemon (quiet on success, surfaces failures only)')}")
     print()
 
     mgr = ModelManager()
+
+    # Daemon mode — long-lived, watches workspace, runs tests on save, quiet
+    # except on failure. Reuses the model in --warm style by default.
+    if daemon:
+        _daemon_loop(workspace, mgr, _build_agent)
+        mgr.unload()
+        return
+
+    # Architect mode flags (override the auto-trigger heuristic)
+    arch_force_on = "--architect" in sys.argv
+    arch_force_off = "--no-architect" in sys.argv
+    auto_flag_off = "--no-auto-flag" in sys.argv
+    handheld_force_on = "--handheld" in sys.argv
 
     # One-shot mode
     goal_args = [a for a in sys.argv[1:] if not a.startswith("--")]
     if goal_args:
         goal = " ".join(goal_args)
+        # Slash-command pre-expansion (parity with REPL dispatcher).
+        # /proof, /tdd, /autofix etc. should work as one-shot args too.
+        goal = _expand_slash_command(goal)
         profile = _detect_profile(goal)
         mgr.ensure_profile(profile)
         agent = _build_agent(mgr, workspace)
-        _run_one(agent, goal)
+        if handheld_force_on:
+            print(f"  {_dim('[handheld driver — plan + per-step with prior-state injection]')}")
+            agent = _build_handheld_driver(agent)
+        elif _should_use_architect(goal, arch_force_on, arch_force_off):
+            print(f"  {_dim('[architect mode — plan-then-execute]')}")
+            agent = _build_architect_agent(agent)
+        result = _run_one(agent, goal)
+        # Same auto-flag hook the REPL loop uses — the one-shot path was
+        # silently skipping it, surfaced by the 2026-04-26 re-walkthrough.
+        if result is not None and not auto_flag_off:
+            _maybe_auto_flag(result, goal)
         mgr.unload()
         return
 
@@ -1559,6 +2189,8 @@ def main():
     agent = None
     session_active = False  # True after first goal — enables continue_session
     last_profile = None
+    last_result = None
+    last_goal_for_distill = ""
 
     while True:
         try:
@@ -1671,6 +2303,15 @@ def main():
             else:
                 continue
 
+        # /review-deep — structured deep review against a base ref (default HEAD)
+        if goal.lower().startswith("/review-deep"):
+            base = goal[len("/review-deep"):].strip() or "HEAD"
+            review_goal = _do_review_deep(workspace, base)
+            if review_goal:
+                goal = review_goal
+            else:
+                continue
+
         # /snippet — manage snippets
         if goal.lower().startswith("/snippet"):
             result = _manage_snippets(goal[8:].strip())
@@ -1689,6 +2330,118 @@ def main():
             rounds = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 5
             goal = _autofix_goal(rounds)
             # fall through to normal goal processing
+
+        # /tdd — test-driven development loop
+        if goal.lower().startswith("/tdd"):
+            user_goal = goal[4:].strip()
+            if not user_goal:
+                print(f"  {_dim('Usage: /tdd <goal> — write tests first, then implement until they pass')}")
+                continue
+            goal = _tdd_goal(user_goal)
+            # fall through to normal goal processing
+
+        # /proof — self-diagnose-and-fix failing tests
+        if goal.lower().startswith("/proof"):
+            target = goal[len("/proof"):].strip()
+            goal = _proof_goal(target)
+            # fall through to normal goal processing
+
+        # /distill — capture the LAST run as a trajectory artifact
+        if goal.lower() in ("/distill",):
+            if not last_result:
+                print(f"  {_dim('No prior run to distill. Run a goal first.')}")
+                continue
+            try:
+                from engine.trajectory_distiller import distill, save
+                traj = distill(last_result, last_goal_for_distill)
+                p = save(traj, _SELF)
+                rel = p.relative_to(_SELF) if p.is_relative_to(_SELF) else p
+                bucket = "examples" if traj.success else "review"
+                meta = f"[intent={traj.intent} lang={traj.language} iters={traj.iterations} files={len(traj.files_touched)}]"
+                print(f"  {_green('Distilled')} {bucket}: {rel}  {_dim(meta)}")
+            except Exception as exc:
+                print(f"  {_red('Distill failed:')} {exc}")
+            continue
+
+        # /library — single-pane status report on every learning artifact
+        if goal.lower() in ("/library", "/lib"):
+            try:
+                from engine.library_status import collect, render_text
+                s = collect(_SELF)
+                print(f"  {_bold('Library status:')}")
+                for line in render_text(s).splitlines():
+                    print(f"  {line}")
+            except Exception as exc:
+                print(f"  {_red('Library status failed:')} {exc}")
+            continue
+
+        # /promote — copy validated auto-generated YAMLs from the review
+        # queue into data/augmentor_examples/agentic/<category>/ so the
+        # retrieval system picks them up on next ulcagent boot.
+        if goal.lower().startswith("/promote"):
+            args = goal[len("/promote"):].strip()
+            try:
+                from engine.augmentor_promoter import (
+                    promote_all, promote_category, list_review_queue, summarize,
+                )
+            except Exception as exc:
+                print(f"  {_red('Promoter not importable:')} {exc}")
+                continue
+            queue = list_review_queue(_SELF)
+            if not queue:
+                print(f"  {_dim('No YAMLs in data/auto_generated_review/.')}")
+                continue
+            if not args or args == "--all":
+                results = promote_all(_SELF)
+            elif args.startswith("--list"):
+                print(f"  {_bold('Review queue:')}")
+                for cat, files in queue.items():
+                    print(f"    {cat}: {len(files)} file(s)")
+                continue
+            else:
+                results = promote_category(args, _SELF)
+            counts = summarize(results)
+            print(f"  {_green('Promoted:')} {counts['promoted']}, "
+                  f"{_yellow('skipped:')} {counts['skipped']}, "
+                  f"{_red('rejected:')} {counts['rejected']}")
+            for r in results:
+                if r.promoted:
+                    rel = r.target.relative_to(_SELF) if r.target and r.target.is_relative_to(_SELF) else r.target
+                    print(f"    {_dim('OK   ')} {r.source.name} -> {rel}")
+                elif "validation failed" in r.reason:
+                    print(f"    {_red('REJECT')} {r.source.name}: {r.reason}")
+                else:
+                    print(f"    {_dim('SKIP ')} {r.source.name}: {r.reason}")
+            continue
+
+        # /flag-errors — analyze the LAST run for known failure patterns and
+        # synthesize YAML augmentor entries that demonstrate the correct fix.
+        if goal.lower() in ("/flag-errors", "/flag"):
+            if not last_result:
+                print(f"  {_dim('No prior run to analyze. Run a goal first.')}")
+                continue
+            try:
+                from engine.failure_flagger import flag, summarize
+                from engine.yaml_augmentor_builder import write_all
+                records = flag(last_result, last_goal_for_distill)
+                if not records:
+                    print(f"  {_green('No known failure patterns detected.')}")
+                    continue
+                summary = summarize(records)
+                summary_str = ", ".join(f"{k}×{v}" for k, v in summary.items())
+                print(f"  {_yellow('Detected:')} {summary_str}")
+                paths = write_all(records, last_goal_for_distill, _SELF)
+                if paths:
+                    print(f"  {_green('Wrote')} {len(paths)} augmentor YAML file(s) to data/auto_generated_review/:")
+                    for p in paths:
+                        rel = p.relative_to(_SELF) if p.is_relative_to(_SELF) else p
+                        print(f"    {_dim('->')} {rel}")
+                    print(f"  {_dim('Review and move to data/augmentor_examples/<domain>/ to enable retrieval.')}")
+                else:
+                    print(f"  {_dim('No YAML templates available for the detected categories.')}")
+            except Exception as exc:
+                print(f"  {_red('Flag failed:')} {exc}")
+            continue
 
         # /watch — file watcher
         if goal.lower().startswith("/watch"):
@@ -1781,8 +2534,28 @@ def main():
         # Log user goal
         _session_log.append({"role": "user", "content": goal})
 
-        # Run with session memory
-        last_result = _run_one(agent, goal, continue_session=session_active)
+        # Mode routing (per-goal): handheld > architect > flat
+        run_target = agent
+        if handheld_force_on:
+            print(f"  {_dim('[handheld driver — plan + per-step with prior-state injection]')}")
+            try:
+                run_target = _build_handheld_driver(agent)
+            except Exception as exc:
+                print(f"  {_yellow('handheld setup failed; falling back to flat:')} {exc}")
+        elif _should_use_architect(goal, arch_force_on, arch_force_off):
+            print(f"  {_dim('[architect mode — plan-then-execute]')}")
+            try:
+                run_target = _build_architect_agent(agent)
+            except Exception as exc:
+                print(f"  {_yellow('architect setup failed; falling back to flat:')} {exc}")
+
+        # Run with session memory (architect agents ignore continue_session
+        # — each step is a fresh sub-agent, which is the whole point)
+        if run_target is agent:
+            last_result = _run_one(agent, goal, continue_session=session_active)
+        else:
+            last_result = _run_one(run_target, goal, continue_session=False)
+        last_goal_for_distill = goal  # preserved across iterations for /distill
         session_active = True
 
         # Track stats + log answer
@@ -1799,6 +2572,13 @@ def main():
             _update_last_answer(answer)
             stats_str = f"{last_result.iterations} iter, {len(last_result.tool_calls)} calls, {last_result.wall_time:.1f}s"
             _session_log.append({"role": "agent", "content": answer, "stats": stats_str})
+
+            # Auto-flag-on-fail: silently scan the run for known failure
+            # patterns and write YAML augmentor entries to
+            # data/auto_generated_review/ (OUTSIDE the retrieval scan path).
+            # No-op on clean runs. Disable via --no-auto-flag CLI flag.
+            if not auto_flag_off:
+                _maybe_auto_flag(last_result, goal)
 
         # Post-task suggestion
         suggestion = _suggest_next(last_result)
