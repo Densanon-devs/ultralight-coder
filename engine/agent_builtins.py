@@ -744,6 +744,7 @@ def build_default_registry(
     ask_user_fn: Optional[Callable] = None,
     extended_tools: bool = False,
     lsp_tools: bool = False,
+    lsp_tool_pack: Optional[list[str]] = None,
     mcp_servers: Optional[list[str]] = None,
     mcp_tool_pack: Optional[list[str]] = None,
 ) -> ToolRegistry:
@@ -1131,7 +1132,12 @@ def build_default_registry(
         try:
             from engine.agent_lsp import register_lsp_tools, is_available
             if is_available():
-                register_lsp_tools(reg, ws.root)
+                # Default tool_pack is None → registers the curated
+                # DEFAULT_LSP_TOOLS (2 tools, keeps the registry under
+                # the 14B regression cliff). Caller can pass
+                # `lsp_tool_pack=["all"]` for the full 4-tool surface
+                # or an explicit list for finer curation.
+                register_lsp_tools(reg, ws.root, tool_pack=lsp_tool_pack)
         except ImportError:
             pass
 

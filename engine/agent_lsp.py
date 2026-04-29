@@ -202,99 +202,139 @@ def _get_completions(workspace_root: Path, path: str, line: int, column: int) ->
 # ── Registration ────────────────────────────────────────────────────
 
 
-def register_lsp_tools(registry, workspace_root: Path) -> int:
-    """Register the 4 code-intelligence tools on `registry`. Returns the
-    number of tools actually registered (0 if jedi is not installed and
-    the diagnostics-only fallback is also skipped — currently always 4
-    once jedi is present, 1 if only AST-diagnostics is wanted)."""
+# Curated default — `--lsp` (no value) registers ONLY these two. The
+# 14B regresses past ~10 tools per feedback_tool_count_regression.md;
+# 9 builtin + 4 LSP = 13 (past the cliff). Capping the default at 2
+# means the registry sits at 11 — closer to the proven safe count, and
+# the omitted tools (get_diagnostics, get_completions) overlap with
+# existing capabilities (auto_verify already runs after every write;
+# completions are mid-edit affordances the agent rarely uses). Users
+# can opt back into the full set with `--lsp=all`.
+DEFAULT_LSP_TOOLS = ("goto_definition", "find_references")
+ALL_LSP_TOOLS = ("goto_definition", "find_references",
+                 "get_diagnostics", "get_completions")
+
+
+def register_lsp_tools(registry, workspace_root: Path,
+                       tool_pack: "list[str] | None" = None) -> int:
+    """Register code-intelligence tools on `registry`. Returns the count
+    actually registered.
+
+    `tool_pack` (optional):
+      - None or [] → register the curated DEFAULT_LSP_TOOLS (2 tools).
+        This is what `ulcagent --lsp` (bare flag) selects.
+      - ['all'] → register every tool in ALL_LSP_TOOLS (4 tools).
+        Selected by `ulcagent --lsp=all`. Past the 14B regression cliff;
+        only safe with extended_tools=False or models with looser
+        tool-count tolerance.
+      - explicit list of names → register only those (validated against
+        ALL_LSP_TOOLS; unknown names raise ValueError so typos surface
+        loudly).
+
+    Returns 0 if jedi isn't installed (graceful degradation).
+    """
     from engine.agent_tools import ToolSchema  # local import — avoid eager dep at module load
 
     if not _JEDI_AVAILABLE:
-        # Even without jedi we can still register get_diagnostics since it
-        # falls back to ast-only checks, but we want explicit user opt-in
-        # to avoid surprising behavior. Skip everything.
         return 0
 
+    # Resolve the tool pack:
+    if not tool_pack:
+        wanted = set(DEFAULT_LSP_TOOLS)
+    elif list(tool_pack) == ["all"]:
+        wanted = set(ALL_LSP_TOOLS)
+    else:
+        wanted = {t.strip() for t in tool_pack if t.strip()}
+        unknown = wanted - set(ALL_LSP_TOOLS)
+        if unknown:
+            raise ValueError(
+                f"Unknown LSP tool name(s): {', '.join(sorted(unknown))}. "
+                f"Available: {', '.join(ALL_LSP_TOOLS)} (or 'all')."
+            )
+
     workspace_root = Path(workspace_root).resolve()
-
-    registry.register(ToolSchema(
-        name="goto_definition",
-        description=(
-            "Jump to the definition of a Python symbol. Pass the file you're "
-            "looking AT (where the symbol is referenced) and the symbol name. "
-            "Returns file:line:col of the definition site, even if it's in a "
-            "different file. Use this BEFORE editing a function whose body you "
-            "haven't seen — much more reliable than grep for cross-file work."
-        ),
-        parameters={
-            "type": "object",
-            "properties": {
-                "path": {"type": "string", "description": "File where the symbol is referenced"},
-                "symbol": {"type": "string", "description": "Symbol name (function, class, variable)"},
+    schemas = {
+        "goto_definition": ToolSchema(
+            name="goto_definition",
+            description=(
+                "Jump to the definition of a Python symbol. Pass the file you're "
+                "looking AT (where the symbol is referenced) and the symbol name. "
+                "Returns file:line:col of the definition site, even if it's in a "
+                "different file. Use this BEFORE editing a function whose body you "
+                "haven't seen — much more reliable than grep for cross-file work."
+            ),
+            parameters={
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "File where the symbol is referenced"},
+                    "symbol": {"type": "string", "description": "Symbol name (function, class, variable)"},
+                },
+                "required": ["path", "symbol"],
             },
-            "required": ["path", "symbol"],
-        },
-        function=lambda path, symbol: _goto_definition(workspace_root, path, symbol),
-        category="code_intel",
-    ))
-
-    registry.register(ToolSchema(
-        name="find_references",
-        description=(
-            "List every place a Python symbol is used across the project. "
-            "Pass the file you're looking AT and the symbol name. Returns "
-            "file:line:col for each reference. Use this BEFORE renaming or "
-            "removing a symbol — catches call sites grep can miss (e.g. "
-            "import aliases, getattr access)."
+            function=lambda path, symbol: _goto_definition(workspace_root, path, symbol),
+            category="code_intel",
         ),
-        parameters={
-            "type": "object",
-            "properties": {
-                "path": {"type": "string", "description": "File where the symbol is referenced or defined"},
-                "symbol": {"type": "string", "description": "Symbol name"},
+        "find_references": ToolSchema(
+            name="find_references",
+            description=(
+                "List every place a Python symbol is used across the project. "
+                "Pass the file you're looking AT and the symbol name. Returns "
+                "file:line:col for each reference. Use this BEFORE renaming or "
+                "removing a symbol — catches call sites grep can miss (e.g. "
+                "import aliases, getattr access)."
+            ),
+            parameters={
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "File where the symbol is referenced or defined"},
+                    "symbol": {"type": "string", "description": "Symbol name"},
+                },
+                "required": ["path", "symbol"],
             },
-            "required": ["path", "symbol"],
-        },
-        function=lambda path, symbol: _find_references(workspace_root, path, symbol),
-        category="code_intel",
-    ))
-
-    registry.register(ToolSchema(
-        name="get_diagnostics",
-        description=(
-            "Run static analysis on a Python file: SyntaxError, possibly-undefined "
-            "names. Faster and more thorough than running the file. Use after a "
-            "non-trivial edit to verify the file is well-formed before running tests."
+            function=lambda path, symbol: _find_references(workspace_root, path, symbol),
+            category="code_intel",
         ),
-        parameters={
-            "type": "object",
-            "properties": {
-                "path": {"type": "string", "description": "Python file path"},
+        "get_diagnostics": ToolSchema(
+            name="get_diagnostics",
+            description=(
+                "Run static analysis on a Python file: SyntaxError, possibly-undefined "
+                "names. Faster and more thorough than running the file. Use after a "
+                "non-trivial edit to verify the file is well-formed before running tests."
+            ),
+            parameters={
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Python file path"},
+                },
+                "required": ["path"],
             },
-            "required": ["path"],
-        },
-        function=lambda path: _get_diagnostics(workspace_root, path),
-        category="code_intel",
-    ))
-
-    registry.register(ToolSchema(
-        name="get_completions",
-        description=(
-            "List completions at a specific cursor position in a Python file. "
-            "Useful for discovering API surface — e.g. 'what methods does this "
-            "object have' — without reading the whole module."
+            function=lambda path: _get_diagnostics(workspace_root, path),
+            category="code_intel",
         ),
-        parameters={
-            "type": "object",
-            "properties": {
-                "path": {"type": "string", "description": "Python file path"},
-                "line": {"type": "integer", "description": "1-indexed line number"},
-                "column": {"type": "integer", "description": "0-indexed column"},
+        "get_completions": ToolSchema(
+            name="get_completions",
+            description=(
+                "List completions at a specific cursor position in a Python file. "
+                "Useful for discovering API surface — e.g. 'what methods does this "
+                "object have' — without reading the whole module."
+            ),
+            parameters={
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Python file path"},
+                    "line": {"type": "integer", "description": "1-indexed line number"},
+                    "column": {"type": "integer", "description": "0-indexed column"},
+                },
+                "required": ["path", "line", "column"],
             },
-            "required": ["path", "line", "column"],
-        },
-        function=lambda path, line, column: _get_completions(workspace_root, path, line, column),
-        category="code_intel",
-    ))
+            function=lambda path, line, column: _get_completions(workspace_root, path, line, column),
+            category="code_intel",
+        ),
+    }
 
-    return 4
+    registered = 0
+    for name in ALL_LSP_TOOLS:  # iterate in stable order
+        if name in wanted:
+            registry.register(schemas[name])
+            registered += 1
+    return registered

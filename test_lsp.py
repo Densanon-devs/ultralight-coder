@@ -39,12 +39,46 @@ def test_is_available():
     assert is_available() is True
 
 
-def test_register_adds_four_tools():
+def test_register_default_pack_adds_two_tools():
+    """Default (no tool_pack) registers the curated 2-tool subset to
+    stay under the 14B's tool-count regression cliff."""
     reg = ToolRegistry()
     n = register_lsp_tools(reg, Path("."))
+    assert n == 2
+    for name in ("goto_definition", "find_references"):
+        assert reg.get(name) is not None
+    # Omitted by default
+    assert reg.get("get_diagnostics") is None
+    assert reg.get("get_completions") is None
+
+
+def test_register_all_pack_adds_four_tools():
+    """tool_pack=['all'] opts back into every LSP tool."""
+    reg = ToolRegistry()
+    n = register_lsp_tools(reg, Path("."), tool_pack=["all"])
     assert n == 4
     for name in ("goto_definition", "find_references", "get_diagnostics", "get_completions"):
         assert reg.get(name) is not None
+
+
+def test_register_explicit_pack():
+    """Explicit list registers only those tools."""
+    reg = ToolRegistry()
+    n = register_lsp_tools(reg, Path("."), tool_pack=["get_diagnostics"])
+    assert n == 1
+    assert reg.get("get_diagnostics") is not None
+    assert reg.get("goto_definition") is None
+
+
+def test_register_unknown_name_raises():
+    """Typos in tool_pack must surface loudly."""
+    import pytest
+    reg = ToolRegistry()
+    with pytest.raises(ValueError) as exc_info:
+        register_lsp_tools(reg, Path("."), tool_pack=["bogus_tool"])
+    assert "bogus_tool" in str(exc_info.value)
+    # Available list should be in the error so the user can fix the typo.
+    assert "goto_definition" in str(exc_info.value)
 
 
 # ── goto_definition ──
