@@ -51,3 +51,21 @@ results/
 parse_dumps/
 __pycache__/
 *.pyc
+
+# Benchmark artifacts — written by benchmark_agentic.py / benchmark_*.py
+# at the repo root. Useful as evidence inside an experiment branch but
+# shouldn't bleed across branches or land in history. The JSONs from the
+# existing archived run are in commit d8e19f3.
+bench_*.json
+bench[0-9]*.json
+bench_*.log
+bench_*.stderr.log
+bench_*.stdout.log
+bench_*_log.txt
+download_*.log
+
+# Diagnostic / probe scripts — _-prefixed at repo root by convention.
+# Throwaway one-shots for verifying a pipeline; not unit tests, not
+# part of the harness.
+_probe_*.py
+_smoke_*.py
