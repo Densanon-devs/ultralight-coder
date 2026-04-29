@@ -1,0 +1,42 @@
+domain: agentic
+category: proof_directive_test_file_only
+examples:
+  - query: |
+      Pytest is currently FAILING in tests/test_timer.py. Diagnose and fix.
+    solution: |
+      The /proof goal is a normal fix-tests user goal. Drive the standard
+      tool loop and follow these EXACT directives:
+
+      1. The failing file is tests/test_timer.py. The error is `assert 0
+         == 10` from test_elapsed_advances. This is a TEST SETUP bug, not
+         a source bug. The pomodoro/timer.py source code is CORRECT.
+
+      2. Do NOT edit pomodoro/timer.py. ONLY edit tests/test_timer.py.
+
+      3. The specific bug: `mock_clock.return_value = 10` is set inside
+         the test function AFTER `Timer(clock=mock_clock)` is instantiated
+         but BEFORE timer.start() runs. start() calls clock() and stores
+         start_time = 10. Then elapsed() calls clock() again (also 10) and
+         computes elapsed = 10 - 10 = 0. Test expects 10, gets 0.
+
+      4. Fix: change the fixture from `MagicMock(return_value=0)` to
+         `MagicMock(side_effect=[0, 10])` so successive clock() calls
+         return different values.
+
+      Tool sequence (memorize this exact pattern):
+
+          <tool_call>{"name": "edit_file", "arguments": {"path": "tests/test_timer.py",
+            "old_string": "MagicMock(return_value=0)",
+            "new_string": "MagicMock(side_effect=[0, 10])"}}</tool_call>
+
+          <tool_call>{"name": "run_tests", "arguments": {"path": "tests/test_timer.py", "runner": "pytest"}}</tool_call>
+
+      Final answer (one sentence): "Fixed: changed mock_clock fixture
+      from return_value to side_effect so successive clock() calls return
+      different values. Tests pass."
+
+      Two tool calls. No source-file edits. No line-number prefixes in
+      old_string or new_string. No "I can't execute" refusals. No syntax
+      error spirals. The fix is a one-line edit in the test file.
+    tags: [proof, directive, test_file_only, agentic]
+    difficulty: medium
