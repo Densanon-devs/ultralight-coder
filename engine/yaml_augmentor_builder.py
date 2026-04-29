@@ -407,18 +407,35 @@ file — it's brittle and breaks when the test is moved.
 # ── Builder ─────────────────────────────────────────────────────────
 
 
-def _signature(record: FailureRecord, goal: str) -> str:
-    """Stable short identifier for the YAML filename. Includes iteration
-    + a counter primed from time.time_ns() so that multiple records from
-    one run (same goal, same category, same path, same wall-clock second)
-    don't collide and overwrite each other on disk."""
+def _solution_signature(payload: dict) -> str:
+    """Stable short identifier derived from the BUILT solution body —
+    the lesson the YAML teaches. Two YAMLs whose solutions normalize to
+    the same shape collide on disk (filename match), so writing the
+    second is idempotent — the first occurrence wins.
+
+    This is the harvest-time half of the dedup story; retrieval-time
+    dedup in engine.augmentors lives in `_dedupe_examples`. Both use
+    the same lowercased + whitespace-collapsed first-200-chars
+    signature so identical lessons hash to identical IDs across
+    layers.
+
+    Earlier behavior used `time.time_ns()` to keep each occurrence
+    distinct on disk — but that's the opposite of what we want. We
+    WANT duplicate lessons to collide; surfacing every flagged
+    occurrence as a separate file just bloats the review queue (a
+    single overnight bench produced 35 missing_import YAMLs all
+    teaching the same canonical fix).
+    """
+    examples = payload.get("examples") or []
+    if not examples:
+        # Defensive — should never happen, but if it does, fall back
+        # to category-only so duplicates still collide.
+        return hashlib.sha256(payload.get("category", "?").encode()).hexdigest()[:10]
+    solution = examples[0].get("solution") or ""
+    normalized = " ".join(solution.lower().split())[:200]
     h = hashlib.sha256()
-    h.update(record.category.encode("utf-8"))
-    h.update((record.file_path or "").encode("utf-8"))
-    h.update(str(record.iteration).encode("utf-8"))
-    h.update((record.error_excerpt or "")[:120].encode("utf-8"))
-    h.update(goal.encode("utf-8"))
-    h.update(str(time.time_ns()).encode("utf-8"))
+    h.update(payload.get("category", "?").encode("utf-8"))
+    h.update(normalized.encode("utf-8"))
     return h.hexdigest()[:10]
 
 
@@ -468,8 +485,18 @@ def write_yaml(record: FailureRecord, goal: str, repo_root: Path | str) -> Path 
     repo_root = Path(repo_root)
     target_dir = repo_root / "data" / "auto_generated_review" / record.category
     target_dir.mkdir(parents=True, exist_ok=True)
-    fname = f"{_signature(record, goal)}.yaml"
+    # Filename is a hash of the SOLUTION body, not the failure record —
+    # two failures that produce identical lessons collide on disk and
+    # writing the second is idempotent. Confirmed by overnight bench:
+    # 35 missing_import failures had collapsed into 35 distinct files
+    # via time.time_ns()-based naming, all teaching the SAME lesson.
+    fname = f"{_solution_signature(payload)}.yaml"
     path = target_dir / fname
+    if path.exists():
+        # Same lesson already harvested — no-op rewrite would just
+        # bump mtime. Return the existing path so callers can still
+        # account for the occurrence.
+        return path
     path.write_text(
         yaml.safe_dump(payload, sort_keys=False, allow_unicode=True),
         encoding="utf-8",

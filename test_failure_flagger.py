@@ -537,9 +537,14 @@ def test_write_yaml_path_is_outside_retrieval_scan():
     assert augmentor_root not in p.resolve().parents
 
 
-def test_signature_avoids_collision_in_same_second():
-    """Bug #3: multiple records same category+path+goal at the same wall-
-    clock second must not produce identical filenames."""
+def test_signature_collapses_identical_lessons():
+    """Inverted from the original Bug #3 test (which wanted unique
+    filenames per occurrence). After 2026-04-29 harvest-time dedup:
+    two records that PRODUCE THE SAME LESSON intentionally collide on
+    disk — writing the second is idempotent. The overnight bench
+    proved the old time_ns-based naming inflated the queue 30x with
+    identical YAMLs (35 missing_import files, all teaching the same
+    fix). Filename now derives from the built solution body."""
     tmp = Path(tempfile.mkdtemp())
     r1 = FailureRecord(category="json_quote_leak", iteration=1,
                        tool_name="write_file", error_excerpt="err A",
@@ -549,7 +554,22 @@ def test_signature_avoids_collision_in_same_second():
                        file_path="x.py")
     p1 = write_yaml(r1, "same goal", tmp)
     p2 = write_yaml(r2, "same goal", tmp)
-    assert p1 != p2, "filenames collided — Bug #3 regression"
+    # Same category template + same goal → same lesson → same path.
+    assert p1 == p2, "duplicate lessons should collapse to one file on disk"
+
+
+def test_signature_distinguishes_different_categories():
+    """Different categories teach different lessons → distinct files."""
+    tmp = Path(tempfile.mkdtemp())
+    r1 = FailureRecord(category="json_quote_leak", iteration=1,
+                       tool_name="write_file", error_excerpt="x",
+                       file_path="a.py")
+    r2 = FailureRecord(category="missing_import", iteration=1,
+                       tool_name="edit_file", error_excerpt="x",
+                       file_path="a.py")
+    p1 = write_yaml(r1, "goal", tmp)
+    p2 = write_yaml(r2, "goal", tmp)
+    assert p1 != p2, "different categories should land in different files"
 
 
 def test_write_all_skips_unknown_categories():
