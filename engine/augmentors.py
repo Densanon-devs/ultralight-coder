@@ -337,6 +337,48 @@ _LANGUAGE_CATEGORY_PREFIXES = {
 _ALL_NON_PYTHON_PREFIXES = tuple(p for prefixes in _LANGUAGE_CATEGORY_PREFIXES.values() for p in prefixes)
 
 
+def _dedupe_examples(examples, top_k: int) -> list:
+    """Return up to `top_k` examples with no two sharing a solution
+    signature. Order-preserving — the first occurrence of each unique
+    signature wins. Used in retrieval paths that don't otherwise
+    diversify (the no-embedder short-circuit).
+    """
+    seen: set[str] = set()
+    out = []
+    for ex in examples:
+        sig = _solution_signature(ex)
+        if sig in seen:
+            continue
+        seen.add(sig)
+        out.append(ex)
+        if len(out) >= top_k:
+            break
+    return out
+
+
+def _solution_signature(example) -> str:
+    """Return a stable fingerprint of an example's solution body for
+    near-duplicate detection during retrieval.
+
+    Two examples with the same fingerprint teach essentially the same
+    lesson — likely two harvest runs that captured the same failure
+    pattern under slightly different goals. We don't want all of them
+    in the model's top-K (wastes the context window on repeated
+    teaching). The highest-similarity variant gets the slot.
+
+    Signature: lowercased solution body with all whitespace collapsed
+    to single spaces, then trimmed to the first 200 chars. Surfaces
+    the shape of the lesson (BEFORE/AFTER blocks, tool-call shape,
+    array vs string write_file) without being foiled by trivial
+    formatting differences.
+    """
+    body = getattr(example, "solution", "") or ""
+    if not body:
+        return f"_empty:{getattr(example, 'category', '')}"
+    normalized = " ".join(body.lower().split())
+    return normalized[:200]
+
+
 def _detect_query_language(query: str) -> str:
     """Return a language key ('python' default) based on explicit markers in the query.
 
@@ -609,7 +651,11 @@ class Augmentor:
             multi_expert = self.multi_expert
 
         if not self._embedder or self._example_embeddings is None or len(self.examples) == 0:
-            return self.examples[:self.max_examples]
+            # No embedder wired — fall back to a deduped slice. Without
+            # this, near-duplicate harvest-generated YAMLs (3 variants of
+            # the same fstring lesson, etc) all surface in the first slots
+            # and waste the model's context budget.
+            return _dedupe_examples(self.examples, self.max_examples)
 
         # Apply language scoping if enabled. Uses local variables so this doesn't mutate
         # self.examples / self._example_embeddings. All indexing below refers to the
@@ -663,14 +709,29 @@ class Augmentor:
                  and scoped_examples[i].category != best_category
                  and i not in selected]
 
+        # Layer 4: Near-duplicate dedup. The harvest pipeline can land
+        # multiple very-similar YAMLs in the same category (3 variants of
+        # the same fstring_nested_quote lesson, etc). Returning all 3 in
+        # top-3 wastes the model's context window on the same teaching
+        # repeatedly. Dedupe by solution-body signature so each LESSON
+        # gets at most one slot — the highest-similarity variant wins.
+        seen_signatures: set[str] = {_solution_signature(scoped_examples[best_idx])}
         for i in same_cat:
             if len(selected) >= max_inject:
                 break
+            sig = _solution_signature(scoped_examples[i])
+            if sig in seen_signatures:
+                continue
             selected.append(i)
+            seen_signatures.add(sig)
         for i in other:
             if len(selected) >= max_inject:
                 break
+            sig = _solution_signature(scoped_examples[i])
+            if sig in seen_signatures:
+                continue
             selected.append(i)
+            seen_signatures.add(sig)
 
         return [scoped_examples[i] for i in selected]
 
