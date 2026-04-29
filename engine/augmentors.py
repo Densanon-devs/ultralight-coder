@@ -2646,22 +2646,49 @@ class AugmentorRouter:
         "csv", "dataframe", "pandas", "etl", "data pipeline",
         "json lines", "parquet",
     )
+    # Signals a query is about agentic tool-use (write_file/edit_file shapes),
+    # NOT general Python codegen. The off-canon drag risk that motivated
+    # Phase 13's gate doesn't apply here — agentic examples teach tool
+    # mechanics, not Python idioms — so we let augmentor injection through
+    # when these signals fire. Added 2026-04-26 to unblock the auto-generated
+    # agentic YAMLs (json_array_form_for_multiline_writes, etc.) from
+    # data/augmentor_examples/agentic/.
+    _LARGE_MODE_AGENTIC_KEYWORDS: tuple[str, ...] = (
+        # Tool-name signals (rare in user prompts but explicit)
+        "write_file", "edit_file", "tool_call", "auto_verify",
+        # Multi-file scaffold signals (common in agentic goals)
+        "build a ", "build the ", "scaffold", "create a project",
+        "from scratch", "multi-file", "multiple files",
+        "todo cli", "todo app",
+        # Failure-shape signals (matches /flag-errors-derived YAML queries)
+        "references undefined names", "old_string not found",
+        "modulenotfounderror", "f-string: expecting",
+        "moduletyperror", "syntaxerror in",
+        # Project-shape signals (when the goal lists files explicitly)
+        ".py —", ".py:", "argparse subcommands", "dataclass",
+    )
 
     def _large_mode_should_augment(self, query: str) -> bool:
         """Return True if a large model should still receive augmentor injection.
 
-        Three-layer decision:
+        Decision layers:
         1. Non-Python queries: always augment. Phase 13's "14B is Python-native and
            the augmentor drags it off-canon" finding only applies to Python — for
            Rust/Kotlin/Java/etc. the 14B is weaker and scaffolding helps (see Phase 10
            multi-language 129/130 baseline which depended on per-language augmentors).
         2. Python testing/data intents: keep (original allowlist).
-        3. Python everything else: skip (off-canon drag dominates).
+        3. Python agentic/tool-use intents (added 2026-04-26): keep — agentic
+           augmentors teach tool mechanics, no off-canon drag risk.
+        4. Python everything else: skip (off-canon drag dominates).
         """
         if _detect_query_language(query) != "python":
             return True
         q = query.lower()
-        return any(k in q for k in self._LARGE_MODE_KEEP_KEYWORDS)
+        if any(k in q for k in self._LARGE_MODE_KEEP_KEYWORDS):
+            return True
+        if any(k in q for k in self._LARGE_MODE_AGENTIC_KEYWORDS):
+            return True
+        return False
 
     def set_skip_failure_routing(self, skip: bool):
         """Toggle failure-aware routing bypass on ALL augmentor sets.

@@ -1,0 +1,42 @@
+domain: agentic
+category: json_array_form_for_multiline_writes
+examples:
+- query: 'Read gallery.html — it is a real production HTML page for a salon website.
+    Add a new category "styling" to the photo gallery:
+
+    1. Add a new filter button with `data-filter="styling"` inside the existing .gallery-filters
+    row, matching the format of the other filter buttons (e.g. Color, Balayage).
+
+    2. Add at least 2 new `.gallery-item` divs with `data-category="styling"` inside
+    .gallery-grid, matching the placeholder-img + overlay pattern of the existing
+    items.
+
+    DO NOT delete or rename any existing filter or gallery item. DO NOT rewrite unrelated
+    sections (header, nav, hero). The page must remain well-formed HTML.
+
+
+    # Triggered failure: json_quote_leak'
+  solution: "When writing multi-line Python files via the agent's write_file tool,\n\
+    ALWAYS use the array form for `content`. One element per line. Inner\nsingle-quoted\
+    \ Python strings stay natural — no JSON escape gymnastics.\n\nWRONG (single string\
+    \ with embedded `'r'` — JSON parser rejects):\n\n    <tool_call>{\"name\": \"\
+    write_file\", \"arguments\": {\"path\": \"x.py\",\n      \"content\": \"with open('x',\
+    \ 'r') as f:\\n    pass\\n\"}}</tool_call>\n\nRIGHT (array form, one line per\
+    \ element):\n\n    <tool_call>{\"name\": \"write_file\", \"arguments\": {\"path\"\
+    : \"x.py\",\n      \"content\": [\"with open('x', 'r') as f:\", \"    pass\"]}}</tool_call>\n\
+    \nThe array form sidesteps the entire JSON-escape pain by treating each\nelement\
+    \ as a complete line. Joins with \\n at write time. Use it for\nANY file with\
+    \ 5+ lines OR any embedded `\"` characters.\n"
+  tags:
+  - write_file
+  - json
+  - escaping
+  - multi-line
+  - agentic
+  difficulty: medium
+  source: auto-generated from failure_flagger
+  captured_at: 1777177142.5641592
+  triggering_file: gallery.html
+  suggested_fix_summary: 'Use the array form for `content` in write_file: every line
+    is its own element with double-quoted string. Inner Python strings can stay single-quoted
+    naturally with no JSON escape contortions.'

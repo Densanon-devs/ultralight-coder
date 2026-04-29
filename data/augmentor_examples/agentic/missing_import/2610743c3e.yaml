@@ -1,0 +1,46 @@
+domain: agentic
+category: prepend_missing_import_after_write
+examples:
+- query: 'Build a minimal todo list CLI from scratch in the current directory. Requirements:
+
+    1. todo.py — Todo dataclass (id: int, title: str, done: bool default False).
+
+    2. storage.py — load_todos(path) and save_todos(path, todos) using JSON.
+
+    3. cli.py — argparse subcommands: add TITLE, list, done ID, clear. Uses todos.json.
+
+    4. test_todo.py — pytest tests for Todo creation, save/load round-trip.
+
+    5. Run the tests with run_tests (pytest) and confirm they pass.
+
+    6. Run ''python cli.py add buy-milk'' and ''python cli.py list'' via run_bash.
+    If stderr shows a SyntaxError or Traceback, fix and retry before declaring done.
+
+
+    # Triggered failure: missing_import'
+  solution: "When auto_verify reports `references undefined names: X`, prepend the\n\
+    import to the SAME file via edit_file with empty `old_string`. Empty\nold_string\
+    \ is the canonical \"prepend at top of file\" pattern.\n\nWRONG (adding the import\
+    \ to __init__.py or another file):\n\n    <tool_call>{\"name\": \"edit_file\"\
+    , \"arguments\": {\"path\": \"__init__.py\",\n      \"old_string\": \"\", \"new_string\"\
+    : \"from module import X\\n\"}}</tool_call>\n\nPython imports are per-file. The\
+    \ undefined name is in X.py, so X.py\nneeds the import — adding it elsewhere doesn't\
+    \ help.\n\nRIGHT (prepend to the file the auto_verify message named):\n\n    <tool_call>{\"\
+    name\": \"edit_file\", \"arguments\": {\"path\": \"X.py\",\n      \"old_string\"\
+    : \"\", \"new_string\": \"from module import X\\n\"}}</tool_call>\n\nIf MULTIPLE\
+    \ names are undefined, prepend ALL needed imports in ONE\nedit_file call:\n\n\
+    \    <tool_call>{\"name\": \"edit_file\", \"arguments\": {\"path\": \"X.py\",\n\
+    \      \"old_string\": \"\",\n      \"new_string\": \"import json\\nfrom Y import\
+    \ Z\\n\"}}</tool_call>\n"
+  tags:
+  - edit_file
+  - import
+  - auto_verify
+  - prepend
+  difficulty: medium
+  source: auto-generated from failure_flagger
+  captured_at: 1777215845.8857589
+  triggering_file: storage.py
+  suggested_fix_summary: 'Prepend the missing import to the file using edit_file with
+    empty old_string. Example: `{"path": "X.py", "old_string": "", "new_string": "from
+    Y import Z\n"}`.'
