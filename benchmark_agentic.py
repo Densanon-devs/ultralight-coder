@@ -989,6 +989,7 @@ def run_one_task(
     architect_mode: bool = False,
     context_char_budget: Optional[int] = None,
     shared_model: Any = None,
+    auto_flag: bool = False,
 ) -> TaskResult:
     """Run one task against the agent. Uses a fresh tmp workspace each time.
 
@@ -1137,11 +1138,20 @@ def run_one_task(
             # Clamp to a sane upper bound so a misconfigured config can't
             # blow up the per-turn inference budget.
             max_tokens_per_turn = max(512, min(max_tokens_per_turn, 8192))
-            # Auto-detect R1-distill-style reasoning models via model path.
-            # Enable the suppress_think assistant-header prefix to skip the
-            # reasoning block that otherwise burns 2-4k tokens per turn.
+            # Auto-detect reasoning models via model path or config name. These
+            # ship with `<think>` reasoning enabled by default and burn 2-4k
+            # tokens per turn before emitting any tool call. The suppress_think
+            # assistant-header prefix pre-closes an empty <think> so the model
+            # jumps straight to action.
+            #   - R1-distill family
+            #   - Anything with "reasoning" in the name
+            #   - Qwen3 family (32B, 30B-A3B, etc — all reasoning-mode by default)
             path_lower = str(cfg_path).lower()
-            suppress_think = ("r1" in path_lower and "distill" in path_lower) or "reasoning" in path_lower
+            suppress_think = (
+                ("r1" in path_lower and "distill" in path_lower)
+                or "reasoning" in path_lower
+                or "qwen3" in path_lower
+            )
             if architect_mode:
                 from engine.architect_agent import ArchitectAgent
                 agent = ArchitectAgent(
@@ -1204,6 +1214,25 @@ def run_one_task(
 
             passed, reason = task.check(ws, result)
             tags = [] if passed else classify_failure(task, result, reason)
+
+            # Auto-flag-on-fail: silently write YAML augmentor entries for
+            # any known failure pattern detected in this run. Only fires when
+            # auto_flag is enabled. No-op for clean runs.
+            if auto_flag:
+                try:
+                    from engine.failure_flagger import flag, summarize
+                    from engine.yaml_augmentor_builder import write_all
+                    repo_root = Path(__file__).resolve().parent
+                    records = flag(result, task.goal)
+                    if records:
+                        paths = write_all(records, task.goal, repo_root)
+                        if paths:
+                            counts = summarize(records)
+                            summary = ", ".join(f"{k}x{v}" for k, v in counts.items())
+                            print(f"   auto-flagged: {summary} -> {len(paths)} YAML(s)")
+                except Exception as exc:
+                    # Never let the flagger crash the bench
+                    print(f"   auto-flag failed: {exc}")
 
             print(f"   result: {'PASS' if passed else 'FAIL'} — {reason}")
             return TaskResult(
@@ -1296,7 +1325,26 @@ def main() -> int:
              "force transcript compaction during a bench run — useful for testing "
              "the auto-compact code path. Default: Agent's built-in budget (~52000 chars ≈ 16k tokens).",
     )
+    parser.add_argument(
+        "--auto-flag", action="store_true",
+        help="After every task, run the failure flagger and write YAML augmentor "
+             "entries to data/auto_generated_review/. Silent on clean tasks. "
+             "Use this on bench runs to harvest failure patterns into the augmentor library.",
+    )
+    parser.add_argument(
+        "--auto-promote", action="store_true",
+        help="After the bench finishes, run the promoter on the review queue: "
+             "validate (schema + replay) + dedup + copy passing YAMLs into "
+             "data/augmentor_examples/agentic/. Implies --auto-flag. Use this for "
+             "fully-autonomous overnight runs where you want the harvest to land "
+             "directly in the retrieval index. Default: harvest only, manual /promote later.",
+    )
     args = parser.parse_args()
+
+    # --auto-promote implies --auto-flag (otherwise nothing lands in the
+    # review queue for the promoter to walk).
+    if getattr(args, "auto_promote", False):
+        args.auto_flag = True
 
     # Logging: info for UCA, warning for llama-cpp noise
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s: %(message)s")
@@ -1348,6 +1396,7 @@ def main() -> int:
                     architect_mode=args.architect,
                     context_char_budget=args.context_budget,
                     shared_model=shared_model,
+                    auto_flag=args.auto_flag,
                 )
             except KeyboardInterrupt:
                 print("\n[aborted by user]")
@@ -1463,6 +1512,30 @@ def main() -> int:
     }
     Path(output_path).write_text(json.dumps(payload, indent=2), encoding="utf-8")
     print(f"\nResults written to {output_path}")
+
+    # Auto-promote: end-of-run pass over the review queue, validating +
+    # deduping + copying passing YAMLs into the live retrieval index.
+    # Implies --auto-flag (harvest before promote). Off by default to
+    # avoid accidentally polluting retrieval; opt-in for unattended runs.
+    if getattr(args, "auto_promote", False):
+        try:
+            from engine.augmentor_promoter import promote_all, summarize as p_summarize
+            repo_root = Path(__file__).resolve().parent
+            promo_results = promote_all(repo_root)
+            counts = p_summarize(promo_results)
+            print(
+                f"Auto-promote: {counts['promoted']} promoted, "
+                f"{counts['skipped']} skipped (dedup/exists), "
+                f"{counts['rejected']} rejected (validation failed)"
+            )
+            if counts["rejected"]:
+                # Surface the first few rejections so the user knows what to investigate
+                rejected = [r for r in promo_results if not r.promoted
+                            and "validation failed" in r.reason]
+                for r in rejected[:5]:
+                    print(f"  REJECT {r.source.name}: {r.reason}")
+        except Exception as exc:
+            print(f"Auto-promote failed: {exc}")
 
     return 0 if passed_count == total_runs else 1
 

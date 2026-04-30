@@ -1,0 +1,44 @@
+domain: agentic
+category: json_array_form_for_multiline_writes
+examples:
+- query: 'Build a minimal todo list CLI from scratch in the current directory. Requirements:
+
+    1. todo.py — Todo dataclass (id: int, title: str, done: bool default False).
+
+    2. storage.py — load_todos(path) and save_todos(path, todos) using JSON.
+
+    3. cli.py — argparse subcommands: add TITLE, list, done ID, clear. Uses todos.json.
+
+    4. test_todo.py — pytest tests for Todo creation, save/load round-trip.
+
+    5. Run the tests with run_tests (pytest) and confirm they pass.
+
+    6. Run ''python cli.py add buy-milk'' and ''python cli.py list'' via run_bash.
+    If stderr shows a SyntaxError or Traceback, fix and retry before declaring done.
+
+
+    # Triggered failure: json_quote_leak'
+  solution: "When writing multi-line Python files via the agent's write_file tool,\n\
+    ALWAYS use the array form for `content`. One element per line. Inner\nsingle-quoted\
+    \ Python strings stay natural — no JSON escape gymnastics.\n\nWRONG (single string\
+    \ with embedded `'r'` — JSON parser rejects):\n\n    <tool_call>{\"name\": \"\
+    write_file\", \"arguments\": {\"path\": \"x.py\",\n      \"content\": \"with open('x',\
+    \ 'r') as f:\\n    pass\\n\"}}</tool_call>\n\nRIGHT (array form, one line per\
+    \ element):\n\n    <tool_call>{\"name\": \"write_file\", \"arguments\": {\"path\"\
+    : \"x.py\",\n      \"content\": [\"with open('x', 'r') as f:\", \"    pass\"]}}</tool_call>\n\
+    \nThe array form sidesteps the entire JSON-escape pain by treating each\nelement\
+    \ as a complete line. Joins with \\n at write time. Use it for\nANY file with\
+    \ 5+ lines OR any embedded `\"` characters.\n"
+  tags:
+  - write_file
+  - json
+  - escaping
+  - multi-line
+  - agentic
+  difficulty: medium
+  source: auto-generated from failure_flagger
+  captured_at: 1777173339.4177904
+  triggering_file: storage.py
+  suggested_fix_summary: 'Use the array form for `content` in write_file: every line
+    is its own element with double-quoted string. Inner Python strings can stay single-quoted
+    naturally with no JSON escape contortions.'

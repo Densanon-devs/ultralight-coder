@@ -1,0 +1,41 @@
+domain: agentic
+category: fstring_nested_quotes_python310
+examples:
+- query: 'Build a minimal todo list CLI from scratch in the current directory. Requirements:
+
+    1. todo.py — Todo dataclass (id: int, title: str, done: bool default False).
+
+    2. storage.py — load_todos(path) and save_todos(path, todos) using JSON.
+
+    3. cli.py — argparse subcommands: add TITLE, list, done ID, clear. Uses todos.json.
+
+    4. test_todo.py — pytest tests for Todo creation, save/load round-trip.
+
+    5. Run the tests with run_tests (pytest) and confirm they pass.
+
+    6. Run ''python cli.py add buy-milk'' and ''python cli.py list'' via run_bash.
+    If stderr shows a SyntaxError or Traceback, fix and retry before declaring done.
+
+
+    # Triggered failure: fstring_nested_quote'
+  solution: "Python 3.10/3.11 cannot parse a single-quoted f-string containing another\n\
+    single-quoted string literal inside its `{ }` block. Same rule for\ndouble-quoted\
+    \ f-strings with embedded double-quoted literals.\n\nWRONG (Python 3.10 SyntaxError\
+    \ — inner `'` closes outer `'`):\n\n    print(f'{todo.id}: {'Done' if todo.done\
+    \ else 'Pending'}')\n\nRIGHT — flip the outer quote style:\n\n    print(f\"{todo.id}:\
+    \ {'Done' if todo.done else 'Pending'}\")\n\nOr extract the value before the f-string:\n\
+    \n    label = 'Done' if todo.done else 'Pending'\n    print(f'{todo.id}: {label}')\n\
+    \nDefault: when an f-string contains string literals inside `{...}`, use\ndouble-quoted\
+    \ f-string + single-quoted inner literals.\n"
+  tags:
+  - f-string
+  - python3.10
+  - syntax
+  - nested-quotes
+  difficulty: medium
+  source: auto-generated from failure_flagger
+  captured_at: 1777173339.4653752
+  triggering_file: cli.py
+  suggested_fix_summary: 'Switch the outer f-string to double quotes and keep inner
+    literals single-quoted (or extract the value before the f-string). Pattern: `f''{x
+    if y else \''X\''}''` → `f"{x if y else ''X''}"`.'

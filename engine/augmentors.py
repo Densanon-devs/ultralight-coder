@@ -337,6 +337,48 @@ _LANGUAGE_CATEGORY_PREFIXES = {
 _ALL_NON_PYTHON_PREFIXES = tuple(p for prefixes in _LANGUAGE_CATEGORY_PREFIXES.values() for p in prefixes)
 
 
+def _dedupe_examples(examples, top_k: int) -> list:
+    """Return up to `top_k` examples with no two sharing a solution
+    signature. Order-preserving — the first occurrence of each unique
+    signature wins. Used in retrieval paths that don't otherwise
+    diversify (the no-embedder short-circuit).
+    """
+    seen: set[str] = set()
+    out = []
+    for ex in examples:
+        sig = _solution_signature(ex)
+        if sig in seen:
+            continue
+        seen.add(sig)
+        out.append(ex)
+        if len(out) >= top_k:
+            break
+    return out
+
+
+def _solution_signature(example) -> str:
+    """Return a stable fingerprint of an example's solution body for
+    near-duplicate detection during retrieval.
+
+    Two examples with the same fingerprint teach essentially the same
+    lesson — likely two harvest runs that captured the same failure
+    pattern under slightly different goals. We don't want all of them
+    in the model's top-K (wastes the context window on repeated
+    teaching). The highest-similarity variant gets the slot.
+
+    Signature: lowercased solution body with all whitespace collapsed
+    to single spaces, then trimmed to the first 200 chars. Surfaces
+    the shape of the lesson (BEFORE/AFTER blocks, tool-call shape,
+    array vs string write_file) without being foiled by trivial
+    formatting differences.
+    """
+    body = getattr(example, "solution", "") or ""
+    if not body:
+        return f"_empty:{getattr(example, 'category', '')}"
+    normalized = " ".join(body.lower().split())
+    return normalized[:200]
+
+
 def _detect_query_language(query: str) -> str:
     """Return a language key ('python' default) based on explicit markers in the query.
 
@@ -609,7 +651,11 @@ class Augmentor:
             multi_expert = self.multi_expert
 
         if not self._embedder or self._example_embeddings is None or len(self.examples) == 0:
-            return self.examples[:self.max_examples]
+            # No embedder wired — fall back to a deduped slice. Without
+            # this, near-duplicate harvest-generated YAMLs (3 variants of
+            # the same fstring lesson, etc) all surface in the first slots
+            # and waste the model's context budget.
+            return _dedupe_examples(self.examples, self.max_examples)
 
         # Apply language scoping if enabled. Uses local variables so this doesn't mutate
         # self.examples / self._example_embeddings. All indexing below refers to the
@@ -663,14 +709,29 @@ class Augmentor:
                  and scoped_examples[i].category != best_category
                  and i not in selected]
 
+        # Layer 4: Near-duplicate dedup. The harvest pipeline can land
+        # multiple very-similar YAMLs in the same category (3 variants of
+        # the same fstring_nested_quote lesson, etc). Returning all 3 in
+        # top-3 wastes the model's context window on the same teaching
+        # repeatedly. Dedupe by solution-body signature so each LESSON
+        # gets at most one slot — the highest-similarity variant wins.
+        seen_signatures: set[str] = {_solution_signature(scoped_examples[best_idx])}
         for i in same_cat:
             if len(selected) >= max_inject:
                 break
+            sig = _solution_signature(scoped_examples[i])
+            if sig in seen_signatures:
+                continue
             selected.append(i)
+            seen_signatures.add(sig)
         for i in other:
             if len(selected) >= max_inject:
                 break
+            sig = _solution_signature(scoped_examples[i])
+            if sig in seen_signatures:
+                continue
             selected.append(i)
+            seen_signatures.add(sig)
 
         return [scoped_examples[i] for i in selected]
 
@@ -2646,22 +2707,49 @@ class AugmentorRouter:
         "csv", "dataframe", "pandas", "etl", "data pipeline",
         "json lines", "parquet",
     )
+    # Signals a query is about agentic tool-use (write_file/edit_file shapes),
+    # NOT general Python codegen. The off-canon drag risk that motivated
+    # Phase 13's gate doesn't apply here — agentic examples teach tool
+    # mechanics, not Python idioms — so we let augmentor injection through
+    # when these signals fire. Added 2026-04-26 to unblock the auto-generated
+    # agentic YAMLs (json_array_form_for_multiline_writes, etc.) from
+    # data/augmentor_examples/agentic/.
+    _LARGE_MODE_AGENTIC_KEYWORDS: tuple[str, ...] = (
+        # Tool-name signals (rare in user prompts but explicit)
+        "write_file", "edit_file", "tool_call", "auto_verify",
+        # Multi-file scaffold signals (common in agentic goals)
+        "build a ", "build the ", "scaffold", "create a project",
+        "from scratch", "multi-file", "multiple files",
+        "todo cli", "todo app",
+        # Failure-shape signals (matches /flag-errors-derived YAML queries)
+        "references undefined names", "old_string not found",
+        "modulenotfounderror", "f-string: expecting",
+        "moduletyperror", "syntaxerror in",
+        # Project-shape signals (when the goal lists files explicitly)
+        ".py —", ".py:", "argparse subcommands", "dataclass",
+    )
 
     def _large_mode_should_augment(self, query: str) -> bool:
         """Return True if a large model should still receive augmentor injection.
 
-        Three-layer decision:
+        Decision layers:
         1. Non-Python queries: always augment. Phase 13's "14B is Python-native and
            the augmentor drags it off-canon" finding only applies to Python — for
            Rust/Kotlin/Java/etc. the 14B is weaker and scaffolding helps (see Phase 10
            multi-language 129/130 baseline which depended on per-language augmentors).
         2. Python testing/data intents: keep (original allowlist).
-        3. Python everything else: skip (off-canon drag dominates).
+        3. Python agentic/tool-use intents (added 2026-04-26): keep — agentic
+           augmentors teach tool mechanics, no off-canon drag risk.
+        4. Python everything else: skip (off-canon drag dominates).
         """
         if _detect_query_language(query) != "python":
             return True
         q = query.lower()
-        return any(k in q for k in self._LARGE_MODE_KEEP_KEYWORDS)
+        if any(k in q for k in self._LARGE_MODE_KEEP_KEYWORDS):
+            return True
+        if any(k in q for k in self._LARGE_MODE_AGENTIC_KEYWORDS):
+            return True
+        return False
 
     def set_skip_failure_routing(self, skip: bool):
         """Toggle failure-aware routing bypass on ALL augmentor sets.
