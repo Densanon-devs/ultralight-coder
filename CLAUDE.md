@@ -48,6 +48,15 @@ ultralight-coder/
 │   ├── agent_tools.py           # Phase 14: Hermes-format tool registry + parser
 │   ├── agent_builtins.py        # Phase 14: 8 builtin agent tools (read/write/edit/list/glob/grep/bash/tests) + optional remember
 │   ├── agent_memory.py          # Phase 14: per-project cross-session notes
+│   ├── agent_lsp.py             # 4 jedi-backed code-intel tools (opt-in via --lsp; experiment branch)
+│   ├── failure_flagger.py       # Harvest pipeline: 12 detectors → FailureRecord
+│   ├── recovery_detector.py    # Harvest pipeline: pair failure with next-attempt success
+│   ├── yaml_augmentor_builder.py # Harvest pipeline: FailureRecord → YAML augmentor
+│   ├── replay_validator.py     # Harvest pipeline: static + live validation gate
+│   ├── augmentor_promoter.py   # Harvest pipeline: review → retrieval index, with dedup
+│   ├── trajectory_distiller.py # Harvest pipeline: successful runs → trajectories
+│   ├── library_status.py       # Harvest pipeline: 4-bucket status (backs /library)
+│   ├── mcp_adapter.py          # MCP-client scaffold (interface only — see docs/MCP.md)
 │   ├── classifier.py            # Neural classifier for routing
 │   └── speculative.py           # Speculative decoding
 ├── modules/                     # Task-specific modules (YAML manifests)
@@ -189,6 +198,46 @@ Phase 14 ReAct loop. The agent is **loader-agnostic** — it accepts any object 
 **Risky-tool confirmation:** `run_bash` is flagged `risky=True`. The agent's `confirm_risky` callback (in `main.py._confirm_risky_tool`) shows the proposed args and prompts `Approve? [y/N]`. Default deny on Ctrl+C/EOF. Denied calls return a `ToolResult(success=False, error="User denied...")` that the model sees and can recover from.
 
 **Privacy invariant:** The entire agent runs in-process. No HTTP, no sockets, no localhost webview. The `remember` notes file is the only thing written outside cwd, and it stays on the local disk.
+
+### Self-improving augmentor pipeline (merged 2026-04-29 to master)
+
+Closed loop: agent fails → `failure_flagger` tags it → `recovery_detector` pairs it with the next-attempt success → `yaml_augmentor_builder` synthesizes BEFORE/AFTER demos → `replay_validator` gates → `augmentor_promoter` moves validated YAMLs into the retrieval index. 8 modules, ~3000 LOC, 118 tests.
+
+**Failure detectors (12 categories, `engine/failure_flagger.py`):**
+
+| Category | Trigger |
+|---|---|
+| `json_quote_leak` | Python `'foo'` inside JSON tool-call content |
+| `fstring_nested_quote` | Python 3.10/3.11 nested-quote f-string SyntaxError |
+| `missing_import` | auto_verify reports `references undefined names` |
+| `premature_bail` | Final-answer claims completion while last result has Traceback / model gives up with "I cannot..." prose |
+| `stuck_repeat_loop` | Agent's `stuck_repeat` watchdog fired |
+| `stale_anchor_edit` | edit_file `old_string not found` 2+ times same file |
+| `cwd_assumption` | run_bash failed on path/cwd assumption |
+| `test_import_path` | Test can't import its target module |
+| `incomplete_deliverable` | N-of-M numbered requirements skipped at final answer |
+| `narration_without_action` | "I will now emit..." prose ends in final answer |
+| `unaddressed_file_in_goal` | Goal named multiple files, only some got edited |
+| `loop_limit_exhausted` | stop_reason=max_iterations AND last 3 calls hit same path |
+
+**Bench results across the loop:**
+
+| Run | Pass rate | Notes |
+|---|---|---|
+| Pre-pipeline (2026-04-25) | 41/42 (97.6%) | baseline |
+| Post-merge `--auto-flag` (2026-04-29) | **42/42 (100%)** | agentic-domain gate landed |
+| `--auto-promote` cycles | 39-41/42 | run-to-run variance band |
+| Variant V3 (A+B fixes, 2026-04-30) | 40/42 (95.2%) | write_bash_lister 3/3 from Fix B |
+
+**Headline pass rate sits in a 39-42/42 variance band.** Tasks like `fix_yaml_indent`, `build_todo_cli`, `rename_function` flake naturally on the 14B; no detector lever moves the band. Each `--auto-promote` cycle tests "is the current canonical lesson library saturated?" — current answer is yes (0 promoted, 14 dedup-skipped on last 2 runs).
+
+**Promoted retrieval index:** 14 YAMLs across 9 categories under `data/augmentor_examples/agentic/`. The agentic-domain gate in `engine/augmentors.py::_LARGE_MODE_AGENTIC_KEYWORDS` makes them surface for tool-use queries without dragging Phase 13's Python-codegen baseline off-canon.
+
+**Promotion gate:** `--auto-promote` runs `engine.augmentor_promoter.promote_all` at end-of-suite. Validation is dedup + schema + must-have-pattern (static phase only by default; live replay is opt-in). Still gated behind explicit `--auto-promote` flag — won't auto-promote during normal sessions.
+
+### Bench checker hygiene
+
+Bench task checkers in `benchmark_agentic.py` validate workspace state after the agent finishes. The 2026-04-30 variant study found that `check_write_bash_lister` was producing false-fails when the bash script emitted absolute paths — the checker compared exact-equality after lstrip("./") which doesn't strip `C:/Users/.../`. Fixed to use suffix matching (`ln.endswith("/" + required)`). Real model variance band on `fix_yaml_indent` and similar tasks is **inherent**, not fixable by detector additions.
 
 **Entry points:**
 - `python main.py --agent "GOAL"` — one-shot, exits after the agent finishes. Uses `UltraliteCodeAssistant.run_agent_fast()`, a static lightweight entry that loads **only** Config + BaseModel + Agent. Skips the full UCA stack (Router, Modules, Memory, Fusion, AugmentorRouter, sentence-transformer embedder, FAISS, ProjectIndex) because agent mode doesn't use any of it. On an RTX 3060 with Qwen 2.5 Coder 14B, this drops startup from ~2 minutes (UCA full init + VRAM contention with the PyTorch embedder on CUDA) to ~4 seconds, and agent loop inference runs at the expected ~20 tok/s. Opt out with `--agent-full-init` if you specifically need the full stack.
