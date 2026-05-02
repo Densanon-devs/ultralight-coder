@@ -1218,6 +1218,50 @@ def _watch_loop(workspace: Path, action: str, mgr, warm: bool, build_agent_fn):
 
 # ── Batch mode ───────────────────────────────────────────────────
 
+def _run_goal_loop(agent, persistent_goal: str):
+    """Codex-style /goal: keep iterating on a single persistent objective
+    until the model self-evaluates GOAL_COMPLETE or the token budget hits.
+
+    Loop logic lives in `engine.codex_goal` — this function is just the
+    REPL-side display + spinner glue.
+    """
+    from engine.codex_goal import run_goal_loop
+    from engine.codex_goal.loop import GoalIteration
+
+    print(f"  {_bold('Goal:')} {persistent_goal}")
+    print(f"  {_dim('Persistent loop — model exits on GOAL_COMPLETE or budget. Ctrl+C to abort.')}\n")
+
+    def on_iter(it: GoalIteration):
+        _spinner.stop()
+        header = _bold(f"  [iter {it.index}]")
+        meta = _dim(f"  ({it.iterations_used} agent steps, {it.wall_time:.1f}s, ~{it.tokens_estimate} tok)")
+        print(f"{header} {meta}")
+        if it.answer:
+            print(it.answer)
+        print()
+        _spinner.start()
+
+    _spinner.start()
+    try:
+        result = run_goal_loop(agent, persistent_goal)
+    finally:
+        _spinner.stop()
+
+    label = {
+        "completed": _green("completed"),
+        "budget": _yellow("budget exhausted"),
+        "max_loops": _yellow("max loops reached"),
+        "interrupted": _yellow("interrupted"),
+        "error": _red("error"),
+    }.get(result.stop_reason, result.stop_reason)
+    print(
+        f"  {_bold(f'Goal loop {label}')}: {len(result.iterations)} iterations, "
+        f"~{result.tokens_estimate_total} tokens used."
+    )
+    if result.stop_reason in ("budget", "max_loops") and result.final_summary:
+        print(f"\n  {_bold('Resume notes:')}\n{result.final_summary}\n")
+
+
 def _run_batch(filepath: str, workspace: Path, mgr, warm: bool, build_agent_fn):
     """Run goals from a file, one per line."""
     p = Path(filepath.strip())
@@ -1359,6 +1403,7 @@ _HELP_TEXT = """
     {cyan}/autofix{end} [N]         Run tests, fix failures, re-run — loop up to N times (default 5)
     {cyan}/watch{end} [action]      Watch for file changes, auto-run: test, lint, or custom goal
     {cyan}/batch{end} <file>        Run goals from a text file (one per line)
+    {cyan}/goal{end} <text>         Persistent objective: agent keeps working until it self-evaluates DONE or hits token budget
     {cyan}/docs{end} readme|api|arch  Auto-generate project documentation
     {cyan}/plugins{end}             List loaded plugins from plugins/ directory
     {cyan}/learn{end}               Capture a correction for future sessions
@@ -1703,6 +1748,22 @@ def main():
                 _run_batch(filepath, workspace, mgr, warm, _build_agent)
             else:
                 print(f"  {_dim('Usage: /batch goals.txt')}")
+            continue
+
+        # /goal — Codex-style persistent objective loop
+        if goal.lower().startswith("/goal"):
+            persistent = goal[5:].strip()
+            if not persistent:
+                print(f"  {_dim('Usage: /goal <persistent objective>')}")
+                continue
+            # Build (or reuse) the agent for this loop. Profile is detected
+            # from the goal text just like a normal turn.
+            profile = _detect_profile(persistent)
+            mgr.ensure_profile(profile, quiet=True)
+            loop_agent = _build_agent(mgr, workspace)
+            _run_goal_loop(loop_agent, persistent)
+            if not warm:
+                mgr.unload()
             continue
 
         # /docs — generate documentation
