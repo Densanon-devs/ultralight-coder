@@ -613,18 +613,31 @@ def check_write_bash_lister(ws: Path, _result: Any) -> tuple[bool, str]:
     if proc.returncode != 0:
         return False, f"bash script exited {proc.returncode}: stderr={proc.stderr.strip()[:200]}"
     lines = [ln.strip() for ln in proc.stdout.splitlines() if ln.strip()]
-    # Normalize: strip leading ./ if the script uses find . -name "*.py"
-    found = set()
-    for ln in lines:
-        ln = ln.lstrip("./").replace("\\", "/")
-        found.add(ln)
-    required = {"a.py", "b.py", "sub/c.py"}
-    missing = required - found
+    # Normalize: backslashes -> forward slashes so relative-path and
+    # Windows-absolute-path forms compare on the same axis.
+    normalized = [ln.replace("\\", "/") for ln in lines]
+
+    # Suffix-based match. The script may emit relative paths ("a.py",
+    # "./a.py", "sub/c.py") or absolute paths
+    # ("C:/Users/.../bench_write_bash_lister_xxx/a.py"). Any line whose
+    # suffix matches `<required>` or `/<required>` counts as a hit.
+    # Decorative noise lines (PowerShell `--------` separators,
+    # `FullName` column headers, etc.) won't suffix-match a real .py
+    # path, so they're naturally ignored.
+    def _has_required(req: str) -> bool:
+        return any(ln == req or ln.endswith("/" + req) for ln in normalized)
+
+    required = ["a.py", "b.py", "sub/c.py"]
+    missing = [r for r in required if not _has_required(r)]
     if missing:
-        return False, f"output missing {sorted(missing)} — got: {sorted(found)[:6]}"
-    if any("notes.txt" in ln or ".md" in ln for ln in found):
-        return False, f"output includes non-.py files: {sorted(found)}"
-    return True, f"bash script lists all .py files: {sorted(found)}"
+        return False, f"output missing {missing} — got: {sorted(normalized)[:6]}"
+    # Negative check: any actual .txt or .md file should NOT appear as
+    # a path. Match on .txt or .md as a path suffix, not anywhere in
+    # the line, so column headers like 'FullName' don't trip the rule.
+    bad = [ln for ln in normalized if ln.endswith(".txt") or ln.endswith(".md")]
+    if bad:
+        return False, f"output includes non-.py files: {bad}"
+    return True, f"bash script lists all required .py files (a.py, b.py, sub/c.py)"
 
 
 def setup_extend_real_gallery(ws: Path) -> None:
