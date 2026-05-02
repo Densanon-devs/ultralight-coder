@@ -73,6 +73,9 @@ FAILURE_CATEGORIES = (
     "narration_without_action",  # "I will now emit..." prose ends in final answer
     # Added 2026-04-26 (re-walkthrough — model fixated on cli.py, ignored storage.py):
     "unaddressed_file_in_goal",
+    # Added 2026-04-30 (overnight #2 — fix_yaml_indent stuck in edit_file
+    # retry loop, exhausted max_iterations on a 4-line YAML):
+    "loop_limit_exhausted",
 )
 
 
@@ -412,6 +415,51 @@ def _detect_narration_without_action(goal: str, result: object) -> bool:
     return mutating == 0
 
 
+def _detect_loop_limit_exhausted(result: object) -> bool:
+    """Run hit max_iterations / loop_limit while the model was still
+    actively bouncing between failed edits of the same file. Surfaces the
+    "agent stuck in an edit retry loop" failure mode that exhausted on
+    fix_yaml_indent in the 2026-04-30 overnight bench (4-line YAML, 6
+    iterations).
+
+    Detection: stop_reason in {'max_iterations', 'loop_limit'} AND the
+    last 3 tool_calls all targeted the same file via edit_file. The
+    file-co-targeting check distinguishes "stuck in a fix loop" from
+    "task is genuinely too big for the iteration budget" (where the last
+    3 calls would touch different files).
+    """
+    stop_reason = (getattr(result, "stop_reason", "") or "").lower()
+    if stop_reason not in ("max_iterations", "loop_limit"):
+        # Also accept failure_types containing 'loop_limit' — bench harness
+        # sometimes records it there even when stop_reason is "answered"
+        # because the model emitted a final answer mid-loop.
+        ftypes = list(getattr(result, "failure_types", []) or [])
+        if "loop_limit" not in ftypes:
+            return False
+
+    calls = list(getattr(result, "tool_calls", []) or [])
+    if len(calls) < 3:
+        return False
+
+    # Walk the last few tool_calls; if 3+ consecutive edit_file calls
+    # share the same path, that's the stuck-loop pattern.
+    edit_paths: list[str] = []
+    for c in reversed(calls):
+        cname = (getattr(c, "name", "") or "")
+        if cname in ("edit_file", "write_file"):
+            cargs = getattr(c, "arguments", {}) or {}
+            if isinstance(cargs, dict):
+                p = cargs.get("path")
+                if p:
+                    edit_paths.append(p)
+        if len(edit_paths) >= 3:
+            break
+
+    if len(edit_paths) < 3:
+        return False
+    return len(set(edit_paths)) == 1  # all 3 hit the same file
+
+
 def _detect_test_import_path(call: ToolCall, result: ToolResult) -> bool:
     """A test file failed because it can't import its target module. Usually
     a PYTHONPATH/cwd issue — pytest needs `__init__.py` or `conftest.py`
@@ -503,6 +551,17 @@ _FIX_TEMPLATES = {
         "goal named and confirm each was actually written or edited. If "
         "the goal says 'fix storage.py and cli.py', BOTH must show up in "
         "your tool_call paths."
+    ),
+    "loop_limit_exhausted": (
+        "Agent ran out of iterations while bouncing between failed edits "
+        "of the same file. The fix is to ESCALATE strategy when 3+ edit "
+        "attempts on the same file fail in a row: read the WHOLE file "
+        "with read_file (no offset/limit), then write_file the entire "
+        "corrected version in one call. Don't keep emitting tiny "
+        "edit_file deltas — they compound state errors. WRONG: edit_file "
+        "x, edit_file again on the same anchor, edit_file again. RIGHT: "
+        "edit_file fails -> read_file the whole thing -> write_file the "
+        "corrected whole file."
     ),
 }
 
@@ -681,6 +740,27 @@ def flag(result: Any, goal: str = "") -> list[FailureRecord]:
             triggering_args={"goal_excerpt": (goal or "")[:300]},
             file_path=None,
             suggested_fix=_FIX_TEMPLATES["unaddressed_file_in_goal"],
+        ))
+    if _detect_loop_limit_exhausted(result):
+        # The most recently-edited file is the one to blame in nearly every
+        # observed case (agent gets stuck on a single-file fix). Walk the
+        # tool_calls in reverse to find the latest mutating path.
+        stuck_path = None
+        for c in reversed(calls):
+            cn = getattr(c, "name", "") or ""
+            if cn in ("edit_file", "write_file"):
+                ca = getattr(c, "arguments", {}) or {}
+                if isinstance(ca, dict) and ca.get("path"):
+                    stuck_path = ca["path"]
+                    break
+        records.append(FailureRecord(
+            category="loop_limit_exhausted",
+            iteration=len(results) or 1,
+            tool_name="",
+            error_excerpt=(getattr(result, "stop_reason", "") or "")[:300],
+            triggering_args={"goal_excerpt": (goal or "")[:300]},
+            file_path=stuck_path,
+            suggested_fix=_FIX_TEMPLATES["loop_limit_exhausted"],
         ))
 
     return records

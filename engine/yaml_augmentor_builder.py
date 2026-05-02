@@ -366,6 +366,63 @@ tool_call in the SAME turn — never end a turn on intent.
 """,
         tags=["narration", "tool_call", "completion", "agentic"],
     ),
+    "loop_limit_exhausted": dict(
+        domain="agentic",
+        category="escalate_after_failed_edit_streak",
+        query_template=(
+            "Stuck in an edit_file retry loop on the same file — three "
+            "consecutive edit attempts have failed. Escalate strategy."
+        ),
+        solution_template="""\
+When edit_file fails 3+ times in a row on the same file (old_string
+not found, repeated stale_anchor_edit, etc.), STOP escalating with
+more tiny edits and switch to a whole-file rewrite. Tiny edits compound
+state errors — each failed edit leaves the file in a weirder state
+than the last one.
+
+WRONG (death-spiral pattern that exhausts max_iterations):
+
+    edit_file(path="config.yml", old_string="...", new_string="...")
+        err: old_string not found
+    edit_file(path="config.yml", old_string="...", new_string="...")
+        err: old_string not found
+    edit_file(path="config.yml", old_string="...", new_string="...")
+        err: ambiguous match
+    edit_file(path="config.yml", ...)   # again
+    edit_file(path="config.yml", ...)   # again
+    [out of iterations; final answer never emitted]
+
+RIGHT (escalate to whole-file rewrite at attempt 4):
+
+    edit_file(path="config.yml", ...)
+        err: old_string not found
+    edit_file(path="config.yml", ...)
+        err: old_string not found
+    edit_file(path="config.yml", ...)
+        err: ambiguous match
+    # Three edit failures in a row -> escalate.
+    read_file(path="config.yml")          # see CURRENT state
+        ok: <full file contents>
+    write_file(path="config.yml", content=[
+        "service: webapp",
+        "database:",
+        "  host: localhost",
+        "  port: 5432",
+    ])
+    [final answer with the corrected file in one shot]
+
+The trigger is "3+ failed edits in a row on the same path." When you
+notice that pattern, escalate. The file might be tiny (4 lines is
+plenty stuck-worthy on a YAML or JSON) — small files are EASIER to
+rewrite, not harder. Don't wait for max_iterations.
+
+For multi-line content in write_file, use the array form (one element
+per line) so JSON quote escaping doesn't compound the original
+problem.
+""",
+        tags=["edit_file", "write_file", "loop_limit", "escalation",
+              "stuck", "agentic"],
+    ),
     "test_import_path": dict(
         domain="agentic",
         category="test_must_import_target_module",
