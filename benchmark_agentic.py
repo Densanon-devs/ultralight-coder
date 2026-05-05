@@ -104,6 +104,106 @@ def setup_empty(ws: Path) -> None:
     pass
 
 
+# ── Ambiguous-anchor stress fixture ──
+#
+# Designed to reliably produce a 2-streak of STALE_ANCHOR or
+# multi-match TOOL_REJECTED failures so the self_heal layer can be
+# A/B-measured. The model gets a 100-line file with three functions
+# all named `process`, with similar surrounding lines. It must rename
+# ONLY the second one. Common failure pattern: the model emits
+# `def process(items):` as old_string → matches 3 times → rejection
+# with "matches 3 times" error → retries with slightly more context
+# from read_file output → either still ambiguous (multi-match again)
+# or includes the `    47\t` line-number prefix → STALE_ANCHOR. Either
+# path produces same-class consecutive failures.
+
+def _setup_ambiguous_anchor(ws: Path) -> None:
+    body = []
+    body.append('"""Three processors; only one is the batch-style one."""')
+    body.append("")
+    body.append("")
+    # First `process` — handles streaming input
+    body.append("def process(items):")
+    body.append("    \"\"\"Stream items one at a time.\"\"\"")
+    body.append("    for item in items:")
+    body.append("        if item is None:")
+    body.append("            continue")
+    body.append("        yield item.upper()")
+    body.append("")
+    body.append("")
+    # Pad with unrelated content so the model can't just count line numbers
+    for i in range(20):
+        body.append(f"def helper_{i}(x):")
+        body.append(f"    return x + {i}")
+        body.append("")
+    body.append("")
+    # SECOND `process` — handles BATCH input. THIS is the one to rename.
+    body.append("def process(items):")
+    body.append("    \"\"\"Group items into batches before yielding.\"\"\"")
+    body.append("    batch_size = 16")
+    body.append("    buf = []")
+    body.append("    for item in items:")
+    body.append("        buf.append(item)")
+    body.append("        if len(buf) >= batch_size:")
+    body.append("            yield buf")
+    body.append("            buf = []")
+    body.append("    if buf:")
+    body.append("        yield buf")
+    body.append("")
+    body.append("")
+    for i in range(20, 40):
+        body.append(f"def helper_{i}(x):")
+        body.append(f"    return x * {i}")
+        body.append("")
+    body.append("")
+    # THIRD `process` — recursive
+    body.append("def process(items):")
+    body.append("    \"\"\"Recursive tree walker.\"\"\"")
+    body.append("    if not items:")
+    body.append("        return")
+    body.append("    head, *tail = items")
+    body.append("    yield head")
+    body.append("    yield from process(tail)")
+    body.append("")
+    (ws / "processors.py").write_text("\n".join(body) + "\n", encoding="utf-8")
+
+
+def _check_ambiguous_anchor(ws: Path) -> tuple[bool, str]:
+    p = ws / "processors.py"
+    if not p.is_file():
+        return False, "processors.py is missing"
+    text = p.read_text(encoding="utf-8")
+    # Must have exactly 2 `process` and 1 `process_batch` at the def level.
+    process_defs = sum(
+        1 for line in text.splitlines() if line.startswith("def process(")
+    )
+    batch_defs = sum(
+        1 for line in text.splitlines() if line.startswith("def process_batch(")
+    )
+    if process_defs != 2 or batch_defs != 1:
+        return False, (
+            f"expected 2 `def process(` + 1 `def process_batch(`, "
+            f"got {process_defs} + {batch_defs}"
+        )
+    # The renamed function must be the BATCH one (contains batch_size).
+    # Crude check: locate the `def process_batch(` line, scan the next
+    # 12 lines for `batch_size`.
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        if line.startswith("def process_batch("):
+            window = "\n".join(lines[i:i + 12])
+            if "batch_size" not in window:
+                return False, "process_batch was renamed but its body is not the batch one"
+            break
+    # Must still parse.
+    try:
+        compile(text, "processors.py", "exec")
+    except SyntaxError as exc:
+        return False, f"processors.py SyntaxError: {exc}"
+    return True, "second `process` renamed to `process_batch`, file parses"
+
+
+
 def setup_calculator(ws: Path) -> None:
     (ws / "calculator.py").write_text(
         '"""Tiny calculator."""\n\n\ndef add(a, b):\n    return a + b\n\n\ndef subtract(a, b):\n    return a - b\n',
@@ -936,6 +1036,24 @@ TASKS: list[AgenticTask] = [
         check=check_add_ts_interface,
         max_iterations=8,
     ),
+    # ── Stress fixture: ambiguous-anchor edits (designed to trigger
+    # STALE_ANCHOR/multi-match streaks so self_heal can be measured). ──
+    AgenticTask(
+        name="ambiguous_anchor_rename",
+        difficulty=4,
+        goal=(
+            "Read processors.py. The file defines THREE functions all named "
+            "`process` with identical signatures. Rename ONLY the SECOND "
+            "function (the one that handles BATCH input — has `batch_size` in "
+            "its body) to `process_batch`. The other two `process` functions "
+            "must keep their name unchanged. After renaming, the file must "
+            "still parse cleanly (auto_verify will check)."
+        ),
+        setup=lambda ws: _setup_ambiguous_anchor(ws),
+        check=lambda ws, _r: _check_ambiguous_anchor(ws),
+        max_iterations=15,
+        max_wall_time=600.0,
+    ),
     # ── Real-codebase fixture: extend a real production HTML file ──
     AgenticTask(
         name="extend_real_gallery",
@@ -1356,9 +1474,18 @@ def main() -> int:
     )
     parser.add_argument(
         "--no-self-heal", action="store_true",
-        help="Disable the live self_heal diagnose-and-repair injection on consecutive "
-             "same-class tool failures. Default: enabled. Use this flag to A/B-measure "
-             "the marginal value of the self_heal layer against the historical baseline.",
+        help="Suppress the self_heal layer entirely. As of 2026-05-05 the layer "
+             "defaults to OFF on the Agent (it never fired across 31 bench runs in "
+             "the 2026-05-05 A/B, so it doesn't earn its keep on the standard stack); "
+             "this flag is redundant for default runs but kept for symmetry with "
+             "--self-heal-on so future toggling is explicit. Use --self-heal-on to "
+             "engage the layer for stress scenarios.",
+    )
+    parser.add_argument(
+        "--self-heal-on", action="store_true",
+        help="Engage the self_heal diagnose-and-repair layer (default OFF as of "
+             "2026-05-05). Useful when running stress benches or smaller models "
+             "with weaker tool-call discipline that may form same-class failure streaks.",
     )
     args = parser.parse_args()
 
@@ -1418,7 +1545,9 @@ def main() -> int:
                     context_char_budget=args.context_budget,
                     shared_model=shared_model,
                     auto_flag=args.auto_flag,
-                    enable_self_heal=not args.no_self_heal,
+                    # default OFF; --self-heal-on engages, --no-self-heal
+                    # is redundant but kept for explicit-suppression callers.
+                    enable_self_heal=(args.self_heal_on and not args.no_self_heal),
                 )
             except KeyboardInterrupt:
                 print("\n[aborted by user]")

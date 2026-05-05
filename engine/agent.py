@@ -181,10 +181,16 @@ class Agent:
         enable_goal_token_sweep: bool = True,
         require_mutating_action: bool = False,
         # Live self_heal diagnose-and-repair injection on consecutive
-        # same-class tool failures. Default-on (matches behavior shipped
-        # on `experiment/self-healing-retry`); set False to A/B-measure
-        # the marginal value of the layer.
-        enable_self_heal: bool = True,
+        # same-class tool failures. Default-OFF as of 2026-05-05 — the
+        # A/B (standard 14-task --repeat 2 + stress fixture --repeat 3,
+        # all on Qwen 2.5 Coder 14B) recorded 0 firings across 31 task
+        # runs because the upstream layers (parser repair, structured
+        # tool-error feedback, stuck_repeat, pre_finish_check, auto-apply
+        # heuristics) already prevent same-class 2-streaks. Layer kept
+        # reachable via this opt-in for stress scenarios + smaller models
+        # with weaker tool-call discipline. See
+        # session_2026-05-05_self_heal_ab_finding.md.
+        enable_self_heal: bool = False,
         suppress_think: bool = False,
         max_iterations: int = 10,
         max_wall_time: float = 300.0,

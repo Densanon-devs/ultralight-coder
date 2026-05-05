@@ -55,7 +55,14 @@ def test_two_stale_anchor_fires_self_heal_diagnose():
             "ok done",
         ]
         model = _StubModel(responses)
-        agent = Agent(model, reg, workspace_root=Path(tmp), max_iterations=5)
+        # Explicit enable_self_heal=True — the default flipped to False
+        # after the 2026-05-05 A/B showed 0 firings on standard + stress
+        # benches. The layer remains opt-in for stress scenarios and for
+        # smaller models with weaker tool-call discipline.
+        agent = Agent(
+            model, reg, workspace_root=Path(tmp),
+            max_iterations=5, enable_self_heal=True,
+        )
         result = agent.run("Edit x.py to say world.")
 
     # The synthetic diagnose result must appear in tool_results history.
@@ -89,6 +96,32 @@ def test_clean_run_does_not_fire_self_heal():
         result = agent.run("Read x.py.")
 
     assert result.self_heals == 0
+    assert not any(r.name == "self_heal_diagnose" for r in result.tool_results)
+
+
+def test_default_is_off_post_2026_05_05():
+    """As of 2026-05-05 the Agent default for enable_self_heal flipped
+    to False after the standard + stress A/B recorded 0 firings across
+    31 bench runs. Regression-protect that default so a later refactor
+    doesn't silently re-enable a known-quiet layer."""
+    with tempfile.TemporaryDirectory() as tmp:
+        target = Path(tmp) / "x.py"
+        target.write_text("print('hello')\n", encoding="utf-8")
+
+        reg = build_default_registry(tmp)
+        # Same 2-streak pattern that DID fire when enable_self_heal=True
+        # was the default. With the new default, no firing.
+        responses = [
+            '<tool_call>{"name": "edit_file", "arguments": {"path": "x.py", "old_string": "definitely-not-here-1", "new_string": "world"}}</tool_call>',
+            '<tool_call>{"name": "edit_file", "arguments": {"path": "x.py", "old_string": "definitely-not-here-2", "new_string": "world"}}</tool_call>',
+            "ok done",
+        ]
+        model = _StubModel(responses)
+        # NOTE: no enable_self_heal kwarg — exercising the default.
+        agent = Agent(model, reg, workspace_root=Path(tmp), max_iterations=5)
+        result = agent.run("Edit x.py to say world.")
+
+    assert result.self_heals == 0, "default should be OFF post-2026-05-05"
     assert not any(r.name == "self_heal_diagnose" for r in result.tool_results)
 
 
@@ -136,7 +169,12 @@ def test_alternating_failure_classes_does_not_fire():
             "ok done",
         ]
         model = _StubModel(responses)
-        agent = Agent(model, reg, workspace_root=Path(tmp), max_iterations=5)
+        # enable_self_heal=True so this test exercises the streak-reset
+        # behavior; default flipped to False after the 2026-05-05 A/B.
+        agent = Agent(
+            model, reg, workspace_root=Path(tmp),
+            max_iterations=5, enable_self_heal=True,
+        )
         result = agent.run("Test alternating failures.")
 
     assert result.self_heals == 0
