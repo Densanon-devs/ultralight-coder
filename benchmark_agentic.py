@@ -1003,6 +1003,7 @@ def run_one_task(
     context_char_budget: Optional[int] = None,
     shared_model: Any = None,
     auto_flag: bool = False,
+    enable_self_heal: bool = True,
 ) -> TaskResult:
     """Run one task against the agent. Uses a fresh tmp workspace each time.
 
@@ -1196,6 +1197,7 @@ def run_one_task(
                     temperature=cfg_temp if cfg_temp is not None else 0.1,
                     confirm_risky=(lambda _c: True) if auto_approve_risky else None,
                     on_event=on_event,
+                    enable_self_heal=enable_self_heal,
                 )
                 if context_char_budget is not None:
                     agent_kwargs["context_char_budget"] = context_char_budget
@@ -1352,6 +1354,12 @@ def main() -> int:
              "fully-autonomous overnight runs where you want the harvest to land "
              "directly in the retrieval index. Default: harvest only, manual /promote later.",
     )
+    parser.add_argument(
+        "--no-self-heal", action="store_true",
+        help="Disable the live self_heal diagnose-and-repair injection on consecutive "
+             "same-class tool failures. Default: enabled. Use this flag to A/B-measure "
+             "the marginal value of the self_heal layer against the historical baseline.",
+    )
     args = parser.parse_args()
 
     # --auto-promote implies --auto-flag (otherwise nothing lands in the
@@ -1410,6 +1418,7 @@ def main() -> int:
                     context_char_budget=args.context_budget,
                     shared_model=shared_model,
                     auto_flag=args.auto_flag,
+                    enable_self_heal=not args.no_self_heal,
                 )
             except KeyboardInterrupt:
                 print("\n[aborted by user]")

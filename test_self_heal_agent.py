@@ -92,6 +92,32 @@ def test_clean_run_does_not_fire_self_heal():
     assert not any(r.name == "self_heal_diagnose" for r in result.tool_results)
 
 
+def test_enable_self_heal_false_skips_injection_entirely():
+    """When the Agent is constructed with enable_self_heal=False, no
+    self_heal_diagnose ToolResult is ever produced — even when a 2-streak
+    same-class failure pattern is present. Used to A/B-measure the layer."""
+    with tempfile.TemporaryDirectory() as tmp:
+        target = Path(tmp) / "x.py"
+        target.write_text("print('hello')\n", encoding="utf-8")
+
+        reg = build_default_registry(tmp)
+        responses = [
+            '<tool_call>{"name": "edit_file", "arguments": {"path": "x.py", "old_string": "definitely-not-here-1", "new_string": "world"}}</tool_call>',
+            '<tool_call>{"name": "edit_file", "arguments": {"path": "x.py", "old_string": "definitely-not-here-2", "new_string": "world"}}</tool_call>',
+            "ok done",
+        ]
+        model = _StubModel(responses)
+        agent = Agent(
+            model, reg, workspace_root=Path(tmp),
+            max_iterations=5,
+            enable_self_heal=False,
+        )
+        result = agent.run("Edit x.py to say world.")
+
+    assert result.self_heals == 0
+    assert not any(r.name == "self_heal_diagnose" for r in result.tool_results)
+
+
 def test_alternating_failure_classes_does_not_fire():
     """A SyntaxError followed by a STALE_ANCHOR (different classes) must
     NOT trigger the diagnose injection — the streak resets between them."""

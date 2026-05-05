@@ -180,6 +180,11 @@ class Agent:
         auto_verify_python: bool = True,
         enable_goal_token_sweep: bool = True,
         require_mutating_action: bool = False,
+        # Live self_heal diagnose-and-repair injection on consecutive
+        # same-class tool failures. Default-on (matches behavior shipped
+        # on `experiment/self-healing-retry`); set False to A/B-measure
+        # the marginal value of the layer.
+        enable_self_heal: bool = True,
         suppress_think: bool = False,
         max_iterations: int = 10,
         max_wall_time: float = 300.0,
@@ -218,6 +223,7 @@ class Agent:
         self.auto_verify_python = auto_verify_python
         self.enable_goal_token_sweep = bool(enable_goal_token_sweep)
         self.require_mutating_action = bool(require_mutating_action)
+        self.enable_self_heal = bool(enable_self_heal)
         self.suppress_think = bool(suppress_think)
         self.max_iterations = max(1, int(max_iterations))
         self.max_wall_time = float(max_wall_time)
@@ -2380,33 +2386,37 @@ class Agent:
             # Composes with the existing stuck_repeat guard (which fires
             # only on identical-arg 3-peats); self_heal fires earlier on
             # any same-class 2-streak.
-            from engine import self_heal as _sh
-            iter_classes = [
-                _sh.classify_failure(r) for r in results
-            ]
-            # An iteration's "class" is the most-severe non-None tag in
-            # its results. If everything's clean, append None so the
-            # streak resets correctly.
-            iter_class = next((c for c in iter_classes if c is not None), None)
-            self._failure_streak.append(iter_class)
-            if iter_class is not None and _sh.should_inject_diagnose(self._failure_streak):
-                # Count how long the matching streak is so the prompt can
-                # mention "you have hit this N times".
-                streak_len = 1
-                for prev in reversed(self._failure_streak[:-1]):
-                    if prev == iter_class:
-                        streak_len += 1
-                    else:
-                        break
-                diagnose = ToolResult(
-                    name="self_heal_diagnose",
-                    success=False,
-                    error=_sh.diagnose_message(iter_class, attempts=streak_len),
-                )
-                results.append(diagnose)
-                self._tool_results.append(diagnose)
-                self._self_heal_fired += 1
-                self._emit(AgentEvent("tool_result", iteration, diagnose))
+            #
+            # Skipped entirely when enable_self_heal=False so the layer
+            # can be A/B-measured against the historical baseline.
+            if self.enable_self_heal:
+                from engine import self_heal as _sh
+                iter_classes = [
+                    _sh.classify_failure(r) for r in results
+                ]
+                # An iteration's "class" is the most-severe non-None tag in
+                # its results. If everything's clean, append None so the
+                # streak resets correctly.
+                iter_class = next((c for c in iter_classes if c is not None), None)
+                self._failure_streak.append(iter_class)
+                if iter_class is not None and _sh.should_inject_diagnose(self._failure_streak):
+                    # Count how long the matching streak is so the prompt can
+                    # mention "you have hit this N times".
+                    streak_len = 1
+                    for prev in reversed(self._failure_streak[:-1]):
+                        if prev == iter_class:
+                            streak_len += 1
+                        else:
+                            break
+                    diagnose = ToolResult(
+                        name="self_heal_diagnose",
+                        success=False,
+                        error=_sh.diagnose_message(iter_class, attempts=streak_len),
+                    )
+                    results.append(diagnose)
+                    self._tool_results.append(diagnose)
+                    self._self_heal_fired += 1
+                    self._emit(AgentEvent("tool_result", iteration, diagnose))
 
             self._transcript.append(
                 {"role": "tool", "content": self._format_tool_responses(results)}
