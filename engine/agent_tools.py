@@ -651,12 +651,27 @@ class ToolRegistry:
             return ToolResult(
                 name=call.name, success=False, error=f"Tool {call.name!r} is disabled"
             )
+        # Pre-dispatch JSON Schema validation (arXiv 2604.26091 typed
+        # controls). Reject malformed argument shapes BEFORE running the
+        # function, so the model gets a clean structured rejection
+        # instead of a Python TypeError stack frame. The function never
+        # executes on a rejected call — important for any tool that
+        # mutates state.
+        from engine.tool_validator import format_rejection, validate_arguments
+        schema_errors = validate_arguments(call.arguments, tool.parameters)
+        if schema_errors:
+            return ToolResult(
+                name=call.name,
+                success=False,
+                error=format_rejection(call.name, schema_errors),
+            )
         try:
             result = tool.function(**call.arguments)
             return ToolResult(name=call.name, success=True, content=result)
         except TypeError as exc:
-            # Signature mismatch (wrong arg names, missing required, extra unknown).
-            # Surface cleanly so the model can retry with the correct shape.
+            # Signature mismatch the validator missed (e.g. unknown kwarg
+            # passed through additionalProperties=True). Surface cleanly
+            # so the model can retry with the correct shape.
             return ToolResult(
                 name=call.name, success=False, error=f"Bad arguments: {exc}"
             )
