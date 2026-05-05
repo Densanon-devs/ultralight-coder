@@ -74,6 +74,7 @@ class AgentResult:
     tool_results: list[ToolResult] = field(default_factory=list)
     transcript: list[dict[str, str]] = field(default_factory=list)
     compactions: int = 0  # how many context-compaction passes fired during this run
+    self_heals: int = 0   # how many live diagnose-and-repair injections fired
 
 
 # ── System prompt ───────────────────────────────────────────────
@@ -235,6 +236,11 @@ class Agent:
         self._tool_calls: list[ToolCall] = []
         self._tool_results: list[ToolResult] = []
         self._memory_block: str = ""
+        # Live diagnose-and-repair: per-iteration failure-class history
+        # used by the self_heal injector. Keyed by classify_failure()
+        # output (or None on success). See engine/self_heal.py.
+        self._failure_streak: list = []
+        self._self_heal_fired: int = 0
 
     # ── prompt assembly ──
 
@@ -1838,6 +1844,8 @@ class Agent:
             self._tool_calls = []
             self._tool_results = []
             self._memory_block = ""
+            self._failure_streak = []
+            self._self_heal_fired = 0
 
         if not continue_session and self.memory is not None:
             notes = self.memory.load()
@@ -2364,6 +2372,42 @@ class Agent:
                 self._tool_results.append(synthetic)
                 self._emit(AgentEvent("tool_result", iteration, synthetic))
 
+            # Live self-heal step (arXiv 2604.27096 pattern): classify the
+            # iteration's outcome into a failure class, and if the same
+            # class has now fired twice consecutively, inject a synthetic
+            # `self_heal_diagnose` ToolResult that asks the model to pause
+            # and write a 2-3 line repair plan before its next tool call.
+            # Composes with the existing stuck_repeat guard (which fires
+            # only on identical-arg 3-peats); self_heal fires earlier on
+            # any same-class 2-streak.
+            from engine import self_heal as _sh
+            iter_classes = [
+                _sh.classify_failure(r) for r in results
+            ]
+            # An iteration's "class" is the most-severe non-None tag in
+            # its results. If everything's clean, append None so the
+            # streak resets correctly.
+            iter_class = next((c for c in iter_classes if c is not None), None)
+            self._failure_streak.append(iter_class)
+            if iter_class is not None and _sh.should_inject_diagnose(self._failure_streak):
+                # Count how long the matching streak is so the prompt can
+                # mention "you have hit this N times".
+                streak_len = 1
+                for prev in reversed(self._failure_streak[:-1]):
+                    if prev == iter_class:
+                        streak_len += 1
+                    else:
+                        break
+                diagnose = ToolResult(
+                    name="self_heal_diagnose",
+                    success=False,
+                    error=_sh.diagnose_message(iter_class, attempts=streak_len),
+                )
+                results.append(diagnose)
+                self._tool_results.append(diagnose)
+                self._self_heal_fired += 1
+                self._emit(AgentEvent("tool_result", iteration, diagnose))
+
             self._transcript.append(
                 {"role": "tool", "content": self._format_tool_responses(results)}
             )
@@ -2382,6 +2426,7 @@ class Agent:
             tool_results=list(self._tool_results),
             transcript=list(self._transcript),
             compactions=self._compactions,
+            self_heals=self._self_heal_fired,
         )
 
 
