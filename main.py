@@ -652,6 +652,7 @@ class UltraliteCodeAssistant:
             max_wall_time=600.0,
             max_tokens_per_turn=1024,
             confirm_risky=self._confirm_risky_tool,
+            confirm_destructive=self._confirm_destructive_command,
             on_event=self._render_agent_event,
         )
         return self._agent
@@ -693,6 +694,39 @@ class UltraliteCodeAssistant:
             return False
         approved = answer in ("y", "yes")
         print(f"  -> {'approved' if approved else 'denied'}")
+        return approved
+
+    def _confirm_destructive_command(self, call: "ToolCall", matches: list) -> bool:
+        """
+        High-friction confirmation for run_bash commands that match the
+        destructive-command denylist (rm -rf, ~/ expansion, format, dd to
+        /dev, git reset --hard, DROP TABLE, etc.). Mandatory prompt —
+        --yes / _auto_approve_risky does NOT bypass this. Requires the
+        user to type the exact phrase `yes i am sure` (case-insensitive,
+        whitespace-normalized) — a single 'y' is rejected. Default deny
+        on Ctrl+C / EOF / any other input.
+
+        See engine/destructive_command_gate.py and the May 2026 r/ClaudeAI
+        `rm -rf ~/` (717 GB Windows-wipe) incident for rationale.
+        """
+        from engine.destructive_command_gate import format_warning
+
+        command = call.arguments.get("command", "")
+        print()
+        print(format_warning(command, matches))
+        print()
+        try:
+            answer = input(
+                "  To execute, type exactly  yes i am sure  (anything else = deny): "
+            ).strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            print("  -> denied (interrupt)")
+            return False
+        # Normalize whitespace inside the answer so accidental double
+        # spaces don't punish the user — but the words must be exact.
+        normalized = " ".join(answer.split())
+        approved = normalized == "yes i am sure"
+        print(f"  -> {'APPROVED (destructive)' if approved else 'denied'}")
         return approved
 
     def _render_agent_event(self, event: AgentEvent) -> None:

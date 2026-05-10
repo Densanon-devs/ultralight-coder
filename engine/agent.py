@@ -212,6 +212,16 @@ class Agent:
         context_char_budget: int = 52000,   # ~16k tokens * 3.25 chars/token
         compact_keep_recent: int = 6,
         confirm_risky: Optional[Callable[[ToolCall], bool]] = None,
+        # Destructive-shell-command gate. Independent of confirm_risky.
+        # Runs only on run_bash calls whose command matches the
+        # destructive_command_gate denylist (rm -rf, ~/ expansion, format,
+        # dd to /dev, git reset --hard, DROP TABLE, etc.). The callback
+        # MUST NOT honor --yes / auto-approve — destructive prompts are
+        # mandatory regardless of the global permission mode. Default
+        # None: matched commands are refused outright (fail safe). See
+        # engine/destructive_command_gate.py + the May 2026 r/ClaudeAI
+        # `rm -rf ~/` incident for rationale.
+        confirm_destructive: Optional[Callable[["ToolCall", list], bool]] = None,
         # Pre-finish check: called when the model declares "done" (no tool
         # calls). Returns None to accept the answer, or a non-empty string
         # describing what's still wrong — which gets injected as a user
@@ -237,6 +247,7 @@ class Agent:
         self.temperature = temperature
         self.repeat_penalty = repeat_penalty
         self.confirm_risky = confirm_risky
+        self.confirm_destructive = confirm_destructive
         self.pre_finish_check = pre_finish_check
         self.pre_finish_max_retries = max(0, int(pre_finish_max_retries))
         self.context_char_budget = int(context_char_budget)
@@ -1845,6 +1856,46 @@ class Agent:
                     success=False,
                     error="User denied execution of risky tool",
                 )
+
+        # Destructive-shell-command gate. Runs AFTER confirm_risky so the
+        # standard y/N still fires first, but BEFORE registry.execute so a
+        # matched destructive command never reaches subprocess.run. Applies
+        # only to run_bash (the only tool dispatching arbitrary shell
+        # strings). Unlike confirm_risky, this gate cannot be bypassed by
+        # an auto-approve flag — destructive prompts are mandatory.
+        if call.name == "run_bash":
+            from engine.destructive_command_gate import check_command
+            command_arg = call.arguments.get("command", "")
+            destructive_matches = check_command(command_arg)
+            if destructive_matches:
+                if self.confirm_destructive is None:
+                    matched_ids = ", ".join(m.pattern_id for m in destructive_matches)
+                    return ToolResult(
+                        name=call.name,
+                        success=False,
+                        error=(
+                            "Destructive shell command refused (no confirm_destructive "
+                            f"callback wired). Matched patterns: {matched_ids}. "
+                            "Rewrite as a non-destructive operation (e.g. move to a "
+                            ".trash/ directory instead of rm -rf)."
+                        ),
+                    )
+                try:
+                    approved = bool(self.confirm_destructive(call, destructive_matches))
+                except Exception:
+                    logger.exception(
+                        "confirm_destructive callback raised; treating as denied"
+                    )
+                    approved = False
+                if not approved:
+                    matched_ids = ", ".join(m.pattern_id for m in destructive_matches)
+                    return ToolResult(
+                        name=call.name,
+                        success=False,
+                        error=(
+                            f"User denied destructive command (matched: {matched_ids})"
+                        ),
+                    )
         return self.registry.execute(call)
 
     def run(self, goal: str, continue_session: bool = False) -> AgentResult:
