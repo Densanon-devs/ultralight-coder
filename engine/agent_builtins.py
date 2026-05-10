@@ -745,6 +745,7 @@ def build_default_registry(
     extended_tools: bool = False,
     mcp_servers: Optional[list[str]] = None,
     mcp_tool_pack: Optional[list[str]] = None,
+    enable_web: bool = False,
 ) -> ToolRegistry:
     """
     Build a ToolRegistry pre-populated with the 8 core Phase 14 agent tools,
@@ -1114,6 +1115,80 @@ def build_default_registry(
         function=_insert_at_line,
         category="file",
     ))
+
+    # ── Web tools (opt-in via enable_web) ──
+    # Orthogonal axis to extended_tools — web is "online access," extended is
+    # "local advanced." Both web tools are flagged risky=True so the existing
+    # confirm_risky agent hook prompts the user before each call. Default
+    # daily-driver mode (enable_web=False) preserves the zero-server invariant
+    # documented in CLAUDE.md.
+    if enable_web:
+        from engine.web_tools import (
+            DEFAULT_MAX_BYTES,
+            DEFAULT_N_RESULTS,
+            DEFAULT_TIMEOUT,
+            fetch_url as _fetch_url,
+            web_search as _web_search,
+        )
+
+        reg.register(ToolSchema(
+            name="web_search",
+            description=(
+                "Search the public web via DuckDuckGo and return ranked results "
+                "(title, URL, snippet). Use to discover URLs/docs you don't "
+                "already know. Then use fetch_url on a specific result. "
+                "Marked risky — the agent loop may prompt to confirm."
+            ),
+            parameters={
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Search query"},
+                    "n_results": {
+                        "type": "integer",
+                        "description": f"Max results (1-15, default {DEFAULT_N_RESULTS})",
+                        "default": DEFAULT_N_RESULTS,
+                    },
+                },
+                "required": ["query"],
+            },
+            function=lambda query, n_results=DEFAULT_N_RESULTS: _web_search(
+                query, n_results=n_results, timeout=DEFAULT_TIMEOUT
+            ),
+            category="web",
+            risky=True,
+        ))
+
+        reg.register(ToolSchema(
+            name="fetch_url",
+            description=(
+                "Fetch an http/https URL and return the response body as text. "
+                "HTML is converted to readable text by default; pass raw=true "
+                "for the raw body. Body is size-capped. Blocks file://, "
+                "localhost, and private IP ranges. Marked risky."
+            ),
+            parameters={
+                "type": "object",
+                "properties": {
+                    "url": {"type": "string", "description": "http:// or https:// URL"},
+                    "raw": {
+                        "type": "boolean",
+                        "description": "Return raw body without HTML stripping",
+                        "default": False,
+                    },
+                    "max_bytes": {
+                        "type": "integer",
+                        "description": f"Response cap in bytes (default {DEFAULT_MAX_BYTES})",
+                        "default": DEFAULT_MAX_BYTES,
+                    },
+                },
+                "required": ["url"],
+            },
+            function=lambda url, raw=False, max_bytes=DEFAULT_MAX_BYTES: _fetch_url(
+                url, timeout=DEFAULT_TIMEOUT, max_bytes=max_bytes, raw=raw
+            ),
+            category="web",
+            risky=True,
+        ))
 
     # ── Extended tools (opt-in) ──
     # These add ~3000 tokens to the system prompt. On a 16k context model,

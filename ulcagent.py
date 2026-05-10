@@ -258,6 +258,7 @@ def _build_agent(mgr: ModelManager, workspace: Path):
     profile = mgr.profile
     memory = AgentMemory(workspace=workspace)
     extended = "--extended" in sys.argv
+    enable_web = "--web" in sys.argv
     # `--mcp <name1,name2>` opt-in MCP-server mounting. Scaffolded today,
     # raises NotImplementedError if used (see engine/mcp_adapter.py).
     # Default = no MCP, identical behavior to before this scaffold landed.
@@ -267,6 +268,7 @@ def _build_agent(mgr: ModelManager, workspace: Path):
         ask_user_fn=_ask_user,
         extended_tools=extended,
         mcp_servers=mcp_servers,
+        enable_web=enable_web,
     )
 
     # Add system tools for the general profile
@@ -1489,6 +1491,7 @@ _HELP_TEXT = """
   {bold}Startup flags:{end}
     --warm          Keep model loaded between goals (instant, ~10GB VRAM)
     --extended      Enable 21 advanced tools (git, checkpoint, etc.)
+    --web           Enable web_search + fetch_url tools (per-call y/N confirm)
 """
 
 

@@ -197,7 +197,9 @@ Phase 14 ReAct loop. The agent is **loader-agnostic** — it accepts any object 
 
 **Risky-tool confirmation:** `run_bash` is flagged `risky=True`. The agent's `confirm_risky` callback (in `main.py._confirm_risky_tool`) shows the proposed args and prompts `Approve? [y/N]`. Default deny on Ctrl+C/EOF. Denied calls return a `ToolResult(success=False, error="User denied...")` that the model sees and can recover from.
 
-**Privacy invariant:** The entire agent runs in-process. No HTTP, no sockets, no localhost webview. The `remember` notes file is the only thing written outside cwd, and it stays on the local disk.
+**Privacy invariant (default):** The entire agent runs in-process. No HTTP, no sockets, no localhost webview. The `remember` notes file is the only thing written outside cwd, and it stays on the local disk.
+
+**Web tools (opt-in):** `--web` registers `web_search` (DuckDuckGo HTML scrape) and `fetch_url` (http/https GET with HTML→text). Both are flagged `risky=True`, so the existing `confirm_risky` callback prompts the user `Approve? [y/N]` before each call (suppressed by `--yes`). `fetch_url` blocks `file://`, non-http schemes, `localhost`, and any hostname that resolves to a private/loopback/link-local/multicast/reserved IP, so the model cannot pivot through these tools to read local files or hit internal services. Stdlib only (`urllib`, `html.parser`) — no new dependencies. See `engine/web_tools.py` and `test_web_tools.py`.
 
 ### Self-improving augmentor pipeline (merged 2026-04-29 to master)
 
@@ -257,6 +259,7 @@ ulcagent                    # interactive REPL
 ulcagent "fix the bug"      # one-shot
 ulcagent --warm             # keep model loaded between goals (~10GB VRAM, instant response)
 ulcagent --extended         # enable 21 advanced tools (rename, git, checkpoint, etc.)
+ulcagent --web              # enable web_search + fetch_url (per-call y/N confirm)
 ```
 
 **Profiles (auto-detected from goal keywords):**

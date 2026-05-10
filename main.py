@@ -637,6 +637,7 @@ class UltraliteCodeAssistant:
             workspace, memory=memory, ask_user_fn=self._ask_user,
             extended_tools=True,
             mcp_servers=getattr(self, "_mcp_servers", None),
+            enable_web=getattr(self, "_enable_web", False),
         )
         hint = self._build_workspace_hint(workspace)
 
@@ -759,6 +760,7 @@ class UltraliteCodeAssistant:
         workspace: Path | None = None,
         auto_approve_risky: bool = False,
         mcp_servers: list[str] | None = None,
+        enable_web: bool = False,
     ) -> int:
         """
         Lightweight agent entry: load Config + BaseModel + Agent only, skip
@@ -820,6 +822,7 @@ class UltraliteCodeAssistant:
         # When the scaffold is empty/None this is a no-op; when populated
         # the agent_builtins MCP hook fires.
         uca._mcp_servers = mcp_servers or []
+        uca._enable_web = enable_web
 
         try:
             uca.run_agent(goal, workspace=workspace)
@@ -877,6 +880,13 @@ def main():
              "NotImplementedError today; the flag exists so future activation "
              "is one flip in engine/mcp_adapter.py. See docs/MCP.md.",
     )
+    parser.add_argument(
+        "--web",
+        action="store_true",
+        help="Enable web_search + fetch_url tools. Both flagged risky — the "
+             "agent loop prompts y/N before each call (unless --yes). Default "
+             "off preserves the zero-server invariant.",
+    )
     args = parser.parse_args()
 
     # Fast agent path: skip the full UCA init entirely. Only Config + BaseModel
@@ -889,6 +899,7 @@ def main():
             args.config, args.agent,
             auto_approve_risky=args.yes,
             mcp_servers=mcp_servers,
+            enable_web=args.web,
         )
 
     engine = UltraliteCodeAssistant(
