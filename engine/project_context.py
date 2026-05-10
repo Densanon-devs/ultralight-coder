@@ -118,7 +118,14 @@ class ProjectIndex:
         self._load_index()
 
     def init_embedder(self, embedder):
-        """Set the shared embedder instance."""
+        """Set the shared embedder instance.
+
+        For nomic-embed-style adapters that distinguish passage vs
+        query roles, this method assumes the embedder defaults to
+        passage role. The search() path flips to query role before
+        encoding the user's question, then back to passage to keep
+        the indexing path correct on subsequent calls.
+        """
         self._embedder = embedder
         if embedder:
             dummy = embedder.encode(["hello"], normalize_embeddings=True)
@@ -343,9 +350,19 @@ class ProjectIndex:
                 return []
 
             k = min(top_k or self.config.top_k, self._index.ntotal)
-            query_vec = self._embedder.encode(
-                [query], normalize_embeddings=True, show_progress_bar=False,
-            )
+            # Nomic-style embedders distinguish query vs passage roles.
+            # Flip to query for the search call, restore to passage so
+            # any subsequent indexing run uses the correct role. The
+            # methods are no-ops on embedders that don't implement them.
+            if hasattr(self._embedder, "use_query_role"):
+                self._embedder.use_query_role()
+            try:
+                query_vec = self._embedder.encode(
+                    [query], normalize_embeddings=True, show_progress_bar=False,
+                )
+            finally:
+                if hasattr(self._embedder, "use_passage_role"):
+                    self._embedder.use_passage_role()
 
             scores, indices = self._index.search(query_vec.astype(np.float32), k)
 

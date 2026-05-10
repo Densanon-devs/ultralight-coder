@@ -589,6 +589,27 @@ class ToolRegistry:
 
     def __init__(self) -> None:
         self._tools: dict[str, ToolSchema] = {}
+        # G-STEP gate (arXiv 2605.00136). Default-off — set via
+        # configure_gate(...) when the Agent wants the gate engaged.
+        # State is per-registry instance; the Agent constructs one
+        # registry per task run.
+        self._gate_config = None  # type: ignore[assignment]
+        self._gate_state = None  # type: ignore[assignment]
+
+    def configure_gate(self, config, goal_text: str = "") -> None:
+        """Engage the G-STEP confidence gate for this registry.
+
+        Pass a populated ``ToolGateConfig``; the gate stays a no-op
+        until ``config.enabled`` is True. ``goal_text`` seeds the
+        anchor corpus so the very first tool call can match against
+        the goal (otherwise the corpus would be empty until the first
+        observation arrives).
+        """
+        from engine.tool_gate import GateState
+        self._gate_config = config
+        self._gate_state = GateState()
+        if goal_text:
+            self._gate_state.record_observation(goal_text)
 
     # ── registration ──
     def register(self, schema: ToolSchema) -> None:
@@ -651,12 +672,45 @@ class ToolRegistry:
             return ToolResult(
                 name=call.name, success=False, error=f"Tool {call.name!r} is disabled"
             )
+        # G-STEP confidence gate (arXiv 2605.00136). Suppress tool
+        # calls whose expected execution gain is unlikely to clear the
+        # protocol-overhead tax — argument has no lexical anchor in the
+        # goal or prior observations, or the agent is in a doom loop
+        # of consecutive exploration calls. Opt-in: the gate is a
+        # no-op unless the registry is given a populated GateConfig.
+        if self._gate_config is not None and self._gate_config.enabled:
+            from engine.tool_gate import check as _gate_check
+            decision = _gate_check(
+                call.name, call.arguments, self._gate_state, self._gate_config
+            )
+            if not decision.allow:
+                return ToolResult(
+                    name=call.name,
+                    success=False,
+                    error=decision.rejection_message(call.name),
+                )
+            self._gate_state.record_call(call.name)
+        # Pre-dispatch JSON Schema validation (arXiv 2604.26091 typed
+        # controls). Reject malformed argument shapes BEFORE running the
+        # function, so the model gets a clean structured rejection
+        # instead of a Python TypeError stack frame. The function never
+        # executes on a rejected call — important for any tool that
+        # mutates state.
+        from engine.tool_validator import format_rejection, validate_arguments
+        schema_errors = validate_arguments(call.arguments, tool.parameters)
+        if schema_errors:
+            return ToolResult(
+                name=call.name,
+                success=False,
+                error=format_rejection(call.name, schema_errors),
+            )
         try:
             result = tool.function(**call.arguments)
             return ToolResult(name=call.name, success=True, content=result)
         except TypeError as exc:
-            # Signature mismatch (wrong arg names, missing required, extra unknown).
-            # Surface cleanly so the model can retry with the correct shape.
+            # Signature mismatch the validator missed (e.g. unknown kwarg
+            # passed through additionalProperties=True). Surface cleanly
+            # so the model can retry with the correct shape.
             return ToolResult(
                 name=call.name, success=False, error=f"Bad arguments: {exc}"
             )
@@ -673,6 +727,13 @@ class ToolRegistry:
         """Parse *text*, execute every call, return (results, text-with-calls-stripped)."""
         calls = self.parse(text)
         results = [self.execute(c) for c in calls]
+        # Feed successful tool results back into the G-STEP anchor
+        # corpus so subsequent calls can lexically match against
+        # observed paths/symbols.
+        if self._gate_state is not None:
+            for r in results:
+                if r.success and r.content:
+                    self._gate_state.record_observation(str(r.content))
         return results, strip_tool_calls(text)
 
     # ── introspection ──
