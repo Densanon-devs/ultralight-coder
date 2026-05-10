@@ -27,7 +27,13 @@ from typing import Optional
 
 DEFAULT_USER_AGENT = "ulcagent/1.0 (+https://github.com/densanon-devs/ultralight-coder)"
 DEFAULT_TIMEOUT = 15
-DEFAULT_MAX_BYTES = 500_000
+# 30 KB ≈ 9k tokens at 3.3 chars/token. Leaves 7k tokens of a 16k context for
+# the system prompt + tool schemas + prior transcript + the model's response.
+# Was 500_000 originally — that worked for raw size capping but real docs come
+# in well under it (Python urllib docs = 52 KB ≈ 13k tokens, GitHub docs = 228
+# KB ≈ 57k tokens), so the cap never fired and bodies blew context. The model
+# can pass max_bytes= explicitly to override when fetching small known pages.
+DEFAULT_MAX_BYTES = 30_000
 DEFAULT_N_RESULTS = 5
 
 DDG_HTML_ENDPOINT = "https://html.duckduckgo.com/html/"
@@ -139,12 +145,23 @@ def _http_get(
     url: str,
     *,
     timeout: int,
-    max_bytes: int,
     extra_headers: Optional[dict] = None,
     method: str = "GET",
     data: Optional[bytes] = None,
-) -> tuple[str, str, bool]:
-    """Returns (body_text, content_type, was_truncated). Raises WebToolError."""
+) -> tuple[str, str]:
+    """Returns (decoded_body, content_type). Raises WebToolError.
+
+    Reads the full response (subject to a generous internal hard cap to prevent
+    pathological cases). The CALLER is responsible for truncating the resulting
+    text to the model's context budget — see fetch_url for that. We can't
+    truncate raw bytes here because gzip would fail to decode and HTML→text
+    expansion is non-monotonic.
+    """
+    # Hard upper-bound on raw network bytes to prevent absurd downloads.
+    # Generous because gzip can compress 10:1, and we want the caller to
+    # control what the model actually sees via final-text truncation.
+    HARD_NETWORK_CAP = 5_000_000  # 5 MB raw
+
     headers = {
         "User-Agent": DEFAULT_USER_AGENT,
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -157,19 +174,15 @@ def _http_get(
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             content_type = resp.headers.get("Content-Type", "")
-            raw = resp.read(max_bytes + 1)
-            was_truncated = len(raw) > max_bytes
-            if was_truncated:
-                raw = raw[:max_bytes]
+            raw = resp.read(HARD_NETWORK_CAP)
             if resp.headers.get("Content-Encoding", "").lower() == "gzip":
                 try:
                     raw = gzip.decompress(raw)
                 except (OSError, EOFError):
-                    # Truncated gzip stream — try BytesIO + GzipFile for partial decode
                     try:
                         raw = gzip.GzipFile(fileobj=io.BytesIO(raw)).read()
                     except Exception:
-                        pass  # leave raw as-is; decode below will best-effort
+                        pass
             charset = "utf-8"
             m = re.search(r"charset=([\w-]+)", content_type, re.IGNORECASE)
             if m:
@@ -178,7 +191,7 @@ def _http_get(
                 body = raw.decode(charset, errors="replace")
             except LookupError:
                 body = raw.decode("utf-8", errors="replace")
-            return body, content_type, was_truncated
+            return body, content_type
     except urllib.error.HTTPError as e:
         raise WebToolError(f"HTTP {e.code} from {url}: {e.reason}") from e
     except urllib.error.URLError as e:
@@ -201,26 +214,30 @@ def fetch_url(
     Args:
         url: http:// or https:// URL.
         timeout: socket timeout in seconds.
-        max_bytes: response body cap. Response is truncated past this.
+        max_bytes: cap on the FINAL TEXT body that goes to the model
+            (post-gzip-decompression, post-HTML-stripping). The default keeps
+            output to ~9k tokens so a fetch fits comfortably in a 16k context
+            with room for system prompt + transcript + new generation.
         raw: if True, return the raw response body (do not strip HTML).
 
     Returns:
-        Text body. Prefixed with a "[truncated to N bytes]" marker if size cap hit.
+        Text body. Prefixed with a "[truncated to N chars of M total]" marker
+        if size cap hit.
     """
     if not isinstance(url, str) or not url:
         raise WebToolError("url must be a non-empty string")
     ok, reason = _is_safe_url(url)
     if not ok:
         raise WebToolError(f"refusing to fetch {url!r}: {reason}")
-    body, content_type, truncated = _http_get(
-        url, timeout=timeout, max_bytes=max_bytes
-    )
+    body, content_type = _http_get(url, timeout=timeout)
     if raw or "html" not in content_type.lower():
         text = body
     else:
         text = _html_to_text(body)
-    if truncated:
-        text = f"[truncated at {max_bytes} bytes]\n{text}"
+    full_len = len(text)
+    if full_len > max_bytes:
+        text = text[:max_bytes]
+        text = f"[truncated to {max_bytes} chars of {full_len} total]\n{text}"
     return text
 
 
@@ -323,10 +340,9 @@ def web_search(
         raise WebToolError("query must be a non-empty string")
     n_results = max(1, min(int(n_results), 15))
     body_data = urllib.parse.urlencode({"q": query.strip()}).encode("utf-8")
-    body, _ct, _trunc = _http_get(
+    body, _ct = _http_get(
         DDG_HTML_ENDPOINT,
         timeout=timeout,
-        max_bytes=DEFAULT_MAX_BYTES,
         method="POST",
         data=body_data,
         extra_headers={"Content-Type": "application/x-www-form-urlencoded"},

@@ -231,13 +231,15 @@ class TestFetchUrl:
         assert "plain text response" in text
 
     def test_size_cap_truncates_with_marker(self):
+        # Body is 10000 'a' chars wrapped in HTML tags; HTML→text yields ~10000 chars.
+        # We cap final text at 1000; should see the truncation marker.
         big = b"<html><body>" + (b"a" * 10000) + b"</body></html>"
         with patch("engine.web_tools.socket.getaddrinfo") as gai, \
              patch("engine.web_tools.urllib.request.urlopen") as up:
             gai.return_value = [(socket.AF_INET, 0, 0, "", ("93.184.216.34", 0))]
             up.return_value = _mock_urlopen(big)
             text = fetch_url("https://example.com", max_bytes=1000)
-        assert text.startswith("[truncated at 1000 bytes]")
+        assert text.startswith("[truncated to 1000 chars of"), f"got: {text[:100]!r}"
 
     def test_blocks_file_url(self):
         with pytest.raises(WebToolError, match="http/https"):

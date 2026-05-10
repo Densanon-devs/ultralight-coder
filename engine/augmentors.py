@@ -2727,6 +2727,13 @@ class AugmentorRouter:
         "moduletyperror", "syntaxerror in",
         # Project-shape signals (when the goal lists files explicitly)
         ".py —", ".py:", "argparse subcommands", "dataclass",
+        # Web-research signals (added 2026-05-10) — surfaces the
+        # web_research_to_file augmentor for goals that combine online
+        # lookup with a file-write deliverable. Without this, the model
+        # tends to leak the answer into a prose final_answer instead of
+        # calling write_file. See project_ulcagent_web_tools.md.
+        "web_search", "fetch_url", "look up", "research the",
+        "find the latest", "find the current",
     )
 
     def _large_mode_should_augment(self, query: str) -> bool:

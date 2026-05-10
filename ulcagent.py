@@ -259,6 +259,7 @@ def _build_agent(mgr: ModelManager, workspace: Path):
     memory = AgentMemory(workspace=workspace)
     extended = "--extended" in sys.argv
     enable_web = "--web" in sys.argv
+    auto_yes = "--yes" in sys.argv
     # `--mcp <name1,name2>` opt-in MCP-server mounting. Scaffolded today,
     # raises NotImplementedError if used (see engine/mcp_adapter.py).
     # Default = no MCP, identical behavior to before this scaffold landed.
@@ -279,11 +280,15 @@ def _build_agent(mgr: ModelManager, workspace: Path):
     plugin_count = _load_plugins(registry)
 
     # Load model-specific prompt profile
-    model_profile = _load_model_profile(mgr.bm.config.base_model.path if hasattr(mgr.bm, 'config') else "")
+    # mgr.bm.config IS the BaseModelConfig directly — has .path, no .base_model
+    model_profile = _load_model_profile(getattr(getattr(mgr.bm, "config", None), "path", "") or "")
 
     def _confirm_risky(call):
         _spinner.stop()
         args_s = ', '.join(f'{k}={str(v)[:60]}' for k, v in call.arguments.items())
+        if auto_yes:
+            print(f"\n  {_yellow('[risky auto-approved]')} {call.name}({args_s})")
+            return True
         print(f"\n  {_yellow('[risky]')} {call.name}({args_s})")
         try:
             answer = input(f"  {_yellow('Approve? [y/N]')} ").strip().lower()
@@ -329,6 +334,9 @@ def _build_agent(mgr: ModelManager, workspace: Path):
         f"Workspace: {workspace}\n"
         f"{PROFILES[profile]['hint']}"
     )
+    if enable_web:
+        from engine.agent_builtins import web_research_pattern_hint
+        workspace_hint = workspace_hint + "\n\n" + web_research_pattern_hint()
 
     agent = Agent(
         model=mgr.bm,
@@ -1492,6 +1500,7 @@ _HELP_TEXT = """
     --warm          Keep model loaded between goals (instant, ~10GB VRAM)
     --extended      Enable 21 advanced tools (git, checkpoint, etc.)
     --web           Enable web_search + fetch_url tools (per-call y/N confirm)
+    --yes           Auto-approve all risky tool calls (unattended runs only)
 """
 
 

@@ -1,0 +1,145 @@
+domain: agentic
+category: web_research_to_file
+examples:
+- query: |
+    Use web_search and fetch_url to find the canonical signature of
+    urllib.request.urlopen in the official Python docs. Then write demo.py
+    that contains a small working example calling urlopen on
+    https://example.com and printing the response status.
+  solution: |
+    When a goal asks you to research something AND write a file, the
+    sequence is:
+
+        web_search  →  fetch_url (optional)  →  write_file  →  final answer
+
+    The fetched body is INPUT to your write, not the deliverable itself.
+    A common failure: the model fetches a docs page, summarizes the answer
+    in prose inside the final answer field, and never calls write_file.
+    The verifier looks for the file on disk — prose in the answer field
+    does not count.
+
+    WRONG (research → narrate, no file ever written):
+
+        web_search(query="urllib.request.urlopen documentation")
+        fetch_url(url="https://docs.python.org/3/library/urllib.request.html")
+        [final answer] "The signature of urllib.request.urlopen is:
+        ```python
+        urllib.request.urlopen(url, data=None, timeout=...)
+        ```
+        Here is a demo: ```python ... ```"
+        -> demo.py was never created. The goal said "write demo.py",
+           the file is missing.
+
+    RIGHT (research → write, then declare done):
+
+        web_search(query="urllib.request.urlopen documentation")
+        fetch_url(url="https://docs.python.org/3/library/urllib.request.html")
+        write_file(path="demo.py", content=[
+            "import urllib.request",
+            "",
+            "with urllib.request.urlopen('https://example.com') as resp:",
+            "    print('status:', resp.status)",
+        ])
+        [final answer] "Wrote demo.py with a working urlopen example."
+
+    Rule: if the goal contains "write FILENAME", "save to FILENAME", or
+    "create FILENAME", your turn after the last fetch_url MUST be a
+    write_file tool_call, not a final answer. Only after the file exists
+    do you give a final answer.
+  tags:
+  - web_search
+  - fetch_url
+  - write_file
+  - completeness
+  - narration_without_action
+  difficulty: medium
+
+- query: |
+    Find the GitHub REST API endpoint for listing a user's public
+    repositories. Use web_search and fetch_url on the official GitHub
+    docs. Then write github_repos.py that uses urllib to define
+    list_user_repos(username) returning a list of repo dicts.
+  solution: |
+    Long deliverable goals are the most likely to leak into a prose
+    summary. After you fetch the relevant docs page, your VERY NEXT
+    tool_call must be write_file with the deliverable. Do not put the
+    code in the final-answer field as a code block — code in the final
+    answer is invisible to the file system.
+
+    RIGHT pattern for "research API X then scaffold a Python module":
+
+        web_search(query="GitHub REST API list user repositories")
+        fetch_url(url="https://docs.github.com/en/rest/repos/repos")
+        # ↓ no narration, go straight to write_file
+        write_file(path="github_repos.py", content=[
+            "import json",
+            "import urllib.request",
+            "",
+            "def list_user_repos(username):",
+            "    url = f'https://api.github.com/users/{username}/repos'",
+            "    req = urllib.request.Request(url, headers={'User-Agent': 'demo'})",
+            "    with urllib.request.urlopen(req) as resp:",
+            "        data = json.load(resp)",
+            "    return [{'name': r['name'], 'stars': r['stargazers_count'],",
+            "             'language': r['language']} for r in data]",
+            "",
+            "if __name__ == '__main__':",
+            "    print(list_user_repos('octocat'))",
+        ])
+        [final answer] "Wrote github_repos.py."
+
+    The fetched body is for YOUR understanding. It does not become the
+    deliverable. The deliverable is the file you write_file.
+  tags:
+  - web_search
+  - fetch_url
+  - write_file
+  - api_docs
+  - narration_without_action
+  difficulty: medium
+
+- query: |
+    Research why asyncio.get_event_loop() raises a DeprecationWarning in
+    Python 3.12+ and write fix.md explaining the new pattern.
+  solution: |
+    Markdown deliverables are extra-tempting to leak into prose because
+    the synthesized content already looks like the final answer. It still
+    has to go through write_file.
+
+    RIGHT pattern for "research a topic then write topic.md":
+
+        web_search(query="asyncio.get_event_loop deprecation python 3.12")
+        fetch_url(url="https://docs.python.org/3/library/asyncio-eventloop.html")
+        # ↓ go straight to write_file, do not paste the markdown into
+        #   the final answer field
+        write_file(path="fix.md", content=[
+            "# asyncio.get_event_loop() deprecation",
+            "",
+            "## What the deprecation says",
+            "Calling get_event_loop() outside a running coroutine is",
+            "deprecated since Python 3.12. It used to implicitly create a",
+            "new loop; now that's removed.",
+            "",
+            "## The replacement",
+            "- For top-level code: use `asyncio.run(main())`.",
+            "- Inside a coroutine: use `asyncio.get_running_loop()`.",
+            "",
+            "## OLD",
+            "```python",
+            "loop = asyncio.get_event_loop()",
+            "loop.run_until_complete(main())",
+            "```",
+            "",
+            "## NEW",
+            "```python",
+            "asyncio.run(main())",
+            "```",
+        ])
+        [final answer] "Wrote fix.md with the deprecation explanation and code samples."
+  tags:
+  - web_search
+  - fetch_url
+  - write_file
+  - markdown
+  - narration_without_action
+  difficulty: medium

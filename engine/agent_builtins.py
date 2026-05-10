@@ -738,6 +738,37 @@ def _run_tests(
 # ── Factory ─────────────────────────────────────────────────────
 
 
+_WEB_RESEARCH_PATTERN_HINT = """\
+## Pattern: web research → write file (CRITICAL when --web is enabled)
+
+When a goal asks you to research something AND write a file, the sequence is:
+
+    web_search  →  fetch_url (optional)  →  write_file  →  final answer
+
+The fetched body is INPUT to your write, not the deliverable itself. Common
+failure: model fetches a docs page, summarizes the answer in prose inside
+the final_answer, and never calls write_file. The user looks for the file
+on disk — prose in the final answer does not count.
+
+Rule: if the goal contains "write FILENAME", "save to FILENAME", or
+"create FILENAME", your turn after the last fetch_url MUST be a write_file
+tool_call, NOT a final answer with a code block. Markdown deliverables are
+extra-tempting to leak into prose — write the .md file via write_file too.
+"""
+
+
+def web_research_pattern_hint() -> str:
+    """Return the web-research-to-file pattern as a system_prompt_extra block.
+
+    Callers append this to their workspace hint when enable_web=True so the
+    model has the search→fetch→write_file pattern in context. Counters the
+    narration_without_action failure mode that fetch_url tends to amplify
+    (the fetched body primes the model into summarize-mode, which competes
+    with the file-write deliverable).
+    """
+    return _WEB_RESEARCH_PATTERN_HINT
+
+
 def build_default_registry(
     workspace_root: Path | str,
     memory: Optional[AgentMemory] = None,
@@ -1137,6 +1168,10 @@ def build_default_registry(
                 "Search the public web via DuckDuckGo and return ranked results "
                 "(title, URL, snippet). Use to discover URLs/docs you don't "
                 "already know. Then use fetch_url on a specific result. "
+                "If the user's goal asks you to write a file (e.g. 'write X.md', "
+                "'save to Y.txt', 'create Z.py'), you MUST call write_file with "
+                "your synthesized result before giving the final answer — do not "
+                "summarize the answer in prose only. "
                 "Marked risky — the agent loop may prompt to confirm."
             ),
             parameters={
@@ -1163,8 +1198,13 @@ def build_default_registry(
             description=(
                 "Fetch an http/https URL and return the response body as text. "
                 "HTML is converted to readable text by default; pass raw=true "
-                "for the raw body. Body is size-capped. Blocks file://, "
-                "localhost, and private IP ranges. Marked risky."
+                "for the raw body. Body is size-capped at 30 KB (~9k tokens) "
+                "to fit in context — bump max_bytes only if the page is known "
+                "to be small. Blocks file://, localhost, and private IP ranges. "
+                "If the user's goal asks you to write a file with the "
+                "information you fetched, you MUST call write_file before "
+                "giving the final answer — prose summaries don't count. "
+                "Marked risky."
             ),
             parameters={
                 "type": "object",
