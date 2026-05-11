@@ -1,0 +1,104 @@
+domain: security
+category: network_port_scan
+examples:
+- query: |
+    Write a TCP connect port scanner in pure Python (no scapy/nmap deps)
+    that scans a host for the top 100 common ports and reports open ones.
+  solution: |
+    Stdlib `socket` with a short timeout per port. Use a thread pool for
+    parallelism — TCP connect is I/O bound. Keep the port list as a
+    constant in the file so it's auditable.
+
+    ```python
+    import socket
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    TOP_100_PORTS = [
+        21, 22, 23, 25, 53, 80, 110, 111, 135, 139, 143, 443, 445, 587,
+        993, 995, 1723, 3306, 3389, 5432, 5900, 8080, 8443,
+        # ... abbreviated; ship the full IANA top-100 in the real script
+    ]
+
+    def scan_port(host, port, timeout=1.0):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(timeout)
+            try:
+                s.connect((host, port))
+                return port, True
+            except (socket.timeout, ConnectionRefusedError, OSError):
+                return port, False
+
+    def scan_host(host, ports=TOP_100_PORTS, workers=64, timeout=1.0):
+        open_ports = []
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = [pool.submit(scan_port, host, p, timeout) for p in ports]
+            for f in as_completed(futures):
+                port, is_open = f.result()
+                if is_open:
+                    open_ports.append(port)
+        return sorted(open_ports)
+
+    if __name__ == "__main__":
+        import sys
+        host = sys.argv[1] if len(sys.argv) > 1 else "127.0.0.1"
+        opens = scan_host(host)
+        print(f"{host}: {len(opens)} open: {opens}")
+    ```
+
+    TCP connect (full handshake) is detectable by IDS — the target sees a
+    real connection from your IP. For lower-noise SYN scans use scapy or
+    wrap nmap. Document the noise profile in the docstring so the operator
+    chooses the right tool for the engagement.
+  tags: [socket, port_scan, tcp_connect, threading, pentest]
+  difficulty: easy
+
+- query: |
+    Add a banner-grabbing pass to the port scanner — for each open port,
+    read the first ~256 bytes the service sends.
+  solution: |
+    After the connect succeeds, recv with a short timeout. Many services
+    send a banner immediately (SSH, FTP, SMTP); HTTP needs a request first.
+    Distinguish between "banner-on-connect" services and "request-required"
+    services with a small protocol map.
+
+    ```python
+    import socket
+
+    PROBE_REQUESTS = {
+        80: b"GET / HTTP/1.0\r\n\r\n",
+        8080: b"GET / HTTP/1.0\r\n\r\n",
+        443: None,  # TLS — banner grabbing requires a TLS handshake first
+    }
+
+    def grab_banner(host, port, timeout=2.0, probe_max=256):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(timeout)
+            try:
+                s.connect((host, port))
+            except (socket.timeout, ConnectionRefusedError, OSError) as e:
+                return None
+            probe = PROBE_REQUESTS.get(port)
+            if probe:
+                try:
+                    s.sendall(probe)
+                except OSError:
+                    return None
+            try:
+                data = s.recv(probe_max)
+            except socket.timeout:
+                return None
+        # Strip non-printable + decode best-effort
+        return data.decode("utf-8", errors="replace").strip() if data else None
+
+    if __name__ == "__main__":
+        import sys
+        host, port = sys.argv[1], int(sys.argv[2])
+        banner = grab_banner(host, port)
+        print(f"{host}:{port} banner: {banner!r}" if banner else f"{host}:{port} no banner")
+    ```
+
+    Banners often reveal version strings — log them verbatim into your
+    findings DB so the report can cite specific CVEs. Don't sanitize before
+    logging; sanitize at report-render time.
+  tags: [socket, banner_grab, fingerprint, pentest]
+  difficulty: medium

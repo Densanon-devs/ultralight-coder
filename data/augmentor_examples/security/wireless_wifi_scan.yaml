@@ -1,0 +1,136 @@
+domain: security
+category: wireless_wifi_scan
+examples:
+- query: |
+    Scan for nearby WiFi networks and parse SSIDs, BSSIDs, channels,
+    signal strength, and encryption type. Use iwlist on Linux (no scapy
+    required), parse the verbose output.
+  solution: |
+    `iwlist <iface> scan` is the simplest cross-distro path. Output is
+    multi-block text — split on "Cell" and parse each block. For Windows,
+    `netsh wlan show networks mode=bssid` is the equivalent (different
+    parser).
+
+    ```python
+    import subprocess
+    import re
+    from dataclasses import dataclass, field
+    from typing import List
+
+    @dataclass
+    class WifiNetwork:
+        ssid: str
+        bssid: str
+        channel: int
+        signal_dbm: int = 0
+        encryption: List[str] = field(default_factory=list)
+
+    def scan_iwlist(iface):
+        result = subprocess.run(
+            ["sudo", "iwlist", iface, "scan"],
+            capture_output=True, text=True,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(f"iwlist failed: {result.stderr.strip()}")
+        return parse_iwlist(result.stdout)
+
+    def parse_iwlist(output):
+        nets = []
+        cells = re.split(r"\s+Cell \d+ - ", output)
+        for cell in cells[1:]:  # first is the header
+            bssid_m = re.search(r"Address:\s+([0-9A-Fa-f:]{17})", cell)
+            ssid_m = re.search(r"ESSID:\"([^\"]*)\"", cell)
+            chan_m = re.search(r"Channel:?(\d+)", cell)
+            sig_m = re.search(r"Signal level=(-?\d+)", cell)
+            enc_open = "Encryption key:off" in cell
+            wpa2 = "IE: IEEE 802.11i/WPA2" in cell
+            wpa3 = "WPA3" in cell or "SAE" in cell
+            wpa1 = "IE: WPA Version 1" in cell
+            enc = []
+            if enc_open: enc.append("OPEN")
+            if wpa1: enc.append("WPA1")
+            if wpa2: enc.append("WPA2")
+            if wpa3: enc.append("WPA3")
+            if not enc:
+                enc.append("UNKNOWN")
+            nets.append(WifiNetwork(
+                ssid=ssid_m.group(1) if ssid_m else "<hidden>",
+                bssid=bssid_m.group(1) if bssid_m else "",
+                channel=int(chan_m.group(1)) if chan_m else 0,
+                signal_dbm=int(sig_m.group(1)) if sig_m else 0,
+                encryption=enc,
+            ))
+        return nets
+
+    if __name__ == "__main__":
+        import sys, json
+        iface = sys.argv[1] if len(sys.argv) > 1 else "wlan0"
+        nets = scan_iwlist(iface)
+        for n in sorted(nets, key=lambda x: -x.signal_dbm):
+            print(f"  {n.signal_dbm:>4} dBm  ch{n.channel:<3} {','.join(n.encryption):<10} {n.bssid}  {n.ssid!r}")
+    ```
+
+    Engagement note: WiFi scanning is generally legal in most jurisdictions
+    (it's just listening to public broadcasts). Scope-of-work confirmation
+    is still good practice — some clients want only their authorized BSSIDs
+    in your report, not the surrounding tenants in a shared building.
+  tags: [iwlist, wifi, scan, ssid, bssid, wireless, pentest]
+  difficulty: easy
+
+- query: |
+    Detect potential rogue access points: any BSSID broadcasting an SSID
+    that matches the client's authorized network names but is NOT in the
+    client's known-BSSID allowlist. A common indicator of an evil-twin
+    attack.
+  solution: |
+    Combine the scanner above with a per-engagement allowlist file. For
+    each scanned network, if its SSID is in the client's authorized SSIDs
+    AND its BSSID is NOT in the client's BSSID allowlist, flag it.
+
+    ```python
+    import json
+    from pathlib import Path
+
+    def load_allowlist(path):
+        """Allowlist JSON shape:
+            {"authorized_ssids": ["ClientCorp", "ClientCorp-Guest"],
+             "authorized_bssids": ["aa:bb:cc:dd:ee:01", ...]}
+        """
+        return json.loads(Path(path).read_text())
+
+    def find_rogue_aps(scanned_networks, allowlist):
+        auth_ssids = set(allowlist["authorized_ssids"])
+        auth_bssids = {b.lower() for b in allowlist["authorized_bssids"]}
+        rogue = []
+        for net in scanned_networks:
+            if net.ssid in auth_ssids and net.bssid.lower() not in auth_bssids:
+                rogue.append({
+                    "ssid": net.ssid,
+                    "bssid": net.bssid,
+                    "channel": net.channel,
+                    "signal_dbm": net.signal_dbm,
+                    "encryption": net.encryption,
+                    "reason": "SSID matches authorized network but BSSID is unknown",
+                })
+        return rogue
+
+    if __name__ == "__main__":
+        from .wireless_wifi_scan import scan_iwlist  # adjust import to match your package
+        import sys
+        nets = scan_iwlist(sys.argv[1])
+        allowlist = load_allowlist(sys.argv[2])
+        rogues = find_rogue_aps(nets, allowlist)
+        if rogues:
+            print(f"FOUND {len(rogues)} POTENTIAL ROGUE AP(s):")
+            for r in rogues:
+                print(f"  {r['bssid']}  ch{r['channel']}  {r['signal_dbm']} dBm  {r['ssid']!r}")
+        else:
+            print("No rogue APs detected.")
+    ```
+
+    A rogue AP isn't always malicious — sometimes a tenant in the same
+    building accidentally configures an SSID matching the client's. The
+    finding always needs human follow-up: confirm physical location via
+    signal triangulation BEFORE escalating to the client.
+  tags: [wifi, evil_twin, rogue_ap, allowlist, wireless, pentest]
+  difficulty: medium

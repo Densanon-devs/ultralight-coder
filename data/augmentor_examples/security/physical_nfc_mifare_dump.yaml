@@ -1,0 +1,141 @@
+domain: security
+category: physical_nfc_mifare_dump
+examples:
+- query: |
+    Use nfcpy (an ACR122U or similar PC/SC reader) to dump a MIFARE Classic
+    1K card given its keys. Write the dump to disk in standard 1024-byte
+    raw format, plus a human-readable text summary.
+  solution: |
+    `nfcpy` connects to the reader, polls for a tag, then `mfclassic`
+    helpers handle authentication block-by-block. If you don't have keys,
+    pre-flight with `mfoc`/`mfcuk` (not nfcpy itself).
+
+    ```python
+    import nfc
+    import nfc.tag.tt2
+    import struct
+    from pathlib import Path
+
+    DEFAULT_KEY = b"\xff" * 6  # FFFFFFFFFFFF — open key on many cards
+
+    def dump_mifare_1k(out_path, keys_a=None, keys_b=None):
+        """
+        keys_a / keys_b are dicts: {sector_index: 6-byte key}. Missing
+        sectors fall back to DEFAULT_KEY. MIFARE 1K has 16 sectors,
+        4 blocks each, 16 bytes per block = 1024 bytes total.
+        """
+        keys_a = keys_a or {}
+        keys_b = keys_b or {}
+        dump = bytearray(1024)
+        sector_status = {}
+
+        with nfc.ContactlessFrontend("usb") as clf:
+            tag = clf.connect(rdwr={"on-connect": lambda t: False})
+            if not tag.product.startswith("Mifare Classic"):
+                raise RuntimeError(f"not a MIFARE Classic: {tag.product}")
+
+            for sector in range(16):
+                key = keys_a.get(sector, DEFAULT_KEY)
+                try:
+                    tag.authenticate_with_keya(sector, key)
+                    sector_status[sector] = ("A", key.hex())
+                except Exception:
+                    key = keys_b.get(sector, DEFAULT_KEY)
+                    try:
+                        tag.authenticate_with_keyb(sector, key)
+                        sector_status[sector] = ("B", key.hex())
+                    except Exception:
+                        sector_status[sector] = (None, None)
+                        continue
+                for block_in_sector in range(4):
+                    block = sector * 4 + block_in_sector
+                    data = tag.read(block)
+                    dump[block * 16 : (block + 1) * 16] = data
+
+        Path(out_path).write_bytes(bytes(dump))
+        return {
+            "path": str(out_path),
+            "size": len(dump),
+            "sectors_authenticated": sum(1 for v in sector_status.values() if v[0]),
+            "sectors_failed": sum(1 for v in sector_status.values() if v[0] is None),
+            "key_material": sector_status,
+        }
+
+    if __name__ == "__main__":
+        import json, sys
+        out = sys.argv[1] if len(sys.argv) > 1 else "card.dump"
+        result = dump_mifare_1k(out)
+        print(json.dumps(result, indent=2))
+    ```
+
+    Card UID is in block 0 of sector 0 — readable without authentication
+    on some implementations, requires Key A on others. The pm3 tool is
+    faster and more reliable for unknown-key cards (`hf mf autopwn`).
+    nfcpy is preferable when you already have the keys and want a clean
+    Python integration into your reporting pipeline.
+  tags: [nfcpy, mifare, classic, dump, pcsc, physical_security, pentest]
+  difficulty: hard
+
+- query: |
+    Compare two MIFARE dump files block-by-block to identify which sectors
+    were modified between two reads — useful for detecting writeable
+    sectors during a pentest.
+  solution: |
+    Both dumps should be 1024 bytes. XOR them, find non-zero blocks, map
+    each back to its sector. Format the diff in a human-readable table.
+
+    ```python
+    from pathlib import Path
+
+    BLOCK_SIZE = 16
+    SECTORS = 16
+    BLOCKS_PER_SECTOR = 4
+
+    def diff_mifare_dumps(path_a, path_b):
+        a = Path(path_a).read_bytes()
+        b = Path(path_b).read_bytes()
+        if len(a) != len(b):
+            raise ValueError(f"size mismatch: {len(a)} vs {len(b)}")
+
+        diffs = []
+        for sector in range(SECTORS):
+            for blk_in_sector in range(BLOCKS_PER_SECTOR):
+                blk = sector * BLOCKS_PER_SECTOR + blk_in_sector
+                start = blk * BLOCK_SIZE
+                end = start + BLOCK_SIZE
+                if a[start:end] != b[start:end]:
+                    diffs.append({
+                        "sector": sector,
+                        "block": blk_in_sector,
+                        "absolute_block": blk,
+                        "is_trailer": blk_in_sector == 3,
+                        "before": a[start:end].hex(),
+                        "after": b[start:end].hex(),
+                    })
+        return diffs
+
+    def format_diff_table(diffs):
+        if not diffs:
+            return "(no changes)"
+        lines = [f"{'sec':<4} {'blk':<4} {'kind':<8} {'before':<34} {'after':<34}"]
+        for d in diffs:
+            kind = "TRAILER" if d["is_trailer"] else "data"
+            lines.append(
+                f"{d['sector']:<4} {d['block']:<4} {kind:<8} "
+                f"{d['before']:<34} {d['after']:<34}"
+            )
+        return "\n".join(lines)
+
+    if __name__ == "__main__":
+        import sys
+        diffs = diff_mifare_dumps(sys.argv[1], sys.argv[2])
+        print(format_diff_table(diffs))
+    ```
+
+    Trailer blocks (block 3 of every sector) hold the keys — changes there
+    indicate the card's keys were rewritten between dumps. Data block
+    diffs alone usually mean the card stores per-use state (counter,
+    timestamp, transaction log) — useful intel for understanding the
+    badge system's logic.
+  tags: [mifare, dump_analysis, diff, physical_security, pentest]
+  difficulty: medium

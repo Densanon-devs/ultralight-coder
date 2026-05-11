@@ -2734,6 +2734,15 @@ class AugmentorRouter:
         # calling write_file. See project_ulcagent_web_tools.md.
         "web_search", "fetch_url", "look up", "research the",
         "find the latest", "find the current",
+        # Security-domain signals (added 2026-05-10) — surfaces the
+        # security/ augmentor library for authorized pentest tooling.
+        # Covers network/physical-access/wireless/reporting categories.
+        # See data/augmentor_examples/security/README.md.
+        "scapy", "nmap", "pentest", "penetration test", "security audit",
+        "packet capture", "port scan", "arp scan", "dns enum", "axfr",
+        "proxmark", "mifare", "rfid", "wiegand", "nfcpy",
+        "bleak", "ble gatt", "wifi scan", "rogue ap", "iwlist",
+        "sniffer", "scanner", "findings report", "pcap analysis",
     )
 
     def _large_mode_should_augment(self, query: str) -> bool:

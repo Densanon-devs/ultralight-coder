@@ -1,0 +1,115 @@
+domain: security
+category: physical_proxmark_wrapper
+examples:
+- query: |
+    Build a Python wrapper around the Proxmark3 client for a physical
+    security pentest. The wrapper should run pm3 commands non-interactively
+    and parse common outputs (LF read, HF read, MIFARE dump).
+  solution: |
+    pm3 supports `-c "command"` for one-shot execution. The output is
+    text — parse with regex per command type. Wrap as subprocess with a
+    timeout because some commands hang waiting for tag presence.
+
+    ```python
+    import subprocess
+    import re
+    import json
+    from pathlib import Path
+
+    PM3_CLIENT = "pm3"  # assumes proxmark3 on PATH
+
+    class Proxmark3Error(Exception): pass
+
+    def run_pm3(command, timeout=30):
+        result = subprocess.run(
+            [PM3_CLIENT, "-c", command],
+            capture_output=True, text=True, timeout=timeout,
+        )
+        if result.returncode != 0:
+            raise Proxmark3Error(f"pm3 failed: {result.stderr.strip()}")
+        return result.stdout
+
+    def lf_search():
+        """LF tag identification — populates the standard pm3 LF search."""
+        out = run_pm3("lf search")
+        # pm3 output typically includes "Valid <Format> ID Found!" lines
+        formats = re.findall(r"Valid\s+(\S+)\s+ID Found!.*?(?=\n\n|\Z)",
+                             out, re.DOTALL)
+        return [f.strip() for f in formats]
+
+    def hf_search():
+        out = run_pm3("hf search")
+        # Typical output: "[+] Valid ISO14443-A tag  found"
+        tags = re.findall(r"Valid\s+(ISO\d+(?:-[A-Z])?)\s+tag\s+found",
+                          out, re.IGNORECASE)
+        return tags
+
+    def mifare_dump(out_path):
+        """Standard MIFARE Classic dump using darkside/nested attack."""
+        out_path = Path(out_path)
+        cmd = f"hf mf autopwn --file {out_path.stem}"
+        out = run_pm3(cmd, timeout=300)
+        # autopwn writes <stem>.bin and <stem>.eml in cwd
+        return {
+            "binary": out_path.with_suffix(".bin"),
+            "emulator": out_path.with_suffix(".eml"),
+            "raw_output": out,
+        }
+
+    if __name__ == "__main__":
+        print("LF search:", lf_search())
+        print("HF search:", hf_search())
+    ```
+
+    Engagement note: MIFARE Classic CRYPTO1 attacks (darkside, nested,
+    hardnested) only work against the cipher; they do NOT apply to MIFARE
+    DESFire / Plus, iCLASS DP, or HID Prox. Document the card type in
+    your scope-of-work BEFORE the engagement so you bring the right tool.
+  tags: [proxmark3, rfid, nfc, mifare, subprocess, physical_security, pentest]
+  difficulty: medium
+
+- query: |
+    Add a function to write (clone) a low-frequency T55x7 tag from a
+    captured HID Prox or EM410x ID. Used for testing whether a client's
+    badge system accepts cloned credentials.
+  solution: |
+    pm3 has `lf hid clone --raw` and `lf em 410x clone` for the two most
+    common LF formats. Validate the input hex, write, then read back to
+    confirm the write succeeded.
+
+    ```python
+    import re
+
+    def clone_lf_hid(raw_hex):
+        if not re.fullmatch(r"[0-9a-fA-F]+", raw_hex):
+            raise ValueError("raw_hex must be hex digits only")
+        out = run_pm3(f"lf hid clone --raw {raw_hex}")
+        if "done" not in out.lower():
+            raise Proxmark3Error(f"HID clone failed:\n{out}")
+        # Read back to verify
+        verify = run_pm3("lf hid read")
+        return raw_hex.lower() in verify.lower()
+
+    def clone_lf_em410x(em_id):
+        em_id = em_id.lower()
+        if not re.fullmatch(r"[0-9a-f]{10}", em_id):
+            raise ValueError("EM410x ID must be 10 hex chars (40 bits)")
+        out = run_pm3(f"lf em 410x clone --id {em_id}")
+        if "done" not in out.lower():
+            raise Proxmark3Error(f"EM410x clone failed:\n{out}")
+        verify = run_pm3("lf em 410x reader")
+        return em_id in verify.lower()
+
+    if __name__ == "__main__":
+        # Example: clone a captured HID Prox card
+        ok = clone_lf_hid("2006e22b3f")  # 26-bit format raw
+        print("HID clone verified:", ok)
+    ```
+
+    LEGAL NOTE: cloning credentials requires explicit authorization from
+    the badge owner AND from the system owner. Both. A hand-written
+    "yes you can clone my badge for testing" note in the engagement
+    folder is the minimum. For physical-security engagements, this is
+    typically pre-arranged with the client contact — never opportunistic.
+  tags: [proxmark3, hid_prox, em410x, t55x7, badge_clone, physical_security, pentest]
+  difficulty: medium

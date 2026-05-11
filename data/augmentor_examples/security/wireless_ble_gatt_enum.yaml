@@ -1,0 +1,143 @@
+domain: security
+category: wireless_ble_gatt_enum
+examples:
+- query: |
+    Scan for BLE advertising devices in the area, then for each one connect
+    and enumerate its GATT services + characteristics. Use bleak (cross-platform
+    pure-Python BLE).
+  solution: |
+    Two phases: `BleakScanner.discover()` for the ad scan, then
+    `BleakClient(addr).connect()` per device for the GATT enum. Async
+    throughout because bleak is asyncio-based.
+
+    ```python
+    import asyncio
+    import json
+    from bleak import BleakScanner, BleakClient
+    from bleak.exc import BleakError
+
+    async def scan_advertisements(scan_seconds=10):
+        devices = await BleakScanner.discover(timeout=scan_seconds)
+        return [
+            {
+                "address": d.address,
+                "name": d.name or "<unnamed>",
+                "rssi": d.rssi,
+                "metadata": dict(d.metadata) if d.metadata else {},
+            }
+            for d in devices
+        ]
+
+    async def enumerate_gatt(address, timeout=15.0):
+        result = {"address": address, "services": []}
+        try:
+            async with BleakClient(address, timeout=timeout) as client:
+                services = await client.get_services()
+                for svc in services:
+                    svc_info = {
+                        "uuid": svc.uuid,
+                        "description": svc.description or "",
+                        "characteristics": [],
+                    }
+                    for char in svc.characteristics:
+                        svc_info["characteristics"].append({
+                            "uuid": char.uuid,
+                            "description": char.description or "",
+                            "properties": list(char.properties),
+                            "handle": char.handle,
+                        })
+                    result["services"].append(svc_info)
+        except BleakError as e:
+            result["error"] = str(e)
+        return result
+
+    async def full_recon(scan_seconds=10, enum_timeout=15):
+        devices = await scan_advertisements(scan_seconds)
+        print(f"Found {len(devices)} BLE devices.")
+        results = []
+        for d in devices:
+            print(f"  Enumerating {d['address']}  '{d['name']}'  rssi={d['rssi']}")
+            gatt = await enumerate_gatt(d["address"], timeout=enum_timeout)
+            results.append({"advertisement": d, "gatt": gatt})
+        return results
+
+    if __name__ == "__main__":
+        results = asyncio.run(full_recon())
+        with open("ble_recon.json", "w") as f:
+            json.dump(results, f, indent=2)
+        print(f"Wrote ble_recon.json ({len(results)} devices)")
+    ```
+
+    GATT properties to flag in your report:
+      * `notify` / `indicate` on a sensitive characteristic with no auth
+      * `write` / `write-without-response` on a control characteristic
+      * Standard service UUIDs that imply sensitive data (Heart Rate, Glucose,
+        Battery, Device Information) when the device shouldn't be exposing them
+      * Known vulnerable manufacturer-specific services (check exploit-db
+        before reporting "no findings")
+  tags: [bleak, ble, gatt, bluetooth, asyncio, wireless, pentest]
+  difficulty: medium
+
+- query: |
+    Passive BLE advertising packet capture — log every advertising packet
+    seen during a window (no GATT connection). Useful for tracking devices
+    over time and building a "what was here when" timeline.
+  solution: |
+    `BleakScanner` with a detection callback writes each ad packet to a
+    JSONL log file. Run for hours/days; analyze later. Each line is one
+    detection event.
+
+    ```python
+    import asyncio
+    import json
+    import time
+    from pathlib import Path
+    from bleak import BleakScanner
+
+    async def passive_log(out_path, duration_seconds=3600):
+        out = Path(out_path)
+        f = out.open("a", encoding="utf-8")
+
+        def detection_callback(device, advertisement_data):
+            event = {
+                "ts": time.time(),
+                "address": device.address,
+                "name": advertisement_data.local_name or device.name or "",
+                "rssi": advertisement_data.rssi,
+                "manufacturer_data": {
+                    str(k): v.hex() for k, v in advertisement_data.manufacturer_data.items()
+                },
+                "service_uuids": list(advertisement_data.service_uuids or []),
+                "service_data": {
+                    str(k): v.hex() for k, v in advertisement_data.service_data.items()
+                },
+            }
+            f.write(json.dumps(event) + "\n")
+            f.flush()
+
+        scanner = BleakScanner(detection_callback=detection_callback)
+        await scanner.start()
+        try:
+            await asyncio.sleep(duration_seconds)
+        finally:
+            await scanner.stop()
+            f.close()
+        return out
+
+    if __name__ == "__main__":
+        import sys
+        path = sys.argv[1] if len(sys.argv) > 1 else "ble_passive.jsonl"
+        seconds = int(sys.argv[2]) if len(sys.argv) > 2 else 3600
+        asyncio.run(passive_log(path, seconds))
+        print(f"Logged to {path}")
+    ```
+
+    Privacy note: BLE addresses can be either public (stable, identifies the
+    device) or random/resolvable (rotates). Most consumer phones rotate
+    every ~15min. The MANUFACTURER DATA field often contains identifiers
+    that DON'T rotate — combining stable manufacturer-data fingerprints
+    with rotating addresses lets you track devices longitudinally. This is
+    a real privacy risk worth flagging in client reports about their
+    customer-facing BLE deployments (loyalty beacons, asset tags, etc.).
+  tags: [bleak, ble, passive, advertisement, privacy, wireless, pentest]
+  difficulty: medium

@@ -1,0 +1,81 @@
+domain: security
+category: network_arp_scan
+examples:
+- query: |
+    Build an ARP scanner using scapy that discovers all live hosts on the
+    local /24 subnet and prints IP/MAC pairs.
+  solution: |
+    Use scapy's `srp` (send-receive at L2) with an Ether/ARP request broadcast.
+    Resolve the local subnet from `netifaces` so the script works on any
+    interface. Report (ip, mac, vendor_oui) tuples — the OUI lookup is
+    a 30-line file you ship with the tool, not an API call.
+
+    ```python
+    from scapy.all import ARP, Ether, srp, conf
+    import netifaces
+
+    def local_subnet(iface=None):
+        iface = iface or conf.iface
+        addrs = netifaces.ifaddresses(iface)[netifaces.AF_INET][0]
+        ip, netmask = addrs["addr"], addrs["netmask"]
+        # Compute /24 for simplicity; for /16 etc compute properly via ipaddress
+        import ipaddress
+        net = ipaddress.IPv4Network(f"{ip}/{netmask}", strict=False)
+        return str(net)
+
+    def arp_scan(subnet, timeout=2, iface=None):
+        request = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=subnet)
+        answered, _ = srp(request, timeout=timeout, iface=iface, verbose=False)
+        return [(rcv.psrc, rcv.hwsrc) for _, rcv in answered]
+
+    if __name__ == "__main__":
+        subnet = local_subnet()
+        print(f"Scanning {subnet}...")
+        for ip, mac in sorted(arp_scan(subnet), key=lambda r: tuple(int(o) for o in r[0].split("."))):
+            print(f"  {ip:<16} {mac}")
+    ```
+
+    Requires root/admin to send raw L2 packets. Document this in the script
+    docstring. For Windows, requires Npcap. For Linux, raise on EPERM with
+    a clear "rerun with sudo" message.
+  tags: [scapy, arp, network_discovery, layer2, pentest]
+  difficulty: easy
+
+- query: |
+    Add a passive ARP listener that watches for new MACs appearing on the
+    network without sending anything (silent recon during a pentest).
+  solution: |
+    Use `scapy.sniff` with a `lfilter` that matches ARP, and dedupe MACs
+    you've seen. Passive = no packets emitted, just listen. Useful when
+    you're on a client network and want to enumerate without tipping off
+    NIDS that watches for ARP scans.
+
+    ```python
+    from scapy.all import sniff, ARP
+    import time
+
+    def passive_arp_watch(duration=300, iface=None):
+        seen = {}  # mac -> (ip, first_seen)
+
+        def handle(pkt):
+            if ARP in pkt and pkt[ARP].op in (1, 2):  # who-has or is-at
+                mac = pkt[ARP].hwsrc.lower()
+                ip = pkt[ARP].psrc
+                if mac not in seen:
+                    seen[mac] = (ip, time.time())
+                    print(f"  [+] new device: {ip:<16} {mac}")
+
+        sniff(filter="arp", prn=handle, store=False, timeout=duration, iface=iface)
+        return seen
+
+    if __name__ == "__main__":
+        print("Listening for ARP traffic for 5 minutes...")
+        devices = passive_arp_watch(300)
+        print(f"\nDiscovered {len(devices)} unique devices.")
+    ```
+
+    Engagement note: confirm the scope-of-work allows passive monitoring on
+    the segment — even passive listening can be out of scope on some
+    sensitive networks (medical, OT/ICS).
+  tags: [scapy, arp, passive_recon, sniffing, pentest]
+  difficulty: medium

@@ -1,0 +1,104 @@
+domain: security
+category: network_packet_capture
+examples:
+- query: |
+    Write a packet capture tool using scapy that writes a pcap file and
+    prints a one-line summary (timestamp, src→dst, protocol, length) per
+    packet to stdout in real time.
+  solution: |
+    `scapy.sniff(prn=callback)` for the live print, `wrpcap` for the file.
+    Buffer packets in a list and flush periodically so you don't lose data
+    if interrupted.
+
+    ```python
+    from scapy.all import sniff, wrpcap, IP, TCP, UDP, ICMP
+    import time
+    import signal
+    import sys
+
+    def summarize(pkt):
+        ts = time.strftime("%H:%M:%S", time.localtime(pkt.time))
+        if IP in pkt:
+            src, dst = pkt[IP].src, pkt[IP].dst
+            proto = pkt[IP].proto
+            proto_name = {6: "TCP", 17: "UDP", 1: "ICMP"}.get(proto, f"IPproto={proto}")
+            if TCP in pkt:
+                proto_name += f" {pkt[TCP].sport}->{pkt[TCP].dport}"
+            elif UDP in pkt:
+                proto_name += f" {pkt[UDP].sport}->{pkt[UDP].dport}"
+            return f"{ts}  {src:<16} -> {dst:<16}  {proto_name:<22} len={len(pkt)}"
+        return f"{ts}  (non-IP)  {pkt.summary()}"
+
+    def capture(out_pcap, bpf_filter="", count=0, iface=None, flush_every=50):
+        buffer = []
+
+        def on_pkt(pkt):
+            buffer.append(pkt)
+            print(summarize(pkt))
+            if len(buffer) >= flush_every:
+                wrpcap(out_pcap, buffer, append=True)
+                buffer.clear()
+
+        def on_signal(sig, frame):
+            if buffer:
+                wrpcap(out_pcap, buffer, append=True)
+            print(f"\n[capture stopped, pcap at {out_pcap}]")
+            sys.exit(0)
+
+        signal.signal(signal.SIGINT, on_signal)
+        sniff(filter=bpf_filter, prn=on_pkt, store=False, count=count, iface=iface)
+
+        if buffer:
+            wrpcap(out_pcap, buffer, append=True)
+
+    if __name__ == "__main__":
+        capture("capture.pcap", bpf_filter="not arp and not port 22", count=0)
+    ```
+
+    BPF filter at capture time is faster than post-hoc filtering — the
+    kernel drops unwanted packets before they hit Python. Default filter
+    excludes the operator's own SSH session.
+  tags: [scapy, packet_capture, pcap, bpf, sniffing, pentest]
+  difficulty: medium
+
+- query: |
+    Replay the contents of a pcap file back onto the wire — useful for
+    reproducing a specific traffic pattern during testing.
+  solution: |
+    `scapy.sendp` for L2 replay, `send` for L3. Read with `rdpcap`,
+    optionally filter, optionally adjust timing. For exact replay use
+    `tcpreplay` (external tool); for selective replay use scapy.
+
+    ```python
+    from scapy.all import rdpcap, sendp, send, IP
+    import time
+
+    def replay_pcap(path, iface=None, layer3=False, throttle=0.0,
+                    only_protocols=None):
+        packets = rdpcap(path)
+        sender = send if layer3 else sendp
+        sent = 0
+        for pkt in packets:
+            if only_protocols:
+                if not any(p in pkt for p in only_protocols):
+                    continue
+            sender(pkt, iface=iface, verbose=False)
+            sent += 1
+            if throttle:
+                time.sleep(throttle)
+        return sent
+
+    if __name__ == "__main__":
+        import sys
+        path = sys.argv[1]
+        n = replay_pcap(path, iface=None, throttle=0.01)
+        print(f"Replayed {n} packets from {path}")
+    ```
+
+    Engagement note: replay can re-trigger findings AND can hit out-of-scope
+    targets if the original pcap covered them. ALWAYS filter or scope the
+    replay to your authorized targets. The `only_protocols` param + a
+    per-call destination IP allowlist (not shown — add per engagement)
+    are minimum hygiene.
+  tags: [scapy, pcap, replay, traffic_generation, pentest]
+  difficulty: medium

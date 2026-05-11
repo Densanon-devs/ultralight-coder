@@ -1,0 +1,95 @@
+domain: security
+category: physical_wiegand_listener
+examples:
+- query: |
+    Build a Wiegand protocol listener — reads D0/D1 data lines via serial
+    from a tap device (ESPKey, Promiscuous Wiegand sniffer, or similar)
+    and decodes 26-bit and 34-bit standard formats.
+  solution: |
+    Tap devices typically expose the captured Wiegand frames as ASCII over
+    USB-serial — newline-delimited hex strings + bit count. The listener
+    just reads the serial port, parses, and decodes facility/card per
+    format.
+
+    ```python
+    import serial
+    import time
+    from dataclasses import dataclass
+
+    @dataclass
+    class WiegandFrame:
+        ts: float
+        bits: int
+        raw_hex: str
+        facility: int = None
+        card: int = None
+        format: str = "unknown"
+
+    def parse_26bit_hid(raw_int):
+        """Standard 26-bit HID format (H10301):
+            EP|FFFFFFFF|CCCCCCCCCCCCCCCC|OP
+            E = even parity (over first 12 data bits)
+            8 facility bits, 16 card bits
+            O = odd parity (over last 12 data bits)
+        """
+        # Strip outer parity bits, leaving 24 data bits
+        data = (raw_int >> 1) & 0xFFFFFF
+        facility = (data >> 16) & 0xFF
+        card = data & 0xFFFF
+        return facility, card
+
+    def parse_34bit(raw_int):
+        """34-bit format: parity + 16 facility + 16 card + parity."""
+        data = (raw_int >> 1) & 0xFFFFFFFF
+        facility = (data >> 16) & 0xFFFF
+        card = data & 0xFFFF
+        return facility, card
+
+    def decode_frame(bits, raw_hex):
+        raw_int = int(raw_hex, 16)
+        if bits == 26:
+            facility, card = parse_26bit_hid(raw_int)
+            fmt = "HID 26-bit (H10301)"
+        elif bits == 34:
+            facility, card = parse_34bit(raw_int)
+            fmt = "34-bit"
+        else:
+            return WiegandFrame(time.time(), bits, raw_hex, format=f"unknown {bits}-bit")
+        return WiegandFrame(time.time(), bits, raw_hex,
+                            facility=facility, card=card, format=fmt)
+
+    def listen(serial_port, baudrate=115200, on_frame=None):
+        """Reads lines like '26 020065B5' (bitcount + space + hex)."""
+        with serial.Serial(serial_port, baudrate, timeout=1) as ser:
+            print(f"Listening on {serial_port}...")
+            while True:
+                line = ser.readline().decode("ascii", errors="ignore").strip()
+                if not line or " " not in line:
+                    continue
+                try:
+                    bits_s, hex_s = line.split(maxsplit=1)
+                    frame = decode_frame(int(bits_s), hex_s)
+                except (ValueError, IndexError):
+                    continue
+                if on_frame:
+                    on_frame(frame)
+
+    if __name__ == "__main__":
+        import sys
+        port = sys.argv[1] if len(sys.argv) > 1 else "/dev/ttyUSB0"
+        def show(f):
+            if f.facility is not None:
+                print(f"  [{f.format}]  facility={f.facility}  card={f.card}")
+            else:
+                print(f"  [unknown {f.bits}-bit]  raw={f.raw_hex}")
+        listen(port, on_frame=show)
+    ```
+
+    Engagement note: Wiegand tapping requires PHYSICAL access to the reader
+    cable (between reader and access controller). This is standard for
+    physical-security testing engagements where the client wants to verify
+    that mid-cable tampering is detectable. ALWAYS log every captured
+    credential into the per-engagement findings DB — never copy them
+    anywhere outside the engagement workspace.
+  tags: [wiegand, serial, espkey, badge, physical_security, pentest]
+  difficulty: medium

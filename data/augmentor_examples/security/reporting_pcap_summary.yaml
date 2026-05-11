@@ -1,0 +1,121 @@
+domain: security
+category: reporting_pcap_summary
+examples:
+- query: |
+    Read a captured .pcap file and produce a human-readable summary suitable
+    for inclusion in a pentest report: total packets, top talkers, protocol
+    breakdown, unique conversations, suspected anomalies.
+  solution: |
+    `scapy.rdpcap` to load, then aggregate. For large pcaps, prefer
+    `pyshark.FileCapture` (uses tshark under the hood, lower memory).
+
+    ```python
+    from collections import Counter, defaultdict
+    from scapy.all import rdpcap, IP, IPv6, TCP, UDP, ICMP, DNS, ARP
+
+    def analyze_pcap(path):
+        packets = rdpcap(path)
+        total = len(packets)
+
+        proto_counts = Counter()
+        l4_counts = Counter()
+        talkers = defaultdict(int)  # ip -> bytes
+        conversations = Counter()  # (src,dst,sport,dport,proto) -> count
+        dns_queries = Counter()
+        anomalies = []
+
+        for pkt in packets:
+            if ARP in pkt:
+                proto_counts["ARP"] += 1
+                continue
+            if IPv6 in pkt:
+                proto_counts["IPv6"] += 1
+                src, dst = pkt[IPv6].src, pkt[IPv6].dst
+            elif IP in pkt:
+                proto_counts["IPv4"] += 1
+                src, dst = pkt[IP].src, pkt[IP].dst
+            else:
+                proto_counts["other"] += 1
+                continue
+
+            talkers[src] += len(pkt)
+            talkers[dst] += len(pkt)
+
+            sport = dport = None
+            l4 = "other"
+            if TCP in pkt:
+                sport, dport = pkt[TCP].sport, pkt[TCP].dport
+                l4 = "TCP"
+            elif UDP in pkt:
+                sport, dport = pkt[UDP].sport, pkt[UDP].dport
+                l4 = "UDP"
+            elif ICMP in pkt:
+                l4 = "ICMP"
+            l4_counts[l4] += 1
+
+            conversations[(src, dst, sport, dport, l4)] += 1
+
+            if DNS in pkt and pkt[DNS].qd is not None:
+                qname = pkt[DNS].qd.qname.decode("utf-8", errors="replace").rstrip(".")
+                dns_queries[qname] += 1
+
+            # Anomaly heuristic: SYN to a high-numbered port from a non-private IP
+            if TCP in pkt and pkt[TCP].flags & 0x02 and dport > 30000:
+                if not (src.startswith("10.") or src.startswith("192.168.")
+                        or src.startswith("172.")):
+                    anomalies.append(f"high-port SYN from {src} to {dst}:{dport}")
+
+        return {
+            "total_packets": total,
+            "protocol_breakdown": dict(proto_counts),
+            "l4_breakdown": dict(l4_counts),
+            "top_talkers": sorted(talkers.items(), key=lambda x: -x[1])[:10],
+            "unique_conversations": len(conversations),
+            "top_conversations": conversations.most_common(10),
+            "top_dns_queries": dns_queries.most_common(15),
+            "anomalies": anomalies[:25],
+        }
+
+    def format_summary(summary):
+        lines = []
+        lines.append(f"## PCAP analysis\n")
+        lines.append(f"**Total packets:** {summary['total_packets']:,}\n")
+
+        lines.append("### Protocol breakdown\n")
+        for proto, n in summary["protocol_breakdown"].items():
+            lines.append(f"- {proto}: {n:,}")
+        lines.append("")
+
+        lines.append("### Top 10 talkers (bytes)\n")
+        lines.append("| Host | Bytes |")
+        lines.append("|---|---:|")
+        for host, b in summary["top_talkers"]:
+            lines.append(f"| {host} | {b:,} |")
+        lines.append("")
+
+        lines.append("### Top DNS queries\n")
+        for qname, n in summary["top_dns_queries"]:
+            lines.append(f"- `{qname}` × {n}")
+        lines.append("")
+
+        if summary["anomalies"]:
+            lines.append("### Heuristic anomalies\n")
+            for a in summary["anomalies"]:
+                lines.append(f"- {a}")
+            lines.append("")
+        return "\n".join(lines)
+
+    if __name__ == "__main__":
+        import sys
+        summary = analyze_pcap(sys.argv[1])
+        print(format_summary(summary))
+    ```
+
+    The anomaly heuristic shown is intentionally simple — high-port SYN from
+    public IPs is a classic scan pattern. Add more heuristics per engagement
+    (e.g., DNS over UDP/53 to non-allowlisted resolvers, SSH from outside the
+    bastion's allowlist, plaintext credentials in HTTP POSTs). Keep them
+    as named constants so the report's "what we looked for" section can
+    cite them by name.
+  tags: [scapy, pcap_analysis, reporting, traffic_summary, anomaly_detection, pentest]
+  difficulty: hard

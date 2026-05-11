@@ -1,0 +1,147 @@
+domain: security
+category: reporting_findings_to_markdown
+examples:
+- query: |
+    Build a findings → markdown report renderer for a pentest engagement.
+    Input is a list of finding dicts (each with title, severity, host,
+    description, remediation, evidence). Output is a single Markdown file
+    grouped by severity, with a TOC + executive summary at the top.
+  solution: |
+    Severity-first grouping is what clients want — they read top-down
+    until they hit something they don't have time to fix. CVSS v3.1 base
+    score buckets work: Critical (9.0+), High (7.0-8.9), Medium (4.0-6.9),
+    Low (0.1-3.9), Info.
+
+    ```python
+    from collections import defaultdict
+    from datetime import datetime
+    from pathlib import Path
+    from typing import List, Dict
+
+    SEVERITY_ORDER = ["Critical", "High", "Medium", "Low", "Informational"]
+    SEVERITY_EMOJI = {
+        "Critical": "[!!!]", "High": "[!!]", "Medium": "[!]",
+        "Low": "[i]", "Informational": "[-]",
+    }
+
+    def render_report(findings: List[Dict], engagement_name: str,
+                      client: str, tester: str, period: str) -> str:
+        by_sev = defaultdict(list)
+        for f in findings:
+            sev = f.get("severity", "Informational")
+            by_sev[sev].append(f)
+
+        lines = []
+        lines.append(f"# {engagement_name} — Pentest Report\n")
+        lines.append(f"**Client:** {client}  ")
+        lines.append(f"**Tester:** {tester}  ")
+        lines.append(f"**Engagement period:** {period}  ")
+        lines.append(f"**Report generated:** {datetime.now().isoformat(timespec='minutes')}\n")
+        lines.append("---\n")
+
+        # Executive summary
+        lines.append("## Executive summary\n")
+        lines.append("| Severity | Count |")
+        lines.append("|---|---:|")
+        for sev in SEVERITY_ORDER:
+            n = len(by_sev.get(sev, []))
+            if n:
+                lines.append(f"| {SEVERITY_EMOJI[sev]} {sev} | {n} |")
+        lines.append("")
+
+        # TOC
+        lines.append("## Table of contents\n")
+        for sev in SEVERITY_ORDER:
+            for f in by_sev.get(sev, []):
+                anchor = f["title"].lower().replace(" ", "-").replace("/", "-")
+                lines.append(f"- [{sev}] [{f['title']}](#{anchor})")
+        lines.append("")
+
+        # Findings
+        for sev in SEVERITY_ORDER:
+            for f in by_sev.get(sev, []):
+                lines.append(f"## {f['title']}\n")
+                lines.append(f"**Severity:** {SEVERITY_EMOJI[sev]} {sev}  ")
+                lines.append(f"**Affected host(s):** {f.get('host', '(see description)')}\n")
+                lines.append("### Description\n")
+                lines.append(f.get("description", "_(no description provided)_") + "\n")
+                lines.append("### Evidence\n")
+                evidence = f.get("evidence", "")
+                if evidence:
+                    lines.append("```")
+                    lines.append(evidence.strip())
+                    lines.append("```\n")
+                else:
+                    lines.append("_(no evidence captured)_\n")
+                lines.append("### Remediation\n")
+                lines.append(f.get("remediation", "_(no remediation guidance provided)_") + "\n")
+                lines.append("---\n")
+
+        return "\n".join(lines)
+
+    if __name__ == "__main__":
+        import json, sys
+        findings = json.loads(Path(sys.argv[1]).read_text())
+        report = render_report(
+            findings,
+            engagement_name="Q3 2026 External Pentest",
+            client="Acme Corp",
+            tester="Jordan / Densanon",
+            period="2026-08-15 to 2026-08-22",
+        )
+        Path("report.md").write_text(report, encoding="utf-8")
+        print("Wrote report.md")
+    ```
+
+    Keep raw evidence in code-fenced blocks — clients often paste them into
+    tickets verbatim. Don't HTML-escape in markdown; pandoc handles that
+    when the client converts to PDF.
+  tags: [reporting, markdown, findings, severity, pentest]
+  difficulty: medium
+
+- query: |
+    Add a CSV export of the same findings for clients that want to bulk-
+    import into Jira / ServiceNow / Linear / Vanta as tickets.
+  solution: |
+    `csv.DictWriter` with explicit fieldnames so the column order matches
+    the client's importer. Severity → numeric priority for systems that
+    expect 1-5.
+
+    ```python
+    import csv
+    from typing import List, Dict
+
+    SEVERITY_PRIORITY = {
+        "Critical": 1, "High": 2, "Medium": 3, "Low": 4, "Informational": 5,
+    }
+
+    FIELDNAMES = [
+        "title", "severity", "priority", "host", "cvss_score",
+        "description", "remediation", "first_seen", "tester",
+    ]
+
+    def export_findings_csv(findings: List[Dict], out_path: str, tester: str):
+        with open(out_path, "w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=FIELDNAMES, quoting=csv.QUOTE_ALL)
+            writer.writeheader()
+            for finding in findings:
+                row = {k: finding.get(k, "") for k in FIELDNAMES}
+                row["priority"] = SEVERITY_PRIORITY.get(finding.get("severity"), 5)
+                row["tester"] = tester
+                # CSV-safe: collapse newlines in description/remediation
+                for collapse_field in ("description", "remediation"):
+                    if collapse_field in row and isinstance(row[collapse_field], str):
+                        row[collapse_field] = row[collapse_field].replace("\n", " | ")
+                writer.writerow(row)
+
+    if __name__ == "__main__":
+        import json, sys
+        findings = json.loads(open(sys.argv[1]).read())
+        export_findings_csv(findings, "findings.csv", tester="Jordan")
+        print(f"Wrote findings.csv ({len(findings)} rows)")
+    ```
+
+    Use `csv.QUOTE_ALL` so any commas/newlines in descriptions don't break
+    the importer. Most ticketing systems' CSV importers are picky.
+  tags: [reporting, csv, export, jira, ticketing, pentest]
+  difficulty: easy

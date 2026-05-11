@@ -1,0 +1,70 @@
+domain: security
+category: network_nmap_wrapper
+examples:
+- query: |
+    Wrap nmap as a Python subprocess that runs a service-version + default
+    NSE script scan against a target and parses the XML output into a list
+    of {host, port, service, version, scripts} dicts.
+  solution: |
+    Use `-oX -` to write XML to stdout, parse with `xml.etree.ElementTree`.
+    nmap-python (`python-nmap` PyPI pkg) is an alternative but adds a dep
+    and is slower than parsing XML yourself.
+
+    ```python
+    import subprocess
+    import xml.etree.ElementTree as ET
+    from typing import Optional
+
+    def nmap_scan(target, ports="1-1000", extra_args=None, timeout=600):
+        args = ["nmap", "-sV", "-sC", "-oX", "-", "-p", ports, target]
+        if extra_args:
+            args.extend(extra_args)
+        result = subprocess.run(
+            args, capture_output=True, text=True, timeout=timeout
+        )
+        if result.returncode != 0:
+            raise RuntimeError(f"nmap failed: {result.stderr.strip()}")
+        return parse_nmap_xml(result.stdout)
+
+    def parse_nmap_xml(xml_text):
+        root = ET.fromstring(xml_text)
+        hosts = []
+        for host in root.findall("host"):
+            addr_el = host.find("address[@addrtype='ipv4']")
+            if addr_el is None:
+                continue
+            ip = addr_el.get("addr")
+            for port in host.findall("ports/port"):
+                portid = int(port.get("portid"))
+                proto = port.get("protocol")
+                state = port.find("state").get("state")
+                if state != "open":
+                    continue
+                svc = port.find("service")
+                service = svc.get("name") if svc is not None else ""
+                version = " ".join(filter(None, [
+                    svc.get("product") if svc is not None else "",
+                    svc.get("version") if svc is not None else "",
+                ])).strip()
+                scripts = {
+                    s.get("id"): s.get("output", "").strip()
+                    for s in port.findall("script")
+                }
+                hosts.append({
+                    "host": ip, "port": portid, "proto": proto,
+                    "service": service, "version": version, "scripts": scripts,
+                })
+        return hosts
+
+    if __name__ == "__main__":
+        import sys, json
+        results = nmap_scan(sys.argv[1])
+        print(json.dumps(results, indent=2))
+    ```
+
+    Requires `nmap` installed. `-sV` does service version, `-sC` runs the
+    default NSE script set (safe). For aggressive scans add `-A`. For
+    UDP add `-sU` (slow). Don't use `--script vuln` without confirming
+    your engagement scope allows active vuln probing.
+  tags: [nmap, subprocess, xml_parsing, service_detection, pentest]
+  difficulty: medium

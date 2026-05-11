@@ -1,0 +1,98 @@
+domain: security
+category: network_dns_enum
+examples:
+- query: |
+    Enumerate DNS records for a target domain — A, AAAA, MX, NS, TXT, CNAME,
+    SOA — using dnspython. Output a structured dict per record type.
+  solution: |
+    `dns.resolver` per record type. Catch NXDOMAIN/NoAnswer cleanly so a
+    domain missing one record type doesn't kill the whole sweep.
+
+    ```python
+    import dns.resolver
+    from collections import defaultdict
+
+    RECORD_TYPES = ["A", "AAAA", "MX", "NS", "TXT", "CNAME", "SOA"]
+
+    def enumerate_dns(domain, resolver=None, timeout=3.0):
+        r = resolver or dns.resolver.Resolver()
+        r.lifetime = timeout
+        results = defaultdict(list)
+        for rtype in RECORD_TYPES:
+            try:
+                answers = r.resolve(domain, rtype)
+                for a in answers:
+                    results[rtype].append(str(a).strip())
+            except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN):
+                continue
+            except dns.exception.Timeout:
+                results[rtype].append("(timeout)")
+        return dict(results)
+
+    if __name__ == "__main__":
+        import sys, json
+        domain = sys.argv[1]
+        print(json.dumps(enumerate_dns(domain), indent=2))
+    ```
+
+    For a real engagement, pin the resolver to a specific server (often the
+    target's authoritative NS, found via the SOA query) — that's where
+    internal records that public resolvers cache differently might surface.
+  tags: [dnspython, dns, enumeration, recon, pentest]
+  difficulty: easy
+
+- query: |
+    Attempt a DNS zone transfer (AXFR) against the target's authoritative
+    name servers. Most modern setups refuse, but legacy/misconfigured
+    servers expose the entire zone — a high-value finding.
+  solution: |
+    `dns.zone.from_xfr` against each NS in turn. Try TCP only (UDP can't
+    carry zone transfers). On success, dump every record. On refusal, log
+    that the NS correctly refuses (which is itself a positive finding for
+    the report).
+
+    ```python
+    import dns.query
+    import dns.zone
+    import dns.resolver
+
+    def get_authoritative_ns(domain):
+        try:
+            ns_rrset = dns.resolver.resolve(domain, "NS")
+            return [str(r.target).rstrip(".") for r in ns_rrset]
+        except Exception as e:
+            return []
+
+    def attempt_axfr(domain, ns_list=None, timeout=5.0):
+        ns_list = ns_list or get_authoritative_ns(domain)
+        results = {}
+        for ns in ns_list:
+            try:
+                xfr = dns.query.xfr(ns, domain, lifetime=timeout)
+                zone = dns.zone.from_xfr(xfr)
+                records = []
+                for name, node in zone.nodes.items():
+                    for rdataset in node.rdatasets:
+                        records.append({
+                            "name": str(name),
+                            "ttl": rdataset.ttl,
+                            "type": dns.rdatatype.to_text(rdataset.rdtype),
+                            "data": [str(r) for r in rdataset],
+                        })
+                results[ns] = {"status": "AXFR_ALLOWED", "records": records}
+            except dns.exception.FormError:
+                results[ns] = {"status": "REFUSED"}
+            except Exception as e:
+                results[ns] = {"status": f"ERROR: {e}"}
+        return results
+
+    if __name__ == "__main__":
+        import sys, json
+        print(json.dumps(attempt_axfr(sys.argv[1]), indent=2))
+    ```
+
+    AXFR_ALLOWED on a public NS is a finding worth a CVE-class write-up
+    in the client report — it leaks the entire DNS zone including dev/
+    staging hostnames that often aren't meant to be public.
+  tags: [dnspython, axfr, zone_transfer, enumeration, pentest]
+  difficulty: medium
