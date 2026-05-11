@@ -62,3 +62,13 @@ class TestEnableWebGate:
         reg = _build(enable_web=True)
         params = reg.get("fetch_url").parameters
         assert "url" in params["required"]
+
+    def test_web_search_exposes_safe_search_param(self):
+        """Registered web_search schema includes safe_search with default False."""
+        reg = _build(enable_web=True)
+        props = reg.get("web_search").parameters["properties"]
+        assert "safe_search" in props
+        assert props["safe_search"]["type"] == "boolean"
+        assert props["safe_search"]["default"] is False
+        # safe_search is optional (not in required list)
+        assert "safe_search" not in reg.get("web_search").parameters["required"]

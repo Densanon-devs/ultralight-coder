@@ -324,6 +324,7 @@ def web_search(
     *,
     n_results: int = DEFAULT_N_RESULTS,
     timeout: int = DEFAULT_TIMEOUT,
+    safe_search: bool = False,
 ) -> str:
     """Search via DuckDuckGo HTML endpoint. Returns a formatted result list.
 
@@ -331,6 +332,12 @@ def web_search(
         query: search string.
         n_results: max number of results to return (1-15).
         timeout: socket timeout in seconds.
+        safe_search: when False (default, privacy-first), DDG safe-search is
+            disabled (kp=-2) so technical/security results aren't filtered out
+            of the ranking. When True, moderate filtering (kp=-1) is applied.
+            Note: DDG itself has upstream filters (CSAM/illegal content) that
+            this flag does NOT control — those are applied at the engine level
+            regardless. This only controls the safe-search ranking layer.
 
     Returns:
         String of "N. Title\n   URL\n   Snippet" entries. Empty result set
@@ -339,7 +346,11 @@ def web_search(
     if not isinstance(query, str) or not query.strip():
         raise WebToolError("query must be a non-empty string")
     n_results = max(1, min(int(n_results), 15))
-    body_data = urllib.parse.urlencode({"q": query.strip()}).encode("utf-8")
+    body_data = urllib.parse.urlencode({
+        "q": query.strip(),
+        # DDG safe-search level: -2 = off, -1 = moderate, 1 = strict
+        "kp": "-1" if safe_search else "-2",
+    }).encode("utf-8")
     body, _ct = _http_get(
         DDG_HTML_ENDPOINT,
         timeout=timeout,

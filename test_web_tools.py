@@ -336,3 +336,30 @@ class TestWebSearch:
             web_search("")
         with pytest.raises(WebToolError, match="non-empty"):
             web_search("   ")
+
+    def test_safe_search_off_by_default_sends_kp_minus_2(self):
+        """Default safe_search=False must send kp=-2 in the form body."""
+        captured = {}
+
+        def fake_get(url, *, timeout, extra_headers=None, method="GET", data=None):
+            captured["data"] = data
+            return DDG_FIXTURE.decode("utf-8"), "text/html"
+
+        with patch("engine.web_tools._http_get", side_effect=fake_get):
+            web_search("python asyncio")
+        assert captured["data"] is not None
+        body_str = captured["data"].decode("utf-8")
+        assert "kp=-2" in body_str, f"expected kp=-2 in body, got: {body_str!r}"
+
+    def test_safe_search_true_sends_kp_minus_1(self):
+        """Explicit safe_search=True flips kp to -1 (moderate filtering)."""
+        captured = {}
+
+        def fake_get(url, *, timeout, extra_headers=None, method="GET", data=None):
+            captured["data"] = data
+            return DDG_FIXTURE.decode("utf-8"), "text/html"
+
+        with patch("engine.web_tools._http_get", side_effect=fake_get):
+            web_search("python asyncio", safe_search=True)
+        body_str = captured["data"].decode("utf-8")
+        assert "kp=-1" in body_str, f"expected kp=-1 in body, got: {body_str!r}"

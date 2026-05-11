@@ -1168,6 +1168,8 @@ def build_default_registry(
                 "Search the public web via DuckDuckGo and return ranked results "
                 "(title, URL, snippet). Use to discover URLs/docs you don't "
                 "already know. Then use fetch_url on a specific result. "
+                "Safe-search is OFF by default for broader technical results; "
+                "pass safe_search=true if you want filtering. "
                 "If the user's goal asks you to write a file (e.g. 'write X.md', "
                 "'save to Y.txt', 'create Z.py'), you MUST call write_file with "
                 "your synthesized result before giving the final answer — do not "
@@ -1183,11 +1185,16 @@ def build_default_registry(
                         "description": f"Max results (1-15, default {DEFAULT_N_RESULTS})",
                         "default": DEFAULT_N_RESULTS,
                     },
+                    "safe_search": {
+                        "type": "boolean",
+                        "description": "Enable DDG safe-search filtering (default false, broader results)",
+                        "default": False,
+                    },
                 },
                 "required": ["query"],
             },
-            function=lambda query, n_results=DEFAULT_N_RESULTS: _web_search(
-                query, n_results=n_results, timeout=DEFAULT_TIMEOUT
+            function=lambda query, n_results=DEFAULT_N_RESULTS, safe_search=False: _web_search(
+                query, n_results=n_results, timeout=DEFAULT_TIMEOUT, safe_search=safe_search
             ),
             category="web",
             risky=True,
