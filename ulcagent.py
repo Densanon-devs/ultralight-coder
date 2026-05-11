@@ -383,6 +383,15 @@ def _build_agent(mgr: ModelManager, workspace: Path):
         temperature=cfg_temp if cfg_temp is not None else 0.1,
         confirm_risky=_confirm_risky,
         augment_for_goal=augment_for_goal,
+        # Re-enabled 2026-05-10 after the security-domain soak found 4/5
+        # failures hitting the JSON quote-escape parse error 5+ times in
+        # a row without recovering. The May-5 A/B that flipped this OFF
+        # was on bench tasks that don't have multi-line file content;
+        # security goals (write 100+ line port_scan.py / pcap_summary.py /
+        # report.py) DO. self_heal's PARSE_ERROR hint explicitly directs
+        # the model to switch to the array-form content parameter, which
+        # sidesteps the JSON escape trap.
+        enable_self_heal=True,
         on_event=_on_event,
     )
     return agent
