@@ -1,0 +1,121 @@
+domain: security
+category: webapp_jwt_inspect
+examples:
+- query: |
+    Build a JWT inspection tool that decodes a token (header + payload),
+    flags weak signing algorithms (none, HS256 with weak key, RS256 with
+    embedded JWK), and checks for common dangerous claims (long expiry,
+    privilege fields like 'role' or 'is_admin').
+  solution: |
+    JWT is base64url(header).base64url(payload).base64url(signature). The
+    signature byte format depends on alg. We can decode + analyze without
+    verifying. Use stdlib base64 + json — no PyJWT dep.
+
+    ```python
+    import base64
+    import json
+    import time
+    from typing import Optional
+
+    DANGEROUS_ALGS = {"none", "None", "NONE", ""}
+    WEAK_HASH_ALGS = {"HS256", "HS384", "HS512"}  # "weak" if key is weak/known
+    PRIVILEGE_CLAIMS = {"role", "roles", "is_admin", "isAdmin", "admin",
+                        "superuser", "permissions", "scope", "scopes"}
+    LONG_EXPIRY_DAYS = 30  # Anything > 30 days is suspicious for an access token
+
+    def b64url_decode(seg: str) -> bytes:
+        # JWT base64url omits padding
+        padding = 4 - (len(seg) % 4)
+        if padding != 4:
+            seg += "=" * padding
+        return base64.urlsafe_b64decode(seg)
+
+    def decode_jwt(token: str) -> dict:
+        parts = token.strip().split(".")
+        if len(parts) != 3:
+            raise ValueError(f"JWT must have 3 segments, got {len(parts)}")
+        header = json.loads(b64url_decode(parts[0]))
+        payload = json.loads(b64url_decode(parts[1]))
+        sig_raw = b64url_decode(parts[2])
+        return {
+            "header": header,
+            "payload": payload,
+            "signature_bytes": len(sig_raw),
+            "signature_hex": sig_raw.hex()[:60] + ("..." if len(sig_raw) > 30 else ""),
+        }
+
+    def analyze_jwt(token: str) -> dict:
+        parsed = decode_jwt(token)
+        findings = []
+
+        # Algorithm checks
+        alg = parsed["header"].get("alg", "")
+        if alg in DANGEROUS_ALGS:
+            findings.append({
+                "severity": "Critical",
+                "issue": f"alg={alg!r} — signature verification can be bypassed",
+            })
+        elif alg in WEAK_HASH_ALGS:
+            findings.append({
+                "severity": "Informational",
+                "issue": f"alg={alg!r} (HMAC) — secret-key strength matters; if leaked, "
+                         "tokens can be forged. Verify the secret entropy.",
+            })
+        if "jwk" in parsed["header"] or "x5c" in parsed["header"]:
+            findings.append({
+                "severity": "High",
+                "issue": "Header embeds JWK/x5c — implementations may trust the embedded "
+                         "key instead of validating against an allowlist (RFC 8725 §3.5).",
+            })
+        if "kid" in parsed["header"]:
+            kid = parsed["header"]["kid"]
+            if any(c in kid for c in ["/", "\\", "..", "'", '"']):
+                findings.append({
+                    "severity": "High",
+                    "issue": f"kid={kid!r} contains path/SQL chars — may be vulnerable to "
+                             "kid injection if the verifier uses kid as a file path or DB key.",
+                })
+
+        # Payload checks
+        exp = parsed["payload"].get("exp")
+        iat = parsed["payload"].get("iat")
+        if exp and iat:
+            lifetime_days = (exp - iat) / 86400
+            if lifetime_days > LONG_EXPIRY_DAYS:
+                findings.append({
+                    "severity": "Medium",
+                    "issue": f"Token lifetime is {lifetime_days:.0f} days. Long-lived "
+                             "access tokens increase blast radius if leaked.",
+                })
+        if exp and exp < time.time():
+            findings.append({
+                "severity": "Informational",
+                "issue": "Token has expired (exp in past).",
+            })
+        for claim in PRIVILEGE_CLAIMS:
+            if claim in parsed["payload"]:
+                findings.append({
+                    "severity": "Informational",
+                    "issue": f"Privilege claim '{claim}={parsed['payload'][claim]!r}' "
+                             "present. If signature is forgeable, attacker can elevate.",
+                })
+
+        return {
+            "decoded": parsed,
+            "findings": findings,
+        }
+
+    if __name__ == "__main__":
+        import sys
+        token = sys.argv[1]
+        result = analyze_jwt(token)
+        print(json.dumps(result, indent=2, default=str))
+    ```
+
+    The "alg=none" attack (RFC 8725 §2.1) and "kid path traversal" (§2.6)
+    are both still common in 2026 — verifier libraries that haven't been
+    updated since 2018 don't reject them. Add the analyzer to your standard
+    webapp-pentest checklist; takes <1 min per token to identify the
+    forgeability surface.
+  tags: [jwt, json_web_token, decode, alg_none, kid_injection, webapp, pentest]
+  difficulty: medium

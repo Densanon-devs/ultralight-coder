@@ -1,0 +1,175 @@
+domain: security
+category: webapp_proxy_intercept
+examples:
+- query: |
+    Build a small intercepting HTTP proxy in Python (stdlib only) that
+    logs every request method/URL/headers/body to a JSONL file. Useful
+    for pentest engagements when you can't install Burp Suite on the
+    client's machine but need a record of what the app sent.
+  solution: |
+    `http.server.BaseHTTPRequestHandler` for the listener, `http.client`
+    or `urllib` for the upstream forwarder. Strip hop-by-hop headers
+    (Connection, Keep-Alive, etc.) per RFC 2616. Log BEFORE forwarding
+    so you have evidence even if the upstream fails.
+
+    ```python
+    import http.server
+    import http.client
+    import json
+    import socketserver
+    import time
+    import urllib.parse
+    from pathlib import Path
+
+    LOG_PATH = Path("proxy_log.jsonl")
+    HOP_BY_HOP = {
+        "connection", "keep-alive", "proxy-authenticate",
+        "proxy-authorization", "te", "trailers", "transfer-encoding", "upgrade",
+    }
+
+    class LoggingProxy(http.server.BaseHTTPRequestHandler):
+        def _handle(self):
+            url = self.path
+            parsed = urllib.parse.urlparse(url if url.startswith("http") else "http://" + self.headers.get("Host", "") + url)
+            host = parsed.hostname
+            port = parsed.port or (443 if parsed.scheme == "https" else 80)
+
+            # Read body
+            length = int(self.headers.get("Content-Length", 0) or 0)
+            body = self.rfile.read(length) if length else b""
+
+            # Log the request before forwarding (always have evidence)
+            entry = {
+                "ts": time.time(),
+                "method": self.command,
+                "url": url,
+                "host": host,
+                "headers": {k: v for k, v in self.headers.items()
+                            if k.lower() not in HOP_BY_HOP},
+                "body": body.decode("utf-8", errors="replace") if body else "",
+            }
+            with LOG_PATH.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(entry) + "\n")
+
+            # Forward to upstream (HTTP only — HTTPS needs CONNECT handling)
+            try:
+                conn = http.client.HTTPConnection(host, port, timeout=15)
+                fwd_headers = {k: v for k, v in self.headers.items()
+                               if k.lower() not in HOP_BY_HOP}
+                conn.request(self.command, parsed.path or "/", body=body, headers=fwd_headers)
+                resp = conn.getresponse()
+                resp_body = resp.read()
+
+                self.send_response(resp.status)
+                for k, v in resp.getheaders():
+                    if k.lower() not in HOP_BY_HOP:
+                        self.send_header(k, v)
+                self.end_headers()
+                self.wfile.write(resp_body)
+            except Exception as e:
+                self.send_error(502, f"upstream failed: {e}")
+
+        do_GET = _handle
+        do_POST = _handle
+        do_PUT = _handle
+        do_DELETE = _handle
+        do_PATCH = _handle
+
+        def log_message(self, format, *args):
+            pass  # silence default stderr logging
+
+    if __name__ == "__main__":
+        port = 8888
+        with socketserver.ThreadingTCPServer(("127.0.0.1", port), LoggingProxy) as srv:
+            print(f"Logging proxy on http://127.0.0.1:{port}, log -> {LOG_PATH}")
+            srv.serve_forever()
+    ```
+
+    HTTPS interception requires either: (a) a CONNECT-only blind tunnel (no
+    visibility into encrypted traffic), or (b) a generated CA cert installed
+    on the client + per-host cert generation (mitmproxy does this). For
+    most pentests reach for `mitmproxy` directly — this stdlib version is
+    for HTTP-only API testing where you don't want extra deps.
+  tags: [proxy, http, mitm, logging, webapp, pentest]
+  difficulty: medium
+
+- query: |
+    Replay a captured HTTP request from the proxy log with a single field
+    swapped (e.g. flip an `id=123` to `id=124` to test IDOR vulnerabilities).
+  solution: |
+    Read the JSONL log, pick one entry by index or filter, mutate, replay
+    via urllib. Keep the diff (what changed) in the result so the report
+    can cite the exact tampered field.
+
+    ```python
+    import json
+    import urllib.request
+    from pathlib import Path
+    from copy import deepcopy
+
+    def load_request(log_path, index):
+        with open(log_path) as f:
+            entries = [json.loads(line) for line in f if line.strip()]
+        return entries[index]
+
+    def replay_with_mutation(req_entry, mutation_fn, log_diff_to=None):
+        """mutation_fn(entry) -> entry; should return a NEW dict with the
+        change. We snapshot original for the diff log."""
+        original = deepcopy(req_entry)
+        mutated = mutation_fn(deepcopy(req_entry))
+
+        # Build urllib request from the mutated entry
+        body = mutated.get("body", "")
+        body_bytes = body.encode("utf-8") if isinstance(body, str) else body
+        req = urllib.request.Request(
+            mutated["url"],
+            data=body_bytes if mutated["method"] not in ("GET", "HEAD") else None,
+            headers=mutated.get("headers", {}),
+            method=mutated["method"],
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                resp_status = resp.status
+                resp_body = resp.read(50_000)  # cap for safety
+        except urllib.error.HTTPError as e:
+            resp_status = e.code
+            resp_body = e.read(50_000)
+
+        diff_entry = {
+            "original_url": original["url"],
+            "original_body": original.get("body", ""),
+            "mutated_url": mutated["url"],
+            "mutated_body": mutated.get("body", ""),
+            "response_status": resp_status,
+            "response_body_preview": resp_body[:1000].decode("utf-8", errors="replace"),
+        }
+        if log_diff_to:
+            with open(log_diff_to, "a") as f:
+                f.write(json.dumps(diff_entry) + "\n")
+        return diff_entry
+
+    # Example: IDOR test — increment numeric IDs in the URL
+    def increment_id_in_url(entry):
+        import re
+        entry["url"] = re.sub(
+            r"/(\d+)(/|$|\?)",
+            lambda m: f"/{int(m.group(1)) + 1}{m.group(2)}",
+            entry["url"],
+            count=1,
+        )
+        return entry
+
+    if __name__ == "__main__":
+        import sys
+        req = load_request(sys.argv[1], int(sys.argv[2]))
+        result = replay_with_mutation(req, increment_id_in_url, log_diff_to="idor_test.jsonl")
+        print(f"Status: {result['response_status']}")
+        print(f"Diff URL: {result['original_url']} -> {result['mutated_url']}")
+    ```
+
+    Engagement note: IDOR tests can ACCESS data you're not authorized to
+    see. Confirm SOW explicitly authorizes "horizontal privilege escalation
+    testing" before running, and define what to do if you actually get back
+    sensitive data (typically: stop, document, do not exfiltrate, report).
+  tags: [proxy, replay, idor, parameter_tampering, webapp, pentest]
+  difficulty: medium

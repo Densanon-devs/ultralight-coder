@@ -1,0 +1,134 @@
+domain: security
+category: webapp_ssl_audit
+examples:
+- query: |
+    Build a TLS/SSL configuration auditor for a target host:port. Report
+    the negotiated cipher suite, protocol version, certificate chain
+    expiry, key size, signature algorithm, and any deprecated/weak
+    primitives (TLS 1.0/1.1, RC4, 3DES, SHA-1, RSA<2048).
+  solution: |
+    `ssl` stdlib module connects + negotiates; `socket` for the wrapper.
+    Use `cryptography` if installed for richer cert details, but fall
+    back to ssl.PEM_cert_to_DER_cert + DER parsing for an out-of-the-box
+    no-deps version.
+
+    ```python
+    import socket
+    import ssl
+    import datetime
+    from typing import Optional
+
+    DEPRECATED_PROTOCOLS = {"TLSv1", "TLSv1.1", "SSLv3", "SSLv2"}
+    WEAK_CIPHERS = ["RC4", "3DES", "DES", "MD5", "EXPORT", "NULL"]
+    WEAK_SIGNATURES = ["sha1", "md5"]
+    MIN_RSA_BITS = 2048
+    MIN_ECDSA_BITS = 256
+
+    def audit_tls(host, port=443, timeout=10):
+        findings = {"host": host, "port": port, "issues": [], "info": {}}
+
+        ctx = ssl.create_default_context()
+        # Disable hostname check + cert verification for the audit so we get
+        # info even from misconfigured servers. Audit is informational,
+        # not a real validation.
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        # Permit deprecated protos so we can detect they're enabled
+        try:
+            ctx.minimum_version = ssl.TLSVersion.MINIMUM_SUPPORTED
+        except (AttributeError, ValueError):
+            pass
+
+        with socket.create_connection((host, port), timeout=timeout) as sock:
+            with ctx.wrap_socket(sock, server_hostname=host) as ssock:
+                findings["info"]["protocol"] = ssock.version()
+                cipher_name, cipher_version, cipher_bits = ssock.cipher()
+                findings["info"]["cipher"] = cipher_name
+                findings["info"]["cipher_protocol"] = cipher_version
+                findings["info"]["cipher_bits"] = cipher_bits
+
+                # Cert chain (cryptography lib gives more; here we use stdlib)
+                cert_bin = ssock.getpeercert(binary_form=True)
+                cert_dict = ssock.getpeercert()
+                findings["info"]["cert_subject"] = dict(x[0] for x in cert_dict.get("subject", []))
+                findings["info"]["cert_issuer"] = dict(x[0] for x in cert_dict.get("issuer", []))
+                not_after = cert_dict.get("notAfter")
+                if not_after:
+                    expiry = datetime.datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z")
+                    days_left = (expiry - datetime.datetime.utcnow()).days
+                    findings["info"]["cert_expiry"] = not_after
+                    findings["info"]["cert_days_remaining"] = days_left
+                    if days_left < 14:
+                        findings["issues"].append({
+                            "severity": "High",
+                            "issue": f"Certificate expires in {days_left} days",
+                        })
+                    elif days_left < 30:
+                        findings["issues"].append({
+                            "severity": "Medium",
+                            "issue": f"Certificate expires in {days_left} days",
+                        })
+
+        # Now flag issues from collected info
+        proto = findings["info"]["protocol"]
+        if proto in DEPRECATED_PROTOCOLS:
+            findings["issues"].append({
+                "severity": "High",
+                "issue": f"Deprecated TLS protocol negotiated: {proto}",
+            })
+        cipher = findings["info"]["cipher"]
+        for weak in WEAK_CIPHERS:
+            if weak in cipher:
+                findings["issues"].append({
+                    "severity": "High",
+                    "issue": f"Weak cipher in negotiated suite: {cipher}",
+                })
+                break
+        bits = findings["info"]["cipher_bits"]
+        if bits < 128:
+            findings["issues"].append({
+                "severity": "High",
+                "issue": f"Cipher key size {bits} bits is below 128-bit baseline",
+            })
+
+        return findings
+
+    def audit_supported_protocols(host, port=443, timeout=10):
+        """Probe individual protocol versions to see which are accepted."""
+        results = {}
+        protocols_to_test = [
+            ("SSLv3",   ssl.PROTOCOL_SSLv23, ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1 | ssl.OP_NO_TLSv1_2),
+            ("TLSv1",   ssl.PROTOCOL_TLSv1, 0),
+            ("TLSv1.1", ssl.PROTOCOL_TLSv1_1, 0),
+            ("TLSv1.2", ssl.PROTOCOL_TLSv1_2, 0),
+        ]
+        for name, proto, opts in protocols_to_test:
+            try:
+                ctx = ssl.SSLContext(proto)
+                ctx.check_hostname = False
+                ctx.verify_mode = ssl.CERT_NONE
+                if opts:
+                    ctx.options |= opts
+                with socket.create_connection((host, port), timeout=timeout) as sock:
+                    with ctx.wrap_socket(sock, server_hostname=host) as ssock:
+                        results[name] = "accepted"
+            except (ssl.SSLError, OSError, AttributeError):
+                results[name] = "refused"
+        return results
+
+    if __name__ == "__main__":
+        import sys, json
+        host = sys.argv[1]
+        port = int(sys.argv[2]) if len(sys.argv) > 2 else 443
+        main = audit_tls(host, port)
+        protos = audit_supported_protocols(host, port)
+        print(json.dumps({"audit": main, "supported_protocols": protos}, indent=2, default=str))
+    ```
+
+    For a real engagement, prefer `testssl.sh` or `sslyze` for production
+    audits — they cover Heartbleed, ROBOT, BEAST, POODLE-class CVEs that
+    this stdlib version doesn't probe. This Python version is for quick
+    in-the-loop checks during exploration where you don't want to install
+    a separate tool.
+  tags: [ssl, tls, certificate, cipher_suite, protocol_audit, webapp, pentest]
+  difficulty: medium

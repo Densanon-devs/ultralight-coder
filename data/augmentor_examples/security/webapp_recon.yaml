@@ -1,0 +1,119 @@
+domain: security
+category: webapp_recon
+examples:
+- query: |
+    Build a webapp fingerprinting tool that fetches a target URL and
+    identifies the framework/server/CMS from response headers, body
+    patterns, and common path probes (Wappalyzer-style but minimal).
+  solution: |
+    Three signal sources: HTTP response headers, HTML body markers, and
+    a small set of well-known paths. Combine into a single "stack guess"
+    output with confidence per finding.
+
+    ```python
+    import urllib.request
+    import urllib.error
+    import re
+    from typing import Optional
+
+    USER_AGENT = "ulcagent-recon/1.0"
+
+    # (header_name_lower, regex pattern, technology, confidence)
+    HEADER_SIGNATURES = [
+        ("server",         r"nginx",          "nginx",         "high"),
+        ("server",         r"apache",         "Apache",        "high"),
+        ("server",         r"cloudflare",     "Cloudflare",    "high"),
+        ("server",         r"gunicorn",       "gunicorn",      "high"),
+        ("server",         r"uvicorn",        "uvicorn",       "high"),
+        ("x-powered-by",   r"php/(\S+)",      "PHP",           "high"),
+        ("x-powered-by",   r"express",        "Express.js",    "high"),
+        ("x-powered-by",   r"asp\.net",       "ASP.NET",       "high"),
+        ("x-aspnet-version", r".*",           "ASP.NET",       "high"),
+        ("x-drupal-cache", r".*",             "Drupal",        "high"),
+        ("x-generator",    r"drupal",         "Drupal",        "high"),
+        ("set-cookie",     r"PHPSESSID",      "PHP",           "medium"),
+        ("set-cookie",     r"laravel_session", "Laravel",      "medium"),
+        ("set-cookie",     r"sessionid",      "Django (probable)", "low"),
+        ("set-cookie",     r"connect\.sid",   "Express.js",    "medium"),
+    ]
+
+    # (regex pattern in body, technology, confidence)
+    BODY_SIGNATURES = [
+        (r"<meta name=\"generator\" content=\"WordPress (\S+)\"", "WordPress", "high"),
+        (r"wp-content/themes/",         "WordPress",        "high"),
+        (r"<meta name=\"generator\" content=\"Drupal (\S+)\"", "Drupal", "high"),
+        (r"<meta name=\"generator\" content=\"Joomla", "Joomla",        "high"),
+        (r"window\.__NUXT__",            "Nuxt.js",         "high"),
+        (r"window\.__NEXT_DATA__",       "Next.js",         "high"),
+        (r"data-reactroot",              "React",           "medium"),
+        (r"<script[^>]+ng-version",      "Angular",         "high"),
+        (r"vue-router",                  "Vue.js",          "medium"),
+        (r"<script[^>]*>[^<]*svelte",    "Svelte",          "medium"),
+    ]
+
+    # Common interesting paths (don't flood — keep small)
+    PROBE_PATHS = [
+        ("/robots.txt",     "robots.txt"),
+        ("/sitemap.xml",    "sitemap.xml"),
+        ("/.git/HEAD",      "exposed .git"),
+        ("/.env",           "exposed .env"),
+        ("/wp-login.php",   "WordPress login"),
+        ("/admin",          "admin endpoint"),
+        ("/api",            "API root"),
+    ]
+
+    def fetch_with_headers(url, timeout=10):
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return resp.status, dict(resp.headers), resp.read(200_000).decode("utf-8", errors="replace")
+        except urllib.error.HTTPError as e:
+            return e.code, dict(e.headers), ""
+        except urllib.error.URLError as e:
+            return None, {}, str(e)
+
+    def fingerprint(url):
+        status, headers, body = fetch_with_headers(url)
+        findings = {"url": url, "status": status, "techs": [], "probes": []}
+
+        for hname, pat, tech, conf in HEADER_SIGNATURES:
+            for k, v in headers.items():
+                if k.lower() == hname and re.search(pat, v, re.IGNORECASE):
+                    findings["techs"].append({"tech": tech, "via": f"header:{k}", "confidence": conf})
+
+        for pat, tech, conf in BODY_SIGNATURES:
+            if re.search(pat, body, re.IGNORECASE):
+                findings["techs"].append({"tech": tech, "via": "body", "confidence": conf})
+
+        # Probes — be polite, only HEAD where possible
+        from urllib.parse import urljoin
+        for path, label in PROBE_PATHS:
+            probe_url = urljoin(url, path)
+            try:
+                req = urllib.request.Request(probe_url, headers={"User-Agent": USER_AGENT}, method="HEAD")
+                with urllib.request.urlopen(req, timeout=5) as resp:
+                    if resp.status < 400:
+                        findings["probes"].append({"path": path, "label": label, "status": resp.status})
+            except urllib.error.HTTPError as e:
+                if e.code == 405:  # Method Not Allowed — try GET
+                    s, _, _ = fetch_with_headers(probe_url, timeout=5)
+                    if s and s < 400:
+                        findings["probes"].append({"path": path, "label": label, "status": s})
+            except urllib.error.URLError:
+                continue
+
+        return findings
+
+    if __name__ == "__main__":
+        import sys, json
+        result = fingerprint(sys.argv[1])
+        print(json.dumps(result, indent=2))
+    ```
+
+    Engagement note: HEAD requests against `/admin` and `/.git/HEAD` are
+    technically authenticated reconnaissance but most engagement scopes
+    explicitly authorize "non-invasive enumeration of public surfaces."
+    Confirm in SOW. Don't probe authentication endpoints with credentials
+    — that crosses into active attack territory.
+  tags: [recon, fingerprint, wappalyzer, http, webapp, pentest]
+  difficulty: medium

@@ -1,0 +1,138 @@
+domain: security
+category: webapp_passive_signal
+examples:
+- query: |
+    Build a passive signal scanner for HTTP responses — looks for tokens
+    that suggest known classes of vulnerability without sending payloads.
+    Reflected query parameters in body, error messages exposing stack
+    traces, missing security headers, comments leaking secrets/paths.
+  solution: |
+    All read-only on a single GET response. No payloads sent, so it's
+    safe for production engagement scopes that only authorize passive
+    enumeration. Outputs a structured findings list ready to merge into
+    the engagement findings DB.
+
+    ```python
+    import re
+    import urllib.request
+    import urllib.parse
+    from typing import Optional
+
+    USER_AGENT = "ulcagent-recon/1.0"
+
+    SECURITY_HEADERS_CHECK = {
+        "strict-transport-security": "Missing HSTS — clients can be downgraded to HTTP",
+        "content-security-policy": "Missing CSP — XSS impact is broader without it",
+        "x-content-type-options": "Missing X-Content-Type-Options — MIME-sniffing risk",
+        "x-frame-options": "Missing X-Frame-Options (or CSP frame-ancestors) — clickjacking risk",
+        "referrer-policy": "Missing Referrer-Policy — URL parameters may leak via Referer",
+    }
+
+    STACK_TRACE_MARKERS = [
+        ("Traceback (most recent call last):",     "Python stack trace"),
+        ("at java.",                                "Java stack trace"),
+        ("System.NullReferenceException",           ".NET exception"),
+        ("Stack trace:",                            "Generic stack trace"),
+        ("Warning: include(",                       "PHP include() failure"),
+        ("Fatal error:",                            "PHP fatal error"),
+        ("ORA-\\d{5}",                              "Oracle DB error"),
+        ("SQLSTATE\\[",                             "SQL error (PDO)"),
+        ("MySQL server",                            "MySQL error"),
+    ]
+
+    SECRET_REGEXES = [
+        (r"(?i)\baws_secret_access_key\b\s*[=:]\s*['\"]?([A-Za-z0-9/+=]{30,})", "AWS secret"),
+        (r"(?i)\baws_access_key_id\b\s*[=:]\s*['\"]?(AKIA[A-Z0-9]{16})", "AWS access key"),
+        (r"(?i)\bapi[_-]?key\b\s*[=:]\s*['\"]?([A-Za-z0-9_\-]{20,})", "Generic API key"),
+        (r"-----BEGIN (RSA |EC |OPENSSH |DSA |)PRIVATE KEY-----", "Embedded private key"),
+        (r"(?i)password\s*[=:]\s*['\"][^'\"]{4,}['\"]", "Hardcoded password"),
+    ]
+
+    def fetch(url):
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                return resp.status, {k.lower(): v for k, v in resp.headers.items()}, resp.read(500_000).decode("utf-8", errors="replace")
+        except urllib.error.HTTPError as e:
+            return e.code, {k.lower(): v for k, v in e.headers.items()}, e.read(500_000).decode("utf-8", errors="replace")
+        except urllib.error.URLError as e:
+            return None, {}, str(e)
+
+    def passive_scan(url):
+        findings = []
+        status, headers, body = fetch(url)
+
+        # Missing security headers
+        for hdr, msg in SECURITY_HEADERS_CHECK.items():
+            if hdr not in headers:
+                findings.append({
+                    "severity": "Low",
+                    "issue": msg,
+                    "header": hdr,
+                })
+
+        # Server/X-Powered-By disclosure
+        for disclose_hdr in ("server", "x-powered-by", "x-aspnet-version"):
+            if disclose_hdr in headers:
+                findings.append({
+                    "severity": "Informational",
+                    "issue": f"Header {disclose_hdr!r}={headers[disclose_hdr]!r} discloses stack info",
+                })
+
+        # Reflected query params
+        parsed = urllib.parse.urlparse(url)
+        for k, vs in urllib.parse.parse_qs(parsed.query).items():
+            for v in vs:
+                if v and len(v) >= 4 and v in body:
+                    findings.append({
+                        "severity": "Informational",
+                        "issue": f"Query param {k}={v!r} reflects in response body — "
+                                 "candidate for XSS active testing",
+                    })
+
+        # Stack traces
+        for pat, label in STACK_TRACE_MARKERS:
+            if re.search(pat, body):
+                findings.append({
+                    "severity": "Medium",
+                    "issue": f"{label} present in response — leaks server internals",
+                })
+
+        # Secrets
+        for pat, label in SECRET_REGEXES:
+            for match in re.finditer(pat, body):
+                findings.append({
+                    "severity": "Critical",
+                    "issue": f"Possible {label} in response body",
+                    "match_preview": match.group(0)[:80],
+                })
+
+        # HTML comments containing TODO/HACK/path-like tokens
+        for comment in re.findall(r"<!--(.*?)-->", body, re.DOTALL):
+            c = comment.strip()
+            if any(token in c.lower() for token in ("todo", "hack", "fixme", "/var/", "/home/", "c:\\")):
+                findings.append({
+                    "severity": "Informational",
+                    "issue": "HTML comment contains developer note / path",
+                    "comment_preview": c[:120],
+                })
+
+        return {
+            "url": url,
+            "status": status,
+            "findings": findings,
+        }
+
+    if __name__ == "__main__":
+        import sys, json
+        result = passive_scan(sys.argv[1])
+        print(json.dumps(result, indent=2))
+    ```
+
+    Engagement note: this is intentionally PASSIVE — only one GET request,
+    no payloads, no enumeration. Always allowed in any reasonable engagement
+    scope. The "reflected query param" finding is a CANDIDATE for XSS, not
+    a confirmed XSS — confirming requires sending an actual payload, which
+    moves into active testing territory and needs explicit scope sign-off.
+  tags: [passive_scan, security_headers, stack_trace, secret_detection, xss_candidate, webapp, pentest]
+  difficulty: medium

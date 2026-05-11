@@ -254,12 +254,17 @@ def _build_agent(mgr: ModelManager, workspace: Path):
     from engine.agent import Agent, AgentEvent
     from engine.agent_builtins import build_default_registry
     from engine.agent_memory import AgentMemory
+    from engine.audit_log import AuditLog
 
     profile = mgr.profile
     memory = AgentMemory(workspace=workspace)
     extended = "--extended" in sys.argv
     enable_web = "--web" in sys.argv
     auto_yes = "--yes" in sys.argv
+
+    # Auto-engage audit logging when workspace is an engagement scaffold
+    # (has an audit/ subdir). No-op for ad-hoc workspaces.
+    audit = AuditLog.for_workspace(workspace)
     # `--mcp <name1,name2>` opt-in MCP-server mounting. Scaffolded today,
     # raises NotImplementedError if used (see engine/mcp_adapter.py).
     # Default = no MCP, identical behavior to before this scaffold landed.
@@ -296,6 +301,11 @@ def _build_agent(mgr: ModelManager, workspace: Path):
             answer = ""
         return answer in ("y", "yes")
 
+    # Pair tool_call with the next tool_result so we audit a single combined
+    # entry. Without pairing, each call would appear twice (once on dispatch,
+    # once on result) — noisier and breaks the "one call per row" convention.
+    _pending_call: dict = {}
+
     def _on_event(e: AgentEvent):
         if e.type == "iteration":
             _spinner.stop()
@@ -305,6 +315,8 @@ def _build_agent(mgr: ModelManager, workspace: Path):
             _spinner.stop()
             args = ", ".join(f"{k}={str(v)[:50]}" for k, v in e.payload.arguments.items())
             print(f"\n    {_cyan('->')} {_cyan(e.payload.name)}({args[:80]})")
+            _pending_call["name"] = e.payload.name
+            _pending_call["args"] = dict(e.payload.arguments)
         elif e.type == "tool_result":
             _spinner.stop()
             r = e.payload
@@ -313,6 +325,15 @@ def _build_agent(mgr: ModelManager, workspace: Path):
                 print(f"       {_dim(preview)}")
             else:
                 print(f"       {_red('err:')} {r.error[:120]}")
+            # Audit the (call, result) pair if logging is engaged
+            if audit is not None and _pending_call:
+                audit.log_call(
+                    tool=_pending_call.get("name", "?"),
+                    args=_pending_call.get("args", {}),
+                    result=str(r.content) if r.success else None,
+                    error=None if r.success else str(r.error),
+                )
+                _pending_call.clear()
         elif e.type == "pre_finish_retry":
             _spinner.stop()
             p = e.payload or {}
@@ -1513,6 +1534,9 @@ _HELP_TEXT = """
     --extended      Enable 21 advanced tools (git, checkpoint, etc.)
     --web           Enable web_search + fetch_url tools (per-call y/N confirm)
     --yes           Auto-approve all risky tool calls (unattended runs only)
+    --new-engagement NAME
+                    Scaffold a new engagement workspace (scope/, evidence/,
+                    findings/, tools/, audit/, report/) and exit.
 """
 
 
@@ -1598,6 +1622,28 @@ def main():
     except ImportError:
         pass
 
+    # --new-engagement <client-name> short-circuits everything else: scaffold
+    # the engagement directory and exit. No model load, no agent build.
+    if "--new-engagement" in sys.argv:
+        idx = sys.argv.index("--new-engagement")
+        if idx + 1 >= len(sys.argv):
+            print(f"  {_red('error:')} --new-engagement requires a client name")
+            sys.exit(2)
+        client = sys.argv[idx + 1]
+        from engine.engagement_scaffold import create_engagement
+        try:
+            eng_dir = create_engagement(client, parent_dir=Path.cwd())
+        except (ValueError, FileExistsError) as exc:
+            print(f"  {_red('error:')} {exc}")
+            sys.exit(2)
+        print(f"\n  {_bold('Engagement scaffolded:')} {eng_dir}")
+        print(f"  {_dim('Next steps:')}")
+        print(f"    cd {eng_dir.name}")
+        print(f"    {_cyan('# Edit scope/sow.md, scope/targets.txt, scope/out_of_scope.txt')}")
+        print(f"    ulcagent --web --extended  {_dim('# every tool call gets audited')}")
+        print()
+        sys.exit(0)
+
     workspace = Path.cwd().resolve()
     warm = "--warm" in sys.argv
 
@@ -1606,6 +1652,12 @@ def main():
     _startup_greeting(workspace)
     if warm:
         print(f"  {_dim('mode: --warm')}")
+    # Auto-engage audit logging when running inside an engagement scaffold
+    # (one with an audit/ subdirectory). No-op for ad-hoc workspaces.
+    from engine.audit_log import AuditLog
+    _audit = AuditLog.for_workspace(workspace)
+    if _audit is not None:
+        print(f"  {_dim('audit:')} {_cyan('engaged')} {_dim(f'-> {_audit.log_dir.relative_to(workspace)}/')}")
     print()
 
     mgr = ModelManager()
