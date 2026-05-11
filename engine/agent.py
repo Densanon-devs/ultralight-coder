@@ -229,6 +229,18 @@ class Agent:
         # infinite loops. Used by the benchmark to wire task.check().
         pre_finish_check: Optional[Callable[[], Optional[str]]] = None,
         pre_finish_max_retries: int = 2,
+        # Per-goal augmentor injection. Called once at the start of each
+        # run() (when not continue_session) with the goal text. The string
+        # it returns is appended to the system prompt for that run only,
+        # AFTER `system_prompt_extra` and BEFORE the tools block. Used by
+        # ulcagent to wire AugmentorRouter retrieval into the agent path —
+        # surfaces relevant YAML examples (security/, web_research_to_file/,
+        # etc.) when the goal matches keyword/embedding gates. Default None
+        # is a no-op (no augmentor injection, original Phase 13 behavior).
+        # Keyword gating happens inside the callback (in AugmentorRouter),
+        # so the Phase 13 "augmentor drags 14B off-canon for plain Python"
+        # finding is preserved — empty return on non-matching goals.
+        augment_for_goal: Optional[Callable[[str], str]] = None,
         on_event: Optional[Callable[[AgentEvent], None]] = None,
     ) -> None:
         self.model = model
@@ -250,6 +262,7 @@ class Agent:
         self.confirm_destructive = confirm_destructive
         self.pre_finish_check = pre_finish_check
         self.pre_finish_max_retries = max(0, int(pre_finish_max_retries))
+        self.augment_for_goal = augment_for_goal
         self.context_char_budget = int(context_char_budget)
         self.compact_keep_recent = max(2, int(compact_keep_recent))
         self._compactions: int = 0  # how many compaction passes fired this run
@@ -259,6 +272,10 @@ class Agent:
         self._tool_calls: list[ToolCall] = []
         self._tool_results: list[ToolResult] = []
         self._memory_block: str = ""
+        # Per-goal augmentor block, populated by self.augment_for_goal at
+        # run() start. Empty string when augmentor returned nothing or
+        # callback isn't wired. Read by _system_prompt() each iteration.
+        self._goal_augmentor_block: str = ""
         # Live diagnose-and-repair: per-iteration failure-class history
         # used by the self_heal injector. Keyed by classify_failure()
         # output (or None on success). See engine/self_heal.py.
@@ -271,6 +288,8 @@ class Agent:
         parts = [_DEFAULT_SYSTEM.strip()]
         if self.system_prompt_extra.strip():
             parts.append(self.system_prompt_extra.strip())
+        if self._goal_augmentor_block.strip():
+            parts.append(self._goal_augmentor_block.strip())
         if self._memory_block:
             parts.append(self._memory_block)
         tool_block = self.registry.hermes_system_block()
@@ -1909,6 +1928,19 @@ class Agent:
             self._memory_block = ""
             self._failure_streak = []
             self._self_heal_fired = 0
+            # Per-goal augmentor injection: ask the optional callback for
+            # a system-prompt block tailored to this goal. Empty string =
+            # no injection (e.g. plain Python codegen with no keyword
+            # match — preserves the Phase 13 baseline). Errors in the
+            # callback never block the run.
+            self._goal_augmentor_block = ""
+            if self.augment_for_goal is not None:
+                try:
+                    block = self.augment_for_goal(goal) or ""
+                    if block.strip():
+                        self._goal_augmentor_block = block.strip()
+                except Exception as exc:
+                    logger.warning(f"augment_for_goal callback raised: {exc!r}")
 
         if not continue_session and self.memory is not None:
             notes = self.memory.load()

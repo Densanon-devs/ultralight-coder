@@ -338,6 +338,17 @@ def _build_agent(mgr: ModelManager, workspace: Path):
         from engine.agent_builtins import web_research_pattern_hint
         workspace_hint = workspace_hint + "\n\n" + web_research_pattern_hint()
 
+    # Per-goal augmentor injection (security/, agentic/web_research_to_file/,
+    # etc). Lightweight keyword matching — no embedder, no HF init. Fires
+    # only on goals matching agentic-domain triggers; returns empty for
+    # plain Python codegen so the Phase 13 baseline is preserved. See
+    # engine/agent_augmentor.py.
+    from engine.agent_augmentor import build_agent_augmentor
+    repo_root = Path(__file__).parent
+    augment_for_goal = build_agent_augmentor(
+        examples_dir=repo_root / "data" / "augmentor_examples"
+    )
+
     agent = Agent(
         model=mgr.bm,
         registry=registry,
@@ -350,6 +361,7 @@ def _build_agent(mgr: ModelManager, workspace: Path):
         max_tokens_per_turn=int(cfg_max) if cfg_max else 1024,
         temperature=cfg_temp if cfg_temp is not None else 0.1,
         confirm_risky=_confirm_risky,
+        augment_for_goal=augment_for_goal,
         on_event=_on_event,
     )
     return agent
